@@ -6,7 +6,7 @@ let watchJson = require('./watch')
 
 program
   .option('-p, --port <port>', '端口')
-  .command('watch <db>', '文件')
+  .command('watch <db>')
   .action(dbname => {
     watchJson(dbname, program.port)
   })

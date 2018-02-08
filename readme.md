@@ -36,9 +36,32 @@
 
       program.parse(process.argv)
   // watch.js
-    module.exports = function (dbname, port) {
+    module.exports = (dbname, port) => {
       console.log('数据库 ', dbname)
       console.log('端口 ', port)
     }
   // node index.js watch db.json -p 5050
 ```
+
+## 启动 http 服务
+
+``` js
+  // watch.js
+    let express = require('express') // 用于 http 请求的库
+
+    module.exports = (dbname, port) => {
+      console.log('数据库 ', dbname)
+      console.log('端口 ', port)
+      let app = express()
+      app.all('*', (req, res) => {
+        console.log('访问 ', req.originalUrl)
+      })
+      app.listen(port, () => {
+        console.log('服务已经启动 ', port)
+      })
+    }
+
+
+```
+
+比如 `node index watch db -p 5050` 后访问 `http://localhost:5050/test` ，会看到控制台显示 `访问 test` 。
