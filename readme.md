@@ -64,4 +64,19 @@
 
 ```
 
-比如 `node index watch db -p 5050` 后访问 `http://localhost:5050/test` ，会看到控制台显示 `访问 test` 。
+比如 `node index watch db.json -p 5050` 后访问 `http://localhost:5050/test` ，会看到控制台显示 `访问 test` 。
+
+## 从浏览器读取 json
+``` js
+  // watch.js
+    let jsonfile = require('jsonfile') // 读取 json 文件， node 原生的读取的是字符串
+    // ...
+    // 去除url前后的/，并分割为数组 /a/b/c => ['a', 'b', 'c']
+    let pathname = url.parse(req.originalUrl).pathname.replace(/^\//,'').replace(/$\//,'').split('/')
+    let database = jsonfile.readFileSync(dbname)
+    let tablename = pathname[0] // 读取到的 json
+    let id = pathname[1] // 取得 /blog/1 中的 blog
+    res.send(database[tablename]) // 发送数据
+    // ...
+```
+  访问 `http://localhost:5050/blog/1` 得到 `[{"name":"文章1","id":1}]`

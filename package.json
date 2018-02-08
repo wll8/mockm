@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "commander": "^2.14.1",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "jsonfile": "^4.0.0"
   }
 }
