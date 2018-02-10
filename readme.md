@@ -66,7 +66,7 @@
 
 比如 `node index watch db.json -p 5050` 后访问 `http://localhost:5050/test` ，会看到控制台显示 `访问 test` 。
 
-## 从浏览器读取 json
+## get - 从浏览器读取 json
 ``` js
   // watch.js
     let jsonfile = require('jsonfile') // 读取 json 文件， node 原生的读取的是字符串
@@ -81,6 +81,25 @@
 ```
   访问 `http://localhost:5050/blog/1` 得到 `[{"name":"文章1","id":1}]`
 
-## 读取表及 id
+## get - 读取表及 id
 从请求的 url 中读取请求类型比如 get ，和要请求的内容。
 从读取的 json 文件里查找对应的数据，并通过 .send() 方法返回给浏览器。
+
+## post - 添加文章
+  `app.use(bodyParser.json())` 是必须的。
+``` powershell
+  Invoke-RestMethod http://localhost:5050/blog # 获取文章内容
+  Invoke-RestMethod http://localhost:5050/blog -Method post -Headers @{"accept"="application/json"} -body  @{ # 添加文章内容
+    id = '3'
+    name = '文章名'
+  }
+
+```
+``` js
+  if(post){
+    let body = req.body
+    database[tablename].push(body)
+    jsonfile.writeFileSync(dbname, database, {spaces: 2})
+    res.send(database[tablename])
+  }
+```
