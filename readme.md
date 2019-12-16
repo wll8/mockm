@@ -29,6 +29,6 @@ npm start
 - 后端还没有完成的接口, 使用 `/t/books`, 完成后使用 `/books`
 
 ### 相关文档
-expressjs: http://expressjs.com/
-mockjs: http://mockjs.com/examples.html
-json-server: https://github.com/typicode/json-server
+- expressjs: http://expressjs.com/
+- mockjs: http://mockjs.com/examples.html
+- json-server: https://github.com/typicode/json-server
