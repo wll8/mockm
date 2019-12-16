@@ -1,7 +1,13 @@
+const {mock} = require('mockjs')
+
 module.exports = () => {
-  return {
-    news: [
-      {id: 1, name: '新闻', value: Math.random()}
-    ]
-  }
+  const data = mock({
+    'books|11-31': [
+      {
+        id: '@id',
+        title: '@ctitle',
+      }
+    ],
+  })
+  return data
 }
