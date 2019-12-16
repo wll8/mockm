@@ -1,2 +1,3 @@
-/Video.wmv
-/node_modules
+node_modules/
+public/
+db.json
