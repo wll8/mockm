@@ -9,6 +9,15 @@ fs.writeFileSync('./db.json', JSON.stringify(db, null, 2))
 const router = jsonServer.router('./db.json')
 const middlewares = jsonServer.defaults()
 const multiparty = require('multiparty')
+let TOKEN = ''
+let CMD = `
+  curl http://www.httpbin.org/get
+`
+
+server.use((req, res, next) => { // 获取 token
+  TOKEN = req.get('Authorization') || TOKEN
+  next()
+})
 
 server.use(proxy(
   pathname => (Boolean(pathname.match(`/${preFix}/t/`)) === false),
@@ -47,6 +56,82 @@ server.post('/file/upload', (req, res, next) => { // 上传文件
   })
 })
 
+server.get('/test', (req, res, next) => { // 给后端查询前端请求的接口
+  let cmd = `${CMD} -s -l -v`
+    .replace(/\n/g, '')
+    .trim()
+  if(TOKEN) {
+    cmd = cmd.replace(/(Authorization: ).*?'/, `$1${TOKEN}'`)
+  }
+  let jsonInfo = {obj: {}, str: ''}
+  try {
+    jsonInfo.obj = getOptions(cmd)
+    jsonInfo.str = JSON.stringify(jsonInfo.obj, null, 2)
+  } catch (error) {
+    console.log('error', error)
+  }
+  new Promise(() => {
+    require('child_process').exec(cmd, (err, stdio, stderr) => {
+      const isHtml = stderr.includes('< content-type: text/html')
+      try {
+        stdio = JSON.stringify(JSON.parse(stdio), null, 2)
+      } catch (error) {
+        console.log('error', error)
+      }
+      res.type('html')
+      res.send(`
+        <style>
+           body {
+             margin: 0;
+             padding: 10px;
+             background: #000;
+             color: #fff;
+           }
+           body>pre {
+             white-space: pre-wrap;
+             overflow: scroll;
+           }
+           body>pre>details>summary {
+             cursor: pointer;
+             border-bottom: 1px solid #666;
+             outline: none;
+             font-size: 14px;
+           }
+           body>pre>details>textarea {
+             font-size: 12px;
+             width: 100%;
+             height: 40vh;
+             color: #fff;
+             outline: none;
+             font-size: nomore;
+             resize: vertical;
+             border: none;
+             background: #333;
+           }
+        </style>
+        <pre>
+${jsonInfo.obj.method || 'GET'} ${jsonInfo.obj.url}
+<details>
+<summary>----- input:</summary>
+<textarea disabled spellcheck="false">${jsonInfo.str}</textarea>
+</details>
+<details open="open">
+<summary>----- out:</summary>
+${isHtml ? stdio : `<textarea disabled spellcheck="false">${stdio}</textarea>`}
+</details>
+<details>
+<summary>----- headers:</summary>
+<textarea disabled spellcheck="false">${stderr}</textarea>
+</details>
+        </pre>
+      `)
+      // res.json({
+      //   res: JSON.parse(cmdRes),
+      // })
+    })
+  })
+})
+
 router.render = (req, res) => { // 修改输出的数据, 符合项目格式
   let returnData = res.locals.data // 前面的数据返回的 data 结构
   const xTotalCount = res.get('X-Total-Count')
@@ -74,3 +159,16 @@ function handleRes(res, data) {
   }
 }
 
+function getOptions(cmd) {
+  const curlconverter = require('curlconverter');
+  let str = curlconverter.toNode(cmd)
+  let res = {}
+  str = str.replace(`request(options, callback)`, `res = options`)
+  eval(str)
+  try {
+    res.body = JSON.parse(res.body)
+  } catch (error) {
+    res.body = {}
+  }
+  return res
+}
