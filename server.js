@@ -15,6 +15,15 @@ server.use(proxy(
   {
     target: config.proxyTarget,
     changeOrigin: true,
+    onProxyRes: (proxyRes, req, res) => { // 跨域配置
+      if(req.method === 'OPTIONS') {
+        proxyRes.headers['Access-Control-Allow-Origin'] = req.headers.origin
+        proxyRes.headers['Access-Control-Allow-Credentials'] = true
+        proxyRes.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
+        proxyRes.headers['Access-Control-Allow-Headers'] = 'authorization,cache-control,content-type,pragma,x-requested-with'
+        proxyRes.headers['Access-Controll-Max-Age'] = '1728000'
+      }
+    },
   },
 ))
 
@@ -48,11 +57,7 @@ router.render = (req, res) => { // 修改输出的数据, 符合项目格式
     }
   }
 
-  res.json({
-    code: res.statusCode,
-    success: Boolean(('' + res.statusCode).match(/^[2]/)), // 如果状态码以2开头则为 true
-    data: returnData,
-  })
+  res.json(handleRes(res, returnData))
 }
 
 server.use(router) // 其他 use 需要在此行之前, 否则无法执行
@@ -60,3 +65,12 @@ server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 server.listen(config.prot, () => {
   console.log(`服务运行于: http://localhost:${config.prot}/`)
 })
+
+function handleRes(res, data) {
+  return {
+    code: res.statusCode,
+    success: Boolean(('' + res.statusCode).match(/^[2]/)), // 如果状态码以2开头则为 true
+    data,
+  }
+}
+
