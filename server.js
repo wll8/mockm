@@ -76,10 +76,11 @@ server.get('/test', (req, res, next) => { // 给后端查询前端请求的接�
   }
   new Promise(() => {
     require('child_process').exec(cmd, (err, stdio, stderr) => {
-      const isHtml = stderr.includes('< content-type: text/html')
+      let isHtml = stderr.includes('< content-type: text/html')
       try {
         stdio = JSON.stringify(JSON.parse(stdio), null, 2)
       } catch (error) {
+        isHtml = true
         console.log('error', error)
       }
       res.type('html')
