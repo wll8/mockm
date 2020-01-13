@@ -14,19 +14,13 @@ let CMD = `
   curl http://www.httpbin.org/get
 `
 
-server.use((req, res, next) => { // 获取 token
-  TOKEN = req.get('Authorization') || TOKEN
-  next()
-})
-
 server.use(proxy(
   pathname => (Boolean(pathname.match(`/${preFix}/t/`)) === false),
   {
     target: config.proxyTarget,
     changeOrigin: true,
     onProxyReq: (proxyReq, req, res) => {
-      // let token = getToken()
-      // proxyReq.setHeader('Authorization', token) // 持久化 token
+      TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
     onProxyRes: (proxyRes, req, res) => { // 跨域配置
       if(req.method === 'OPTIONS') {
