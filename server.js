@@ -24,6 +24,10 @@ server.use(proxy(
   {
     target: config.proxyTarget,
     changeOrigin: true,
+    onProxyReq: (proxyReq, req, res) => {
+      // let token = getToken()
+      // proxyReq.setHeader('Authorization', token) // 持久化 token
+    },
     onProxyRes: (proxyRes, req, res) => { // 跨域配置
       if(req.method === 'OPTIONS') {
         proxyRes.headers['Access-Control-Allow-Origin'] = req.headers.origin
@@ -172,3 +176,5 @@ function getOptions(cmd) {
   }
   return res
 }
+
+function getToken() {}
