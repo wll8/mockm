@@ -61,7 +61,7 @@ server.post('/file/upload', (req, res, next) => { // 上传文件
 })
 
 server.get('/test', (req, res, next) => { // 给后端查询前端请求的接口
-  let cmd = `${CMD} -s -l -v`
+  let cmd = `${CMD} -s -l -v -g`
     .replace(/\n/g, '')
     .trim()
   if(TOKEN) {
