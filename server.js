@@ -7,7 +7,7 @@ const server = jsonServer.create()
 const db = require('./db.js')()
 fs.writeFileSync('./db.json', JSON.stringify(db, null, 2))
 const router = jsonServer.router('./db.json')
-const middlewares = jsonServer.defaults()
+const middlewares = jsonServer.defaults({bodyParser: true})
 const multiparty = require('multiparty')
 let TOKEN = ''
 let CMD = `
@@ -36,7 +36,6 @@ server.use(proxy(
 ))
 
 server.use(middlewares)
-server.use(jsonServer.bodyParser)
 
 server.use(jsonServer.rewriter({ // 修改路由, 方便后面的 api 书写
   [`/${preFix}/${config.proxyTag}/*`] : '/$1',
