@@ -22,13 +22,14 @@ server.use(proxy(
     onProxyReq: (proxyReq, req, res) => {
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
-    onProxyRes: (proxyRes, req, res) => { // 跨域配置
+    onProxyRes: (proxyRes, req, res) => {
       if(req.method === 'OPTIONS') {
-        proxyRes.headers['Access-Control-Allow-Origin'] = req.headers.origin
-        proxyRes.headers['Access-Control-Allow-Credentials'] = true
-        proxyRes.headers['Access-Control-Allow-Methods'] = 'PUT, GET, POST, DELETE, OPTIONS'
-        proxyRes.headers['Access-Control-Allow-Headers'] = 'authorization,cache-control,content-type,pragma,x-requested-with'
-        proxyRes.headers['Access-Controll-Max-Age'] = '1728000'
+        // // 配置跨域跨域之后, 可以直接在浏览器控制台使用 fetch 测试 api, 但是如果配置没有与后端一致, 则导致模拟不统一
+        // proxyRes.headers['Access-Control-Allow-Origin'] = req.headers.origin
+        // proxyRes.headers['Access-Control-Allow-Credentials'] = true
+        // proxyRes.headers['Access-Control-Allow-Methods'] = 'PUT, GET' // 允许的方法列表
+        // proxyRes.headers['Access-Control-Allow-Headers'] = 'authorization, cache-control' // 允许的自定义 headers
+        // proxyRes.headers['Access-Controll-Max-Age'] = '1728000' // 在些时间内不需再申请跨域
       }
     },
   },
