@@ -49,8 +49,8 @@ server.use(proxy(
       } = req
       modifyResponse(res, proxyRes, body => {
         const {statusCode, statusMessage} = proxyRes
-        console.log('proxyRes', {statusCode, statusMessage})
         if(ignoreHttpHistory(req) === false) {
+          console.log(`${method} ${req.path} ${statusCode} ${statusMessage}`)
           setHttpHistory(`${method} ${url}`, {res: {
             info: {
               status: proxyRes.statusCode,
@@ -91,7 +91,7 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
     res.send(`
       <ul style="word-wrap: break-word;">
         ${Object.keys(httpHistory).map(key => {
-          const {res: {info = {}}} = httpHistory[key]
+          const {info = {}} = httpHistory[key].res || {}
           return `
             <li><a href="/${config.preFix}/${config.proxyTag}/${config.apiTest}?api=${querystring.escape(key)}">
               ${info.status || '--'}
@@ -116,10 +116,14 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
       try {
         httpReq = httpHistory[api].req
         httpRes = httpHistory[api].res
-        isHtml = (httpRes.headers[`content-type`] || '').includes(`text/html`)
+        try {
+          isHtml = (httpRes.headers[`content-type`] || '').includes(`text/html`)
+        } catch (error) {
+          isHtml = false
+        }
       } catch (error) {
         console.log('error', {api, error})
-        res.send('暂无请求数据')
+        res.json('暂无请求数据')
         return
       }
       res.type('html')
@@ -173,16 +177,20 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
           }
         </style>
         <body class="api">
-        <div class="sketch">${htmlEscape(api)}</div>
+        <div class="sketch">${httpHistory[api].res.info.status} ${htmlEscape(api)}</div>
         <button><a href="/api/t/test">返回</a></button>
-        <button onClick="replay('${api}')">重播</button>
+        <button onClick="replay('${api}')">重发</button>
         <details>
           <summary>----- input:</summary>
           <textarea disabled spellcheck="false">${o2t(httpReq)}</textarea>
         </details>
         <details open="open">
           <summary>----- out:</summary>
-          ${isHtml ? `<iframe class="html" srcdoc="${htmlEscape(httpRes.body)}"></iframe>` : `<textarea disabled spellcheck="false">${o2t(httpRes)}</textarea>`}
+          ${
+            isHtml
+            ? `<iframe class="html" srcdoc="${htmlEscape(httpRes.body)}"></iframe>`
+            : `<textarea disabled spellcheck="false">${o2t(httpRes || {})}</textarea>`
+          }
         </details>
         <script src="https://unpkg.com/axios@0.19.1/dist/axios.js"></script>
         <script>
@@ -191,20 +199,21 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
             if(isDone) {
               isDone = false
               axios({
-                baseURL: 'http://localhost:9000/',
+                baseURL: '${config.myHttpSever}',
                 method: 'get',
                 url: 'api/t/test',
                 params: {api, action: 'replay'},
               }).then(({data, status, statusText, headers, config, request}) => {
                 console.log({data, status, statusText, headers, config, request})
                 isDone = true
+                alert('重发完成')
                 document.location.reload()
               }).catch(err => {
                 console.error(err)
-                alert('重播失败')
+                alert('重发失败')
               })
             } else {
-              alert('请等待重播结束')
+              alert('请等待重发结束')
             }
           }
         </script>

@@ -5,6 +5,7 @@ const config = {
   preFix: 'api', // api 地址前缀
   updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
   proxyTarget: 'http://192.168.6.59:9000/', // 转发URL
+  myHttpSever: 'http://192.168.6.20:9000/', //
   httpHistory: './httpHistory.json', // 录制信息保存位置
   dbJsonName: './db.json', // db.js 生成的 json 数据文件名
 }
