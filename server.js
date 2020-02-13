@@ -1,12 +1,16 @@
 const modifyResponse = require('node-http-proxy-json')
+const axios = require('axios')
 const {htmlEscape} = require('escape-goat')
-const config = require('./config.js')
 const proxy = require('http-proxy-middleware')
 const jsonServer = require('json-server')
 const fs = require('fs')
 const server = jsonServer.create()
+const serverReplay = jsonServer.create()
+const config = require('./config.js')
 const db = require('./db.js')()
-fs.writeFileSync(config.dbJsonName, o2t(db))
+const api = require('./api.js')
+
+fs.writeFileSync(config.dbJsonName, o2s(db))
 const router = jsonServer.router(config.dbJsonName)
 const middlewares = jsonServer.defaults({bodyParser: true})
 init()
@@ -20,8 +24,6 @@ const middlewaresObj = middlewares.flat().reduce((res, item) => {
     [item.name]: item,
   })
 }, {})
-const multiparty = require('multiparty')
-const axios = require('axios')
 let TOKEN = ''
 // server.use(middlewaresObj.corsMiddleware)
 
@@ -69,19 +71,12 @@ server.use(proxy(
 server.use(jsonServer.rewriter({ // 修改路由, 方便后面的 api 书写
   [`/${config.preFix}/${config.proxyTag}/*`] : '/$1',
 }))
-server.use(middlewares)
+server.use(middlewares) // 添加中间件, 方便取值
 server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   req.query.page && (req.query._page = req.query.page)
   req.query.pageSize && (req.query._limit = req.query.pageSize)
   const {url, body, query, params} = req
   next()
-})
-server.post('/file/upload', (req, res, next) => { // 上传文件
-  const form = new multiparty.Form()
-  form.parse(req, (err, fields = [], files) => {
-    const data = {fields, files, err}
-    res.json(data)
-  })
 })
 
 server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端请求的接口
@@ -182,14 +177,14 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
         <button onClick="replay('${api}')">重发</button>
         <details>
           <summary>----- input:</summary>
-          <textarea disabled spellcheck="false">${o2t(httpReq)}</textarea>
+          <textarea disabled spellcheck="false">${o2s(httpReq)}</textarea>
         </details>
         <details open="open">
           <summary>----- out:</summary>
           ${
             isHtml
             ? `<iframe class="html" srcdoc="${htmlEscape(httpRes.body)}"></iframe>`
-            : `<textarea disabled spellcheck="false">${o2t(httpRes || {})}</textarea>`
+            : `<textarea disabled spellcheck="false">${o2s(httpRes || {})}</textarea>`
           }
         </details>
         <script src="https://unpkg.com/axios@0.19.1/dist/axios.js"></script>
@@ -223,6 +218,8 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
   }
 })
 
+api(server) // 前端自行添加的测试 api
+
 router.render = (req, res) => { // 修改输出的数据, 符合项目格式
   let returnData = res.locals.data // 前面的数据返回的 data 结构
   const xTotalCount = res.get('X-Total-Count')
@@ -240,6 +237,43 @@ server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 
 server.listen(config.prot, () => {
   console.log(`服务运行于: http://localhost:${config.prot}/`)
+})
+
+serverReplay.use(proxy( // 重放也可以使用 /t/* 临时接口
+  pathname => (Boolean(pathname.match(`/${config.preFix}/${config.proxyTag}/`)) === true),
+  {
+    target: `http://localhost:${config.prot}/`,
+  },
+))
+serverReplay.use(middlewares)
+serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
+  function getHttpHistory(req, type) { // 获取某个请求的记录
+    // type: url|path 匹配方式, path 会忽略 url 上的 query 参数
+
+    if(type === 'url') {
+      return httpHistory[`${req.method} ${req.url}`]
+    }
+    if(type === 'path') {
+      let re = new RegExp(`^${req.method} `)
+      let key  = Object.keys(httpHistory).find(key => {
+        return (key.match(re) && (httpHistory[key].req.path === req.path))
+      })
+      return httpHistory[key]
+    }
+  }
+  const history = getHttpHistory(req, 'url')
+  try {
+    res.json(history.res.body)
+  } catch (error) {
+    // res.json({})
+
+    // 对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能)
+    // 所以这里直接告诉前面接口正常(200ok), 并返回前约定的接口数据结构, 让前端页面可以正常运行
+    res.json(handleRes(res, {}))
+  }
+})
+serverReplay.listen(config.replayProt, () => {
+  console.log(`服务器重放地址: http://localhost:${config.replayProt}/`)
 })
 
 function handleRes(res, data) {
@@ -274,15 +308,15 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
   )
 }
 
-function init() {
-  !hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`)
+function init() { // 初始化, 例如所需文件
+  !hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
 }
 
 function hasFile(filePath) {
   return fs.existsSync(filePath)
 }
 
-function o2t(o) {
+function o2s(o) {
   return JSON.stringify(o, null, 2)
 }
 
@@ -312,7 +346,7 @@ function setHttpHistory(api, {req, res}) {
         }
     ),
   }
-  fs.writeFileSync(config.httpHistory, o2t(httpHistory))
+  fs.writeFileSync(config.httpHistory, o2s(httpHistory))
 }
 
 function sendReq(api, cb) { // 发送请求
@@ -323,7 +357,7 @@ function sendReq(api, cb) { // 发送请求
     headers.authorization = TOKEN
   }
   axios({
-    baseURL: 'http://localhost:9000/',
+    baseURL: config.myHttpSever,
     method,
     url: path || url,
     params: query,
@@ -340,6 +374,7 @@ function sendReq(api, cb) { // 发送请求
       body: data,
     }})
   }).catch(err => {
+    console.log('err', err)
     const {data, status, statusText, headers, config, request} = err.response
     setHttpHistory(api, {res: {
       info: {
@@ -349,7 +384,6 @@ function sendReq(api, cb) { // 发送请求
       headers,
       body: data,
     }})
-    console.log('err', {data})
   }).finally(() => {
     cb()
   })
