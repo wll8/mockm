@@ -6,6 +6,7 @@ const jsonServer = require('json-server')
 const fs = require('fs')
 const server = jsonServer.create()
 const serverReplay = jsonServer.create()
+const serverTest = jsonServer.create()
 const config = require('./config.js')
 const db = require('./db.js')()
 const api = require('./api.js')
@@ -69,7 +70,7 @@ server.use(proxy(
 ))
 
 server.use(jsonServer.rewriter({ // 修改路由, 方便后面的 api 书写
-  [`/${config.preFix}/${config.proxyTag}/*`] : '/$1',
+  [`/${config.preFix}/*`] : '/$1',
 }))
 server.use(middlewares) // 添加中间件, 方便取值
 server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
@@ -79,7 +80,7 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   next()
 })
 
-server.get(`/${config.apiTest}`, (req, res, next) => {
+serverTest.get(`/`, (req, res, next) => {
   res.type('html')
   res.send(`
     <ul style="word-wrap: break-word;">
@@ -87,7 +88,7 @@ server.get(`/${config.apiTest}`, (req, res, next) => {
         const {info = {}} = httpHistory[key].res || {}
         const [, method, url] = key.match(/(\w+)\s+(.*)/)
         return `
-          <li><a href="/${config.preFix}/${config.proxyTag}/${config.apiTest}/${method}${url}">
+          <li><a href="/${method}${url}">
             ${info.status || '--'}
             ${htmlEscape(key)}
           </a></li>
@@ -97,16 +98,12 @@ server.get(`/${config.apiTest}`, (req, res, next) => {
   `)
 })
 
-server.get(`/${config.apiTest}/:argList/:api(*)`, (req, res, next) => { // 给后端查询前端请求的接口
-  let {api, argList} = req.url.match(new RegExp(`\/${config.apiTest}\/(?<argList>.*?)(?<api>\/.*)`)).groups
+serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前端请求的接口
+  let {api, argList} = req.url.match(new RegExp(`\/(?<argList>.*?)(?<api>\/.*)`)).groups
   const rawApi = api
   argList = argList.split(',')
   const {query, params} = req
   const {method, action} = argList.map((item, index) => index).reduce((res, index) => ({
-    // 把路径中的 argList 转换为对象
-    // 注: `path-to-regexp` 库可以使用 `:method?{,:action}?` 这种写法来直接解决这个问题, 但 json-server 引用的 express 引用的 path-to-regexp 版本太低, 且两者有兼容问题
-    // 相关讨论: https://github.com/expressjs/express/pull/4070
-    // 测试路由匹配: http://forbeslindesay.github.io/express-route-tester/
     ...res,
     [['method', 'action'][index]]: argList[index]
   }), {})
@@ -134,8 +131,8 @@ server.get(`/${config.apiTest}/:argList/:api(*)`, (req, res, next) => { // 给�
         res.json('暂无请求数据')
         return
       }
-      const mainPath = `/${config.preFix}/${config.proxyTag}/${config.apiTest}/`
-      const replayPath = `/${config.preFix}/${config.proxyTag}/${config.apiTest}/${method},replay${rawApi}`
+      const mainPath = `/`
+      const replayPath = `/${method},replay${rawApi}`
 
       res.type('html')
       res.send(`
@@ -210,7 +207,7 @@ server.get(`/${config.apiTest}/:argList/:api(*)`, (req, res, next) => { // 给�
             if(isDone) {
               isDone = false
               axios({
-                baseURL: '${config.myHttpSever}',
+                // baseURL: '${config.myHttpSever}',
                 method: 'get',
                 url: '${replayPath}',
               }).then(({data, status, statusText, headers, config, request}) => {
@@ -255,7 +252,7 @@ server.listen(config.prot, () => {
 })
 
 serverReplay.use(proxy( // 重放也可以使用 /t/* 临时接口
-  pathname => (Boolean(pathname.match(`/${config.preFix}/${config.proxyTag}/`)) === true),
+  pathname => (Boolean(pathname.match(`/${config.preFix}/`)) === true),
   {
     target: `http://localhost:${config.prot}/`,
   },
@@ -290,6 +287,9 @@ serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的
 serverReplay.listen(config.replayProt, () => {
   console.log(`服务器重放地址: http://localhost:${config.replayProt}/`)
 })
+serverTest.listen(config.testProt, () => {
+  console.log(`接口调试地址: http://localhost:${config.testProt}/`)
+})
 
 function handleRes(res, data) {
   return {
@@ -318,7 +318,7 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
   return Boolean(
     method.match(/OPTIONS/i)
     || (
-      method.match(/GET/i) && url.match(new RegExp(`/\/${config.preFix}\/${config.proxyTag}\/${config.apiTest}/`))
+      method.match(/GET/i) && url.match(new RegExp(`/\/${config.preFix}\//`))
     )
   )
 }
