@@ -79,25 +79,38 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   next()
 })
 
-server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端请求的接口
-  const {api, action} = req.query
-  if(!api) {
-    res.type('html')
-    res.send(`
-      <ul style="word-wrap: break-word;">
-        ${Object.keys(httpHistory).map(key => {
-          const {info = {}} = httpHistory[key].res || {}
-          return `
-            <li><a href="/${config.preFix}/${config.proxyTag}/${config.apiTest}?api=${querystring.escape(key)}">
-              ${info.status || '--'}
-              ${htmlEscape(key)}
-            </a></li>
-          `
-        }).join('')}
-      </ul>
-    `)
-    return
-  }
+server.get(`/${config.apiTest}`, (req, res, next) => {
+  res.type('html')
+  res.send(`
+    <ul style="word-wrap: break-word;">
+      ${Object.keys(httpHistory).map(key => {
+        const {info = {}} = httpHistory[key].res || {}
+        const [, method, url] = key.match(/(\w+)\s+(.*)/)
+        return `
+          <li><a href="/${config.preFix}/${config.proxyTag}/${config.apiTest}/${method}${url}">
+            ${info.status || '--'}
+            ${htmlEscape(key)}
+          </a></li>
+        `
+      }).join('')}
+    </ul>
+  `)
+})
+
+server.get(`/${config.apiTest}/:argList/:api(*)`, (req, res, next) => { // 给后端查询前端请求的接口
+  let {api, argList} = req.url.match(new RegExp(`\/${config.apiTest}\/(?<argList>.*?)(?<api>\/.*)`)).groups
+  const rawApi = api
+  argList = argList.split(',')
+  const {query, params} = req
+  const {method, action} = argList.map((item, index) => index).reduce((res, index) => ({
+    // 把路径中的 argList 转换为对象
+    // 注: `path-to-regexp` 库可以使用 `:method?{,:action}?` 这种写法来直接解决这个问题, 但 json-server 引用的 express 引用的 path-to-regexp 版本太低, 且两者有兼容问题
+    // 相关讨论: https://github.com/expressjs/express/pull/4070
+    // 测试路由匹配: http://forbeslindesay.github.io/express-route-tester/
+    ...res,
+    [['method', 'action'][index]]: argList[index]
+  }), {})
+  api = `${method.toUpperCase()} ${api}`
   if(action === 'replay') {
     sendReq(api, () => {
       res.json({message: '重发请求完成'})
@@ -121,6 +134,9 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
         res.json('暂无请求数据')
         return
       }
+      const mainPath = `/${config.preFix}/${config.proxyTag}/${config.apiTest}/`
+      const replayPath = `/${config.preFix}/${config.proxyTag}/${config.apiTest}/${method},replay${rawApi}`
+
       res.type('html')
       res.send(`
         <style>
@@ -173,7 +189,7 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
         </style>
         <body class="api">
         <div class="sketch">${httpHistory[api].res.info.status} ${htmlEscape(api)}</div>
-        <button><a href="/api/t/test">返回</a></button>
+        <button><a href="${mainPath}">返回</a></button>
         <button onClick="replay('${api}')">重发</button>
         <details>
           <summary>----- input:</summary>
@@ -196,8 +212,7 @@ server.get(`/${config.apiTest}`, (req, res, next) => { // 给后端查询前端�
               axios({
                 baseURL: '${config.myHttpSever}',
                 method: 'get',
-                url: 'api/t/test',
-                params: {api, action: 'replay'},
+                url: '${replayPath}',
               }).then(({data, status, statusText, headers, config, request}) => {
                 console.log({data, status, statusText, headers, config, request})
                 isDone = true
