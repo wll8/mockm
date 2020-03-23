@@ -1,5 +1,6 @@
 const config = {
   prot: 9000, // 本地端口
+  testProt: 9005, // 调试端口
   replayProt: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
   proxyTag: 't', // 测试标志, 若不匹配 /api/t/* 即进行转发
   apiTest: 'test', // api 调试地址, 即 /api/t/test/* 进入接口调试
