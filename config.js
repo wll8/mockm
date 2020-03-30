@@ -10,6 +10,8 @@ const config = {
   myHttpSever: 'http://192.168.6.20:9000/', //
   httpHistory: './httpHistory.json', // 录制信息保存位置
   dbJsonName: './db.json', // db.js 生成的 json 数据文件名
+  dataDir: './httpData/', // 数据保存目录
+  httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
 }
 
 module.exports = config
