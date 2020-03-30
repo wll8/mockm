@@ -7,8 +7,10 @@
     "axios": "^0.19.1",
     "curlconverter": "^2.13.0",
     "escape-goat": "^3.0.0",
+    "filenamify": "^4.1.0",
     "http-proxy-middleware": "^0.20.0",
     "json-server": "^0.15.1",
+    "mime": "^2.4.4",
     "mockjs": "^1.1.0",
     "multiparty": "^4.2.1",
     "node-http-proxy-json": "^0.1.9"
