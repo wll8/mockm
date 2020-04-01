@@ -65,12 +65,23 @@ server.use(proxy(
           const extensionName = mime.getExtension(contentType)
           const bodyPathOld = (getHttpHistory(req, 'url').res || {body: {}}).body.bodyPath
           // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
-          const bodyPath = bodyPathOld || `${config.dataDir}/${
-            filenamify(
-              `${url.slice(1, 100)}_${method}_body_${nextId()}.${extensionName}`,
-              {maxLength: 255, replacement: '_'}
-            )
-          }`
+
+          function createBodyPath() {
+            return `${config.dataDir}/${
+              filenamify(
+                `${url.slice(1, 100)}_${method}_body_${nextId()}.${extensionName}`,
+                {maxLength: 255, replacement: '_'}
+              )
+            }`
+          }
+
+          // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
+          let bodyPath = bodyPathOld || createBodyPath()
+          if(mime.getType(bodyPathOld) !== contentType) {
+            // todo: 更新后缀名, 还有什么优雅的方式?
+            bodyPath = bodyPath.split('.').map((item, index, arr) => (index+1 < arr.length ? item : extensionName)).join('.')
+          }
+
           fs.writeFileSync(bodyPath, buffer, {encoding: 'buffer'})
           console.log(`${method} ${req.path} ${statusCode} ${statusMessage}`)
           setHttpHistory(fullApi, {res: {
@@ -141,10 +152,12 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     let httpRes
     let httpReq
     let bodyPath
+    let contentType
     try {
       httpRes = {...httpHistory[api].res}
       httpReq = {...httpHistory[api].req}
       bodyPath = httpRes.body.bodyPath
+      contentType = httpRes.headers[`content-type`]
     } catch (error) {
       console.log('error', {api, error})
       res.json('暂无请求数据')
@@ -223,7 +236,7 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
         <summary>----- out:</summary>
         <textarea disabled spellcheck="false">${o2s({
           ...(httpRes || {}),
-          body: undefined, // 删除 body
+          body: contentType === `application/json` ? JSON.parse(fs.readFileSync(bodyPath, 'utf8')) : undefined, // 删除 body
         })}</textarea>
       </details>
       <script src="https://unpkg.com/axios@0.19.1/dist/axios.js"></script>
@@ -412,7 +425,6 @@ function sendReq(api, cb) { // 发送请求
   }).then(res => {
     const {data, status, statusText, headers, config, request} = res
   }).catch(err => {
-    console.log('err', err)
     const {data, status, statusText, headers, config, request} = err.response
   }).finally(() => {
     cb()
