@@ -18,6 +18,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "nodemon --watch \"*.js\" --exec \"node server.js\"",
+    "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
