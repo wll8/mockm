@@ -78,8 +78,7 @@ server.use(proxy(
           // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
           let bodyPath = bodyPathOld || createBodyPath()
           if(mime.getType(bodyPathOld) !== contentType) {
-            // todo: 更新后缀名, 还有什么优雅的方式?
-            bodyPath = bodyPath.split('.').map((item, index, arr) => (index+1 < arr.length ? item : extensionName)).join('.')
+            bodyPath = bodyPath.replace(/(.*\.)(.*)/, `$1${extensionName}`)
           }
 
           fs.writeFileSync(bodyPath, buffer, {encoding: 'buffer'})
