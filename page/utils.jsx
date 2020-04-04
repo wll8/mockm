@@ -1,4 +1,26 @@
+// headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
+
 window.utils = (() => {
+  function copyToClipboard(text) { // 复制文本到剪贴版
+    var textArea = document.createElement('textarea');
+    textArea.style.position = 'fixed';
+    textArea.style.zIndex = '-9';
+    textArea.style.top = '-100%';
+    textArea.style.left = '-100%';
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    var successful = false
+    try {
+      successful = document.execCommand('copy');
+    } catch (err) {
+      console.log('该浏览器不支持点击复制到剪贴板');
+    }
+    document.body.removeChild(textArea);
+    return successful
+  }
+
   function wordToUpperCase(str) { // 转换单词首字符为大写
     return str.replace(/(\w+)/g, m => m.charAt().toUpperCase()+m.slice(1))
   }
@@ -15,8 +37,21 @@ window.utils = (() => {
       ...cfg,
     }
     return {
-      querySource: obj => qs.stringify(obj), // {a: 1, b: 2} => a=1&b=2
-      objectToText: obj => { // 对象转文件, 键名加粗
+      source: obj => {
+        if(cfg.headerRaw) {
+          return `headerRaw`
+        } else {
+          return Qs.stringify(obj) // {中文: `你好`} => "%E4%B8%AD%E6%96%87=%E4%BD%A0%E5%A5%BD"
+        }
+      },
+      parse: function (obj) {
+        return this.parse(obj)
+      },
+      encode: function (obj) {
+        return this.parse(obj, 'encode')
+      },
+      json: obj => JSON.stringify(obj, null, 2),
+      parse: (obj, action) => { // 对象转文件, 键名加粗
         return (
           <>
             {
@@ -24,9 +59,23 @@ window.utils = (() => {
                 const val = obj[key]
                 return (
                   <div key={key}>
-                    <span className="key">{cfg.keyToUpperCase ? wordToUpperCase(key) : key}</span>:
+                    <span className="key">{
+                      (() => {
+                        const res = cfg.keyToUpperCase ? wordToUpperCase(key) : key
+                        return action === `encode` ? encodeURI(res) : res
+                        // chrome network: key 使用的是 encodeURI, val 使用的是 encodeURIComponent
+                        // 测试: axios.get('//httpbin.org/get', {params: {"中文@": "你好="}})
+                        // 查看 view URL encoded 会发现 key 中的 @ 没有被转换, 即使用了 encodeURI
+                        // %E4%B8%AD%E6%96%87@: %E4%BD%A0%E5%A5%BD%3D
+                      })()
+                    }</span>:
                     <span className="val">
-                      {typeof(val) === `object` ? JSON.stringify(val) : val}
+                      {
+                        (() => {
+                          const res = typeof(val) === `object` ? JSON.stringify(val) : val
+                          return action === `encode` ? encodeURIComponent(res) : res
+                        })()
+                      }
                     </span>
                   </div>
                 )
@@ -63,6 +112,7 @@ window.utils = (() => {
     return object
   }
   return {
+    copyToClipboard,
     wordToUpperCase,
     sortKey,
     formatData,
