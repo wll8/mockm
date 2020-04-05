@@ -92,7 +92,6 @@ window.HttpShow = (() => {
       Doc: () => `Doc`,
     }
 
-    // 类似 componentDidMount 和 componentDidUpdate: 挂载后, 更新后
     useEffect(() => {
       // ... dom api
     });
