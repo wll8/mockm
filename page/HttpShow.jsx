@@ -80,11 +80,11 @@ window.HttpShow = (() => {
     }
 
     const [state, setState] = useState({ // 默认值
-
+      httpData: undefined,
     });
 
     const tabList = {
-      Headers: Headers,
+      Headers,
       Preview: () => `Preview`,
       Response: () => `Response`,
       Timing: () => `Timing`,
@@ -92,9 +92,25 @@ window.HttpShow = (() => {
       Doc: () => `Doc`,
     }
 
-    useEffect(() => {
-      // ... dom api
+    const method = `GET`
+    const api = `/api/options/?page=1&pageSize=9999`
+    const http = axios.create({
+      baseURL: `http://localhost:9005/`,
+      timeout: 1000,
+      headers: {'X-Custom-Header': 'foobar'}
     });
+    useEffect(() => {
+      http(`${method},getHttpData${api}`).then(res => {
+        const newData = {
+          method,
+          api: `${api}`,
+          data: res.data,
+        }
+        console.log(`newData`, newData)
+        setState({httpData: newData})
+      })
+      // ... dom api
+    }, []);
 
     return (
       <div className="HttpShow">
@@ -102,7 +118,14 @@ window.HttpShow = (() => {
           {
             Object.keys(tabList).map(key => (
               <TabPane tab={key} key={key}>
-                {tabList[key]({httpData})}
+                {
+                  state.httpData ?
+                    (() => {
+                      const ComName = tabList[key]
+                      return <ComName {...{httpData: state.httpData}}></ComName>
+                    })()
+                  : `(暂无)`
+                }
               </TabPane>
             ))
           }
