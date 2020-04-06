@@ -211,7 +211,8 @@ window.Headers = (() => {
                             key={canSel}
                             onChange={() => {
                               if([`copy`].includes(canSel)) { // 不写入 header 选项的值
-                                if(copyToClipboard(document.querySelector(`.panelBody.${panelKey} .panelData`).outerText)) {
+                                const text = document.querySelector(`.panelBody.${panelKey} .panelData`).outerText
+                                if(text && copyToClipboard(text)) {
                                   message.success(`复制成功`)
                                 } else {
                                   message.error(`复制失败`)
