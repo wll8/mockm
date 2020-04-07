@@ -29,7 +29,7 @@ const middlewaresObj = middlewares.flat().reduce((res, item) => {
   })
 }, {})
 let TOKEN = ''
-// server.use(middlewaresObj.corsMiddleware)
+serverTest.use(middlewaresObj.corsMiddleware)
 
 server.use(proxy(
   pathname => (Boolean(pathname.match(`/${config.preFix}/${config.proxyTag}/`)) === false),
@@ -165,6 +165,10 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
 
     if(action === 'getBodyFile') {
       res.sendFile(require('path').resolve(bodyPath))
+      return true
+    }
+    if(action === 'getHttpData') {
+      res.send(httpHistory[api])
       return true
     }
 
