@@ -41,7 +41,6 @@ window.HttpShow = (() => {
 
     const [state, setState] = useState({ // 默认值
       ...initState,
-      httpData: undefined,
       fullApi: `GET /api/options/?page=1&pageSize=9999`,
       // fullApi: `GET /static/static/hot.95598193.png`,
       // fullApi: `POST /api/dynamicdatatemplate/search/?a=1&b=2`,
@@ -65,11 +64,11 @@ window.HttpShow = (() => {
     }
 
     useEffect(() => {
-      window.localStorage.setItem(`HttpShowState`, JSON.stringify(state, null, 2))
+      window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
     }, [state.activeTabs]);
 
     useEffect(() => {
-      http(`${method},getHttpData${api}`).then(res => {
+      http.get(`${method},getHttpData${api}`).then(res => {
         const newData = {
           method,
           api,
@@ -78,8 +77,6 @@ window.HttpShow = (() => {
         setState(preState => ({...deepSet(preState, `httpData`, newData)}))
       })
     }, [state.fullApi]);
-
-    console.log(`state.httpData`, state.httpData)
 
     return (
       <div className="HttpShow">
@@ -91,7 +88,7 @@ window.HttpShow = (() => {
                   state.httpData ?
                     (() => {
                       const ComName = tabList[key]
-                      return <ComName {...{httpData: state.httpData}}></ComName>
+                      return <ComName {...state} />
                     })()
                   : `(暂无)`
                 }

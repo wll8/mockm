@@ -18,6 +18,40 @@ window.utils = (() => {
     })
   }
 
+  async function blobTool(blob, action, fileName) {
+    return new Promise((resolve, reject) => {
+      if(action === `download`) {
+        var a = document.createElement('a')
+        var blobUrl = window.URL.createObjectURL(blob)
+        a.href = blobUrl
+        a.download = fileName
+        a.click()
+        window.URL.revokeObjectURL(blobUrl)
+        resolve(blobUrl)
+      }
+      if(action === `toBase64`) {
+        let reader = new FileReader();
+        reader.readAsDataURL(blob); // 转换为 base64, 直接放入 a 标签的 href 可用于下载
+        reader.onload = res => {
+          const result = res.target.result
+          resolve(result)
+        }
+      }
+      if(action === `toObjectURL`) {
+        var blobUrl = window.URL.createObjectURL(blob)
+        resolve(blobUrl)
+      }
+      if(action === `toText`) {
+        let reader = new FileReader();
+        reader.readAsText(blob, `utf-8`); // 转换为文本, 注意需要原数据就是文本
+        reader.onload = res => {
+          const result = res.target.result
+          resolve(result)
+        }
+      }
+    })
+  }
+
   function copyToClipboard(text) { // 复制文本到剪贴版
     var textArea = document.createElement('textarea');
     textArea.style.position = 'fixed';
@@ -73,6 +107,7 @@ window.utils = (() => {
     return object
   }
   return {
+    blobTool,
     getMethodUrl,
     fetchDownload,
     copyToClipboard,

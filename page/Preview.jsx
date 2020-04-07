@@ -6,6 +6,7 @@ const {
   deepGet,
   deepSet,
   fetchDownload,
+  blobTool,
 } = window.utils
 
 window.Preview = (() => {
@@ -30,6 +31,9 @@ window.Preview = (() => {
         console.log(error)
       }
       return { // 默认值
+        resBodyBlob: undefined,
+        resBodyJsonStr: undefined,
+        resBodyBase64: undefined,
         activePanel: ['responseBody'],
         activePanelTab: {
           responseBody: `preview`,
@@ -40,6 +44,10 @@ window.Preview = (() => {
 
     const [state, setState] = useState(initState);
     const httpData = props.httpData
+    const resBodyBlob = state.resBodyBlob
+    const resBodyBase64 = state.resBodyBase64
+    const resBodyJsonStr = state.resBodyJsonStr
+    const resBodyObjectURL = state.resBodyObjectURL
     const file = `http://localhost:9005/${httpData.method},getBodyFile${httpData.api}`
     const contentType = httpData.data.res.headers[`content-type`]
     const shortType = contentType.replace(/\/.*/, '')
@@ -60,64 +68,31 @@ window.Preview = (() => {
     ))
 
     useEffect(() => {
-      window.localStorage.setItem(`PreviewState`, JSON.stringify(state, null, 2))
-      // ... dom api
+      http.get(`${httpData.method},getBodyFile${httpData.api}`, {responseType: 'blob'}).then(res => {
+        const blob = res.data
+        setState(preState => ({...deepSet(preState, `resBodyBlob`, blob)}))
+        blobTool(blob, `toText`).then(res => {
+          if(blob.type === `application/json`) {
+            res = JSON.stringify(JSON.parse(res), null, 2)
+          }
+          setState(preState => ({...deepSet(preState, `resBodyJsonStr`, res)}))
+        })
+        blobTool(blob, `toBase64`).then(res => {
+          setState(preState => ({...deepSet(preState, `resBodyBase64`, res)}))
+        })
+        blobTool(blob, `toObjectURL`).then(res => {
+          setState(preState => ({...deepSet(preState, `resBodyObjectURL`, res)}))
+        })
+      })
+    }, []);
+
+    useEffect(() => {
+      window.localStorage.setItem(`PreviewState`, JSON.stringify({
+        activePanel: state.activePanel,
+        activePanelTab: state.activePanelTab,
+      }, null, 2))
     });
 
-
-    function ComShowBase64(props) { // 组件, 根据 api 渲染 base64
-      const [state, setState] = useState('');
-
-      useEffect(() => {
-        if(state === ``) {
-          fetch(file).then(res => res.blob()).then(blob => {
-            let reader = new FileReader();
-            reader.readAsDataURL(blob); // 转换为 base64, 直接放入 a 标签的 href 可用于下载
-            reader.onload = res => {
-              const base64 = res.target.result
-              console.log(`resresres`, base64.length)
-              setState(base64)
-            }
-            console.log(`reader`, reader.result)
-          })
-        }
-      }, [state]);
-
-      return (
-        <div {...props} className={`ComShowBase64 ${props.className || ''}`}>
-          {state ? (
-            <a onClick={() => {
-              const newWindow = window.open(``)
-              newWindow.document.write(`<iframe style="border: 0;" width="100%" height="100%" src="${state}"></iframe>`)
-              newWindow.document.body.style.margin = 0
-            }} rel="noopener" target="_blank"
-            >
-              {state}
-            </a>
-          ) : `(暂无)`}
-        </div>
-      )
-    }
-
-    function ComShowFileContent(props) { // 组件, 根据 api 和 type 渲染文本文件内容
-      const [state, setState] = useState('');
-
-      useEffect(() => {
-        if(state === ``) {
-          http(props.file).then(res => {
-            console.log(`resresres`, res.data)
-            setState(JSON.stringify(res.data, null, 2))
-          })
-        }
-      }, [state]);
-
-      return (
-        <div {...props} className={`ComShowFileContent ${props.className || ''}`}>
-          {state ? state : `(暂无)`}
-        </div>
-      )
-
-    }
 
     function canSelToNode(canSel) { // 按钮值转换为 node 结点
       return {
@@ -128,13 +103,30 @@ window.Preview = (() => {
       }[canSel]
     }
 
+    function base64Render() {
+      return (
+        <div className="ComShowBase64">
+          {resBodyBase64 ? (
+            <a onClick={() => {
+              const newWindow = window.open(``)
+              newWindow.document.write(`<iframe style="border: 0;" width="100%" height="100%" src="${resBodyBase64}"></iframe>`)
+              newWindow.document.body.style.margin = 0
+            }} rel="noopener" target="_blank"
+            >
+              {resBodyBase64}
+            </a>
+          ) : `(暂无)`}
+        </div>
+      )
+    }
+
     function formatData(type, data, cfg) { // 格式化数据, 例如 url query 转 object; image 转 base64
       cfg = {
         ...cfg,
       }
       return {
         preview: obj => {
-          const noPre = obj => (
+          const noPreRender = obj => (
             <div className="noPre">
               <div className="msg">此文件类型暂不支持预览:</div>
               <div className="type">{contentType}</div>
@@ -142,6 +134,12 @@ window.Preview = (() => {
               <div className="link"><a rel="noopener" target="_blank" href={file}>{file}</a></div>
             </div>
           )
+          const resBodyJsonStrRender = obj => (
+            <div className="ComShowText">
+              {resBodyJsonStr || ''}
+            </div>
+          )
+
           const dom = (() => {
             return ({
               "application": () => {
@@ -151,28 +149,27 @@ window.Preview = (() => {
                     `application/xml`,
                   ].includes(contentType)
                 if(isText) {
-                  return <ComShowFileContent file={file}/>
+                  return resBodyJsonStrRender()
                 } else {
-                  return noPre()
+                  return noPreRender()
                 }
               },
               "audio": () => <audio controls><source src={file} type={contentType}></source></audio>,
-              "chemical": noPre,
+              "chemical": noPreRender,
               "image": () => <img src={file} alt={file} />,
-              "message": noPre,
-              "model": noPre,
-              "text": () => <ComShowFileContent file={file} />, // 如果是文件的时候, 获取 type 传给格式化工具, 例如: text/css => css
-              "video": noPre, // <video controls><source src={src} type={type}></video>
-              "x-conference": noPre,
-              "font": noPre,
-              "undefined": noPre,
+              // "image": () => <img src={resBodyObjectURL} alt={resBodyObjectURL} />,
+              "message": noPreRender,
+              "model": noPreRender,
+              "text": resBodyJsonStrRender, // 如果是文件的时候, 获取 type 传给格式化工具, 例如: text/css => css
+              "video": noPreRender, // <video controls><source src={src} type={type}></video>
+              "x-conference": noPreRender,
+              "font": noPreRender,
+              "undefined": noPreRender,
             })[shortType]
           })()
           return dom()
         },
-        base64: obj => {
-          return <ComShowBase64 />
-        },
+        base64: base64Render,
         url: obj => <div className="link"><a rel="noopener" target="_blank" href={file}>{file}</a></div>,
         download: obj => `download`,
       }[type](data)
@@ -205,7 +202,6 @@ window.Preview = (() => {
 
     return (
       <div className="Headers Preview">
-        {JSON.stringify(state, null, 2)}
         <Collapse
           defaultActiveKey={state.activePanel}
           onChange={collapseChange}
@@ -249,7 +245,7 @@ window.Preview = (() => {
                                   }
                                 }
                                 if(canSel === `download`) {
-                                  fetchDownload(file)
+                                  blobTool(resBodyBlob, `download`, file.replace(/.*\//, ''))
                                 }
                                 if(canSel === `open`) {
                                   window.open(file)
