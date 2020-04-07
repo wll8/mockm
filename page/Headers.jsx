@@ -78,23 +78,27 @@ window.Headers = (() => {
         lineStr: cfg.activePanel.includes(cfg.panelKey) ? `` : `\r\n`, // 强制添加转行, 否则隐藏状态下复制时, 没有换行效果
         ...cfg,
       }
-      if(cfg.sortKey) {
-        data = sortKey(data)
-      }
-
       return {
-        source: obj => {
+        source: function (obj) {
           if(cfg.headerRaw) {
-            return `headerRaw`
+            cfg.sortKey = false
+            return this.parse(obj)
           } else {
-            return Qs.stringify(obj) // {中文: `你好`} => "%E4%B8%AD%E6%96%87=%E4%BD%A0%E5%A5%BD"
+            if(`requestPayload` === cfg.panelKey) {
+              return JSON.stringify(obj)
+            } else {
+              return Qs.stringify(obj) // {中文: `你好`} => "%E4%B8%AD%E6%96%87=%E4%BD%A0%E5%A5%BD"
+            }
           }
         },
         encode: function (obj) {
-          return this.parse(obj, 'encode')
+          return this.parse(obj, {action: 'encode'})
         },
         json: obj => JSON.stringify(obj, null, 2),
-        parse: (obj, action) => { // 对象转文件, 键名加粗
+        parse: (obj) => { // 对象转文件, 键名加粗
+          if(cfg.sortKey) {
+            obj = sortKey(obj)
+          }
           return (
             <>
               {
@@ -104,8 +108,9 @@ window.Headers = (() => {
                     <div key={key}>
                       <span className="key">{
                         (() => {
-                          const res = cfg.keyToUpperCase ? wordToUpperCase(key) : key
-                          return action === `encode` ? encodeURI(res) : res
+                          // const res = cfg.keyToUpperCase ? wordToUpperCase(key) : key
+                          const res = key
+                          return cfg.action === `encode` ? encodeURI(res) : res
                           // chrome network: key 使用的是 encodeURI, val 使用的是 encodeURIComponent
                           // 测试: axios.get('//httpbin.org/get', {params: {"中文@": "你好="}})
                           // 查看 view URL encoded 会发现 key 中的 @ 没有被转换, 即使用了 encodeURI
@@ -116,7 +121,7 @@ window.Headers = (() => {
                         {
                           (() => {
                             const res = typeof(val) === `object` ? JSON.stringify(val) : val
-                            return action === `encode` ? encodeURIComponent(res) : res
+                            return cfg.action === `encode` ? encodeURIComponent(res) : res
                           })()
                           + cfg.lineStr
                         }
@@ -144,7 +149,7 @@ window.Headers = (() => {
         requestHeaders: deepGet(apiData, `req.headers`),
         queryStringParameters: deepGet(apiData, `req.query`), // query 参数
         requestPayload: deepGet(apiData, `req.body`), // application/json 或 multipart/form-data
-        formData: deepGet(apiData, `req.form`, 'null'), //  application/x-www-form-urlencoded
+        formData: deepGet(apiData, `req.form`, {}), //  application/x-www-form-urlencoded
       }[type]
     }
 
