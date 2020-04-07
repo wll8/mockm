@@ -6,11 +6,15 @@
     <!-- less -->
     <link rel="stylesheet/less" type="text/css" href="HttpShow.less" />
     <link rel="stylesheet/less" type="text/css" href="Headers.less" />
+    <link rel="stylesheet/less" type="text/css" href="Preview.less" />
     <script src="unpkg.com/less@3.11.1/dist/less.js" type="text/javascript"></script>
     <!-- less -->
     <style>
       :focus {
         outline: none;
+      }
+      *[class^="ant-"] {
+        transition: none !important;
       }
     </style>
   </head>
@@ -24,8 +28,10 @@
     <script src="unpkg.com/@ant-design/icons@4.0.5/dist/index.umd.js">`@ant-design/icons@4.0.5`</script>
     <link rel="stylesheet" href="unpkg.com/antd@4.1.0/dist/antd.css"></link>
     <script src="unpkg.com/@babel/standalone@7.9.4/babel.js">`babel独立版`</script>
+    <script type="text/babel" src="common.jsx"></script>
     <script type="text/babel" src="utils.jsx"></script>
     <script type="text/babel" src="HttpShow.jsx"></script>
+    <script type="text/babel" src="Preview.jsx"></script>
     <script type="text/babel" src="Headers.jsx"></script>
     <script type="text/babel" src="index.jsx"></script>
   </body>

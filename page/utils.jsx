@@ -1,6 +1,23 @@
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
 window.utils = (() => {
+  function getMethodUrl(path) {
+    const [, method, api] = path.match(/(\w+)\s+(.*)/)
+    return {method, api}
+  }
+
+  function fetchDownload(fileApi, name) {
+    fetch(fileApi).then(res => res.blob()).then(blob => {
+        var a = document.createElement('a')
+        var url = window.URL.createObjectURL(blob)
+        var filename = name || fileApi.replace(/.*\//, '')
+        a.href = url
+        a.download = filename
+        a.click()
+        window.URL.revokeObjectURL(url)
+    })
+  }
+
   function copyToClipboard(text) { // 复制文本到剪贴版
     var textArea = document.createElement('textarea');
     textArea.style.position = 'fixed';
@@ -56,6 +73,8 @@ window.utils = (() => {
     return object
   }
   return {
+    getMethodUrl,
+    fetchDownload,
     copyToClipboard,
     wordToUpperCase,
     sortKey,

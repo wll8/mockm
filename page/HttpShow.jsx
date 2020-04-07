@@ -1,4 +1,5 @@
 const {
+  getMethodUrl,
   wordToUpperCase,
   sortKey,
   formatData,
@@ -10,6 +11,7 @@ window.HttpShow = (() => {
   const {
     useState,
     useEffect,
+    useRef,
   } = React
   const {
     Collapse,
@@ -21,50 +23,67 @@ window.HttpShow = (() => {
   const { Panel } = Collapse;
   const { TabPane } = Tabs;
 
-  function callback(key) {
-    console.log(key);
-  }
-
   function com() {
     // 【计数器改写方法一】 React Hooks之useContext
     // https://blog.csdn.net/weixin_44282875/article/details/85336106
 
+    const initState = (() => {
+      try {
+        return JSON.parse(window.localStorage.getItem(`HttpShowState`) || undefined)
+      } catch (error) {
+        console.log(error)
+        // return {}
+      }
+      return { // 默认值
+        activeTabs: `Headers`,
+      }
+    })();
+
     const [state, setState] = useState({ // 默认值
+      ...initState,
       httpData: undefined,
+      fullApi: `GET /api/options/?page=1&pageSize=9999`,
+      // fullApi: `GET /static/static/hot.95598193.png`,
+      // fullApi: `POST /api/dynamicdatatemplate/search/?a=1&b=2`,
     });
 
     const tabList = {
       Headers,
-      Preview: () => `Preview`,
+      Preview,
+      // Preview: () => `Preview`,
       Response: () => `Response`,
       Timing: () => `Timing`,
       Cookies: () => `Cookies`,
       Doc: () => `Doc`,
     }
 
-    const method = `GET`
-    const api = `/api/options/?page=1&pageSize=9999`
-    const http = axios.create({
-      baseURL: `http://localhost:9005/`,
-      timeout: 1000,
-      headers: {'X-Custom-Header': 'foobar'}
-    });
+    const {method, api} = getMethodUrl(state.fullApi)
+
+    function tabsChange(key) {
+      console.log(key);
+      setState(preState => ({...deepSet(preState, `activeTabs`, key)}))
+    }
+
+    useEffect(() => {
+      window.localStorage.setItem(`HttpShowState`, JSON.stringify(state, null, 2))
+    }, [state.activeTabs]);
+
     useEffect(() => {
       http(`${method},getHttpData${api}`).then(res => {
         const newData = {
           method,
-          api: `${api}`,
+          api,
           data: res.data,
         }
-        console.log(`newData`, newData)
-        setState({httpData: newData})
+        setState(preState => ({...deepSet(preState, `httpData`, newData)}))
       })
-      // ... dom api
-    }, []);
+    }, [state.fullApi]);
+
+    console.log(`state.httpData`, state.httpData)
 
     return (
       <div className="HttpShow">
-        <Tabs animated={false} defaultActiveKey="Headers" onChange={callback}>
+        <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
           {
             Object.keys(tabList).map(key => (
               <TabPane tab={key} key={key}>
