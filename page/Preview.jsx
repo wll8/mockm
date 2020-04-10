@@ -32,7 +32,7 @@ window.Preview = (() => {
       }
       return { // 默认值
         resBodyBlob: undefined,
-        resBodyJsonStr: undefined,
+        resBodyText: undefined,
         resBodyBase64: undefined,
         activePanel: ['responseBody'],
         activePanelTab: {
@@ -46,7 +46,7 @@ window.Preview = (() => {
     const httpData = props.httpData
     const resBodyBlob = state.resBodyBlob
     const resBodyBase64 = state.resBodyBase64
-    const resBodyJsonStr = state.resBodyJsonStr
+    const resBodyText = state.resBodyText
     const resBodyObjectURL = state.resBodyObjectURL
     const file = `http://localhost:9005/${httpData.method},getBodyFile${httpData.api}`
     const contentType = httpData.data.res.headers[`content-type`]
@@ -75,7 +75,7 @@ window.Preview = (() => {
           if(blob.type === `application/json`) {
             res = JSON.stringify(JSON.parse(res), null, 2)
           }
-          setState(preState => ({...deepSet(preState, `resBodyJsonStr`, res)}))
+          setState(preState => ({...deepSet(preState, `resBodyText`, res)}))
         })
         blobTool(blob, `toBase64`).then(res => {
           setState(preState => ({...deepSet(preState, `resBodyBase64`, res)}))
@@ -107,7 +107,7 @@ window.Preview = (() => {
       return (
         <div className="ComShowBase64">
           {resBodyBase64 ? (
-            <a onClick={() => {
+            <a className="link" onClick={() => {
               const newWindow = window.open(``)
               newWindow.document.write(`<iframe style="border: 0;" width="100%" height="100%" src="${resBodyBase64}"></iframe>`)
               newWindow.document.body.style.margin = 0
@@ -130,26 +130,37 @@ window.Preview = (() => {
             <div className="noPre">
               <div className="msg">此文件类型暂不支持预览:</div>
               <div className="type">{contentType}</div>
-              <div className="type">链接:</div>
-              <div className="link"><a rel="noopener" target="_blank" href={file}>{file}</a></div>
+              <div className="msg">链接:</div>
+              <div className="linkBox"><a className="link" rel="noopener" target="_blank" href={file}>{file}</a></div>
             </div>
           )
-          const resBodyJsonStrRender = obj => (
+          const resBodyTextRender = obj => (
             <div className="ComShowText">
-              {resBodyJsonStr || ''}
+              {resBodyText || ''}
+            </div>
+          )
+
+          const heightTextRender = obj => ( // 如果是文本的时候, 获取 type 传给格式化工具, 例如: text/css => css
+            <div className="ComHeightText">
+              颜色高亮: {resBodyText}
             </div>
           )
 
           const dom = (() => {
-            return ({
+            let getDom = (({ // 根据 contentType 渲染 dom
+              "text/html": () => (
+                <iframe className="htmlViewIframe" src={resBodyObjectURL}></iframe>
+              ),
+              // "application/json": resBodyTextRender,
+              "application/json": resBodyTextRender,
+            })[contentType] || ({ // 如果 contentType 没有匹配, 则根据大类(shortType)渲染
               "application": () => {
-                const isText = [
+                const isLanguage = [
                     `application/javascript`,
-                    `application/json`,
                     `application/xml`,
                   ].includes(contentType)
-                if(isText) {
-                  return resBodyJsonStrRender()
+                if(isLanguage) {
+                  return heightTextRender() // 使用颜色高亮进行渲染
                 } else {
                   return noPreRender()
                 }
@@ -157,20 +168,23 @@ window.Preview = (() => {
               "audio": () => <audio controls><source src={file} type={contentType}></source></audio>,
               "chemical": noPreRender,
               "image": () => <img src={file} alt={file} />,
-              // "image": () => <img src={resBodyObjectURL} alt={resBodyObjectURL} />,
+              // "image": () => <img src={resBodyObjectURL} alt={file} />,
               "message": noPreRender,
               "model": noPreRender,
-              "text": resBodyJsonStrRender, // 如果是文件的时候, 获取 type 传给格式化工具, 例如: text/css => css
-              "video": noPreRender, // <video controls><source src={src} type={type}></video>
+              "text": heightTextRender,
+              "video": () => <video controls><source src={file} type={contentType} /></video>,
               "x-conference": noPreRender,
               "font": noPreRender,
               "undefined": noPreRender,
-            })[shortType]
+            })[shortType])
+
+
+            return getDom
           })()
           return dom()
         },
         base64: base64Render,
-        url: obj => <div className="link"><a rel="noopener" target="_blank" href={file}>{file}</a></div>,
+        url: obj => <div className="link"><a className="link" rel="noopener" target="_blank" href={file}>{file}</a></div>,
         download: obj => `download`,
       }[type](data)
     }
