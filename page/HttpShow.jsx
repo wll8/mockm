@@ -80,6 +80,7 @@ window.HttpShow = (() => {
 
     return (
       <div className="HttpShow">
+        {state.fullApi}
         <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
           {
             Object.keys(tabList).map(key => (
