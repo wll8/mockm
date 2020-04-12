@@ -1,3 +1,5 @@
+require(`util`).inspect.defaultOptions.depth = null
+
 const { inspect } = require('util')
 
 function getType(data, type) {

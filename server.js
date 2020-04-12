@@ -43,7 +43,7 @@ server.use(proxy(
           url,
         } = req
         if(ignoreHttpHistory(req) === false) {
-          setHttpHistory(`${method} ${url}`, {req})
+          // setHttpHistory(`${method} ${url}`, {req})
         }
       })
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
@@ -61,40 +61,75 @@ server.use(proxy(
           const {statusCode, statusMessage, headers} = proxyRes
           const fullApi = `${method} ${url}`
           const buffer = Buffer.concat(data);
-          const contentType = headers[`content-type`]
-          const extensionName = mime.getExtension(contentType)
-          const bodyPathOld = (getHttpHistory(req, 'url').res || {body: {}}).body.bodyPath
+          const reqBody = req.body
+
           // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
 
-          function createBodyPath() {
-            return `${config.dataDir}/${
-              filenamify(
-                `${url.slice(1, 100)}_${method}_body_${nextId()}.${extensionName}`,
-                {maxLength: 255, replacement: '_'}
-              )
-            }`
+          function createBodyPath(reqOrRes, apiId) { // 根据 url 生成文件路径, reqOrRes: req, res
+            const headers = ({res: proxyRes, req})[reqOrRes].headers
+            const contentType = headers[`content-type`]
+            const extensionName = mime.getExtension(contentType)
+
+            const bodyPathOld = ((getHttpHistory(req, 'url') || {})[reqOrRes] || {}).bodyPath
+            const newPath = () => {
+              return `${config.dataDir}/${
+                filenamify(
+                  `${url.slice(1, 100)}_${method}_${reqOrRes}_${apiId}.${extensionName}`,
+                  {maxLength: 255, replacement: '_'}
+                )
+              }`
+            }
+
+            // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
+            let bodyPath = bodyPathOld || newPath()
+            if(mime.getType(bodyPathOld) !== contentType) {
+              bodyPath = bodyPath.replace(/(.*\.)(.*)/, `$1${extensionName}`)
+            }
+            return bodyPath
           }
 
-          // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
-          let bodyPath = bodyPathOld || createBodyPath()
-          if(mime.getType(bodyPathOld) !== contentType) {
-            bodyPath = bodyPath.replace(/(.*\.)(.*)/, `$1${extensionName}`)
+          function getBodyPath() {
+            const apiId = string10to62(nextId())
+            return {
+              bodyPathReq: isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
+              bodyPathRes: isEmpty(buffer) === false ? createBodyPath(`res`, apiId) : undefined,
+            }
           }
-
-          fs.writeFileSync(bodyPath, buffer, {encoding: 'buffer'})
+          const {bodyPathReq, bodyPathRes} = getBodyPath()
+          bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
+          bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
           console.log(`${method} ${req.path} ${statusCode} ${statusMessage}`)
-          setHttpHistory(fullApi, {res: {
-            info: {
-              status: statusCode,
-              statusText: statusMessage,
+          const resDataObj = {
+            req: {
+              lineHeaders: {
+                line: {
+                  method: req.method,
+                  url: req.url,
+                  query: req.query,
+                  params: req.params,
+                  version: req.httpVersion,
+                },
+                headers: req.headers,
+                _header: proxyRes.req._header,
+              },
+              // body: null,
+              bodyPath: bodyPathReq,
             },
-            body: {
-              contentType,
-              extensionName,
-              bodyPath,
+            res: {
+              lineHeaders: {
+                line: {
+                  statusCode,
+                  statusMessage,
+                  version: proxyRes.httpVersion,
+                },
+                headers: proxyRes.headers,
+                _header: res._header,
+              },
+              // body: null,
+              bodyPath: bodyPathRes,
             },
-            headers: headers,
-          }})
+          }
+          setHttpHistory(fullApi, resDataObj)
         });
 
       }
@@ -104,7 +139,7 @@ server.use(proxy(
 ))
 
 server.use(jsonServer.rewriter({ // 修改路由, 方便后面的 api 书写
-  [`/${config.preFix}/*`] : '/$1',
+  [`/${config.preFix}/${config.proxyTag}/*`] : '/$1',
 }))
 server.use(middlewares) // 添加中间件, 方便取值
 server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
@@ -146,131 +181,28 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     sendReq(api, () => {
       res.json({message: '重发请求完成'})
     })
-    return
+    return true
   } else {
     let httpRes
     let httpReq
-    let bodyPath
-    let contentType
     try {
       httpRes = {...httpHistory[api].res}
       httpReq = {...httpHistory[api].req}
-      bodyPath = httpRes.body.bodyPath
-      contentType = httpRes.headers[`content-type`]
     } catch (error) {
       console.log('error', {api, error})
       res.json('暂无请求数据')
-      return
     }
 
-    if(action === 'getBodyFile') {
-      res.sendFile(require('path').resolve(bodyPath))
-      return true
+    if(action === 'getBodyFileReq') {
+      res.sendFile(require('path').resolve(httpReq.bodyPath))
+    }
+    if(action === 'getBodyFileRes') {
+      res.sendFile(require('path').resolve(httpRes.bodyPath))
     }
     if(action === 'getHttpData') {
+
       res.send(httpHistory[api])
-      return true
     }
-
-    const mainPath = `/`
-    const replayApi = `/${method},replay${rawApi}`
-    const getBodyFileApi = `/${method},getBodyFile${rawApi}`
-
-    res.type('html')
-    res.send(`
-      <style>
-        body.api {
-          margin: 0;
-          padding: 10px;
-          // background: #000;
-        }
-        body.api>.sketch {
-          word-wrap: break-word;
-          // color: #fff;
-        }
-        body.api>button {
-          cursor: pointer;
-        }
-        body.api>button a {
-          text-decoration: none;
-          color: initial;
-        }
-        body.api>details summary {
-          cursor: pointer;
-          border-bottom: 1px solid #666;
-          outline: none;
-          font-size: 14px;
-          // color: #fff;
-        }
-        body.api>details summary .replay {
-          display: inline-block;
-        }
-        body.api>details textarea {
-          font-size: 12px;
-          padding: 4px;
-          width: 100%;
-          height: 40vh;
-          // color: #fff;
-          outline: none;
-          font-size: nomore;
-          resize: vertical;
-          border: none;
-          // background: #333;
-        }
-        body.api>details .html {
-          width: 100%;
-          height: 100%;
-          margin: 0;
-          padding: 0;
-          border: 0;
-          outline: none;
-        }
-      </style>
-      <body class="api">
-      <div class="sketch">${httpHistory[api].res.info.status} ${htmlEscape(api)}</div>
-      <button><a href="${mainPath}">返回</a></button>
-      <button onClick="replay('${api}')">重发</button>
-      <button onClick="openRes('${getBodyFileApi}')">Response</button>
-      <details>
-        <summary>----- input:</summary>
-        <textarea disabled spellcheck="false">${o2s(httpReq)}</textarea>
-      </details>
-      <details open="open">
-        <summary>----- out:</summary>
-        <textarea disabled spellcheck="false">${o2s({
-          ...(httpRes || {}),
-          body: contentType === `application/json` ? JSON.parse(fs.readFileSync(bodyPath, 'utf8')) : undefined, // 删除 body
-        })}</textarea>
-      </details>
-      <script src="https://unpkg.com/axios@0.19.1/dist/axios.js"></script>
-      <script>
-        let isDone = true
-        function openRes(api) {
-          window.open(api)
-        }
-        function replay(api) {
-          if(isDone) {
-            isDone = false
-            axios({
-              // baseURL: '${config.myHttpSever}',
-              method: 'get',
-              url: '${replayApi}',
-            }).then(({data, status, statusText, headers, config, request}) => {
-              console.log({data, status, statusText, headers, config, request})
-              isDone = true
-              alert('重发完成')
-              document.location.reload()
-            }).catch(err => {
-              console.error(err)
-              alert('重发失败')
-            })
-          } else {
-            alert('请等待重发结束')
-          }
-        }
-      </script>
-      </body>
-    `)
   }
 })
 
@@ -383,29 +315,11 @@ function o2s(o) {
 
 function getToken() {}
 
-function setHttpHistory(api, {req, res}) {
+function setHttpHistory(api, resDataObj) {
   const [, method, url] = api.match(/(\w+)\s+(.*)/)
   httpHistory[`${method} ${url}`] = {
     ...httpHistory[`${method} ${url}`],
-    ...(
-      req
-      ? {
-          req: {
-            headers: req.headers,
-            body: req.body,
-            // params: req.params,
-            query: req.query,
-            path: req.path,
-          }
-        }
-      : {
-          res: {
-            info: res.info,
-            headers: res.headers,
-            body: res.body,
-          }
-        }
-    ),
+    ...resDataObj,
   }
   fs.writeFileSync(config.httpHistory, o2s(httpHistory))
 }
@@ -432,6 +346,54 @@ function sendReq(api, cb) { // 发送请求
   }).finally(() => {
     cb()
   })
+}
+
+function isEmpty(value) {
+  return (
+    value === null
+    || value === ``
+    || typeof(value) === `object`
+      && (
+        value.length === 0
+        || Object.keys(value).length === 0
+      )
+  )
+}
+
+function emptyFn(f) {  // 把函数的参数 {}, [], null 转为默认值
+  return (...a) => {
+    return f(...a.map(
+      v => {
+        return (isEmpty(v) ? undefined : v)
+      }
+    ))
+  }
+}
+
+function string10to62(number) {
+  var chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'.split(''),
+    radix = chars.length,
+    qutient = +number,
+    arr = [];
+  do {
+    mod = qutient % radix;
+    qutient = (qutient - mod) / radix;
+    arr.unshift(chars[mod]);
+  } while (qutient);
+  return arr.join('');
+}
+
+function string62to10(number) {
+  var chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ',
+    radix = chars.length,
+    number = String(number),
+    len = number.length,
+    i = 0,
+    origin_number = 0;
+  while (i < len) {
+    origin_number += Math.pow(radix, i++) * chars.indexOf(number.charAt(len - i) || 0);
+  }
+  return origin_number;
 }
 
 function nextId() {
