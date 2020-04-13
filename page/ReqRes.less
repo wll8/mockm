@@ -1,0 +1,53 @@
+#root {
+  .ReqRes {
+    .preview[class*="image"],
+    .preview[class*="video"],
+    .preview[class*="audio"] {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      & > * {
+        max-width: 80%;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        box-shadow: 5px 5px 10px;
+      }
+    }
+    .preview {
+      .noPre {
+        text-align: center;
+      }
+      .link{
+        display: inline-block;
+      }
+      .htmlViewIframe{
+        border: 0;
+        width: 100%;
+        height: 50vh;
+      }
+    }
+    .detailsBox {
+      details {
+        pre {
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+        details {
+          padding-left: 10px;
+          padding-right: 10px;
+          summary {
+            border-bottom: 1px solid #eee;
+          }
+        }
+        summary {
+          cursor: pointer;
+          border-bottom: 1px solid #ccc;
+          background-color: #eee;
+          outline: none;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
