@@ -102,15 +102,15 @@ server.use(proxy(
           const resDataObj = {
             req: {
               lineHeaders: {
-                line: {
+                line: removeEmpty({
                   method: req.method,
                   url: req.url,
                   query: req.query,
                   params: req.params,
                   version: req.httpVersion,
-                },
+                }),
                 headers: req.headers,
-                _header: proxyRes.req._header,
+                // _header: proxyRes.req._header,
               },
               // body: null,
               bodyPath: bodyPathReq,
@@ -123,7 +123,7 @@ server.use(proxy(
                   version: proxyRes.httpVersion,
                 },
                 headers: proxyRes.headers,
-                _header: res._header,
+                // _header: res._header,
               },
               // body: null,
               bodyPath: bodyPathRes,
@@ -200,7 +200,6 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
       res.sendFile(require('path').resolve(httpRes.bodyPath))
     }
     if(action === 'getHttpData') {
-
       res.send(httpHistory[api])
     }
   }
@@ -252,6 +251,16 @@ serverReplay.listen(config.replayProt, () => {
 serverTest.listen(config.testProt, () => {
   console.log(`接口调试地址: http://localhost:${config.testProt}/`)
 })
+
+function removeEmpty(obj) {
+  obj = {...obj}
+  Object.keys(obj).forEach(key => {
+    if (isEmpty(obj[key])) {
+      delete obj[key]
+    }
+  })
+  return obj
+}
 
 function handleRes(res, data) {
   return {

@@ -35,7 +35,7 @@ window.HttpShow = (() => {
         // return {}
       }
       return { // 默认值
-        activeTabs: `Headers`,
+        activeTabs: `ReqRes`,
       }
     })();
 
@@ -47,6 +47,7 @@ window.HttpShow = (() => {
     });
 
     const tabList = {
+      ReqRes,
       Headers,
       Preview,
       // Preview: () => `Preview`,
