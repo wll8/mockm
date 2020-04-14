@@ -56,7 +56,7 @@ window.ReqRes = (() => {
     const newHttpData = state.newHttpData
     console.log(`httpData`, newHttpData)
     console.log(`newHttpData`, state.newHttpData)
-    const {data: {req, res}} = props.httpData
+    const {data: {req, res}} = newHttpData
     const resDataObj = {
       req,
       res,
@@ -105,8 +105,11 @@ window.ReqRes = (() => {
     }
 
     function preview(reqOrRes, json) {
+      function wrap({type, chidren}) {
+        return <div className={`preview ${type}`}>{chidren}</div>
+      }
       if(json) { // lineHeaders 或 body
-        return <pre className="preview json">{JSON.stringify(json, null, 2)}</pre>
+        return wrap({type: `application/json`, chidren: JSON.stringify(json, null, 2)})
       }
 
       const keyPath = `newHttpData.data.${reqOrRes}.lineHeaders.headers.content-type`
@@ -144,7 +147,6 @@ window.ReqRes = (() => {
           "text/html": () => (
             <iframe className="htmlViewIframe" src={bodyObjectURL}></iframe>
           ),
-          // "application/json": bodyTextRender,
           "application/json": bodyTextRender,
         })[contentType] || ({ // 如果 contentType 没有匹配, 则根据大类(shortType)渲染
           "application": () => {
@@ -174,7 +176,7 @@ window.ReqRes = (() => {
 
         return getDom
       })()
-      return <span className={`preview ${shortType}`}>{dom()}</span>
+      return wrap({type: contentType, chidren: dom()})
     }
 
     function collapseChange(val, key) {
@@ -231,7 +233,7 @@ window.ReqRes = (() => {
                             <summary
                               onClick={val => collapseChange(panelPanel, `activePanelPanel.${panel}`)}
                             >{panelPanel}</summary>
-                            <div>
+                            <div className="content">
                               {preview(panel, resDataObj[panel][panelPanel])}
                             </div>
                           </details>
