@@ -41,7 +41,8 @@ window.HttpShow = (() => {
 
     const [state, setState] = useState({ // 默认值
       ...initState,
-      fullApi: `GET /api/options/?page=1&pageSize=9999`,
+      // fullApi: `GET /api/options/?page=1&pageSize=9999`,
+      fullApi: `POST /api/auth/login/`,
       // fullApi: `GET /static/static/hot.95598193.png`,
       // fullApi: `POST /api/dynamicdatatemplate/search/?a=1&b=2`,
     });

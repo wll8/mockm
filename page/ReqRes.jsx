@@ -104,12 +104,31 @@ window.ReqRes = (() => {
       return str.replace(/(.)(.*)/, ($0, $1, $2) => $1.toLocaleUpperCase()+$2)
     }
 
-    function preview(reqOrRes, json) {
+    function preview({panel: reqOrRes, panelPanel}) {
+      const jsonRender = json => {
+        let jsonObj = {}
+        if(typeof(json) === `string`) {
+          jsonObj = JSON.parse(json)
+        } else {
+          jsonObj = json
+        }
+        const ReactJson = reactJsonView.default
+        return <ReactJson {...{
+          indentWidth: 2,
+          displayObjectSize: false,
+          enableClipboard: false,
+          name: false,
+          displayDataTypes: false,
+          src: jsonObj,
+        }} />
+      }
+
       function wrap({type, chidren}) {
         return <div className={`preview ${type}`}>{chidren}</div>
       }
-      if(json) { // lineHeaders 或 body
-        return wrap({type: `application/json`, chidren: JSON.stringify(json, null, 2)})
+      if(panelPanel === `lineHeaders`) {
+        const json = deepGet(state, `newHttpData.data.${reqOrRes}.lineHeaders`)
+        return wrap({type: `application/json`, chidren: jsonRender(json)})
       }
 
       const keyPath = `newHttpData.data.${reqOrRes}.lineHeaders.headers.content-type`
@@ -147,7 +166,7 @@ window.ReqRes = (() => {
           "text/html": () => (
             <iframe className="htmlViewIframe" src={bodyObjectURL}></iframe>
           ),
-          "application/json": bodyTextRender,
+          "application/json": () => jsonRender(bodyText),
         })[contentType] || ({ // 如果 contentType 没有匹配, 则根据大类(shortType)渲染
           "application": () => {
             const isLanguage = [
@@ -234,7 +253,7 @@ window.ReqRes = (() => {
                               onClick={val => collapseChange(panelPanel, `activePanelPanel.${panel}`)}
                             >{panelPanel}</summary>
                             <div className="content">
-                              {preview(panel, resDataObj[panel][panelPanel])}
+                              {preview({panel, panelPanel})}
                             </div>
                           </details>
                         )
@@ -248,7 +267,6 @@ window.ReqRes = (() => {
         </div>
       )
     }
-
     return (
       <div className="ReqRes">
         {comDetails({

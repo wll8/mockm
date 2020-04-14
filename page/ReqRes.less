@@ -1,6 +1,7 @@
 #root {
   .ReqRes {
     .preview {
+      font-family: 'Courier New', Courier, monospace;
       white-space: pre-wrap;
       word-break: break-all;
       overflow: auto;
@@ -20,6 +21,13 @@
           box-shadow: 5px 5px 10px;
         }
       }
+      &[class*="json"] {
+        font-size: 12px;
+        .variable-row {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+      }
       .noPre {
         text-align: center;
       }
@@ -35,10 +43,13 @@
     .detailsBox {
       details {
         details {
-          padding-left: 10px;
-          padding-right: 10px;
           summary {
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #fff;
+            background: rgba(238, 238, 238, .5);
+            margin-left: 10px;
+          }
+          .content {
+            padding-left: 10px;
           }
         }
         summary {
