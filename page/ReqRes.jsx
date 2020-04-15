@@ -42,10 +42,10 @@ window.ReqRes = (() => {
         // return {}
       }
       return { // 默认值
-        activePanel: [`req`],
+        activePanel: [`req`, `res`],
         activePanelPanel: {
-          req: [`lineHeaders`],
-          res: [`lineHeaders`],
+          req: [`lineHeaders`, `body`],
+          res: [`lineHeaders`, `body`],
         },
       }
     })();

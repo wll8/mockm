@@ -28,7 +28,6 @@ window.ApiList = (() => {
   const { TabPane } = Tabs;
 
   function com(props) {
-    console.log(`propsprops`, props)
     return (
       <div className="ApiList">
         <ul className="ulRef">
