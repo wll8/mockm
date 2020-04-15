@@ -149,22 +149,17 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   next()
 })
 
-serverTest.get(`/`, (req, res, next) => {
-  res.type('html')
-  res.send(`
-    <ul style="word-wrap: break-word;">
-      ${Object.keys(httpHistory).map(key => {
-        const {info = {}} = httpHistory[key].res || {}
-        const [, method, url] = key.match(/(\w+)\s+(.*)/)
-        return `
-          <li><a href="/${method}${url}">
-            ${info.status || '--'}
-            ${htmlEscape(key)}
-          </a></li>
-        `
-      }).join('')}
-    </ul>
-  `)
+serverTest.get(`*`, (req, res, next) => {
+  const {path} = req
+  if(path.match(/^\/(get|post|head|put|delete|connect|options|trace)\b,/i)) { // 以 http `${method},` 单词加逗号开头的 path 视为 api
+    next()
+  } else {
+    res.sendFile(__dirname + `/page/${path}`, err => {
+      if (err) {
+        res.status(404).send({msg: `文件未找到: ${path}`})
+      }
+    })
+  }
 })
 
 serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前端请求的接口
@@ -177,6 +172,24 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     [['method', 'action'][index]]: argList[index]
   }), {})
   api = `${method.toUpperCase()} ${api}`
+  if(action === 'getApiList') {
+    let list = []
+    for (const fullApi in httpHistory) {
+      if (httpHistory.hasOwnProperty(fullApi)) {
+        const {method, api} = getMethodUrl(fullApi)
+        list.push({
+          method,
+          api,
+          // fullApi,
+          statusCode: httpHistory[fullApi].res.lineHeaders.line.statusCode,
+          contentType: httpHistory[fullApi].res.lineHeaders.headers[`content-type`],
+          date: httpHistory[fullApi].res.lineHeaders.headers.date,
+        })
+      }
+    }
+    res.send(list)
+    return true
+  }
   if(action === 'replay') {
     sendReq(api, () => {
       res.json({message: '重发请求完成'})
@@ -331,6 +344,11 @@ function setHttpHistory(api, resDataObj) {
     ...resDataObj,
   }
   fs.writeFileSync(config.httpHistory, o2s(httpHistory))
+}
+
+function getMethodUrl(path) {
+  const [, method, api] = path.match(/(\w+)\s+(.*)/)
+  return {method, api}
 }
 
 function sendReq(api, cb) { // 发送请求
