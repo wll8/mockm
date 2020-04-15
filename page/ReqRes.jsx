@@ -14,7 +14,9 @@ window.ReqRes = (() => {
   const {
     useState,
     useEffect,
+    useRef,
   } = React
+
   const {
     Collapse,
     Button,
@@ -116,7 +118,7 @@ window.ReqRes = (() => {
         return <ReactJson {...{
           indentWidth: 2,
           displayObjectSize: false,
-          enableClipboard: false,
+          enableClipboard: true,
           name: false,
           displayDataTypes: false,
           src: jsonObj,
@@ -165,6 +167,7 @@ window.ReqRes = (() => {
         let getDom = (({ // 根据 contentType 渲染 dom
           "text/html": () => (
             <iframe className="htmlViewIframe" src={bodyObjectURL}></iframe>
+            // <object className="htmlViewIframe" data={bodyObjectURL} type="text/html"></object>
           ),
           "application/json": () => jsonRender(bodyText),
         })[contentType] || ({ // 如果 contentType 没有匹配, 则根据大类(shortType)渲染
@@ -223,6 +226,13 @@ window.ReqRes = (() => {
         })
       }
 
+      function copyBtn(ev, ...arg) {
+        console.log(`evev`, ev, arg)
+        return false
+        ev.nativeEvent.stopImmediatePropagation()
+        ev.stopPropagation()
+      }
+
       return (
         <div
           className="detailsBox"
@@ -251,7 +261,10 @@ window.ReqRes = (() => {
                           >
                             <summary
                               onClick={val => collapseChange(panelPanel, `activePanelPanel.${panel}`)}
-                            >{panelPanel}</summary>
+                            >
+                              {panelPanel}
+                              {/* <button onClick={(ev) => copyBtn(ev, 1,2,3)}>copy</button> */}
+                            </summary>
                             <div className="content">
                               {preview({panel, panelPanel})}
                             </div>
