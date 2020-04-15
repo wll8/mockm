@@ -45,8 +45,9 @@ window.HttpShow = (() => {
 
     const [state, setState] = useState({ // 默认值
       ...initState,
-      // fullApi: `GET /api/options/?page=1&pageSize=9999`,
-      fullApi: `POST /api/auth/login/`,
+      apiList: [],
+      // fullApi: `GET /api/options/?page=1&pageSize=999`,
+      // fullApi: `POST /api/auth/login/`,
       // fullApi: `PUT /api/regulations/2020200019/normal/`, // 500 => html
       // fullApi: `GET /static/static/hot.95598193.png`,
       // fullApi: `POST /api/dynamicdatatemplate/search/?a=1&b=2`,
@@ -56,8 +57,6 @@ window.HttpShow = (() => {
       ReqRes,
       // Doc: () => `Doc`,
     }
-
-    const {method, api} = getMethodUrl(state.fullApi)
 
     function savePage() {
       const node = document.getElementById(`root`)
@@ -98,6 +97,29 @@ window.HttpShow = (() => {
     }, [state.activeTabs]);
 
     useEffect(() => {
+      const [, method, api] = location.hash.match(/#(\w+)(.*)/) || []
+      if(method && api) { // 如果 true 显示某个 api 信息; 否则显示所有 api 列表
+        console.log(`method, api`, method, api)
+        const fullApi = `${method.toLocaleUpperCase()} ${api}`
+        console.log(`fullApi`, fullApi)
+        setState(preState => ({...deepSet(preState, `fullApi`, fullApi)}))
+
+        http.get(`${method},getHttpData${api}`).then(res => {
+          const newData = {
+            method,
+            api,
+            data: res.data,
+          }
+          setState(preState => ({...deepSet(preState, `httpData`, newData)}))
+        })
+
+      } else {
+        http.get(`GET,getApiList/`).then(res => {
+          const newData = res.data
+          setState(preState => ({...deepSet(preState, `apiList`, newData)}))
+        })
+      }
+
       const hotKey = new HotKey();
       hotKey.add(`CTRL+C`, ev => {
         if(!getSelectionText()) { // 如果没有选择任何文本
@@ -111,43 +133,38 @@ window.HttpShow = (() => {
       return () => hotKey.stop();
     }, []);
 
-
-    useEffect(() => {
-      http.get(`${method},getHttpData${api}`).then(res => {
-        const newData = {
-          method,
-          api,
-          data: res.data,
-        }
-        setState(preState => ({...deepSet(preState, `httpData`, newData)}))
-      })
-    }, [state.fullApi]);
-
     return (
       <div className="HttpShow">
         <BackTop />
-        <div className="info">
-          <div className="api">api: {state.fullApi}</div>
-          <div className="status">
-            status: {deepGet(state, `httpData.data.res.lineHeaders.line.statusCode`)} {deepGet(state, `httpData.data.res.lineHeaders.line.statusMessage`)}
-          </div>
-        </div>
-        <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
-          {
-            Object.keys(tabList).map(key => (
-              <TabPane tab={key} key={key}>
+        {
+          state.fullApi ? (
+            <>
+              <div className="info">
+                <div className="api">api: {state.fullApi}</div>
+                <div className="status">
+                  status: {deepGet(state, `httpData.data.res.lineHeaders.line.statusCode`)} {deepGet(state, `httpData.data.res.lineHeaders.line.statusMessage`)}
+                </div>
+              </div>
+              <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
-                  state.httpData ?
-                    (() => {
-                      const ComName = tabList[key]
-                      return <ComName {...state} />
-                    })()
-                  : `(暂无)`
+                  Object.keys(tabList).map(key => (
+                    <TabPane tab={key} key={key}>
+                      {
+                        state.httpData ?
+                          (() => {
+                            const ComName = tabList[key]
+                            return <ComName {...state} />
+                          })()
+                        : `(暂无)`
+                      }
+                    </TabPane>
+                  ))
                 }
-              </TabPane>
-            ))
-          }
-        </Tabs>
+              </Tabs>
+            </>
+          ) : <ApiList apiList={state.apiList} />
+        }
+
       </div>
     )
   }
