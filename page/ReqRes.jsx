@@ -51,56 +51,47 @@ window.ReqRes = (() => {
     })();
     const [state, setState] = useState({
       ...initState,
-      newHttpData: props.httpData,
+      newHttpData: undefined,
     });
     console.log(`initState`, initState)
 
     const newHttpData = state.newHttpData
     console.log(`httpData`, newHttpData)
     console.log(`newHttpData`, state.newHttpData)
-    const {data: {req, res}} = newHttpData
-    const resDataObj = {
-      req,
-      res,
-    }
-    console.log(`resDataObj`, resDataObj)
-
 
     useEffect(() => {
-      // ...
-    });
+      getAllTypeBody(`req`, {...state, newHttpData: props.httpData})
+      getAllTypeBody(`res`, {...state, newHttpData: props.httpData})
 
-    useEffect(() => {
-      function getAllTypeBody(reqOrRes) {
-        deepGet(state, `newHttpData.data.${reqOrRes}.bodyPath`) && http.get(`${newHttpData.method},getBodyFile${toUpperCase(reqOrRes)}${newHttpData.api}`, {responseType: 'blob'}).then(res => {
-          const blob = res.data
-          Promise.all([
-            blobTool(blob, `toText`),
-            blobTool(blob, `toBase64`),
-            blobTool(blob, `toObjectURL`),
-          ]).then(res => {
-            let [
-              bodyText,
-              bodyBase64,
-              bodyObjectURL,
-            ] = res
-            if(blob.type === `application/json`) {
-              bodyText = JSON.stringify(JSON.parse(bodyText), null, 2)
-            }
-            const newRes = {
-              ...deepGet(state, `newHttpData.data.${reqOrRes}`, {}),
-              bodyBlob: blob,
-              bodyText,
-              bodyBase64,
-              bodyObjectURL,
-            }
-            setState(preState => ({...deepSet(preState, `newHttpData.data.${reqOrRes}`, newRes)}))
-          })
+    }, [props.httpData]);
+
+    function getAllTypeBody(reqOrRes, state) {
+      deepGet(state, `newHttpData.data.${reqOrRes}.bodyPath`) && http.get(`${state.newHttpData.method},getBodyFile${toUpperCase(reqOrRes)}${state.newHttpData.api}`, {responseType: 'blob'}).then(res => {
+        const blob = res.data
+        Promise.all([
+          blobTool(blob, `toText`),
+          blobTool(blob, `toBase64`),
+          blobTool(blob, `toObjectURL`),
+        ]).then(res => {
+          let [
+            bodyText,
+            bodyBase64,
+            bodyObjectURL,
+          ] = res
+          if(blob.type === `application/json`) {
+            bodyText = JSON.stringify(JSON.parse(bodyText), null, 2)
+          }
+          const newRes = {
+            ...deepGet(state, `newHttpData.data.${reqOrRes}`, {}),
+            bodyBlob: blob,
+            bodyText,
+            bodyBase64,
+            bodyObjectURL,
+          }
+          setState(preState => ({...deepSet(state, `newHttpData.data.${reqOrRes}`, newRes)}))
         })
-      }
-      getAllTypeBody(`res`)
-      getAllTypeBody(`req`)
-    }, []);
+      })
+    }
 
     function toUpperCase(str) {
       return str.replace(/(.)(.*)/, ($0, $1, $2) => $1.toLocaleUpperCase()+$2)
