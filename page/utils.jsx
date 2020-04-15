@@ -1,6 +1,16 @@
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
 window.utils = (() => {
+  function getSelectionText() { // 获取选中的文本
+      var text = "";
+      if (window.getSelection) {
+          text = window.getSelection().toString();
+      } else if (document.selection && document.selection.type != "Control") {
+          text = document.selection.createRange().text;
+      }
+      return text;
+  }
+
   function getMethodUrl(path) {
     const [, method, api] = path.match(/(\w+)\s+(.*)/)
     return {method, api}
@@ -107,6 +117,7 @@ window.utils = (() => {
     return object
   }
   return {
+    getSelectionText,
     blobTool,
     getMethodUrl,
     fetchDownload,

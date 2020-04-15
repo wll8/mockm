@@ -1,4 +1,5 @@
 const {
+  getSelectionText,
   getMethodUrl,
   wordToUpperCase,
   sortKey,
@@ -18,7 +19,9 @@ window.HttpShow = (() => {
     Button,
     Tag,
     Tabs,
+    BackTop,
     message,
+    Spin,
   } = window.antd
 
   const { Panel } = Collapse;
@@ -43,8 +46,8 @@ window.HttpShow = (() => {
     const [state, setState] = useState({ // 默认值
       ...initState,
       // fullApi: `GET /api/options/?page=1&pageSize=9999`,
-      // fullApi: `POST /api/auth/login/`,
-      fullApi: `PUT /api/regulations/2020200019/normal/`, // 500 => html
+      fullApi: `POST /api/auth/login/`,
+      // fullApi: `PUT /api/regulations/2020200019/normal/`, // 500 => html
       // fullApi: `GET /static/static/hot.95598193.png`,
       // fullApi: `POST /api/dynamicdatatemplate/search/?a=1&b=2`,
     });
@@ -77,10 +80,10 @@ window.HttpShow = (() => {
               [blob.type]: blob
             })
           ]);
-          message.success(`复制成功`)
+          message.success(`复制图片成功`)
         } catch(err) {
           console.error(err.name, err.message);
-          message.success(`${err.message}, ${err.message}`)
+          message.error(`复制图片失败: ${err.message}, ${err.message}`)
         }
       });
     }
@@ -95,6 +98,21 @@ window.HttpShow = (() => {
     }, [state.activeTabs]);
 
     useEffect(() => {
+      const hotKey = new HotKey();
+      hotKey.add(`CTRL+C`, ev => {
+        if(!getSelectionText()) { // 如果没有选择任何文本
+          savePage()
+        }
+      });
+      hotKey.setup({
+        metaToCtrl: true,
+      });
+      hotKey.start();
+      return () => hotKey.stop();
+    }, []);
+
+
+    useEffect(() => {
       http.get(`${method},getHttpData${api}`).then(res => {
         const newData = {
           method,
@@ -107,8 +125,13 @@ window.HttpShow = (() => {
 
     return (
       <div className="HttpShow">
-        {state.fullApi}
-        <Button onClick={savePage}>copy page as picture</Button>
+        <BackTop />
+        <div className="info">
+          <div className="api">api: {state.fullApi}</div>
+          <div className="status">
+            status: {deepGet(state, `httpData.data.res.lineHeaders.line.statusCode`)} {deepGet(state, `httpData.data.res.lineHeaders.line.statusMessage`)}
+          </div>
+        </div>
         <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
           {
             Object.keys(tabList).map(key => (
