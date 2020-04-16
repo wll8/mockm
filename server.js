@@ -208,10 +208,12 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     }
 
     if(action === 'getBodyFileReq') {
-      res.sendFile(require('path').resolve(httpReq.bodyPath))
+      res.sendFile(path.resolve(httpReq.bodyPath))
     }
     if(action === 'getBodyFileRes') {
-      res.sendFile(require('path').resolve(httpRes.bodyPath))
+      res.set(httpRes.lineHeaders.headers)
+      res.set(`access-control-allow-origin`, req.headers.origin)
+      res.sendFile(path.resolve(httpRes.bodyPath))
     }
     if(action === 'getHttpData') {
       res.send(httpHistory[api])
@@ -255,7 +257,8 @@ serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的
   const history = getHttpHistory(req, 'url')
   try {
     res.set(history.res.lineHeaders.headers) // 还原 headers
-    const newPath = path.resolve(__dirname, history.res.bodyPath) // 发送 body
+    res.set(`access-control-allow-origin`, req.headers.origin)
+    const newPath = path.resolve(history.res.bodyPath) // 发送 body
     res.sendFile(newPath)
   } catch (error) {
     // res.json({})
