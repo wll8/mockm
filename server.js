@@ -7,6 +7,7 @@ const {htmlEscape} = require('escape-goat')
 const proxy = require('http-proxy-middleware')
 const jsonServer = require('json-server')
 const fs = require('fs')
+const path = require('path')
 const server = jsonServer.create()
 const serverReplay = jsonServer.create()
 const serverTest = jsonServer.create()
@@ -240,7 +241,11 @@ server.listen(config.prot, () => {
 })
 
 serverReplay.use(proxy( // 重放也可以使用 /t/* 临时接口
-  pathname => (Boolean(pathname.match(`/${config.preFix}/`)) === true),
+  pathname => {
+    let re = new RegExp(`^/${config.preFix}/${config.proxyTag}\\b`)
+    let isNext = (Boolean(pathname.match(re)) === true)
+    return isNext
+  },
   {
     target: `http://localhost:${config.prot}/`,
   },
@@ -249,7 +254,9 @@ serverReplay.use(middlewares)
 serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   const history = getHttpHistory(req, 'url')
   try {
-    res.json(history.res.body)
+    res.set(history.res.lineHeaders.headers) // 还原 headers
+    const newPath = path.resolve(__dirname, history.res.bodyPath) // 发送 body
+    res.sendFile(newPath)
   } catch (error) {
     // res.json({})
 
