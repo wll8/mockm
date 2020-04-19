@@ -184,6 +184,7 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
           // fullApi,
           statusCode: httpHistory[fullApi].res.lineHeaders.line.statusCode,
           contentType: httpHistory[fullApi].res.lineHeaders.headers[`content-type`],
+          extensionName: (httpHistory[fullApi].res.bodyPath || '').replace(/(.*)(\.)/, ''),
           date: httpHistory[fullApi].res.lineHeaders.headers.date,
         })
       }
