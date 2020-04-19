@@ -60,6 +60,7 @@ window.ReqRes = (() => {
     console.log(`newHttpData`, state.newHttpData)
 
     useEffect(() => {
+      setState(preState => ({...deepSet(state, `newHttpData`, props.httpData)}))
       getAllTypeBody(`req`, {...state, newHttpData: props.httpData})
       getAllTypeBody(`res`, {...state, newHttpData: props.httpData})
 
