@@ -28,22 +28,21 @@ window.HttpShow = (() => {
   const { TabPane } = Tabs;
 
   const {
-    useLocation,
     HashRouter,
-    Route,
-    Switch,
-    Redirect,
   } = window.ReactRouterDOM
 
   function com() {
     function App() {
       const {
+        useHistory,
         useLocation,
         HashRouter,
         Route,
         Switch,
         Redirect,
       } = window.ReactRouterDOM
+      const history = useHistory()
+
 
       const initState = (() => {
         try {
@@ -60,6 +59,7 @@ window.HttpShow = (() => {
       const [state, setState] = useState({ // 默认值
         ...initState,
         apiList: [],
+        replayDone: true,
         // fullApi: `GET /api/options/?page=1&pageSize=999`,
         // fullApi: `POST /api/auth/login/`,
         // fullApi: `PUT /api/regulations/2020200019/normal/`, // 500 => html
@@ -96,6 +96,23 @@ window.HttpShow = (() => {
         });
       }
 
+      function replay() {
+        const {method, api} = state.httpData
+        const replayDone = state.replayDone
+        if(replayDone) {
+          setState(preState => ({...preState, replayDone: false}))
+          http.get(`/${method},replay${api}`).then(({data, status, statusText, headers, config, request}) => {
+            setState(preState => ({...preState, replayDone: true}))
+            message.info(`重发请求成功 ${data.message}`)
+            getHttpData({method, api})
+          }).catch(err => {
+            message.error(`重发失败 ${err}`)
+          })
+        } else {
+          message.info('请等待重发结束')
+        }
+      }
+
       function tabsChange(key) {
         console.log(key);
         setState(preState => ({...deepSet(preState, `activeTabs`, key)}))
@@ -122,31 +139,37 @@ window.HttpShow = (() => {
         return simpleInfo
       }
 
+      function getHttpData({method, api}) {
+        console.log(`method, api`, method, api)
+        const fullApi = `${method.toLocaleUpperCase()} ${api}`
+        console.log(`fullApi`, fullApi)
+        http.get(`${method},getHttpData${api}`).then(res => {
+          const newData = {
+            method,
+            api,
+            data: res.data,
+          }
+          setState(preState => ({
+            ...preState,
+            fullApi,
+            httpData: newData,
+            simpleInfo: getSimpleInfo(newData),
+          }))
+        })
+      }
+
       useEffect(() => {
         window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
       }, [state.activeTabs]);
 
       useEffect(() => {
-        const [, method, api] = window.location.hash.match(/#\/(\w+)(.*)/) || []
+        console.log(`location`, location)
+        console.log(`location.pathname`, location.pathname)
+        // const [, method, api] = window.location.hash.match(/#\/(\w+)(.*)/) || []
+        const [, method, api] = (`#${location.pathname}${location.search}`).match(/#\/(\w+)(.*)/) || []
         setState(preState => ({...preState, httpData: {}}))
         if(method && api) { // 如果 true 显示某个 api 信息; 否则显示所有 api 列表
-          console.log(`method, api`, method, api)
-          const fullApi = `${method.toLocaleUpperCase()} ${api}`
-          console.log(`fullApi`, fullApi)
-          http.get(`${method},getHttpData${api}`).then(res => {
-            const newData = {
-              method,
-              api,
-              data: res.data,
-            }
-            setState(preState => ({
-              ...preState,
-              fullApi,
-              httpData: newData,
-              simpleInfo: getSimpleInfo(newData),
-            }))
-          })
-
+          getHttpData({method, api})
         } else {
           http.get(`GET,getApiList/`).then(res => {
             const newData = res.data
@@ -187,6 +210,10 @@ window.HttpShow = (() => {
                   <span className="key">status:</span>
                   <span className="val">{deepGet(state, `httpData.data.res.lineHeaders.line.statusCode`)} {deepGet(state, `httpData.data.res.lineHeaders.line.statusMessage`)}</span>
                 </div>
+              </div>
+              <div className="options">
+                <Button onClick={() => history.push(`/`)} size="small" className="replay">apiList</Button>
+                <Button onClick={replay} size="small" className="replay">replay</Button>
               </div>
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
