@@ -107,6 +107,8 @@ window.ReqRes = (() => {
           jsonObj = json
         }
         const ReactJson = reactJsonView.default
+        return JSON.stringify(jsonObj, null, 2)
+        // ReactJson 当数据过多时渲染较慢
         return <ReactJson {...{
           indentWidth: 2,
           displayObjectSize: false,
