@@ -106,6 +106,7 @@ server.use(proxy(
                 line: removeEmpty({
                   method: req.method,
                   url: req.url,
+                  path: req.path,
                   query: req.query,
                   params: req.params,
                   version: req.httpVersion,
@@ -193,8 +194,8 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     return true
   }
   if(action === 'replay') {
-    sendReq(api, () => {
-      res.json({message: '重发请求完成'})
+    sendReq(api, err => {
+      res.json(err)
     })
     return true
   } else {
@@ -364,25 +365,39 @@ function getMethodUrl(path) {
 
 function sendReq(api, cb) { // 发送请求
   // api httpHistory 中的 api
-  const {body, params, query, headers, path} = httpHistory[api].req
+  // console.log(`httpHistory[api]`, httpHistory[api])
+  const httpDataReq = httpHistory[api].req
+  const {line: {path, query, params}, headers} = httpDataReq.lineHeaders
   const [, method, url] = api.match(/(\w+)\s+(.*)/)
+  let resErr = {message: ``, config: {}}
   if(TOKEN && config.updateToken) { // 更新 TOKEN
     headers.authorization = TOKEN
   }
   axios({
-    baseURL: config.myHttpSever,
+    // baseURL: config.myHttpSever,
+    baseURL: `http://localhost:${config.prot}`,
     method,
-    url: path || url,
+    url: path || url, // 注意不要 url 和 params 上都同时存在 query
     params: query,
     headers,
-    data: body,
+    data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
     responseType: 'arraybuffer',
   }).then(res => {
     const {data, status, statusText, headers, config, request} = res
+    resErr = {
+      success: true,
+      message: `${status} ${statusText}`,
+      config: res.config,
+    }
   }).catch(err => {
-    const {data, status, statusText, headers, config, request} = err.response
+    const {status, statusText} = err.response
+    resErr = {
+      success: false,
+      message: `${status} ${statusText}`,
+      config: err.config,
+    }
   }).finally(() => {
-    cb()
+    cb(resErr)
   })
 }
 
