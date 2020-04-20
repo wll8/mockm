@@ -103,6 +103,25 @@ window.HttpShow = (() => {
 
       const location = useLocation();
 
+
+      function getSimpleInfo(httpData) {
+        if(!httpData.data) {
+          return {}
+        }
+        const res = httpData.data.res
+        const {method, api} = httpData
+        let simpleInfo = {
+          method,
+          api,
+          // fullApi,
+          statusCode: res.lineHeaders.line.statusCode,
+          contentType: res.lineHeaders.headers[`content-type`],
+          extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
+          date: res.lineHeaders.headers.date,
+        }
+        return simpleInfo
+      }
+
       useEffect(() => {
         window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
       }, [state.activeTabs]);
@@ -120,7 +139,12 @@ window.HttpShow = (() => {
               api,
               data: res.data,
             }
-            setState(preState => ({...preState, fullApi, httpData: newData}))
+            setState(preState => ({
+              ...preState,
+              fullApi,
+              httpData: newData,
+              simpleInfo: getSimpleInfo(newData),
+            }))
           })
 
         } else {
@@ -155,9 +179,13 @@ window.HttpShow = (() => {
           <Route path="/*">
             <>
               <div className="info">
-                <div className="api">api: {state.fullApi}</div>
-                <div className="status">
-                  status: {deepGet(state, `httpData.data.res.lineHeaders.line.statusCode`)} {deepGet(state, `httpData.data.res.lineHeaders.line.statusMessage`)}
+                <div className="item api">
+                  <span className="key">api:</span>
+                  <span className="val">{state.fullApi}</span>
+                </div>
+                <div className="item status">
+                  <span className="key">status:</span>
+                  <span className="val">{deepGet(state, `httpData.data.res.lineHeaders.line.statusCode`)} {deepGet(state, `httpData.data.res.lineHeaders.line.statusMessage`)}</span>
                 </div>
               </div>
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
