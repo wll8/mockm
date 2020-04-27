@@ -28,9 +28,9 @@ npm start
   updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
   proxyTarget: 'http://1.2.3.4/', // 转发URL, 即真实服务器
   myHttpSever: 'http://192.168.6.20:9000/', // 想要暴露的 ip 地址, 为 localhost 时仅能自己使用
-  httpHistory: './httpHistory.json', // 录制信息保存位置
-  dbJsonName: './db.json', // mockjs 生成的 json 数据文件名
   dataDir: './httpData/', // 数据保存目录
+  httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
+  dbJsonName: './db.json', // mockjs 生成的 json 数据文件名
 }
 ```
 
