@@ -36,7 +36,6 @@ window.ApiList = (() => {
         title: 'code',
         width: 100,
         dataIndex: 'statusCode',
-        defaultSortOrder: 'descend',
         sorter: (a, b) => a.statusCode - b.statusCode,
       },
       {
@@ -67,6 +66,7 @@ window.ApiList = (() => {
         width: 200,
         dataIndex: 'date',
         sorter: (a, b) => a.date.localeCompare(b.date),
+        defaultSortOrder: 'descend',
         render: record => {
           return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
         }
