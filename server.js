@@ -1,3 +1,4 @@
+const interceptor = require('express-interceptor')
 const modifyResponse = require('node-http-proxy-json')
 const filenamify = require('filenamify')
 require('./log.js').logHelper()
@@ -33,7 +34,11 @@ let TOKEN = ''
 serverTest.use(middlewaresObj.corsMiddleware)
 
 server.use(proxy(
-  pathname => (Boolean(pathname.match(`/${config.preFix}/${config.proxyTag}/`)) === false),
+  pathname => {
+    // 为 true 表示走代理, 通过真实服务器
+    const str = `/${config.preFix}/${config.proxyTag}/`
+    return (Boolean(pathname.match(str)) === false)
+  },
   {
     target: config.proxyTarget,
     changeOrigin: true,
@@ -50,92 +55,7 @@ server.use(proxy(
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
     onProxyRes: (proxyRes, req, res) => {
-      if(ignoreHttpHistory(req) === false) {
-        const data = [];
-        proxyRes.on('data', function(chunk) {
-          data.push(chunk);
-        }).on('end', function() {
-          const {
-            method,
-            url,
-          } = req
-          const {statusCode, statusMessage, headers} = proxyRes
-          const fullApi = `${method} ${url}`
-          const buffer = Buffer.concat(data);
-          const reqBody = req.body
-
-          // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
-
-          function createBodyPath(reqOrRes, apiId) { // 根据 url 生成文件路径, reqOrRes: req, res
-            const headers = ({res: proxyRes, req})[reqOrRes].headers
-            const contentType = headers[`content-type`]
-            const extensionName = mime.getExtension(contentType)
-
-            const bodyPathOld = ((getHttpHistory(req, 'url') || {})[reqOrRes] || {}).bodyPath
-            const newPath = () => {
-              return `${config.dataDir}/${
-                filenamify(
-                  `${url.slice(1, 100)}_${method}_${reqOrRes}_${apiId}.${extensionName}`,
-                  {maxLength: 255, replacement: '_'}
-                )
-              }`
-            }
-
-            // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
-            let bodyPath = bodyPathOld || newPath()
-            if(mime.getType(bodyPathOld) !== contentType) {
-              bodyPath = bodyPath.replace(/(.*\.)(.*)/, `$1${extensionName}`)
-            }
-            return bodyPath
-          }
-
-          function getBodyPath() {
-            const apiId = string10to62(nextId())
-            return {
-              bodyPathReq: isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
-              bodyPathRes: isEmpty(buffer) === false ? createBodyPath(`res`, apiId) : undefined,
-            }
-          }
-          const {bodyPathReq, bodyPathRes} = getBodyPath()
-          bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
-          bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
-          console.log(`${method} ${req.path} ${statusCode} ${statusMessage}`)
-          const resDataObj = {
-            req: {
-              lineHeaders: {
-                line: removeEmpty({
-                  method: req.method,
-                  url: req.url,
-                  path: req.path,
-                  query: req.query,
-                  params: req.params,
-                  version: req.httpVersion,
-                }),
-                headers: req.headers,
-                // _header: proxyRes.req._header,
-              },
-              // body: null,
-              bodyPath: bodyPathReq,
-            },
-            res: {
-              lineHeaders: {
-                line: {
-                  statusCode,
-                  statusMessage,
-                  version: proxyRes.httpVersion,
-                },
-                headers: proxyRes.headers,
-                // _header: res._header,
-              },
-              // body: null,
-              bodyPath: bodyPathRes,
-            },
-          }
-          setHttpHistory(fullApi, resDataObj)
-        });
-
-      }
-
+      setHttpHistoryWrap({req, res: proxyRes})
     },
   },
 ))
@@ -151,8 +71,33 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   next()
 })
 
+const finalParagraphInterceptor = interceptor((req, res) => {
+   // `express-interceptor`: 这个库的判断方式是基于十分有限的 content-type 判断为文本(是否转换为 buffer)
+// 其他拦截方案
+// https://stackoverflow.com/questions/33732509/express-js-how-to-intercept-response-send-response-json/33735452
+// https://www.youtube.com/watch?v=1jhdfS1Bwcc
+// https://www.npmjs.com/package/express-interceptor
+return {
+  isInterceptable: () => {
+    return true
+  },
+  intercept: (body, send) => {
+    const {statusCode, statusMessage, headers} = res
+    setHttpHistoryWrap({
+      req,
+      res,
+      mock: true,
+      buffer: typeof(body) === `object` ? body : Buffer.from(body),
+    })
+    send(body)
+  }
+}
+})
+
+server.use(finalParagraphInterceptor)
+
 serverTest.get(`*`, (req, res, next) => {
-  const {path} = req
+  const {path} = getClientUrlAndPath(req.originalUrl)
   if(path.match(/^\/(get|post|head|put|delete|connect|options|trace)\b,/i)) { // 以 http `${method},` 单词加逗号开头的 path 视为 api
     next()
   } else {
@@ -277,6 +222,111 @@ serverTest.listen(config.testProt, () => {
   console.log(`接口调试地址: http://localhost:${config.testProt}/`)
 })
 
+function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
+  // 当重定向路由(mock api)时, req.originalUrl 和 req.url 不一致, req.originalUrl 为浏览器中访问的 url, 应该基于这个 url 获取 path
+  return {
+    url: originalUrl,
+    path: (new URL(originalUrl, `http://127.0.0.1`)).pathname,
+  }
+}
+
+function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 记录 history
+  if(ignoreHttpHistory(req) === false) {
+    const data = [];
+    function createHttpHistory({buffer}) {
+      const {
+        method,
+      } = req
+      const {url, path} = getClientUrlAndPath(req.originalUrl)
+      const headersObj = {req: req.headers || req.getHeaders(), res: res.headers || res.getHeaders()}
+      const {statusCode, statusMessage, headers} = res
+      const fullApi = `${method} ${url}`
+      const reqBody = req.body
+
+      // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
+
+      function createBodyPath(reqOrRes, apiId) { // 根据 url 生成文件路径, reqOrRes: req, res
+        const headers = headersObj[reqOrRes]
+        const contentType = headers[`content-type`]
+        const extensionName = mime.getExtension(contentType)
+
+        const bodyPathOld = ((getHttpHistory(req, 'url') || {})[reqOrRes] || {}).bodyPath
+        const newPath = () => {
+          return `${config.dataDir}/${
+            filenamify(
+              `${url.slice(1, 100)}_${method}_${reqOrRes}_${apiId}.${extensionName}`,
+              {maxLength: 255, replacement: '_'}
+            )
+          }`
+        }
+
+        // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
+        let bodyPath = bodyPathOld || newPath()
+        if(mime.getType(bodyPathOld) !== contentType) {
+          bodyPath = bodyPath.replace(/(.*\.)(.*)/, `$1${extensionName}`)
+        }
+        return bodyPath
+      }
+
+      function getBodyPath() {
+        const apiId = string10to62(nextId())
+        return {
+          bodyPathReq: isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
+          bodyPathRes: isEmpty(buffer) === false ? createBodyPath(`res`, apiId) : undefined,
+        }
+      }
+      const {bodyPathReq, bodyPathRes} = getBodyPath()
+      bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
+      bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
+      console.log(`${getClientIp(req)} => ${method} ${path} ${statusCode} ${statusMessage}`)
+      const resDataObj = {
+        req: {
+          lineHeaders: {
+            line: removeEmpty({
+              method,
+              url,
+              path,
+              query: req.query,
+              params: req.params,
+              version: req.httpVersion,
+            }),
+            headers: headersObj.req,
+            // _header: proxyRes.req._header,
+          },
+          // body: null,
+          bodyPath: bodyPathReq,
+        },
+        res: {
+          lineHeaders: {
+            line: {
+              statusCode,
+              statusMessage,
+              version: res.httpVersion,
+            },
+            headers: headersObj.res,
+            // _header: res._header,
+          },
+          // body: null,
+          bodyPath: bodyPathRes,
+        },
+      }
+      setHttpHistory(fullApi, resDataObj)
+    }
+
+    if(mock === true) {
+      createHttpHistory({buffer})
+      return false
+    } else {
+      res.on('data', function(chunk) {
+        data.push(chunk)
+      }).on('end', function() {
+        const buffer = Buffer.concat(data)
+        createHttpHistory({buffer})
+      })
+    }
+  }
+}
+
 function removeEmpty(obj) {
   obj = {...obj}
   Object.keys(obj).forEach(key => {
@@ -321,14 +371,15 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
 
 function getHttpHistory(req, type) { // 获取某个请求的记录
   // type: url|path 匹配方式, path 会忽略 url 上的 query 参数
+  const {url, path} = getClientUrlAndPath(req.originalUrl)
 
   if(type === 'url') {
-    return httpHistory[`${req.method} ${req.url}`]
+    return httpHistory[`${req.method} ${url}`]
   }
   if(type === 'path') {
     let re = new RegExp(`^${req.method} `)
     let key  = Object.keys(httpHistory).find(key => {
-      return (key.match(re) && (httpHistory[key].req.path === req.path))
+      return (key.match(re) && (httpHistory[key].req.path === path))
     })
     return httpHistory[key]
   }
@@ -390,7 +441,7 @@ function sendReq(api, cb) { // 发送请求
       config: res.config,
     }
   }).catch(err => {
-    const {status, statusText} = err.response
+    const {status, statusText} = err.response || {}
     resErr = {
       success: false,
       message: `${status} ${statusText}`,
@@ -421,6 +472,19 @@ function emptyFn(f) {  // 把函数的参数 {}, [], null 转为默认值
       }
     ))
   }
+}
+
+function getClientIp (req) { // 获取客户端 IP
+  var ip = req.headers['x-forwarded-for'] || // 判断是否有反向代理 IP
+    req.ip ||
+    req.connection.remoteAddress || // 判断 connection 的远程 IP
+    req.socket.remoteAddress || // 判断后端的 socket 的 IP
+    req.connection.socket.remoteAddress || ''
+  if (ip.includes(',')) {
+    ip = ip.split(',')[0]
+  }
+  ip = ip.substr(ip.lastIndexOf(':') + 1, ip.length) // ::ffff:127.0.0.1 => 127.0.0.1
+  return ip
 }
 
 function string10to62(number) {
