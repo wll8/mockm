@@ -6,6 +6,7 @@ const {
   formatData,
   deepGet,
   deepSet,
+  blobTool,
 } = window.utils
 
 window.HttpShow = (() => {
@@ -60,6 +61,7 @@ window.HttpShow = (() => {
         ...initState,
         apiList: [],
         replayDone: true,
+        captureImg: undefined, // 截图 objectUrl
         // fullApi: `GET /api/options/?page=1&pageSize=999`,
         // fullApi: `POST /api/auth/login/`,
         // fullApi: `PUT /api/regulations/2020200019/normal/`, // 500 => html
@@ -67,7 +69,10 @@ window.HttpShow = (() => {
         // fullApi: `POST /api/dynamicdatatemplate/search/?a=1&b=2`,
       });
 
-      function savePage() {
+      function capture () {
+        if(state.captureImg) {
+          setState(preState => ({...preState, captureImg: undefined}))
+        } else {
         const node = document.getElementById(`root`)
         // const scale = 1200 / node.offsetWidth; // 生成固定宽度的图像
         const scale = 1.5;
@@ -82,18 +87,12 @@ window.HttpShow = (() => {
           }
         }
         domtoimage.toBlob(node, cfg).then(async function (blob) {
-          try {
-            await navigator.clipboard.write([
-              new ClipboardItem({
-                [blob.type]: blob
+            const objectUrl = await blobTool(blob, `toObjectURL`)
+            setState(preState => ({...preState, captureImg: objectUrl}))
+          }).catch(err => {
+            console.log(`err`, err)
               })
-            ]);
-            message.success(`复制图片成功`)
-          } catch(err) {
-            console.error(err.name, err.message);
-            message.error(`复制图片失败: ${err.message}, ${err.message}`)
           }
-        });
       }
 
       function replay() {
@@ -167,7 +166,11 @@ window.HttpShow = (() => {
         console.log(`location.pathname`, location.pathname)
         // const [, method, api] = window.location.hash.match(/#\/(\w+)(.*)/) || []
         const [, method, api] = (`#${location.pathname}${location.search}`).match(/#\/(\w+)(.*)/) || []
-        setState(preState => ({...preState, httpData: {}}))
+        setState(preState => ({ // 当路由改变时, 清理上一次路由中的数据
+          ...preState,
+          httpData: {},
+          captureImg: undefined,
+        }))
         if(method && api) { // 如果 true 显示某个 api 信息; 否则显示所有 api 列表
           getHttpData({method, api})
         } else {
@@ -180,7 +183,7 @@ window.HttpShow = (() => {
         const hotKey = new HotKey();
         hotKey.add(`CTRL+C`, ev => {
           if(!getSelectionText()) { // 如果没有选择任何文本
-            savePage()
+            console.log(`ctrl+c`)
           }
         });
         hotKey.setup({
@@ -214,6 +217,10 @@ window.HttpShow = (() => {
               <div className="options">
                 <Button onClick={() => history.push(`/`)} size="small" className="replay">apiList</Button>
                 <Button onClick={replay} size="small" className="replay">replay</Button>
+                <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
+                <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
+                  {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
+              </div>
               </div>
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
