@@ -73,26 +73,26 @@ window.HttpShow = (() => {
         if(state.captureImg) {
           setState(preState => ({...preState, captureImg: undefined}))
         } else {
-        const node = document.getElementById(`root`)
-        // const scale = 1200 / node.offsetWidth; // 生成固定宽度的图像
-        const scale = 1.5;
-        const cfg = {
-          height: node.offsetHeight * scale,
-          width: node.offsetWidth * scale,
-          style: {
-            transform: "scale(" + scale + ")",
-            transformOrigin: "top left",
-            width: node.offsetWidth + "px",
-            height: node.offsetHeight + "px",
+          const node = document.getElementById(`root`)
+          // const scale = 1200 / node.offsetWidth; // 生成固定宽度的图像
+          const scale = 1.5;
+          const cfg = {
+            height: node.offsetHeight * scale,
+            width: node.offsetWidth * scale,
+            style: {
+              transform: "scale(" + scale + ")",
+              transformOrigin: "top left",
+              width: node.offsetWidth + "px",
+              height: node.offsetHeight + "px",
+            }
           }
-        }
-        domtoimage.toBlob(node, cfg).then(async function (blob) {
+          domtoimage.toBlob(node, cfg).then(async function (blob) {
             const objectUrl = await blobTool(blob, `toObjectURL`)
             setState(preState => ({...preState, captureImg: objectUrl}))
           }).catch(err => {
             console.log(`err`, err)
-              })
-          }
+          })
+        }
       }
 
       function replay() {
@@ -220,7 +220,7 @@ window.HttpShow = (() => {
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
                 <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
                   {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
-              </div>
+                </div>
               </div>
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
@@ -247,7 +247,7 @@ window.HttpShow = (() => {
     return (
       <div className="HttpShow">
         <HashRouter>
-          <BackTop />
+          <BackTop visibilityHeight={0} />
           <App />
         </HashRouter>
       </div>
