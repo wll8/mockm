@@ -14,6 +14,9 @@ module.exports = server => {
       name: mock(`@cname`)
     }))
   })
+  server.get(`/file`, (req, res, next) => {
+    res.sendFile(__dirname + '/readme.md')
+  })
   return server
 }
 

@@ -36,11 +36,11 @@ serverTest.use(middlewaresObj.corsMiddleware)
 server.use(proxy(
   pathname => {
     // 为 true 表示走代理, 通过真实服务器
-    const str = `/${config.preFix}/${config.proxyTag}/`
-    return (Boolean(pathname.match(str)) === false)
+    const re = new RegExp(`^${config.pathname}${config.noProxy}`)
+    return (Boolean(pathname.match(re)) === false)
   },
   {
-    target: config.proxyTarget,
+    target: config.origin,
     changeOrigin: true,
     onProxyReq: (proxyReq, req, res) => {
       middlewaresObj.jsonParser(req, res, () => {
@@ -61,7 +61,7 @@ server.use(proxy(
 ))
 
 server.use(jsonServer.rewriter({ // 修改路由, 方便后面的 api 书写
-  [`/${config.preFix}/${config.proxyTag}/*`] : '/$1',
+  [`${config.pathname}${config.noProxy}*`] : '/$1',
 }))
 server.use(middlewares) // 添加中间件, 方便取值
 server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
@@ -191,7 +191,7 @@ server.listen(config.prot, () => {
 
 serverReplay.use(proxy( // 重放也可以使用 /t/* 临时接口
   pathname => {
-    let re = new RegExp(`^/${config.preFix}/${config.proxyTag}\\b`)
+    let re = new RegExp(`^/${config.pathname}${config.noProxy}\\b`)
     let isNext = (Boolean(pathname.match(re)) === true)
     return isNext
   },
@@ -239,6 +239,7 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
       } = req
       const {url, path} = getClientUrlAndPath(req.originalUrl)
       const headersObj = {req: req.headers || req.getHeaders(), res: res.headers || res.getHeaders()}
+      headersObj.res.date = headersObj.res.date || (new Date()).toGMTString() // 居然没有 date ?
       const {statusCode, statusMessage, headers} = res
       const fullApi = `${method} ${url}`
       const reqBody = req.body
@@ -364,7 +365,7 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
   return Boolean(
     method.match(/OPTIONS/i)
     || (
-      method.match(/GET/i) && url.match(new RegExp(`/\/${config.preFix}\//`))
+      method.match(/GET/i) && url.match(new RegExp(`/\/${config.pathname}\//`))
     )
   )
 }
@@ -425,7 +426,6 @@ function sendReq(api, cb) { // 发送请求
     headers.authorization = TOKEN
   }
   axios({
-    // baseURL: config.myHttpSever,
     baseURL: `http://localhost:${config.prot}`,
     method,
     url: path || url, // 注意不要 url 和 params 上都同时存在 query
