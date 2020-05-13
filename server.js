@@ -55,6 +55,7 @@ server.use(proxy(
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
     onProxyRes: (proxyRes, req, res) => {
+      proxyRes.headers[config.apiInHeader] = `http://${getOsIp()}:${config.testProt}/#/${req.method}${req.originalUrl}`
       setHttpHistoryWrap({req, res: proxyRes})
     },
   },
@@ -516,4 +517,12 @@ function string62to10(number) {
 function nextId() {
   global.id = (global.id || 0) + 1
   return global.id
+}
+
+function getOsIp() { // 获取系统 ip
+  const obj = require(`os`).networkInterfaces()
+  const ip = Object.keys(obj).reduce((res, cur, index) => {
+    return [...res, ...obj[cur]]
+  }, []).filter(item => !item.address.match(/(127.|:)/))[0].address
+  return ip
 }
