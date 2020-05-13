@@ -5,7 +5,8 @@ window.IconFont = icons.createFromIconfontCN({
 });
 
 window.http = axios.create({
-  baseURL: `http://localhost:9005/`,
+  // baseURL: `http://localhost:9005/`,
+  baseURL: `/`,
   timeout: 0,
   headers: {'X-Custom-Header': 'foobar'}
 })
