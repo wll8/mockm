@@ -6,6 +6,7 @@ const {
   formatData,
   deepGet,
   deepSet,
+  dateDiff,
 } = window.utils
 
 window.ApiList = (() => {
@@ -63,12 +64,13 @@ window.ApiList = (() => {
       },
       {
         title: 'date',
-        width: 200,
+        width: 100,
         dataIndex: 'date',
         sorter: (a, b) => a.date.localeCompare(b.date),
         defaultSortOrder: 'descend',
         render: record => {
-          return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
+          return dateDiff(new Date(record))
+          // return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
         }
       },
     ];
@@ -78,7 +80,7 @@ window.ApiList = (() => {
     }
     return (
       <div className="ApiList">
-        <Table pagination={false} rowKey={({method, api}) => method + api } columns={columns2} dataSource={apiList} onChange={onChange} />
+        <Table size="small" pagination={false} rowKey={({method, api}) => method + api } columns={columns2} dataSource={apiList} onChange={onChange} />
       </div>
     )
   }
