@@ -157,9 +157,23 @@ window.HttpShow = (() => {
         })
       }
 
+      function getApiList() {
+        const source = new EventSource('/GET,getApiListSse/')
+        source.onopen = event => {console.log(`sse onopen`) }
+        source.onerror = event => { console.log(`sse onerror`) }
+        source.addEventListener('message', event => {
+          const newData = JSON.parse(event.data)
+          setState(preState => ({...deepSet(preState, `apiList`, newData)}))
+        }, false);
+      }
+
       useEffect(() => {
         window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
       }, [state.activeTabs]);
+
+      useEffect(() => {
+        getApiList()
+      }, []);
 
       useEffect(() => {
         console.log(`location`, location)
@@ -173,11 +187,6 @@ window.HttpShow = (() => {
         }))
         if(method && api) { // 如果 true 显示某个 api 信息; 否则显示所有 api 列表
           getHttpData({method, api})
-        } else {
-          http.get(`GET,getApiList/`).then(res => {
-            const newData = res.data
-            setState(preState => ({...deepSet(preState, `apiList`, newData)}))
-          })
         }
 
         const hotKey = new HotKey();
@@ -199,10 +208,10 @@ window.HttpShow = (() => {
       }
       return (
         <Switch>
-          <Route exact path="/">
+          <Route cache exact path="/">
             <ApiList apiList={state.apiList} />
           </Route>
-          <Route path="/*">
+          <Route cache path="/*">
             <>
               <div className="info">
                 <div className="item api">

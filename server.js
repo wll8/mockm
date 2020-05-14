@@ -120,7 +120,7 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     [['method', 'action'][index]]: argList[index]
   }), {})
   api = `${method.toUpperCase()} ${api}`
-  if(action === 'getApiList') {
+  function getHistoryList() {
     let list = []
     for (const fullApi in httpHistory) {
       if (httpHistory.hasOwnProperty(fullApi)) {
@@ -136,8 +136,40 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
         })
       }
     }
+    return list
+  }
+  if(action === 'getApiList') {
+    const list = getHistoryList()
     res.send(list)
     return true
+  }
+  if(action === 'getApiListSse') {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive"
+    })
+    res.write("retry: 3000\n")
+    res.write("event: message\n")
+    let oldSize = -1
+    const interval = setInterval( () => {
+      const fs = require(`fs`)
+      fs.stat(config.httpHistory, (err, stats) => {
+        if (err) {
+          return console.error(err);
+        }
+        if(stats.size !== oldSize) {
+          const str = JSON.stringify(getHistoryList())
+          res.write(`data:${str}\n\n`)
+          oldSize = stats.size
+        }
+      })
+    }, 500)
+
+    req.connection.addListener("close",  () => {
+      clearInterval(interval);
+    }, false);
+
   }
   if(action === 'replay') {
     sendReq(api, err => {
