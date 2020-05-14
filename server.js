@@ -192,7 +192,7 @@ server.listen(config.prot, () => {
 
 serverReplay.use(proxy( // 重放也可以使用 /t/* 临时接口
   pathname => {
-    let re = new RegExp(`^/${config.pathname}${config.noProxy}\\b`)
+    let re = new RegExp(`^${config.pathname}${config.noProxy}\\b`)
     let isNext = (Boolean(pathname.match(re)) === true)
     return isNext
   },
