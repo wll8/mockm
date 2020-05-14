@@ -66,11 +66,11 @@ window.ApiList = (() => {
         title: 'date',
         width: 100,
         dataIndex: 'date',
-        sorter: (a, b) => a.date.localeCompare(b.date),
+        sorter: (a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime(),
         defaultSortOrder: 'descend',
         render: record => {
-          return dateDiff(new Date(record))
           // return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
+          return dateDiff(new Date(record))
         }
       },
     ];
