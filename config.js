@@ -20,7 +20,7 @@ const handleConfig = {
       ? false
       : config.apiInHeader
     ),
-  pathname: (new URL(config.proxy)).pathname, // 取出 ap 中的 pathname
+  pathname: (new URL(config.proxy)).pathname.replace(/\/$/, '') + '/',
   origin: (new URL(config.proxy)).origin,
   noProxy: config.noProxy.replace(/\/$/, '') + '/', // 在末尾添加 `/`
   proxy: config.proxy.replace(/\/$/, '') + '/',
