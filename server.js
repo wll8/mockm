@@ -35,9 +35,7 @@ serverTest.use(middlewaresObj.corsMiddleware)
 
 server.use(proxy(
   pathname => {
-    // 为 true 表示走代理, 通过真实服务器
-    const re = new RegExp(`^${config.pathname}${config.noProxy}`)
-    return (Boolean(pathname.match(re)) === false)
+    return noProxyTest(pathname) === false
   },
   {
     target: config.origin,
@@ -61,9 +59,6 @@ server.use(proxy(
   },
 ))
 
-server.use(jsonServer.rewriter({ // 修改路由, 方便后面的 api 书写
-  [`${config.pathname}${config.noProxy}*`] : '/$1',
-}))
 server.use(middlewares) // 添加中间件, 方便取值
 server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   req.query.page && (req.query._page = req.query.page)
@@ -73,11 +68,11 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
 })
 
 const finalParagraphInterceptor = interceptor((req, res) => {
-   // `express-interceptor`: 这个库的判断方式是基于十分有限的 content-type 判断为文本(是否转换为 buffer)
-// 其他拦截方案
-// https://stackoverflow.com/questions/33732509/express-js-how-to-intercept-response-send-response-json/33735452
-// https://www.youtube.com/watch?v=1jhdfS1Bwcc
-// https://www.npmjs.com/package/express-interceptor
+  // `express-interceptor`: 这个库的判断方式是基于十分有限的 content-type 判断为文本(是否转换为 buffer)
+  // 其他拦截方案
+  // https://stackoverflow.com/questions/33732509/express-js-how-to-intercept-response-send-response-json/33735452
+  // https://www.youtube.com/watch?v=1jhdfS1Bwcc
+  // https://www.npmjs.com/package/express-interceptor
 return {
   isInterceptable: () => {
     return true
@@ -222,11 +217,16 @@ server.listen(config.prot, () => {
   console.log(`服务运行于: http://localhost:${config.prot}/`)
 })
 
-serverReplay.use(proxy( // 重放也可以使用 /t/* 临时接口
-  pathname => {
-    let re = new RegExp(`^${config.pathname}${config.noProxy}\\b`)
-    let isNext = (Boolean(pathname.match(re)) === true)
-    return isNext
+serverReplay.use(proxy(
+  (pathname, req) => {
+    const history = getHttpHistory(req, 'url')
+    if(history) { // 当存在 history 则不进入代理
+      return false
+    } else if(noProxyTest(pathname) === true) { // 当没有 history, 则使用 noProxy 规则
+      return true
+    } else { // 当没有 history 也不匹配 noProxy 时, 则根据 replayProxy 规则
+      return config.replayProxy
+    }
   },
   {
     target: `http://localhost:${config.prot}/`,
@@ -236,15 +236,25 @@ serverReplay.use(middlewares)
 serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   const history = getHttpHistory(req, 'url')
   try {
-    res.set(history.res.lineHeaders.headers) // 还原 headers
+    const lineHeaders = history.res.lineHeaders
+    res.set(lineHeaders.headers) // 还原 headers
     res.set(`access-control-allow-origin`, req.headers.origin)
-    const newPath = path.resolve(history.res.bodyPath) // 发送 body
-    res.sendFile(newPath)
+    const bodyPath = history.res.bodyPath
+    console.log(`bodyPath`, bodyPath)
+    if(bodyPath) {
+      const newPath = path.resolve(bodyPath) // 发送 body
+      res.sendFile(newPath)
+    } else {
+      const {statusCode, statusMessage} = lineHeaders.line
+      res.statusCode = statusCode
+      res.statusMessage = statusMessage
+      res.send()
+    }
   } catch (error) {
-    // res.json({})
-
+    console.log(`error`, error)
     // 对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能)
     // 所以这里直接告诉前面接口正常(200ok), 并返回前约定的接口数据结构, 让前端页面可以正常运行
+    res.statusCode = 200
     res.json(handleRes(res, {}))
   }
 })
@@ -254,6 +264,16 @@ serverReplay.listen(config.replayProt, () => {
 serverTest.listen(config.testProt, () => {
   console.log(`接口调试地址: http://localhost:${config.testProt}/`)
 })
+
+function noProxyTest(pathname) {
+  // return true 时不走代理
+  if(Boolean(config.noProxy) === false) {
+    return false
+  } else {
+    const reStrList = typeof(config.noProxy) === `string` ? [config.noProxy] : config.noProxy
+    return reStrList.map(reStr => Boolean(pathname.match((new RegExp(reStr)))) ).some(item => item === true)
+  }
+}
 
 function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
   // 当重定向路由(mock api)时, req.originalUrl 和 req.url 不一致, req.originalUrl 为浏览器中访问的 url, 应该基于这个 url 获取 path

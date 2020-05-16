@@ -9,13 +9,17 @@ module.exports = server => {
       res.json(data)
     })
   })
-  server.get(`/json`, (req, res, next) => {
+  server.get(`/image/t/json`, (req, res, next) => {
     res.json(handleRes(res, {
       name: mock(`@cname`)
     }))
   })
   server.get(`/file`, (req, res, next) => {
     res.sendFile(__dirname + '/readme.md')
+  })
+  server.get(`/status/200`, (req, res, next) => {
+    res.statusCode = 300
+    res.send(`status 300`)
   })
   return server
 }
