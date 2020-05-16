@@ -5,7 +5,7 @@
 npm i
 npm start
 curl http://localhost:9000/image/svg # => 访问 http://httpbin.org/image/svg
-curl http://localhost:9000/image/t/json # mock api `/image/json`
+curl http://localhost:9000/status/200 # 拦截并修改原接口 res `/status/200`
 curl http://localhost:9001/image/svg # 从 GET method `/image/svg` 保存的的信息中获取 response
 # open http://localhost:9005/#/GET/image/svg => 查看 GET method `/image/svg` 接口的调试页面
 ``` 
