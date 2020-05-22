@@ -217,6 +217,7 @@ server.listen(config.prot, () => {
   console.log(`服务运行于: http://localhost:${config.prot}/`)
 })
 
+serverReplay.use(middlewaresObj.corsMiddleware)
 serverReplay.use(proxy(
   (pathname, req) => {
     const history = getHttpHistory(req, 'url')
