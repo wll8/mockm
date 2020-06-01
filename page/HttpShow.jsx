@@ -103,9 +103,9 @@ window.HttpShow = (() => {
         const replayDone = state.replayDone
         if(replayDone) {
           setState(preState => ({...preState, replayDone: false}))
-          http.get(`/${method},replay${api}`).then(({data, status, statusText, headers, config, request}) => {
+          http.get(`/${method},replay${api}`).then(res => {
             setState(preState => ({...preState, replayDone: true}))
-            message.info(`重发请求成功 ${data.message}`)
+            message.info(`重发请求成功 ${res.message}`)
             getHttpData({method, api})
           }).catch(err => {
             message.error(`重发失败 ${err}`)
@@ -204,7 +204,7 @@ window.HttpShow = (() => {
           const newData = {
             method,
             api,
-            data: res.data,
+            data: res,
           }
           setState(preState => ({
             ...preState,
@@ -221,6 +221,7 @@ window.HttpShow = (() => {
         source.onerror = event => { console.log(`sse onerror`) }
         source.addEventListener('message', event => {
           const newData = JSON.parse(event.data).slice(0, 100)
+          // const newData = JSON.parse(event.data)
           setState(preState => ({...deepSet(preState, `apiList`, newData)}))
         }, false);
       }
