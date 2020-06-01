@@ -7,6 +7,8 @@ const {
   deepGet,
   deepSet,
   blobTool,
+  getAbsolutePosition,
+  debounce,
 } = window.utils
 
 window.HttpShow = (() => {
@@ -53,6 +55,7 @@ window.HttpShow = (() => {
           // return {}
         }
         return { // 默认值
+          swagger: false, // 是否显示 swagger 文档
           activeTabs: `ReqRes`,
         }
       })();
@@ -111,6 +114,61 @@ window.HttpShow = (() => {
           message.info('请等待重发结束')
         }
       }
+      function hideDoc() {
+        setState(preState => ({...preState, swagger: false}))
+        $(`.swaggerBox`).addClass(`hide`).removeClass(`show`)
+        $(`#root`).css({width: ``})
+      }
+      function showDoc({$swaggerApiDom}) {
+        setState(preState => ({...preState, swagger: true}))
+        $(`.swaggerBox`).removeClass(`hide`).addClass('show')
+        $(`#root`).css({width: `50%`})
+        $(`#swagger-ui`).scrollTo($swaggerApiDom.parent())
+      }
+      function swagger() {
+        if($(`.swaggerBox`).hasClass(`show`)) {
+          hideDoc()
+        } else {
+          // 滚动 swagger 视图到相同的 api 位置
+          let {method, path} = state.httpData.data.req.lineHeaders.line
+          method = method.toLowerCase()
+          // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
+          path = path.replace(/^\/(.+?)(\/.*)/, '$2')
+          // method = `get`
+          // path = `/headers`
+          const selStr = `.opblock-summary-${method} [data-path="${path}"]`
+          const $swaggerApiDom = $(selStr)
+          if ($swaggerApiDom.length === 0) {
+            message.error(`未找到文档`)
+            return false
+          }
+          const $opblock = $swaggerApiDom.parents(`.opblock`) // 获取当前点击的 swagger api, 并且不是展开状态的元素
+          if ($opblock.hasClass(`open`) === false) {
+            $swaggerApiDom.click() // 打开
+          }
+          $opblock.addClass(`open`)
+
+          // 一些 dom 改变事件, 当用户操作 swagger api, 例如点击 `try it out` 的时候, 重新获取高度, 并同步到 swaggerBox 和 swaggerShadow
+          const domChange = `DOMAttrModified DOMAttributeNameChanged DOMCharacterDataModified DOMElementNameChanged DOMNodeInserted DOMNodeInsertedIntoDocument DOMNodeRemoved DOMNodeRemovedFromDocument DOMSubtreeModified`
+          $('.opblock').off(domChange) // 监听前先取消所有类似元素的监听, 避免多于的监听造成卡顿
+          function changeFn() {
+            const pos = getAbsolutePosition($opblock[0])
+            if (pos.height === 0) {
+              return false; // 高度为 0 则不进行处理
+            } else {
+              let newHeight = `${pos.height}px`
+              $(`#swagger-ui`).css({
+                height: newHeight,
+              })
+            }
+          }
+          setTimeout(changeFn, 500) // 如果没有 dom 改变, 那也执行, 在 500 毫秒(等待样式展示)之后
+          $opblock.on(domChange, debounce(changeFn, 100))
+
+          console.log(`selStr`, selStr)
+          showDoc({$swaggerApiDom})
+        }
+      }
 
       function tabsChange(key) {
         console.log(key);
@@ -162,7 +220,7 @@ window.HttpShow = (() => {
         source.onopen = event => {console.log(`sse onopen`) }
         source.onerror = event => { console.log(`sse onerror`) }
         source.addEventListener('message', event => {
-          const newData = JSON.parse(event.data)
+          const newData = JSON.parse(event.data).slice(0, 100)
           setState(preState => ({...deepSet(preState, `apiList`, newData)}))
         }, false);
       }
@@ -176,6 +234,7 @@ window.HttpShow = (() => {
       }, []);
 
       useEffect(() => {
+        hideDoc()
         console.log(`location`, location)
         console.log(`location.pathname`, location.pathname)
         // const [, method, api] = window.location.hash.match(/#\/(\w+)(.*)/) || []
@@ -227,6 +286,7 @@ window.HttpShow = (() => {
                 <Button onClick={() => history.push(`/`)} size="small" className="replay">apiList</Button>
                 <Button onClick={replay} size="small" className="replay">replay</Button>
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
+                <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger">swagger</Button>
                 <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
                   {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
                 </div>
@@ -256,7 +316,7 @@ window.HttpShow = (() => {
     return (
       <div className="HttpShow">
         <HashRouter>
-          <BackTop visibilityHeight={0} />
+          <BackTop visibilityHeight={0} target={() => document.querySelector(`#root`)}/>
           <App />
         </HashRouter>
       </div>
