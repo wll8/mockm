@@ -495,10 +495,16 @@ function sendReq(api, cb) { // 发送请求
       config: res.config,
     }
   }).catch(err => {
-    const {status, statusText} = err.response || {}
+    let message = ``
+    if(err.response) {
+      const {status, statusText} = err.response
+      message = `${status} ${statusText}`
+    } else {
+      message = err.toString()
+    }
     resErr = {
       success: false,
-      message: `${status} ${statusText}`,
+      message,
       config: err.config,
     }
   }).finally(() => {
