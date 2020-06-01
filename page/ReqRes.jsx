@@ -68,7 +68,7 @@ window.ReqRes = (() => {
 
     function getAllTypeBody(reqOrRes, state) {
       deepGet(state, `newHttpData.data.${reqOrRes}.bodyPath`) && http.get(`${state.newHttpData.method},getBodyFile${toUpperCase(reqOrRes)}${state.newHttpData.api}`, {responseType: 'blob'}).then(res => {
-        const blob = res.data
+        const blob = res
         Promise.all([
           blobTool(blob, `toText`),
           blobTool(blob, `toBase64`),
