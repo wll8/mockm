@@ -1,6 +1,33 @@
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
 window.utils = (() => {
+  function getAbsolutePosition(domObj) { // 获取元素位置及大小
+    // 如果函数没有传入值的话返回对象为空的
+    if (!domObj) return null;
+    var w = domObj.offsetWidth, h = domObj.offsetHeight;
+    // 从目标元素开始向外遍历，累加top和left值
+    var t, l;
+    for (t = domObj.offsetTop, l = domObj.offsetLeft; domObj = domObj.offsetParent;) {
+      t += domObj.offsetTop;
+      l += domObj.offsetLeft;
+    }
+    var r = document.body.offsetWidth - w - l;
+    var b = document.body.offsetHeight - h - t;
+
+    // 返回定位元素的坐标集合
+    return { width: w, height: h, top: t, left: l, right: r, bottom: b };
+  }
+
+  function debounce(fn, wait) { // 防抖
+    var timer = null;
+    return function () {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(fn, wait);
+    }
+  }
+
   function dateDiff(hisTime, nowTime) {
     var now = nowTime ? nowTime : new Date().getTime(),
       diffValue = now - hisTime,
@@ -145,6 +172,8 @@ window.utils = (() => {
     return object
   }
   return {
+    getAbsolutePosition,
+    debounce,
     dateDiff,
     getSelectionText,
     blobTool,
