@@ -11,4 +11,12 @@ window.http = axios.create({
   headers: {'X-Custom-Header': 'foobar'}
 })
 
-
+window.http.interceptors.response.use(
+  response => {
+    const res = response.data
+    return Promise.resolve(res)
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
