@@ -6,6 +6,7 @@ const config = {
   updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
   apiInHeader: true, // 在 header 中添加调试 api 地址, true: 是; false, 否; string: 以 string 为 header key
   proxy: 'http://httpbin.org/', // 后台服务器的的 api
+  openApi: `https://httpbin.org/spec.json`, // 关联的 openApi 数据文件
   noProxy: [ // 不进行代理的路由, 可以进行 mock 操作
     `/image/t/*`,
     `/status/200`,
