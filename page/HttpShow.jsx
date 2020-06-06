@@ -133,10 +133,10 @@ window.HttpShow = (() => {
           let {method, path} = state.httpData.data.req.lineHeaders.line
           method = method.toLowerCase()
           // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
-          path = path.replace(/^\/(.+?)(\/.*)/, '$2')
-          // method = `get`
-          // path = `/headers`
-          const selStr = `.opblock-summary-${method} [data-path="${path}"]`
+          const basePath = $(`.swagger-ui .info .base-url`).text().match(/(\/.*) ]/)[1] // 其实就是 json 中的 basePath, 只是不想再请求并解析这个 json 文件, 所以直接在 dom 中获取
+          const re = new RegExp(`^(${basePath})(\/.*)`)
+          const swgPath = path.replace(re, '$2')
+          const selStr = `.opblock-summary-${method} [data-path="${swgPath}"]`
           const $swaggerApiDom = $(selStr)
           if ($swaggerApiDom.length === 0) {
             message.error(`未找到文档`)
@@ -230,12 +230,29 @@ window.HttpShow = (() => {
           setState(preState => ({...deepSet(preState, `apiList`, newData)}))
         }, false);
       }
+      function initSwagger(openApi) {
+        // 添加 swagger-ui.css
+        $(`head`).append($(`<link rel="stylesheet" href="/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui.css">`))
+        $(`head`).append($(`<link rel="stylesheet" href="/swagger.css">`))
+        // 添加 swagger-ui-bundle.js 并初始化 swg
+        $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
+          SwaggerUIBundle({
+            url: openApi,
+            dom_id: '#swagger-ui',
+          })
+        })
+      }
 
       useEffect(() => {
         window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
       }, [state.activeTabs]);
 
       useEffect(() => {
+        http.get(`/GET,getConfig/`).then(res => {
+          setState(preState => ({...deepSet(preState, `serverConfig`, res)}))
+          const {openApi} = res
+          openApi && initSwagger(openApi)
+        })
         getApiListSse()
       }, []);
 
