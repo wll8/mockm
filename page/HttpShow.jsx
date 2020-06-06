@@ -76,7 +76,7 @@ window.HttpShow = (() => {
         if(state.captureImg) {
           setState(preState => ({...preState, captureImg: undefined}))
         } else {
-          const node = document.getElementById(`root`)
+          const node = document.querySelector(`.HttpShow`)
           // const scale = 1200 / node.offsetWidth; // 生成固定宽度的图像
           const scale = 1.5;
           const cfg = {
