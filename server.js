@@ -194,6 +194,9 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     getHttpData() {
       res.send(httpHistory[api])
     },
+    getConfig() {
+      res.send(config)
+    },
   }
   if (actionFnObj[action]) {
     actionFnObj[action]()
