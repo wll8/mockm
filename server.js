@@ -133,66 +133,72 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
     }
     return list
   }
-  if(action === 'getApiList') {
-    const list = getHistoryList()
-    res.send(list)
-    return true
-  }
-  if(action === 'getApiListSse') {
-    res.writeHead(200, {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "Connection": "keep-alive"
-    })
-    res.write("retry: 3000\n")
-    res.write("event: message\n")
-    let oldSize = -1
-    const interval = setInterval( () => {
-      const fs = require(`fs`)
-      fs.stat(config.httpHistory, (err, stats) => {
-        if (err) {
-          return console.error(err);
-        }
-        if(stats.size !== oldSize) {
-          const str = JSON.stringify(getHistoryList())
-          res.write(`data:${str}\n\n`)
-          oldSize = stats.size
-        }
-      })
-    }, 500)
 
-    req.connection.addListener("close",  () => {
-      clearInterval(interval);
-    }, false);
-
-  }
-  if(action === 'replay') {
-    sendReq(api, err => {
-      res.json(err)
-    })
-    return true
-  } else {
-    let httpRes
-    let httpReq
+  function getFilePath(type) {
     try {
-      httpRes = {...httpHistory[api].res}
-      httpReq = {...httpHistory[api].req}
+      const httpData = {...httpHistory[api][type]}
+      if(type === `res`) { // 模仿 res 中的响应头, 但是开启跨域
+        res.set(httpData.lineHeaders.headers)
+        res.set(`access-control-allow-origin`, req.headers.origin)
+      }
+      res.sendFile(path.resolve(httpData.bodyPath))
     } catch (error) {
       console.log('error', {api, error})
       res.json('暂无请求数据')
     }
+  }
 
-    if(action === 'getBodyFileReq') {
-      res.sendFile(path.resolve(httpReq.bodyPath))
-    }
-    if(action === 'getBodyFileRes') {
-      res.set(httpRes.lineHeaders.headers)
-      res.set(`access-control-allow-origin`, req.headers.origin)
-      res.sendFile(path.resolve(httpRes.bodyPath))
-    }
-    if(action === 'getHttpData') {
+  const actionFnObj = {
+    getApiList() {
+      const list = getHistoryList()
+      res.send(list)
+    },
+    getApiListSse() {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive"
+      })
+      res.write("retry: 10000\n")
+      res.write("event: message\n")
+      let oldSize = -1
+      const interval = setInterval( () => {
+        const fs = require(`fs`)
+        fs.stat(config.httpHistory, (err, stats) => {
+          if (err) {
+            return console.error(err);
+          }
+          if(stats.size !== oldSize) {
+            const str = JSON.stringify(getHistoryList())
+            res.write(`data:${str}\n\n`)
+            oldSize = stats.size
+          }
+        })
+      }, 500)
+
+      req.connection.addListener("close",  () => {
+        clearInterval(interval);
+      }, false);
+    },
+    replay() {
+      sendReq(api, err => {
+        res.json(err)
+      })
+    },
+    getBodyFileReq() {
+      getFilePath(`req`)
+    },
+    getBodyFileRes() {
+      getFilePath(`res`)
+    },
+    getHttpData() {
       res.send(httpHistory[api])
-    }
+    },
+  }
+  if (actionFnObj[action]) {
+    actionFnObj[action]()
+  } else {
+    console.log(`无匹配方法`, {action, api, method})
   }
 })
 
