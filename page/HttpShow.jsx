@@ -216,12 +216,17 @@ window.HttpShow = (() => {
       }
 
       function getApiList() {
+        http.get('/GET,getApiList/').then(res => {
+          setState(preState => ({...deepSet(preState, `apiList`, res)}))
+        })
+      }
+
+      function getApiListSse() {
         const source = new EventSource('/GET,getApiListSse/')
         source.onopen = event => {console.log(`sse onopen`) }
         source.onerror = event => { console.log(`sse onerror`) }
         source.addEventListener('message', event => {
-          const newData = JSON.parse(event.data).slice(0, 100)
-          // const newData = JSON.parse(event.data)
+          const newData = JSON.parse(event.data)
           setState(preState => ({...deepSet(preState, `apiList`, newData)}))
         }, false);
       }
@@ -231,7 +236,7 @@ window.HttpShow = (() => {
       }, [state.activeTabs]);
 
       useEffect(() => {
-        getApiList()
+        getApiListSse()
       }, []);
 
       useEffect(() => {
