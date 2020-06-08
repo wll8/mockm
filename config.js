@@ -1,3 +1,4 @@
+const cliArg = parseArgv()
 const config = {
   prot: 9000, // 本地端口
   testProt: 9005, // 调试端口
@@ -14,6 +15,15 @@ const config = {
   dbJsonName: './db.json', // db.js 生成的 json 数据文件名
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
+  ...cliArg,
+}
+
+function parseArgv() {
+  return process.argv.slice(2).reduce((acc, arg) => {
+    let [k, v = true] = arg.split('==')
+    acc[k] = v
+    return acc
+  }, {})
 }
 
 const handleConfig = {
