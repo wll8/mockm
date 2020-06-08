@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const interceptor = require('express-interceptor')
 const modifyResponse = require('node-http-proxy-json')
 const filenamify = require('filenamify')
