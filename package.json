@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
+  "bin": {
+    "sm": "server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wll8/mock-server.git"
+  },
   "dependencies": {
     "axios": "^0.19.1",
     "curlconverter": "^2.13.0",
