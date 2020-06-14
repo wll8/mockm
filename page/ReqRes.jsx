@@ -35,19 +35,14 @@ window.ReqRes = (() => {
       },
     }
     const initState = (() => {
-      try {
-        return JSON.parse(window.localStorage.getItem(`ReqResState`) || undefined)
-      } catch (error) {
-        console.log(error)
-        // return {}
-      }
-      return { // 默认值
+      const ReqResStateBase = { // 默认值
         activePanel: [`req`, `res`],
         activePanelPanel: {
           req: [`lineHeaders`, `body`],
           res: [`lineHeaders`, `body`],
         },
       }
+      return JSON.parse(window.localStorage.getItem(`ReqResState`) || undefined) || ReqResStateBase
     })();
     const [state, setState] = useState({
       ...initState,
