@@ -9,6 +9,7 @@ const {
   blobTool,
   getAbsolutePosition,
   debounce,
+  swgPathToReg,
 } = window.utils
 
 window.HttpShow = (() => {
@@ -136,8 +137,10 @@ window.HttpShow = (() => {
           const basePath = $(`.swagger-ui .info .base-url`).text().match(/(\/.*) ]/)[1] // 其实就是 json 中的 basePath, 只是不想再请求并解析这个 json 文件, 所以直接在 dom 中获取
           const re = new RegExp(`^(${basePath})(\/.*)`)
           const swgPath = path.replace(re, '$2')
-          const selStr = `.opblock-summary-${method} [data-path="${swgPath}"]`
-          const $swaggerApiDom = $(selStr)
+          const $swaggerApiDom = $([...$(`.opblock-summary-${method} [data-path]`)].find(item => {
+            let re = swgPathToReg($(item).data(`path`))
+            return swgPath.match(re)
+          }))
           if ($swaggerApiDom.length === 0) {
             message.error(`未找到文档`)
             return false
@@ -165,7 +168,6 @@ window.HttpShow = (() => {
           setTimeout(changeFn, 500) // 如果没有 dom 改变, 那也执行, 在 500 毫秒(等待样式展示)之后
           $opblock.on(domChange, debounce(changeFn, 100))
 
-          console.log(`selStr`, selStr)
           showDoc({$swaggerApiDom})
         }
       }
