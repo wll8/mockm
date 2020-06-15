@@ -1,6 +1,10 @@
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
 window.utils = (() => {
+  function swgPathToReg(path) { // 把 swagger 的 path /status/{codes} 转为正则 /status/.+?$
+    return new RegExp(path.replace(/\{.+?\}/g, '.+?')+`$`)
+  }
+
   function getAbsolutePosition(domObj) { // 获取元素位置及大小
     // 如果函数没有传入值的话返回对象为空的
     if (!domObj) return null;
@@ -172,6 +176,7 @@ window.utils = (() => {
     return object
   }
   return {
+    swgPathToReg,
     getAbsolutePosition,
     debounce,
     dateDiff,
