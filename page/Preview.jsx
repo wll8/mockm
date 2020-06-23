@@ -26,7 +26,7 @@ window.Preview = (() => {
   function com(props) {
     const initState = (() => {
       try {
-        return JSON.parse(window.localStorage.getItem(`PreviewState`) || undefined)
+        return JSON.parse(window.localStorage.getItem(`PreviewState`)) || {}
       } catch (error) {
         console.log(error)
       }
