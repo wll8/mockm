@@ -50,7 +50,7 @@ window.HttpShow = (() => {
 
       const initState = (() => {
         try {
-          return JSON.parse(window.localStorage.getItem(`HttpShowState`) || undefined)
+          return JSON.parse(window.localStorage.getItem(`HttpShowState`)) || {}
         } catch (error) {
           console.log(error)
           // return {}

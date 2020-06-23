@@ -49,7 +49,7 @@ window.Headers = (() => {
   function com(props) {
     const initState = (() => {
       try {
-        return JSON.parse(window.localStorage.getItem(`HeadersState`) || undefined)
+        return JSON.parse(window.localStorage.getItem(`HeadersState`)) || {}
       } catch (error) {
         console.log(error)
         // return {}
