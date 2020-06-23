@@ -42,7 +42,7 @@ window.ReqRes = (() => {
           res: [`lineHeaders`, `body`],
         },
       }
-      return JSON.parse(window.localStorage.getItem(`ReqResState`) || undefined) || ReqResStateBase
+      return JSON.parse(window.localStorage.getItem(`ReqResState`)) || ReqResStateBase
     })();
     const [state, setState] = useState({
       ...initState,
