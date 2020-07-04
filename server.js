@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const { pathToRegexp } = require("path-to-regexp")
 const interceptor = require('express-interceptor')
 const modifyResponse = require('node-http-proxy-json')
 const filenamify = require('filenamify')
@@ -207,7 +208,23 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
   }
 })
 
-api(server) // 前端自行添加的测试 api
+// api(server) // 前端自行添加的测试 api
+const noProxyRouteList = []
+Object.keys(api).forEach(key => {
+  let [, method, route] = key.match(/(\w+)\s+(.*)/) || [, key.trim()]
+  method = method.toLowerCase()
+  if((method === `*` || method === `/`) && (route === undefined)) { // 拦截所有方法所有路由
+    server.all(`*`, api[key])
+  } else if(route === undefined) { // 拦截指定方法的所有路由
+    server[method](`*`, api[key])
+  }
+  if(method && route) { // 拦截指定方法的指定路由
+    let [, method, route] = key.match(/(\w+)\s+(.*)/)
+    noProxyRouteList.push(route)
+    method = method.toLowerCase()
+    server[method](route, api[key])
+  }
+})
 
 router.render = (req, res) => { // 修改输出的数据, 符合项目格式
   let returnData = res.locals.data // 前面的数据返回的 data 结构
@@ -278,13 +295,8 @@ serverTest.listen(config.testProt, () => {
 })
 
 function noProxyTest(pathname) {
-  // return true 时不走代理
-  if(Boolean(config.noProxy) === false) {
-    return false
-  } else {
-    const reStrList = typeof(config.noProxy) === `string` ? [config.noProxy] : config.noProxy
-    return reStrList.map(reStr => Boolean(pathname.match((new RegExp(reStr)))) ).some(item => item === true)
-  }
+  // return true 时不走真实服务器, 而是走自定义 api
+  return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
 }
 
 function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
