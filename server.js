@@ -43,8 +43,8 @@ serverTest.use(middlewaresObj.corsMiddleware)
 server.use(middlewaresObj.corsMiddleware)
 
 server.use(proxy(
-  pathname => {
-    return noProxyTest(pathname) === false
+  (pathname, {method}) => { // 返回 true 时进行转发
+    return (noProxyTest(pathname) || getDataRouter({method, pathname, db})) ? false : true
   },
   {
     target: config.origin,
@@ -613,4 +613,31 @@ function getOsIp() { // 获取系统 ip
     return [...res, ...obj[cur]]
   }, []).filter(item => !item.address.match(/(127.|:)/))[0].address
   return ip
+}
+
+function isType(data, type) {
+  const dataType = Object.prototype.toString.call(data).match(/\s(.+)]/)[1].toLowerCase()
+  return type ? (dataType === type.toLowerCase()) : dataType
+}
+
+function getDataRouter({method, pathname, db}) {
+  /**
+    给定一个 method 和 path, 根据 db.json 来判断是否应该过滤
+    根据 db.json 获取要拦截的 route , 参考 node_modules/json-server/lib/server/router/index.js
+  */
+
+  method = method.trim().toLowerCase()
+  const res = Object.keys(db).some(key => {
+    const val = db[key]
+    if (isType(val, `object`)) {
+      return `get post put patch `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname) // 方法与路由匹配
+    }
+    if (isType(val, `array`)) {
+      return (
+        (`get post `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname)) // 获取所有或创建单条
+        || (`get put patch delete `.includes(`${method} `) && pathToRegexp(`/${key}/:id`).exec(pathname)) // 处理针对于 id 单条数据的操作, 注意 id 的取值字段 foreignKeySuffix
+      )
+    }
+  })
+  return res
 }
