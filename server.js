@@ -35,6 +35,7 @@ const middlewaresObj = middlewares.flat().reduce((res, item) => {
 }, {})
 let TOKEN = ''
 serverTest.use(middlewaresObj.corsMiddleware)
+server.use(middlewaresObj.corsMiddleware)
 
 server.use(proxy(
   pathname => {
