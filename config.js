@@ -1,4 +1,17 @@
-const cliArg = parseArgv()
+const path = require(`path`)
+const { parseArgv } = require(`./util.js`)
+const util = require("./util.js")
+let cliArg = parseArgv()
+if(cliArg._base64) { // 如果指定了 base64 配置
+  const base64deCode = JSON.parse(Buffer.from(cliArg._base64, 'base64').toString())
+  if (base64deCode.config) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
+    const normalizePath = path.normalize(base64deCode.config)
+    const fileArg = path.isAbsolute(normalizePath) ? require(normalizePath) : require(`${process.cwd()}/${normalizePath}`) // 处理相对路径
+    cliArg = {...fileArg, ...cliArg}
+  }
+  cliArg = {...base64deCode, ...cliArg}
+}
+
 const config = {
   prot: 9000, // 本地端口
   testProt: 9005, // 调试端口
@@ -11,25 +24,32 @@ const config = {
   dbJsonName: './db.json', // db.js 生成的 json 数据文件名
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
+  api: util => { // 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
+    const { axios, mime, mock, multiparty } = util
+    return { // api 拦截器
+      '*' (req, res, next) { // 拦截所有方法和路由
+        next()
+      },
+      'post /file/upload' (req, res, next) { // 获取上传的文件
+        const form = new multiparty.Form()
+        form.parse(req, (err, fields = [], files) => {
+          const data = {fields, files, err}
+          res.json(data)
+        })
+      },
+      'get /name' (req, res, next) { // 使用 mock 功能
+        res.json({name: mock(`@cname`)})
+      },
+      'get /file' (req, res, next) { // 发送文件
+        res.sendFile(`${__dirname}/readme.md`)
+      },
+      'get /status/:code' (req, res, next) { // 使用 params 参数
+        res.statusCode = req.params.code
+        res.json(req.params)
+      },
+    }
+  },
   ...cliArg,
-}
-
-function parseArgv(arr) {
-  return (arr || process.argv.slice(2)).reduce((acc, arg) => {
-    let [k, v] = arg.split('==')
-    acc[k] = v === undefined // 没有值时, 则表示为 true
-      ? true
-      : (
-        /^(true|false)$/.test(v) // 转换指明的 true/false
-        ? v === 'true'
-        : (
-          /[\d|\.]+/.test(v)
-          ? (isNaN(Number(v)) ? v : Number(v)) // 如果转换为数字失败, 则使用原始字符
-          : v
-        )
-      )
-    return acc
-  }, {})
 }
 
 const handleConfig = {
