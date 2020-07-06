@@ -4,7 +4,7 @@
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
-    "ms": "server.js"
+    "ms": "run.js"
   },
   "repository": {
     "type": "git",
@@ -22,11 +22,13 @@
     "mockjs": "^1.1.0",
     "multiparty": "^4.2.1",
     "node-http-proxy-json": "^0.1.9",
+    "nodemon": "^2.0.4",
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {},
   "scripts": {
     "start": "nodemon --watch \"*.js\" --exec \"node server.js\"",
+    "serve": "node run.js",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
