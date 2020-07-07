@@ -19,12 +19,13 @@ const serverReplay = jsonServer.create()
 const serverTest = jsonServer.create()
 const config = require(`${__dirname}/config.js`)
 const db = require(`${__dirname}/db.js`)()
+const util = require(`${__dirname}/util.js`)
 let api = config.api
 if( typeof(api) === `function`) { // 如果拦截器是函数, 则向函数传入常用工具库
   api = api({axios, mime, mock, multiparty})
 }
 
-fs.writeFileSync(config.dbJsonName, o2s(db))
+fs.writeFileSync(config.dbJsonName, util.o2s(db))
 const router = jsonServer.router(config.dbJsonName)
 const middlewares = jsonServer.defaults({bodyParser: true})
 init()
@@ -62,9 +63,10 @@ server.use(proxy(
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
     onProxyRes: (proxyRes, req, res) => {
-      proxyRes.headers[config.apiInHeader] = `http://${getOsIp()}:${config.testProt}/#/${req.method}${req.originalUrl}`
+      proxyRes.headers[config.apiInHeader] = `http://${util.getOsIp()}:${config.testProt}/#/${req.method}${req.originalUrl}`
       setHttpHistoryWrap({req, res: proxyRes})
     },
+    logLevel: `silent`,
   },
 ))
 
@@ -102,7 +104,7 @@ return {
 server.use(finalParagraphInterceptor)
 
 serverTest.get(`*`, (req, res, next) => {
-  const {path} = getClientUrlAndPath(req.originalUrl)
+  const {path} = util.getClientUrlAndPath(req.originalUrl)
   if(path.match(/^\/(get|post|head|put|delete|connect|options|trace)\b,/i)) { // 以 http `${method},` 单词加逗号开头的 path 视为 api
     next()
   } else {
@@ -265,6 +267,7 @@ serverReplay.use(proxy(
   },
   {
     target: `http://localhost:${config.prot}/`,
+    logLevel: `silent`,
   },
 ))
 serverReplay.use(middlewares)
@@ -305,14 +308,6 @@ function noProxyTest(pathname) {
   return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
 }
 
-function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
-  // 当重定向路由(mock api)时, req.originalUrl 和 req.url 不一致, req.originalUrl 为浏览器中访问的 url, 应该基于这个 url 获取 path
-  return {
-    url: originalUrl,
-    path: (new URL(originalUrl, `http://127.0.0.1`)).pathname,
-  }
-}
-
 function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 记录 history
   if(ignoreHttpHistory(req) === false) {
     const data = [];
@@ -320,7 +315,7 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
       const {
         method,
       } = req
-      const {url, path} = getClientUrlAndPath(req.originalUrl)
+      const {url, path} = util.getClientUrlAndPath(req.originalUrl)
       const headersObj = {req: req.headers || req.getHeaders(), res: res.headers || res.getHeaders()}
       headersObj.res.date = headersObj.res.date || (new Date()).toGMTString() // 居然没有 date ?
       const {statusCode, statusMessage, headers} = res
@@ -353,20 +348,20 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
       }
 
       function getBodyPath() {
-        const apiId = string10to62(nextId())
+        const apiId = util.string10to62(util.nextId())
         return {
-          bodyPathReq: isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
-          bodyPathRes: isEmpty(buffer) === false ? createBodyPath(`res`, apiId) : undefined,
+          bodyPathReq: util.isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
+          bodyPathRes: util.isEmpty(buffer) === false ? createBodyPath(`res`, apiId) : undefined,
         }
       }
       const {bodyPathReq, bodyPathRes} = getBodyPath()
       bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
       bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
-      console.log(`${getClientIp(req)} => ${method} ${path} ${statusCode} ${statusMessage}`)
+      console.log(`${util.getClientIp(req)} => ${method} ${path} ${statusCode} ${statusMessage || ``}`)
       const resDataObj = {
         req: {
           lineHeaders: {
-            line: removeEmpty({
+            line: util.removeEmpty({
               method,
               url,
               path,
@@ -411,16 +406,6 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
   }
 }
 
-function removeEmpty(obj) {
-  obj = {...obj}
-  Object.keys(obj).forEach(key => {
-    if (isEmpty(obj[key])) {
-      delete obj[key]
-    }
-  })
-  return obj
-}
-
 function handleRes(res, data) {
   return {
     code: res.statusCode,
@@ -428,21 +413,6 @@ function handleRes(res, data) {
     data,
   }
 }
-
-function getOptions(cmd) {
-  const curlconverter = require('curlconverter');
-  let str = curlconverter.toNode(cmd)
-  let res = {}
-  str = str.replace(`request(options, callback)`, `res = options`)
-  eval(str)
-  try {
-    res.body = JSON.parse(res.body)
-  } catch (error) {
-    res.body = {}
-  }
-  return res
-}
-
 function ignoreHttpHistory(req) { // 不进行记录的请求
   const {method, url} = req
   return Boolean(
@@ -455,7 +425,7 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
 
 function getHttpHistory(req, type) { // 获取某个请求的记录
   // type: url|path 匹配方式, path 会忽略 url 上的 query 参数
-  const {url, path} = getClientUrlAndPath(req.originalUrl)
+  const {url, path} = util.getClientUrlAndPath(req.originalUrl)
 
   if(type === 'url') {
     return httpHistory[`${req.method} ${url}`]
@@ -470,19 +440,9 @@ function getHttpHistory(req, type) { // 获取某个请求的记录
 }
 
 function init() { // 初始化, 例如所需文件
-  !hasFile(config.dataDir) && fs.mkdirSync(config.dataDir)
-  !hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+  !util.hasFile(config.dataDir) && fs.mkdirSync(config.dataDir)
+  !util.hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
 }
-
-function hasFile(filePath) {
-  return fs.existsSync(filePath)
-}
-
-function o2s(o) {
-  return JSON.stringify(o, null, 2)
-}
-
-function getToken() {}
 
 function setHttpHistory(api, resDataObj) {
   const [, method, url] = api.match(/(\w+)\s+(.*)/)
@@ -490,7 +450,7 @@ function setHttpHistory(api, resDataObj) {
     ...httpHistory[`${method} ${url}`],
     ...resDataObj,
   }
-  fs.writeFileSync(config.httpHistory, o2s(httpHistory))
+  fs.writeFileSync(config.httpHistory, util.o2s(httpHistory))
 }
 
 function getMethodUrl(path) {
@@ -541,85 +501,6 @@ function sendReq(api, cb) { // 发送请求
   })
 }
 
-function isEmpty(value) {
-  return (
-    value === null
-    || value === ``
-    || typeof(value) === `object`
-      && (
-        value.length === 0
-        || Object.keys(value).length === 0
-      )
-  )
-}
-
-function emptyFn(f) {  // 把函数的参数 {}, [], null 转为默认值
-  return (...a) => {
-    return f(...a.map(
-      v => {
-        return (isEmpty(v) ? undefined : v)
-      }
-    ))
-  }
-}
-
-function getClientIp (req) { // 获取客户端 IP
-  var ip = req.headers['x-forwarded-for'] || // 判断是否有反向代理 IP
-    req.ip ||
-    req.connection.remoteAddress || // 判断 connection 的远程 IP
-    req.socket.remoteAddress || // 判断后端的 socket 的 IP
-    req.connection.socket.remoteAddress || ''
-  if (ip.includes(',')) {
-    ip = ip.split(',')[0]
-  }
-  ip = ip.substr(ip.lastIndexOf(':') + 1, ip.length) // ::ffff:127.0.0.1 => 127.0.0.1
-  return ip
-}
-
-function string10to62(number) {
-  var chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'.split(''),
-    radix = chars.length,
-    qutient = +number,
-    arr = [];
-  do {
-    mod = qutient % radix;
-    qutient = (qutient - mod) / radix;
-    arr.unshift(chars[mod]);
-  } while (qutient);
-  return arr.join('');
-}
-
-function string62to10(number) {
-  var chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ',
-    radix = chars.length,
-    number = String(number),
-    len = number.length,
-    i = 0,
-    origin_number = 0;
-  while (i < len) {
-    origin_number += Math.pow(radix, i++) * chars.indexOf(number.charAt(len - i) || 0);
-  }
-  return origin_number;
-}
-
-function nextId() {
-  global.id = (global.id || 0) + 1
-  return global.id
-}
-
-function getOsIp() { // 获取系统 ip
-  const obj = require(`os`).networkInterfaces()
-  const ip = Object.keys(obj).reduce((res, cur, index) => {
-    return [...res, ...obj[cur]]
-  }, []).filter(item => !item.address.match(/(127.|:)/))[0].address
-  return ip
-}
-
-function isType(data, type) {
-  const dataType = Object.prototype.toString.call(data).match(/\s(.+)]/)[1].toLowerCase()
-  return type ? (dataType === type.toLowerCase()) : dataType
-}
-
 function getDataRouter({method, pathname, db}) {
   /**
     给定一个 method 和 path, 根据 db.json 来判断是否应该过滤
@@ -629,10 +510,10 @@ function getDataRouter({method, pathname, db}) {
   method = method.trim().toLowerCase()
   const res = Object.keys(db).some(key => {
     const val = db[key]
-    if (isType(val, `object`)) {
+    if (util.isType(val, `object`)) {
       return `get post put patch `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname) // 方法与路由匹配
     }
-    if (isType(val, `array`)) {
+    if (util.isType(val, `array`)) {
       return (
         (`get post `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname)) // 获取所有或创建单条
         || (`get put patch delete `.includes(`${method} `) && pathToRegexp(`/${key}/:id`).exec(pathname)) // 处理针对于 id 单条数据的操作, 注意 id 的取值字段 foreignKeySuffix
