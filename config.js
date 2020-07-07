@@ -1,6 +1,5 @@
 const path = require(`path`)
-const { parseArgv } = require(`./util.js`)
-const util = require("./util.js")
+const { parseArgv } = require(`${__dirname}/util.js`)
 let cliArg = parseArgv()
 if(cliArg._base64) { // 如果指定了 base64 配置
   const base64deCode = JSON.parse(Buffer.from(cliArg._base64, 'base64').toString())

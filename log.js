@@ -1,4 +1,4 @@
-require(`util`).inspect.defaultOptions.depth = null
+require(`util`).inspect.defaultOptions.depth = null // console.log 展开对象
 
 const { inspect } = require('util')
 
