@@ -30,6 +30,13 @@ function dataType(data, type) {
   return type ? (dataType === type.toLowerCase()) : dataType
 }
 
+function handlePathArg(pathStr) { // 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+  const path = require(`path`)
+  let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
+  newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
+  return newPathStr
+}
+
 function getOptions(cmd) { // curl 命令转 body
   const curlconverter = require('curlconverter');
   let str = curlconverter.toNode(cmd)
@@ -142,6 +149,7 @@ function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 
 }
 
 module.exports = {
+  handlePathArg,
   nextId,
   getClientUrlAndPath,
   isType,
