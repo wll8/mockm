@@ -4,7 +4,6 @@ const { pathToRegexp } = require("path-to-regexp")
 const interceptor = require('express-interceptor')
 const modifyResponse = require('node-http-proxy-json')
 const filenamify = require('filenamify')
-require('./log.js').logHelper()
 const axios = require('axios')
 const mime = require('mime')
 const multiparty = require('multiparty')
@@ -14,19 +13,22 @@ const proxy = require('http-proxy-middleware')
 const jsonServer = require('json-server')
 const fs = require('fs')
 const path = require('path')
+const querystring = require('querystring')
+
+require('./log.js').logHelper()
+const config = require(`./config.js`)
+const util = require(`./util.js`)
+
+const { api, db } = init(config)
+
 const server = jsonServer.create()
 const serverReplay = jsonServer.create()
 const serverTest = jsonServer.create()
-const config = require(`${__dirname}/config.js`)
-const util = require(`${__dirname}/util.js`)
-const api = config.api({axios, mime, mock, multiparty})
 
-const db = getDb()
 const router = jsonServer.router(config.dbJsonName)
 const middlewares = jsonServer.defaults({bodyParser: true})
-init()
 const httpHistory = JSON.parse(fs.readFileSync(config.httpHistory).toString() || '{}') // 请求历史
-const querystring = require('querystring')
+
 const middlewaresObj = middlewares.flat().reduce((res, item) => {
   // 使用 jsonServer 里面的中间件, 以保持一致:
   // compression, corsMiddleware, serveStatic, logger, jsonParser, urlencodedParser
@@ -304,22 +306,6 @@ function noProxyTest(pathname) {
   return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
 }
 
-function getDb() { // 根据配置返回 db
-  let db = config.db
-  if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
-    config.dbCover
-    || (util.hasFile(config.dbJsonName) === false)
-    || fs.readFileSync(config.dbJsonName, `utf-8`).trim() === ``
-  ) {
-    db = db({mock})
-    fs.writeFileSync(config.dbJsonName, util.o2s(db))
-    return db
-  } else { // 如果 json 数据文件存在, 则从 json 文件中读取
-    db = require(config.dbJsonName)
-    return db
-  }
-}
-
 function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 记录 history
   if(ignoreHttpHistory(req) === false) {
     const data = [];
@@ -451,9 +437,33 @@ function getHttpHistory(req, type) { // 获取某个请求的记录
   }
 }
 
-function init() { // 初始化, 例如所需文件
+function init(config) { // 初始化, 例如创建所需文件, 以及格式化配置文件
   !util.hasFile(config.dataDir) && fs.mkdirSync(config.dataDir)
   !util.hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+  const db = getDb()
+  const api = config.api({axios, mime, mock, multiparty})
+
+  return {
+    db,
+    api,
+  }
+
+  function getDb() { // 根据配置返回 db
+    let db = config.db
+    if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
+      config.dbCover
+      || (util.hasFile(config.dbJsonName) === false)
+      || fs.readFileSync(config.dbJsonName, `utf-8`).trim() === ``
+    ) {
+      db = db({mock})
+      fs.writeFileSync(config.dbJsonName, util.o2s(db))
+      return db
+    } else { // 如果 json 数据文件存在, 则从 json 文件中读取
+      db = require(config.dbJsonName)
+      return db
+    }
+  }
+
 }
 
 function setHttpHistory(api, resDataObj) {

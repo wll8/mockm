@@ -1,16 +1,12 @@
 require(`util`).inspect.defaultOptions.depth = null // console.log 展开对象
 
 const { inspect } = require('util')
-
-function getType(data, type) {
-  const dataType = Object.prototype.toString.call(data).replace(/(.* )(.*)\]/, '$2').trim().toLowerCase()
-  return type ? (dataType === type.trim().toLowerCase()) : dataType
-}
+const util = require('./util.js')
 
 function print(...argList) { // 用于输出有用信息, 而不是调试信息
   const resList = []
   argList.map(item => {
-    const type = getType(item)
+    const type = util.getType(item)
     ;([
       ['undefined', ''],
       ['string', 'number', item],
