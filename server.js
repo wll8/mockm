@@ -18,14 +18,10 @@ const server = jsonServer.create()
 const serverReplay = jsonServer.create()
 const serverTest = jsonServer.create()
 const config = require(`${__dirname}/config.js`)
-const db = require(`${__dirname}/db.js`)()
 const util = require(`${__dirname}/util.js`)
-let api = config.api
-if( typeof(api) === `function`) { // 如果拦截器是函数, 则向函数传入常用工具库
-  api = api({axios, mime, mock, multiparty})
-}
+const api = config.api({axios, mime, mock, multiparty})
 
-fs.writeFileSync(config.dbJsonName, util.o2s(db))
+const db = getDb()
 const router = jsonServer.router(config.dbJsonName)
 const middlewares = jsonServer.defaults({bodyParser: true})
 init()
@@ -306,6 +302,22 @@ serverTest.listen(config.testProt, () => {
 function noProxyTest(pathname) {
   // return true 时不走真实服务器, 而是走自定义 api
   return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
+}
+
+function getDb() { // 根据配置返回 db
+  let db = config.db
+  if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
+    config.dbCover
+    || (util.hasFile(config.dbJsonName) === false)
+    || fs.readFileSync(config.dbJsonName, `utf-8`).trim() === ``
+  ) {
+    db = db({mock})
+    fs.writeFileSync(config.dbJsonName, util.o2s(db))
+    return db
+  } else { // 如果 json 数据文件存在, 则从 json 文件中读取
+    db = require(config.dbJsonName)
+    return db
+  }
 }
 
 function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 记录 history
