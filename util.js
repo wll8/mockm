@@ -1,4 +1,4 @@
-function isEmpty(value) {
+function isEmpty(value) { // 判断空值
   return (
     value === null
     || value === ``
@@ -10,7 +10,7 @@ function isEmpty(value) {
   )
 }
 
-function removeEmpty(obj) {
+function removeEmpty(obj) { // 删除对象中为空值的键
   obj = {...obj}
   Object.keys(obj).forEach(key => {
     if (isEmpty(obj[key])) {
@@ -23,11 +23,6 @@ function removeEmpty(obj) {
 function hasFile(filePath) { // 判断文件是否存在
   const fs = require(`fs`)
   return fs.existsSync(filePath)
-}
-
-function dataType(data, type) {
-  const dataType = Object.prototype.toString.call(data).match(/\s(.+)]/)[1].toLowerCase()
-  return type ? (dataType === type.toLowerCase()) : dataType
 }
 
 function handlePathArg(pathStr) { // 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
@@ -51,7 +46,7 @@ function getOptions(cmd) { // curl 命令转 body
   return res
 }
 
-function parseArgv(arr) {
+function parseArgv(arr) { // 解析命令行参数
   return (arr || process.argv.slice(2)).reduce((acc, arg) => {
     let [k, v] = arg.split('==')
     acc[k] = v === undefined // 没有值时, 则表示为 true
@@ -163,5 +158,4 @@ module.exports = {
   isEmpty,
   removeEmpty,
   parseArgv,
-  dataType,
 }
