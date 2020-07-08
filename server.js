@@ -544,3 +544,11 @@ function getDataRouter({method, pathname, db}) {
   })
   return res
 }
+
+function getOsIp() { // 获取系统 ip
+  const obj = require(`os`).networkInterfaces()
+  const ip = Object.keys(obj).reduce((res, cur, index) => {
+    return [...res, ...obj[cur]]
+  }, []).filter(item => !item.address.match(/(127.|:)/))[0].address
+  return ip
+}
