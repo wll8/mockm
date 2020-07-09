@@ -7,7 +7,7 @@ const filenamify = require('filenamify')
 const axios = require('axios')
 const mime = require('mime')
 const multiparty = require('multiparty')
-const {mock} = require('mockjs')
+const mockjs = require('mockjs')
 const {htmlEscape} = require('escape-goat')
 const proxy = require('http-proxy-middleware')
 const jsonServer = require('json-server')
@@ -76,6 +76,17 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
   next()
 })
 
+function getHistory({fullApi, id}) {
+  const { path } = util.fullApi2Obj(fullApi)
+  console.log(`path`, path)
+  return httpHistory[path] && httpHistory[path].find(item => {
+    return ( // 传入 id 时比较 id, 不传入时取第一条匹配(最新记录)
+      id === undefined ? true : (item.id === id)
+      && (item.fullApi === fullApi)
+    )
+  }) || {}
+}
+
 const finalParagraphInterceptor = interceptor((req, res) => {
   // `express-interceptor`: 这个库的判断方式是基于十分有限的 content-type 判断为文本(是否转换为 buffer)
   // 其他拦截方案
@@ -103,7 +114,7 @@ server.use(finalParagraphInterceptor)
 
 serverTest.get(`*`, (req, res, next) => {
   const {path} = util.getClientUrlAndPath(req.originalUrl)
-  if(path.match(/^\/(get|post|head|put|delete|connect|options|trace)\b,/i)) { // 以 http `${method},` 单词加逗号开头的 path 视为 api
+  if(path.match(/^\/api\//)) { // 为 /api/ 则视为 api, 否则为静态文件
     next()
   } else {
     res.sendFile(__dirname + `/page/${path}`, err => {
@@ -114,39 +125,18 @@ serverTest.get(`*`, (req, res, next) => {
   }
 })
 
-serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前端请求的接口
-  let {api, argList} = req.url.match(new RegExp(`\/(?<argList>.*?)(?<api>\/.*)`)).groups
-  const rawApi = api
-  argList = argList.split(',')
-  const {query, params} = req
-  const {method, action} = argList.map((item, index) => index).reduce((res, index) => ({
-    ...res,
-    [['method', 'action'][index]]: argList[index]
-  }), {})
-  api = `${method.toUpperCase()} ${api}`
-  function getHistoryList() {
-    let list = []
-    for (const fullApi in httpHistory) {
-      if (httpHistory.hasOwnProperty(fullApi)) {
-        const {method, api} = getMethodUrl(fullApi)
-        list.push({
-          method,
-          api,
-          // fullApi,
-          statusCode: httpHistory[fullApi].res.lineHeaders.line.statusCode,
-          contentType: httpHistory[fullApi].res.lineHeaders.headers[`content-type`],
-          extensionName: (httpHistory[fullApi].res.bodyPath || '').replace(/(.*)(\.)/, ''),
-          date: httpHistory[fullApi].res.lineHeaders.headers.date,
-        })
-      }
-    }
-    return list
-  }
+serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查询前端请求的接口
+  let {actionRaw, api0} = req.params
+  const [action, ...actionArg] = actionRaw.split(`,`)
+  api0 = `/${api0}`
+  const [, method, api] = api0.match(/\/(\w+)(.*)/) || []
+  const urlData = {actionRaw, action, actionArg, api0, method, api}
+  const fullApi = `${method} ${api}`
 
-  function getFilePath(type) {
+  function getFilePath({reqOrRes, id}) {
     try {
-      const httpData = {...httpHistory[api][type]}
-      if(type === `res`) { // 模仿 res 中的响应头, 但是开启跨域
+      const httpData = getHistory({fullApi, id}).data[reqOrRes]
+      if(reqOrRes === `res`) { // 模仿 res 中的响应头, 但是开启跨域
         res.set(httpData.lineHeaders.headers)
         res.set(`access-control-allow-origin`, req.headers.origin)
       }
@@ -156,7 +146,6 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
       res.json('暂无请求数据')
     }
   }
-
   const actionFnObj = {
     getApiList() {
       const list = getHistoryList()
@@ -190,18 +179,18 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
       }, false);
     },
     replay() {
-      sendReq(api, err => {
+      sendReq(fullApi, err => {
         res.json(err)
       })
     },
     getBodyFileReq() {
-      getFilePath(`req`)
+      getFilePath({reqOrRes: `req`, id: actionArg[0]})
     },
     getBodyFileRes() {
-      getFilePath(`res`)
+      getFilePath({reqOrRes: `res`, id: actionArg[0]})
     },
     getHttpData() {
-      res.send(httpHistory[api])
+      res.send(getHistory({fullApi, id: actionArg[0]}).data)
     },
     getConfig() {
       res.send(config)
@@ -217,18 +206,16 @@ serverTest.get(`/:argList/:api(*)`, (req, res, next) => { // 给后端查询前�
 // api(server) // 前端自行添加的测试 api
 const noProxyRouteList = []
 Object.keys(api).forEach(key => {
-  let [, method, route] = key.match(/(\w+)\s+(.*)/) || [, key.trim()]
+  let {method, url} = util.fullApi2Obj(key)
   method = method.toLowerCase()
-  if((method === `*` || method === `/`) && (route === undefined)) { // 拦截所有方法所有路由
+  if((method === `*` || method === `/`) && (url === undefined)) { // 拦截所有方法所有路由
     server.all(`*`, api[key])
-  } else if(route === undefined) { // 拦截指定方法的所有路由
+  } else if(url === undefined) { // 拦截指定方法的所有路由
     server[method](`*`, api[key])
   }
-  if(method && route) { // 拦截指定方法的指定路由
-    let [, method, route] = key.match(/(\w+)\s+(.*)/)
-    noProxyRouteList.push(route)
-    method = method.toLowerCase()
-    server[method](route, api[key])
+  if(method && url) { // 拦截指定方法的指定路由
+    noProxyRouteList.push(url)
+    server[method](url, api[key])
   }
 })
 
@@ -254,7 +241,8 @@ server.listen(config.prot, () => {
 serverReplay.use(middlewaresObj.corsMiddleware)
 serverReplay.use(proxy(
   (pathname, req) => {
-    const history = getHttpHistory(req, 'url')
+    const fullApi = `${req.method.toLowerCase()} ${req.originalUrl}`
+    const history = getHistory({fullApi}).data
     if(history) { // 当存在 history 则不进入代理
       return false
     } else if(noProxyTest(pathname) === true) { // 当没有 history, 则使用 noProxy 规则
@@ -270,7 +258,8 @@ serverReplay.use(proxy(
 ))
 serverReplay.use(middlewares)
 serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
-  const history = getHttpHistory(req, 'url')
+  const fullApi = `${req.method.toLowerCase()} ${req.originalUrl}`
+  const history = getHistory({fullApi}).data
   try {
     const lineHeaders = history.res.lineHeaders
     res.set(lineHeaders.headers) // 还原 headers
@@ -301,6 +290,27 @@ serverTest.listen(config.testProt, () => {
   console.log(`接口调试地址: http://localhost:${config.testProt}/`)
 })
 
+function getHistoryList() {
+  let list = []
+  list = Object.keys(httpHistory).reduce((acc, cur) => {
+    return acc.concat(httpHistory[cur])
+  }, [])
+  list = list.map(({fullApi, id, data: {req, res}}) => {
+    const {method, url} = util.fullApi2Obj(fullApi)
+    return {
+      id,
+      method,
+      api: url,
+      // fullApi,
+      statusCode: res.lineHeaders.line.statusCode,
+      contentType: res.lineHeaders.headers[`content-type`],
+      extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
+      date: res.lineHeaders.headers.date,
+    }
+  })
+  return list
+}
+
 function noProxyTest(pathname) {
   // return true 时不走真实服务器, 而是走自定义 api
   return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
@@ -310,9 +320,10 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
   if(ignoreHttpHistory(req) === false) {
     const data = [];
     function createHttpHistory({buffer}) {
-      const {
+      let {
         method,
       } = req
+      method = method.toLowerCase()
       const {url, path} = util.getClientUrlAndPath(req.originalUrl)
       const headersObj = {req: req.headers || req.getHeaders(), res: res.headers || res.getHeaders()}
       headersObj.res.date = headersObj.res.date || (new Date()).toGMTString() // 居然没有 date ?
@@ -325,28 +336,35 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
       function createBodyPath(reqOrRes, apiId) { // 根据 url 生成文件路径, reqOrRes: req, res
         const headers = headersObj[reqOrRes]
         const contentType = headers[`content-type`]
-        const extensionName = mime.getExtension(contentType)
+        console.log(`contentTypecontentType`, contentType)
+        const extensionName = mime.getExtension(contentType) || ``
 
-        const bodyPathOld = ((getHttpHistory(req, 'url') || {})[reqOrRes] || {}).bodyPath
         const newPath = () => {
-          return `${config.dataDir}/${
+          const pathDir = `${config.dataDir}/${path}` // 以 path 创建目录
+          if(util.hasFile(pathDir) === false) { // 如果不存在此目录则进行创建
+            fs.mkdirSync(pathDir, { recursive: true })
+          }
+          let shortUrl = url.indexOf(path) === 0 ? url.replace(path, ``) : url // 为了节约目录长度删除 url 中的 path 部分, 因为 pathDir 已经是 path 的表示
+          shortUrl = shortUrl.slice(1, 100)
+          const filePath = `${pathDir}/${
             filenamify(
-              `${url.slice(1, 100)}_${method}_${reqOrRes}_${apiId}.${extensionName}`,
+              `${shortUrl}_${method}_${reqOrRes}_${apiId}.${extensionName}`,
               {maxLength: 255, replacement: '_'}
             )
           }`
+          // 如果 filePath 已存在于记录中, 则使用新的
+          return filePath
         }
 
         // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
-        let bodyPath = bodyPathOld || newPath()
-        if(mime.getType(bodyPathOld) !== contentType) {
-          bodyPath = bodyPath.replace(/(.*\.)(.*)/, `$1${extensionName}`)
-        }
+        let bodyPath = newPath()
+        console.log(`bodyPath`, bodyPath)
         return bodyPath
       }
 
+      const apiId = util.string10to62(util.nextId())
+      // const apiId = util.nextId()
       function getBodyPath() {
-        const apiId = util.string10to62(util.nextId())
         return {
           bodyPathReq: util.isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
           bodyPathRes: util.isEmpty(buffer) === false ? createBodyPath(`res`, apiId) : undefined,
@@ -387,7 +405,7 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
           bodyPath: bodyPathRes,
         },
       }
-      setHttpHistory(fullApi, resDataObj)
+      setHttpHistory({path, fullApi, id: apiId, data: resDataObj})
     }
 
     if(mock === true) {
@@ -421,27 +439,11 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
   )
 }
 
-function getHttpHistory(req, type) { // 获取某个请求的记录
-  // type: url|path 匹配方式, path 会忽略 url 上的 query 参数
-  const {url, path} = util.getClientUrlAndPath(req.originalUrl)
-
-  if(type === 'url') {
-    return httpHistory[`${req.method} ${url}`]
-  }
-  if(type === 'path') {
-    let re = new RegExp(`^${req.method} `)
-    let key  = Object.keys(httpHistory).find(key => {
-      return (key.match(re) && (httpHistory[key].req.path === path))
-    })
-    return httpHistory[key]
-  }
-}
-
 function init(config) { // 初始化, 例如创建所需文件, 以及格式化配置文件
   !util.hasFile(config.dataDir) && fs.mkdirSync(config.dataDir)
   !util.hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
   const db = getDb()
-  const api = config.api({axios, mime, mock, multiparty})
+  const api = config.api({axios, mime, mockjs, multiparty})
 
   return {
     db,
@@ -455,7 +457,7 @@ function init(config) { // 初始化, 例如创建所需文件, 以及格式化�
       || (util.hasFile(config.dbJsonName) === false)
       || fs.readFileSync(config.dbJsonName, `utf-8`).trim() === ``
     ) {
-      db = db({mock})
+      db = db({mockjs})
       fs.writeFileSync(config.dbJsonName, util.o2s(db))
       return db
     } else { // 如果 json 数据文件存在, 则从 json 文件中读取
@@ -466,24 +468,15 @@ function init(config) { // 初始化, 例如创建所需文件, 以及格式化�
 
 }
 
-function setHttpHistory(api, resDataObj) {
-  const [, method, url] = api.match(/(\w+)\s+(.*)/)
-  httpHistory[`${method} ${url}`] = {
-    ...httpHistory[`${method} ${url}`],
-    ...resDataObj,
-  }
+function setHttpHistory(data) {
+  const {path} = data
+  httpHistory[path] = (httpHistory[path] || []).concat(data)
   fs.writeFileSync(config.httpHistory, util.o2s(httpHistory))
 }
-
-function getMethodUrl(path) {
-  const [, method, api] = path.match(/(\w+)\s+(.*)/)
-  return {method, api}
-}
-
-function sendReq(api, cb) { // 发送请求
+function sendReq(api, cb, apiId) { // 发送请求
   // api httpHistory 中的 api
   // console.log(`httpHistory[api]`, httpHistory[api])
-  const httpDataReq = httpHistory[api].req
+  const httpDataReq = getHistory({fullApi: api, id: apiId}).data.req
   const {line: {path, query, params}, headers} = httpDataReq.lineHeaders
   const [, method, url] = api.match(/(\w+)\s+(.*)/)
   let resErr = {message: ``, config: {}}

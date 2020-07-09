@@ -19,6 +19,7 @@ window.HttpShow = (() => {
     useRef,
   } = React
   const {
+    Drawer,
     Collapse,
     Button,
     Tag,
@@ -65,6 +66,8 @@ window.HttpShow = (() => {
         ...initState,
         apiList: [],
         replayDone: true,
+        showHistry: false,
+        parseHashData: {}, // 解析 hash 参数得到的信息
         captureImg: undefined, // 截图 objectUrl
         // fullApi: `GET /api/options/?page=1&pageSize=999`,
         // fullApi: `POST /api/auth/login/`,
@@ -104,7 +107,7 @@ window.HttpShow = (() => {
         const replayDone = state.replayDone
         if(replayDone) {
           setState(preState => ({...preState, replayDone: false}))
-          http.get(`/${method},replay${api}`).then(res => {
+          http.get(`/api/replay/${method}${api}`).then(res => {
             setState(preState => ({...preState, replayDone: true}))
             message.info(`重发请求成功 ${res.message}`)
             getHttpData({method, api})
@@ -177,7 +180,7 @@ window.HttpShow = (() => {
         setState(preState => ({...deepSet(preState, `activeTabs`, key)}))
       }
 
-      const location = useLocation();
+      const reactLocation = useLocation();
 
 
       function getSimpleInfo(httpData) {
@@ -200,12 +203,14 @@ window.HttpShow = (() => {
 
       function getHttpData({method, api}) {
         console.log(`method, api`, method, api)
-        const fullApi = `${method.toLocaleUpperCase()} ${api}`
-        console.log(`fullApi`, fullApi)
-        http.get(`${method},getHttpData${api}`).then(res => {
+        const fullApi = `${method} ${api}`
+        console.log(`fullApi`, fullApi, state.parseHashData)
+        http.get(`/api/getHttpData/${method}${api}`).then(res => {
+          const [, histryId = ``] = window.location.hash.match(/\#\/histry,(\w+)/) || []
           const newData = {
             method,
             api,
+            id: histryId, // todo 这里不一定是 id, 可能会导致错误
             data: res,
           }
           setState(preState => ({
@@ -218,13 +223,13 @@ window.HttpShow = (() => {
       }
 
       function getApiList() {
-        http.get('/GET,getApiList/').then(res => {
+        http.get(`/api/getApiList/`).then(res => {
           setState(preState => ({...deepSet(preState, `apiList`, res)}))
         })
       }
 
       function getApiListSse() {
-        const source = new EventSource('/GET,getApiListSse/')
+        const source = new EventSource(`/api/getApiListSse/`)
         source.onopen = event => {console.log(`sse onopen`) }
         source.onerror = event => { console.log(`sse onerror`) }
         source.addEventListener('message', event => {
@@ -245,12 +250,16 @@ window.HttpShow = (() => {
         })
       }
 
+      function historyFn(isShow) {
+        setState(preState => ({...deepSet(preState, `showHistry`, isShow)}))
+      }
+
       useEffect(() => {
         window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
       }, [state.activeTabs]);
 
       useEffect(() => {
-        http.get(`/GET,getConfig/`).then(res => {
+        http.get(`/api/getConfig/`).then(res => {
           setState(preState => ({...deepSet(preState, `serverConfig`, res)}))
           const {openApi} = res
           openApi && initSwagger(openApi)
@@ -260,10 +269,26 @@ window.HttpShow = (() => {
 
       useEffect(() => {
         hideDoc()
-        console.log(`location`, location)
-        console.log(`location.pathname`, location.pathname)
-        // const [, method, api] = window.location.hash.match(/#\/(\w+)(.*)/) || []
-        const [, method, api] = (`#${location.pathname}${location.search}`).match(/#\/(\w+)(.*)/) || []
+        console.log(`location`, reactLocation)
+        console.log(`location.pathname`, reactLocation.pathname)
+        function parseHash() {
+          let res = {}
+          if(reactLocation.pathname.match(/^\/(\w+),(.*)/)) { // 如果 url 上有 /id,123/post/books/ 类似的参数, 则先取出 `id,123` 参数
+            let {argList, path} = reactLocation.pathname.match(new RegExp(`\/(?<argList>.*?)(?<path>\/.*)`)).groups
+            const [action, ...actionArg] = argList.split(',')
+            const actionArgStr = actionArg.join(`,`)
+            res = {...res, action, actionArg, actionArgStr}
+            const [, method, api] = (`#${path}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
+            res = {...res, method, api}
+          } else {
+            const [, method, api] = (`#${reactLocation.pathname}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
+            res = {...res, method, api}
+          }
+          return res
+        }
+        const parseHashData = parseHash()
+        setState(preState => ({...preState, parseHashData}))
+        const {api, method, action, actionArg} = parseHashData
         setState(preState => ({ // 当路由改变时, 清理上一次路由中的数据
           ...preState,
           httpData: {},
@@ -284,7 +309,7 @@ window.HttpShow = (() => {
         });
         hotKey.start();
         return () => hotKey.stop();
-      }, [location]);
+      }, [reactLocation]);
 
       const tabList = {
         ReqRes,
@@ -312,10 +337,20 @@ window.HttpShow = (() => {
                 <Button onClick={replay} size="small" className="replay">replay</Button>
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
                 <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger">swagger</Button>
+                {/* <Button onClick={() => historyFn(true)} size="small" className="history">history</Button> */}
                 <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
                   {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
                 </div>
               </div>
+              {/* <Drawer
+                title="history"
+                onClose={() => historyFn(false)}
+                visible={state.showHistry}
+              >
+                <p>Some contents...</p>
+                <p>Some contents...</p>
+                <p>Some contents...</p>
+              </Drawer> */}
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
                   Object.keys(tabList).map(key => (
