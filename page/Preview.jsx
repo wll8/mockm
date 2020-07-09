@@ -68,7 +68,7 @@ window.Preview = (() => {
     ))
 
     useEffect(() => {
-      http.get(`${httpData.method},getBodyFile${httpData.api}`, {responseType: 'blob'}).then(res => {
+      http.get(`/api/getBodyFile/${httpData.method}${httpData.api}`, {responseType: 'blob'}).then(res => {
         const blob = res
         setState(preState => ({...deepSet(preState, `resBodyBlob`, blob)}))
         blobTool(blob, `toText`).then(res => {
