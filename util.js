@@ -10,6 +10,12 @@ function isEmpty(value) { // 判断空值
   )
 }
 
+function fullApi2Obj(api) {
+  let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, api.trim()]
+  const {path} = getClientUrlAndPath(url)
+  return {path, method, url}
+}
+
 function removeEmpty(obj) { // 删除对象中为空值的键
   obj = {...obj}
   Object.keys(obj).forEach(key => {
@@ -65,10 +71,10 @@ function parseArgv(arr) { // 解析命令行参数
 }
 
 function string10to62(number) { // 10 进制转 62 进制, 用来压缩数字长度
-  let chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'.split(''),
-    radix = chars.length,
-    qutient = +number,
-    arr = [];
+  const chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'.split('')
+  const radix = chars.length
+  const arr = []
+  let qutient = +number
   do {
     mod = qutient % radix;
     qutient = (qutient - mod) / radix;
@@ -77,21 +83,21 @@ function string10to62(number) { // 10 进制转 62 进制, 用来压缩数字长
   return arr.join('');
 }
 
-function string62to10(number) { // 62 进制转 10 进制
-  let chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ',
-    radix = chars.length,
-    number = String(number),
-    len = number.length,
-    i = 0,
-    origin_number = 0;
+function string62to10(str) { // 62 进制转 10 进制
+  str = String(str)
+  const chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'
+  const radix = chars.length
+  const len = str.length
+  let origin_number = 0
+  let i = 0
   while (i < len) {
-    origin_number += Math.pow(radix, i++) * chars.indexOf(number.charAt(len - i) || 0);
+    origin_number += Math.pow(radix, i++) * chars.indexOf(str.charAt(len - i) || 0);
   }
   return origin_number;
 }
 
 function nextId() { // 获取全局自增 id
-  global.id = (global.id || 0) + 1
+  global.id = (global.id || 0) + Date.now() + 1
   return global.id
 }
 
@@ -144,6 +150,7 @@ function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 
 }
 
 module.exports = {
+  fullApi2Obj,
   handlePathArg,
   nextId,
   getClientUrlAndPath,

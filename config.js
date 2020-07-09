@@ -27,7 +27,7 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
   api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
-    const { axios, mime, mock, multiparty } = util
+    const { axios, mime, mockjs, multiparty } = util
     return { // api 拦截器
       '*' (req, res, next) { // 拦截所有方法和路由
         next()
@@ -40,7 +40,7 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
         })
       },
       'get /name' (req, res, next) { // 使用 mock 功能
-        res.json({name: mock(`@cname`)})
+        res.json({name: mockjs.mock(`@cname`)})
       },
       'get /file' (req, res, next) { // 发送文件
         res.sendFile(`${__dirname}/readme.md`)
@@ -54,11 +54,12 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
   dbJsonName: './db.json', // json 数据生成的保存位置
   dbCover: false, // 每次启动总是生成新的 db.json
   db (util) { // 供 json-server 使用的 json 数据, function || object
-    const { mock } = util
-    const data = mock({
+    const { mockjs } = util
+    const data = mockjs.mock({
       'books|3-7': [
         {
-          id: '@id',
+          'id|+1': 1,
+          num: mockjs.Random.natural(1, 10),
           title: '@ctitle',
         }
       ],
