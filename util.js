@@ -10,6 +10,29 @@ function isEmpty(value) { // 判断空值
   )
 }
 
+function parseRePath(rePath, url) { // 使用 path-to-regexp 转换 express 的 router, 并解析参数为对象
+  // 注: path-to-regexp 1.x 自带 match 方法可处理此方法, 但是当前的 json-server 依赖的 express 的路由语法仅支持 path-to-regexp@0.1.7
+  // 所以只能手动转换, 参考: https://github.com/ForbesLindesay/express-route-tester/blob/f39c57fa660490e74b387ed67bf8f2b50ee3c27f/index.js#L96
+  const pathToRegexp = require('path-to-regexp')
+  const keys = []
+  const re = pathToRegexp(rePath, keys)
+  const pathUrl = url
+  const result = re.exec(pathUrl)
+  const obj = keys.reduce((acc, cur, index) => {
+    acc[cur.name] = result[index + 1]
+    return acc
+  }, {})
+  return obj
+}
+
+function isFileEmpty(file) { // 判断文件是否存或为空
+  const fs = require(`fs`)
+  return (
+    (hasFile(file) === false)
+    || fs.readFileSync(file, `utf-8`).trim() === ``
+  )
+}
+
 function fullApi2Obj(api) {
   let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, api.trim()]
   const {path} = getClientUrlAndPath(url)
@@ -150,6 +173,7 @@ function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 
 }
 
 module.exports = {
+  parseRePath,
   fullApi2Obj,
   handlePathArg,
   nextId,
