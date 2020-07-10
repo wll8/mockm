@@ -27,7 +27,7 @@ const serverTest = jsonServer.create()
 
 const router = jsonServer.router(config.dbJsonName)
 const middlewares = jsonServer.defaults({bodyParser: true})
-const httpHistory = JSON.parse(fs.readFileSync(config.httpHistory).toString() || '{}') // 请求历史
+const httpHistory = require(config.httpHistory) // 请求历史
 
 const middlewaresObj = middlewares.flat().reduce((res, item) => {
   // 使用 jsonServer 里面的中间件, 以保持一致:
@@ -78,7 +78,6 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
 
 function getHistory({fullApi, id}) {
   const { path } = util.fullApi2Obj(fullApi)
-  console.log(`path`, path)
   return httpHistory[path] && httpHistory[path].find(item => {
     return ( // 传入 id 时比较 id, 不传入时取第一条匹配(最新记录)
       id === undefined ? true : (item.id === id)
@@ -168,7 +167,7 @@ serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查
       let oldSize = -1
       const interval = setInterval( () => {
         const fs = require(`fs`)
-        fs.stat(config.httpHistory, (err, stats) => {
+        fs.stat(config.httpHistory, (err, stats) => { // 不用全部读取文件即可读取文件大小信息, 减少内存占用
           if (err) {
             return console.error(err);
           }
@@ -190,13 +189,14 @@ serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查
       }, actionArg0)
     },
     getBodyFileReq() {
-      getFilePath({reqOrRes: `req`, id: actionArg[0]})
+      getFilePath({reqOrRes: `req`, id: actionArg0})
     },
     getBodyFileRes() {
-      getFilePath({reqOrRes: `res`, id: actionArg[0]})
+      getFilePath({reqOrRes: `res`, id: actionArg0})
     },
     getHttpData() {
-      res.send(getHistory({fullApi, id: actionArg[0]}).data)
+      console.log(`actionArg0`, {actionArg0, fullApi})
+      res.send(getHistory({fullApi, id: actionArg0}).data)
     },
     getConfig() {
       res.send(config)
@@ -451,8 +451,12 @@ function ignoreHttpHistory(req) { // 不进行记录的请求
 }
 
 function init(config) { // 初始化, 例如创建所需文件, 以及格式化配置文件
-  !util.hasFile(config.dataDir) && fs.mkdirSync(config.dataDir)
-  !util.hasFile(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+  if(util.hasFile(config.dataDir) === false) { // 如果没有目录则创建目录
+    fs.mkdirSync(config.dataDir, {recursive: true})
+  }
+  if(util.isFileEmpty(config.httpHistory)) { // 如果文件为空则创建文件
+    util.isFileEmpty(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+  }
   const db = getDb()
   const api = config.api({axios, mime, mockjs, multiparty})
 
@@ -464,9 +468,7 @@ function init(config) { // 初始化, 例如创建所需文件, 以及格式化�
   function getDb() { // 根据配置返回 db
     let db = config.db
     if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
-      config.dbCover
-      || (util.hasFile(config.dbJsonName) === false)
-      || fs.readFileSync(config.dbJsonName, `utf-8`).trim() === ``
+      config.dbCover || util.isFileEmpty(config.dbJsonName)
     ) {
       db = db({mockjs})
       fs.writeFileSync(config.dbJsonName, util.o2s(db))
@@ -547,12 +549,4 @@ function getDataRouter({method, pathname, db}) {
     }
   })
   return res
-}
-
-function getOsIp() { // 获取系统 ip
-  const obj = require(`os`).networkInterfaces()
-  const ip = Object.keys(obj).reduce((res, cur, index) => {
-    return [...res, ...obj[cur]]
-  }, []).filter(item => !item.address.match(/(127.|:)/))[0].address
-  return ip
 }

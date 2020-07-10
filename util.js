@@ -49,7 +49,7 @@ function removeEmpty(obj) { // 删除对象中为空值的键
   return obj
 }
 
-function hasFile(filePath) { // 判断文件是否存在
+function hasFile(filePath) { // 判断文件或目录是否存在
   const fs = require(`fs`)
   return fs.existsSync(filePath)
 }
@@ -173,6 +173,7 @@ function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 
 }
 
 module.exports = {
+  isFileEmpty,
   parseRePath,
   fullApi2Obj,
   handlePathArg,
