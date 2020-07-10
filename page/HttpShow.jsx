@@ -206,7 +206,7 @@ window.HttpShow = (() => {
 
       function getHttpData({method, api}) {
         console.log(`method, api`, method, api)
-        const fullApi = `${method} ${api}`
+        const fullApi = window.decodeURIComponent(`${method} ${api}`)
         console.log(`fullApi`, fullApi, state.parseHashData)
         http.get(`/api/getHttpData/${method}${api}`).then(res => {
           const [, histryId = ``] = window.location.hash.match(/\#\/histry,(\w+)/) || []
