@@ -1,5 +1,5 @@
 pre.md
-node_modules/
+node_modules*/
 public/
 httpData/
 db.json
