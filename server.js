@@ -131,6 +131,7 @@ serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查
   api0 = `/${api0}`
   const [, method, api] = api0.match(/\/(\w+)(.*)/) || []
   const urlData = {actionRaw, action, actionArg, api0, method, api}
+  const actionArg0 = actionArg[0]
   const fullApi = `${method} ${api}`
 
   function getFilePath({reqOrRes, id}) {
@@ -185,7 +186,7 @@ serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查
     replay() {
       sendReq(fullApi, err => {
         res.json(err)
-      })
+      }, actionArg0)
     },
     getBodyFileReq() {
       getFilePath({reqOrRes: `req`, id: actionArg[0]})
