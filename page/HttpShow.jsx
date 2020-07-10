@@ -10,6 +10,7 @@ const {
   getAbsolutePosition,
   debounce,
   swgPathToReg,
+  dateDiff,
 } = window.utils
 
 window.HttpShow = (() => {
@@ -27,6 +28,7 @@ window.HttpShow = (() => {
     BackTop,
     message,
     Spin,
+    Table,
   } = window.antd
 
   const { Panel } = Collapse;
@@ -46,7 +48,7 @@ window.HttpShow = (() => {
         Switch,
         Redirect,
       } = window.ReactRouterDOM
-      const history = useHistory()
+      const reactHistory = useHistory()
 
 
       const initState = (() => {
@@ -67,6 +69,7 @@ window.HttpShow = (() => {
         apiList: [],
         replayDone: true,
         showHistry: false,
+        dataApiHistry: [],
         parseHashData: {}, // 解析 hash 参数得到的信息
         captureImg: undefined, // 截图 objectUrl
         // fullApi: `GET /api/options/?page=1&pageSize=999`,
@@ -210,12 +213,14 @@ window.HttpShow = (() => {
           const newData = {
             method,
             api,
+            api0: `${method}${api}`,
             id: histryId, // todo 这里不一定是 id, 可能会导致错误
             data: res,
           }
           setState(preState => ({
             ...preState,
             fullApi,
+            histryId,
             httpData: newData,
             simpleInfo: getSimpleInfo(newData),
           }))
@@ -250,8 +255,32 @@ window.HttpShow = (() => {
         })
       }
 
+      const columnsApiHistry = [
+        {
+          title: 'date',
+          width: 100,
+          dataIndex: 'date',
+          sorter: (a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime(),
+          defaultSortOrder: 'descend',
+          render: record => {
+            // return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
+            return dateDiff(new Date(record))
+          }
+        },
+        {
+          title: 'code',
+          width: 100,
+          dataIndex: 'statusCode',
+          sorter: (a, b) => a.statusCode - b.statusCode,
+        },
+      ]
+
       function historyFn(isShow) {
         setState(preState => ({...deepSet(preState, `showHistry`, isShow)}))
+        isShow && http.get(`/api/getApiHistry/${state.httpData.api0}`).then(res => {
+          console.log(`resres`, res)
+          setState(preState => ({...deepSet(preState, `dataApiHistry`, res)}))
+        })
       }
 
       useEffect(() => {
@@ -333,24 +362,38 @@ window.HttpShow = (() => {
                 </div>
               </div>
               <div className="options">
-                <Button onClick={() => history.push(`/`)} size="small" className="replay">apiList</Button>
+                <Button onClick={() => reactHistory.push(`/`)} size="small" className="replay">apiList</Button>
                 <Button onClick={replay} size="small" className="replay">replay</Button>
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
                 <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger">swagger</Button>
-                {/* <Button onClick={() => historyFn(true)} size="small" className="history">history</Button> */}
+                <Button onClick={() => historyFn(true)} size="small" className="history">history</Button>
                 <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
                   {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
                 </div>
               </div>
-              {/* <Drawer
+              <Drawer
+                className="drawer"
                 title="history"
                 onClose={() => historyFn(false)}
                 visible={state.showHistry}
               >
-                <p>Some contents...</p>
-                <p>Some contents...</p>
-                <p>Some contents...</p>
-              </Drawer> */}
+                <Table
+                  onRow={record => {
+                    return {
+                      onClick: event => {
+                        reactHistory.push(`/histry,${record.id}/${record.method}${record.api}`)
+                      },
+                    };
+                  }}
+                  rowClassName={(record, index) => record.id === state.histryId ? 'curItem':''}
+                  showHeader={false}
+                  rowKey="id"
+                  size="small"
+                  pagination={false}
+                  columns={columnsApiHistry}
+                  dataSource={state.dataApiHistry}
+                />
+              </Drawer>
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
                   Object.keys(tabList).map(key => (

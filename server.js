@@ -151,6 +151,10 @@ serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查
       const list = getHistoryList()
       res.send(list)
     },
+    getApiHistry(apiId) {
+      const list = getHistoryList({method, api})
+      res.send(list)
+    },
     getApiListSse() {
       res.writeHead(200, {
         "Content-Type": "text/event-stream",
@@ -197,7 +201,7 @@ serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查
     },
   }
   if (actionFnObj[action]) {
-    actionFnObj[action]()
+    actionFnObj[action](...actionArg)
   } else {
     console.log(`无匹配方法`, {action, api, method})
   }
@@ -290,13 +294,18 @@ serverTest.listen(config.testProt, () => {
   console.log(`接口调试地址: http://localhost:${config.testProt}/`)
 })
 
-function getHistoryList() {
+function getHistoryList({method: methodFind, api: apiFind} = {}) {
   let list = []
   list = Object.keys(httpHistory).reduce((acc, cur) => {
     return acc.concat(httpHistory[cur])
   }, [])
   list = list.map(({fullApi, id, data: {req, res}}) => {
     const {method, url} = util.fullApi2Obj(fullApi)
+    if(methodFind && apiFind) {
+      if(((method === methodFind) && (url === apiFind)) === false) { // 如果没有找到就返回, 找到才进入数据处理
+        return false
+      }
+    }
     return {
       id,
       method,
@@ -307,7 +316,7 @@ function getHistoryList() {
       extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
       date: res.lineHeaders.headers.date,
     }
-  })
+  }).filter(item => item)
   return list
 }
 
