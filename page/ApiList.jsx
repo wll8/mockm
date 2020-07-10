@@ -32,7 +32,7 @@ window.ApiList = (() => {
   function com(props) {
     const apiList = props.apiList
 
-    const columns2 = [
+    const columnsApiList = [
       {
         title: 'code',
         width: 100,
@@ -80,7 +80,7 @@ window.ApiList = (() => {
     }
     return (
       <div className="ApiList">
-        <Table size="small" pagination={false} rowKey={({method, api}) => method + api } columns={columns2} dataSource={apiList} onChange={onChange} />
+        <Table size="small" pagination={false} rowKey="id" columns={columnsApiList} dataSource={apiList} onChange={onChange} />
       </div>
     )
   }
