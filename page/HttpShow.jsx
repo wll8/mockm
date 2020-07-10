@@ -10,7 +10,6 @@ const {
   getAbsolutePosition,
   debounce,
   swgPathToReg,
-  dateDiff,
 } = window.utils
 
 window.HttpShow = (() => {
@@ -20,7 +19,6 @@ window.HttpShow = (() => {
     useRef,
   } = React
   const {
-    Drawer,
     Collapse,
     Button,
     Tag,
@@ -28,7 +26,6 @@ window.HttpShow = (() => {
     BackTop,
     message,
     Spin,
-    Table,
   } = window.antd
 
   const { Panel } = Collapse;
@@ -48,7 +45,8 @@ window.HttpShow = (() => {
         Switch,
         Redirect,
       } = window.ReactRouterDOM
-      const reactHistory = useHistory()
+      const history = useHistory()
+      let apiToken = `` // 组件内全局变量, 可以在其他闭包函数中使用, 避免获取到旧值, 也可使用 useRef 来总是获取新值
 
 
       const initState = (() => {
@@ -67,10 +65,8 @@ window.HttpShow = (() => {
       const [state, setState] = useState({ // 默认值
         ...initState,
         apiList: [],
+        httpData: {},
         replayDone: true,
-        showHistry: false,
-        dataApiHistry: [],
-        parseHashData: {}, // 解析 hash 参数得到的信息
         captureImg: undefined, // 截图 objectUrl
         // fullApi: `GET /api/options/?page=1&pageSize=999`,
         // fullApi: `POST /api/auth/login/`,
@@ -110,7 +106,7 @@ window.HttpShow = (() => {
         const replayDone = state.replayDone
         if(replayDone) {
           setState(preState => ({...preState, replayDone: false}))
-          http.get(`/api/replay/${method}${api}`).then(res => {
+          http.get(`/${method},replay${api}`).then(res => {
             setState(preState => ({...preState, replayDone: true}))
             message.info(`重发请求成功 ${res.message}`)
             getHttpData({method, api})
@@ -183,8 +179,17 @@ window.HttpShow = (() => {
         setState(preState => ({...deepSet(preState, `activeTabs`, key)}))
       }
 
-      const reactLocation = useLocation();
+      const location = useLocation();
 
+      function getToken(req) {
+        let authorization
+        try {
+          authorization = req.lineHeaders.headers.authorization
+        } catch (error) {
+          console.log(`error`, `暂无 token`)
+        }
+        return authorization
+      }
 
       function getSimpleInfo(httpData) {
         if(!httpData.data) {
@@ -206,21 +211,18 @@ window.HttpShow = (() => {
 
       function getHttpData({method, api}) {
         console.log(`method, api`, method, api)
-        const fullApi = window.decodeURIComponent(`${method} ${api}`)
-        console.log(`fullApi`, fullApi, state.parseHashData)
-        http.get(`/api/getHttpData/${method}${api}`).then(res => {
-          const [, histryId = ``] = window.location.hash.match(/\#\/histry,(\w+)/) || []
+        const fullApi = `${method.toLocaleUpperCase()} ${api}`
+        console.log(`fullApi`, fullApi)
+        http.get(`${method},getHttpData${api}`).then(data => {
           const newData = {
             method,
             api,
-            api0: `${method}${api}`,
-            id: histryId, // todo 这里不一定是 id, 可能会导致错误
-            data: res,
+            data,
           }
+          apiToken = getToken(data.req)
           setState(preState => ({
             ...preState,
             fullApi,
-            histryId,
             httpData: newData,
             simpleInfo: getSimpleInfo(newData),
           }))
@@ -228,13 +230,13 @@ window.HttpShow = (() => {
       }
 
       function getApiList() {
-        http.get(`/api/getApiList/`).then(res => {
+        http.get('/GET,getApiList/').then(res => {
           setState(preState => ({...deepSet(preState, `apiList`, res)}))
         })
       }
 
       function getApiListSse() {
-        const source = new EventSource(`/api/getApiListSse/`)
+        const source = new EventSource('/GET,getApiListSse/')
         source.onopen = event => {console.log(`sse onopen`) }
         source.onerror = event => { console.log(`sse onerror`) }
         source.addEventListener('message', event => {
@@ -242,44 +244,48 @@ window.HttpShow = (() => {
           setState(preState => ({...deepSet(preState, `apiList`, newData)}))
         }, false);
       }
-      function initSwagger(openApi) {
+      function initSwagger(serverConfig) {
         // 添加 swagger-ui.css
         $(`head`).append($(`<link rel="stylesheet" href="/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui.css">`))
         $(`head`).append($(`<link rel="stylesheet" href="/swagger.css">`))
         // 添加 swagger-ui-bundle.js 并初始化 swg
-        $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
-          SwaggerUIBundle({
-            url: openApi,
-            dom_id: '#swagger-ui',
-          })
-        })
-      }
 
-      const columnsApiHistry = [
-        {
-          title: 'date',
-          width: 100,
-          dataIndex: 'date',
-          sorter: (a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime(),
-          defaultSortOrder: 'descend',
-          render: record => {
-            // return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
-            return dateDiff(new Date(record))
+        // swagger-ui v3 没有 setHost 方法, 这里注入此方法
+        // https://github.com/swagger-api/swagger-ui/issues/5981
+        const UrlMutatorPlugin = (system) => ({
+          rootInjects: {
+            setSpec (data) {
+              const jsonSpec = system.getState().toJSON().spec.json;
+              return system.specActions.updateJsonSpec({...jsonSpec, ...data});
+            }
           }
-        },
-        {
-          title: 'code',
-          width: 100,
-          dataIndex: 'statusCode',
-          sorter: (a, b) => a.statusCode - b.statusCode,
-        },
-      ]
+        });
 
-      function historyFn(isShow) {
-        setState(preState => ({...deepSet(preState, `showHistry`, isShow)}))
-        isShow && http.get(`/api/getApiHistry/${state.httpData.api0}`).then(res => {
-          console.log(`resres`, res)
-          setState(preState => ({...deepSet(preState, `dataApiHistry`, res)}))
+        $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
+          window.swaggerUi = SwaggerUIBundle({
+            url: serverConfig.openApi,
+            dom_id: '#swagger-ui',
+            plugins: [
+              UrlMutatorPlugin,
+            ],
+            requestInterceptor (req) {
+              // 如果原 url 存在 auth (需要 auth), 则使用新 token 替换它, 否则不要添加, 避免添加不必要的东西引起错误
+              let authorization = apiToken
+              if(authorization) {
+                req.headers.Authorization = authorization
+              }
+              return req
+            },
+            configs: {
+              preFetch (req) { // 请求前处理 req
+                return req
+              }
+            },
+            onComplete () {
+              const host = `${window.location.hostname}:${serverConfig.prot}`
+              window.swaggerUi.setSpec({host, protocol: `http`, schemes: [`http`]})
+            }
+          })
         })
       }
 
@@ -288,36 +294,20 @@ window.HttpShow = (() => {
       }, [state.activeTabs]);
 
       useEffect(() => {
-        http.get(`/api/getConfig/`).then(res => {
+        http.get(`/GET,getConfig/`).then(res => {
           setState(preState => ({...deepSet(preState, `serverConfig`, res)}))
           const {openApi} = res
-          openApi && initSwagger(openApi)
+          openApi && initSwagger(res)
         })
         getApiListSse()
       }, []);
 
       useEffect(() => {
         hideDoc()
-        console.log(`location`, reactLocation)
-        console.log(`location.pathname`, reactLocation.pathname)
-        function parseHash() {
-          let res = {}
-          if(reactLocation.pathname.match(/^\/(\w+),(.*)/)) { // 如果 url 上有 /id,123/post/books/ 类似的参数, 则先取出 `id,123` 参数
-            let {argList, path} = reactLocation.pathname.match(new RegExp(`\/(?<argList>.*?)(?<path>\/.*)`)).groups
-            const [action, ...actionArg] = argList.split(',')
-            const actionArgStr = actionArg.join(`,`)
-            res = {...res, action, actionArg, actionArgStr}
-            const [, method, api] = (`#${path}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
-            res = {...res, method, api}
-          } else {
-            const [, method, api] = (`#${reactLocation.pathname}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
-            res = {...res, method, api}
-          }
-          return res
-        }
-        const parseHashData = parseHash()
-        setState(preState => ({...preState, parseHashData}))
-        const {api, method, action, actionArg} = parseHashData
+        console.log(`location`, location)
+        console.log(`location.pathname`, location.pathname)
+        // const [, method, api] = window.location.hash.match(/#\/(\w+)(.*)/) || []
+        const [, method, api] = (`#${location.pathname}${location.search}`).match(/#\/(\w+)(.*)/) || []
         setState(preState => ({ // 当路由改变时, 清理上一次路由中的数据
           ...preState,
           httpData: {},
@@ -338,7 +328,7 @@ window.HttpShow = (() => {
         });
         hotKey.start();
         return () => hotKey.stop();
-      }, [reactLocation]);
+      }, [location]);
 
       const tabList = {
         ReqRes,
@@ -362,38 +352,14 @@ window.HttpShow = (() => {
                 </div>
               </div>
               <div className="options">
-                <Button onClick={() => reactHistory.push(`/`)} size="small" className="replay">apiList</Button>
+                <Button onClick={() => history.push(`/`)} size="small" className="replay">apiList</Button>
                 <Button onClick={replay} size="small" className="replay">replay</Button>
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
                 <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger">swagger</Button>
-                <Button onClick={() => historyFn(true)} size="small" className="history">history</Button>
                 <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
                   {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
                 </div>
               </div>
-              <Drawer
-                className="drawer"
-                title="history"
-                onClose={() => historyFn(false)}
-                visible={state.showHistry}
-              >
-                <Table
-                  onRow={record => {
-                    return {
-                      onClick: event => {
-                        reactHistory.push(`/histry,${record.id}/${record.method}${record.api}`)
-                      },
-                    };
-                  }}
-                  rowClassName={(record, index) => record.id === state.histryId ? 'curItem':''}
-                  showHeader={false}
-                  rowKey="id"
-                  size="small"
-                  pagination={false}
-                  columns={columnsApiHistry}
-                  dataSource={state.dataApiHistry}
-                />
-              </Drawer>
               <Tabs animated={false} defaultActiveKey={state.activeTabs} onChange={tabsChange}>
                 {
                   Object.keys(tabList).map(key => (
