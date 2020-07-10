@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { pathToRegexp } = require("path-to-regexp")
+const pathToRegexp = require('path-to-regexp')
 const interceptor = require('express-interceptor')
 const modifyResponse = require('node-http-proxy-json')
 const filenamify = require('filenamify')
@@ -126,7 +126,8 @@ serverTest.get(`*`, (req, res, next) => {
 })
 
 serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查询前端请求的接口
-  let {actionRaw, api0} = req.params
+  let {actionRaw, api0} = util.parseRePath(req.route.path, req.url)
+
   const [action, ...actionArg] = actionRaw.split(`,`)
   api0 = `/${api0}`
   const [, method, api] = api0.match(/\/(\w+)(.*)/) || []

@@ -23,7 +23,7 @@
     "multiparty": "^4.2.1",
     "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.4",
-    "path-to-regexp": "^6.1.0"
+    "path-to-regexp": "^0.1.7"
   },
   "devDependencies": {},
   "scripts": {
