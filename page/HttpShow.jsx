@@ -66,6 +66,8 @@ window.HttpShow = (() => {
         ...initState,
         apiList: [],
         httpData: {},
+        spec: {},
+        pathInSwagger: false,
         replayDone: true,
         captureImg: undefined, // 截图 objectUrl
         // fullApi: `GET /api/options/?page=1&pageSize=999`,
@@ -255,8 +257,10 @@ window.HttpShow = (() => {
         const UrlMutatorPlugin = (system) => ({
           rootInjects: {
             setSpec (data) {
-              const jsonSpec = system.getState().toJSON().spec.json;
-              return system.specActions.updateJsonSpec({...jsonSpec, ...data});
+              const jsonSpec = system.getState().toJSON().spec.json
+              const newSpec = {...jsonSpec, ...data}
+              setState(preState => ({...deepSet(preState, `spec`, newSpec)}))
+              return system.specActions.updateJsonSpec(newSpec)
             }
           }
         });
@@ -301,6 +305,24 @@ window.HttpShow = (() => {
         })
         getApiListSse()
       }, []);
+
+      useEffect(() => { // 判断是否有 swagger, 如果有则显示 swagger 按钮
+        try {
+          let {method, path} = state.httpData.data.req.lineHeaders.line
+          let {paths, basePath} = state.spec
+          method = method.toLowerCase()
+          // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
+          const re = new RegExp(`^(${basePath})(\/.*)`)
+          const swgPath = path.replace(re, '$2')
+          const res = Object.keys(paths).some(path => {
+            let re = swgPathToReg(path)
+            return swgPath.match(re)
+          })
+          setState(preState => ({...deepSet(preState, `pathInSwagger`, res)}))
+        } catch (error) {
+          setState(preState => ({...deepSet(preState, `pathInSwagger`, false)}))
+        }
+      }, [state.spec, state.httpData]);
 
       useEffect(() => {
         hideDoc()
@@ -355,7 +377,7 @@ window.HttpShow = (() => {
                 <Button onClick={() => history.push(`/`)} size="small" className="replay">apiList</Button>
                 <Button onClick={replay} size="small" className="replay">replay</Button>
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
-                <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger">swagger</Button>
+                <Button style={{display: state.pathInSwagger ? undefined : `none`}} onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger">swagger</Button>
                 <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
                   {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
                 </div>
