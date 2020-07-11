@@ -131,7 +131,7 @@ window.ReqRes = (() => {
       } = deepGet(state, `newHttpData.data.${reqOrRes}`)
       const contentType = deepGet(state, keyPath, '').split(`;`)[0]
       const shortType = contentType.replace(/\/.*/, '')
-      const file = `${location.origin}/api/getBodyFile${toUpperCase(reqOrRes)}/${newHttpData.method}${newHttpData.api}`
+      const file = `${location.origin}/api/getBodyFile${toUpperCase(reqOrRes)},${newHttpData.apiId}/${newHttpData.method}${newHttpData.api}`
       const noPreRender = obj => (
         <div className="noPre">
           <div className="msg">此文件类型暂不支持预览:</div>
