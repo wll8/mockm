@@ -26,6 +26,7 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
   openApi: `https://httpbin.org/spec.json`, // 关联的 openApi 数据文件
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
+  store: './httpData/store.json', // 录制信息保存位置
   api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
     const { axios, mime, mockjs, multiparty } = util
     return { // api 拦截器

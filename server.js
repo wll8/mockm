@@ -354,7 +354,7 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
           shortUrl = shortUrl.slice(1, 100)
           const filePath = `${pathDir}/${
             filenamify(
-              `${shortUrl}_${method}_${reqOrRes}_${apiId}.${extensionName}`,
+              `${shortUrl}_${method}_${apiId}_${reqOrRes}.${extensionName}`,
               {maxLength: 255, replacement: '_'}
             )
           }`
@@ -368,8 +368,8 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
         return bodyPath
       }
 
-      const apiId = util.string10to62(util.nextId())
-      // const apiId = util.nextId()
+      const apiCount = util.localStore(config.store).updateApiCount()
+      const apiId = util.string10to62(apiCount)
       function getBodyPath() {
         return {
           bodyPathReq: util.isEmpty(reqBody) === false ? createBodyPath(`req`, apiId) : undefined,
@@ -449,7 +449,10 @@ function init(config) { // 初始化, 例如创建所需文件, 以及格式化�
     fs.mkdirSync(config.dataDir, {recursive: true})
   }
   if(util.isFileEmpty(config.httpHistory)) { // 如果文件为空则创建文件
-    util.isFileEmpty(config.httpHistory) && fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+    fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+  }
+  if(util.isFileEmpty(config.store)) {
+    fs.writeFileSync(config.store, `{}`)
   }
   const db = getDb()
   const api = config.api({axios, mime, mockjs, multiparty})
