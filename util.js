@@ -1,3 +1,24 @@
+function localStore(storePath) { // 存取需要持久化存储的数据
+  const fs = require(`fs`)
+  delRequireCache(storePath)
+  const store = require(storePath)
+  return {
+    set(key, val) {
+      store[key] = val
+      fs.writeFileSync(storePath, o2s(store))
+      return store
+    },
+    get(key) {
+      return store[key]
+    },
+    updateApiCount() {
+      const apiCountOld =  this.get(`apiCount`) || 0
+      this.set(`apiCount`, apiCountOld + 1)
+      return this.get(`apiCount`)
+    },
+  }
+}
+
 function isEmpty(value) { // 判断空值
   return (
     value === null
@@ -171,8 +192,13 @@ function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 
     path: (new URL(originalUrl, `http://127.0.0.1`)).pathname,
   }
 }
+function delRequireCache(filePath) {
+  delete require.cache[require.resolve(filePath)]
+}
 
 module.exports = {
+  localStore,
+  delRequireCache,
   isFileEmpty,
   parseRePath,
   fullApi2Obj,
