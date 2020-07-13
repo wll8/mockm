@@ -14,6 +14,7 @@ const jsonServer = require('json-server')
 const fs = require('fs')
 const path = require('path')
 const querystring = require('querystring')
+const cloneDeep = require('lodash/cloneDeep')
 
 require('./log.js').logHelper()
 const config = require(`./config.js`)
@@ -86,30 +87,21 @@ function getHistory({fullApi, id}) {
   }) || {}
 }
 
-const finalParagraphInterceptor = interceptor((req, res) => {
-  // `express-interceptor`: 这个库的判断方式是基于十分有限的 content-type 判断为文本(是否转换为 buffer)
-  // 其他拦截方案
-  // https://stackoverflow.com/questions/33732509/express-js-how-to-intercept-response-send-response-json/33735452
-  // https://www.youtube.com/watch?v=1jhdfS1Bwcc
-  // https://www.npmjs.com/package/express-interceptor
-return {
-  isInterceptable: () => {
-    return true
-  },
-  intercept: (body, send) => {
-    const {statusCode, statusMessage, headers} = res
+server.use((req, res, next) => {
+  const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
+  const oldSend = res.send
+  res.send = function(data) {
+    res.send = oldSend
     setHttpHistoryWrap({
-      req,
+      req: {...req, body: reqBody},
       res,
       mock: true,
-      buffer: typeof(body) === `object` ? body : Buffer.from(body),
+      buffer: typeof(data) === `object` ? data : Buffer.from(data),
     })
-    send(body)
+    return res.send(data)
   }
-}
+  next()
 })
-
-server.use(finalParagraphInterceptor)
 
 serverTest.get(`*`, (req, res, next) => {
   const {path} = util.getClientUrlAndPath(req.originalUrl)
