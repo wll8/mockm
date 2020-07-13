@@ -15,6 +15,8 @@ const fs = require('fs')
 const path = require('path')
 const querystring = require('querystring')
 const cloneDeep = require('lodash/cloneDeep')
+const morgan = require('morgan')
+const logger = morgan('dev')
 
 require('./log.js').logHelper()
 const config = require(`./config.js`)
@@ -50,6 +52,7 @@ server.use(proxy(
     target: config.origin,
     changeOrigin: true,
     onProxyReq: (proxyReq, req, res) => {
+      logger(req, res, () => {})
       middlewaresObj.jsonParser(req, res, () => {
         const {
           method,
@@ -376,7 +379,6 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
       const {bodyPathReq, bodyPathRes} = getBodyPath()
       bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
       bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
-      console.log(`${util.getClientIp(req)} => ${method} ${path} ${statusCode} ${statusMessage || ``}`)
       const resDataObj = {
         req: {
           lineHeaders: {
