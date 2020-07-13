@@ -18,6 +18,7 @@
     "filenamify": "^4.1.0",
     "http-proxy-middleware": "^0.20.0",
     "json-server": "^0.16.1",
+    "lodash": "^4.17.19",
     "mime": "^2.4.4",
     "mockjs": "^1.1.0",
     "multiparty": "^4.2.1",
