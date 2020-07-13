@@ -18,7 +18,9 @@ const cloneDeep = require('lodash/cloneDeep')
 const morgan = require('morgan')
 const logger = morgan('dev')
 
-require('./log.js').logHelper()
+const {logHelper, print} = require('./log.js')
+logHelper()
+
 const config = require(`./config.js`)
 const util = require(`./util.js`)
 
@@ -266,7 +268,6 @@ serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的
     res.set(lineHeaders.headers) // 还原 headers
     res.set(`access-control-allow-origin`, req.headers.origin)
     const bodyPath = history.res.bodyPath
-    console.log(`bodyPath`, bodyPath)
     if(bodyPath) {
       const newPath = path.resolve(bodyPath) // 发送 body
       res.sendFile(newPath)
@@ -342,7 +343,6 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
       function createBodyPath(reqOrRes, apiId) { // 根据 url 生成文件路径, reqOrRes: req, res
         const headers = headersObj[reqOrRes]
         const contentType = headers[`content-type`]
-        console.log(`contentTypecontentType`, contentType)
         const extensionName = mime.getExtension(contentType) || ``
 
         const newPath = () => {
@@ -364,7 +364,6 @@ function setHttpHistoryWrap({req, res, mock = false, buffer}) { // 从 req, res 
 
         // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
         let bodyPath = newPath()
-        console.log(`bodyPath`, bodyPath)
         return bodyPath
       }
 
