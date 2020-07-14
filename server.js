@@ -67,9 +67,7 @@ server.use(proxy(
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
     onProxyRes: (proxyRes, req, res) => {
-      const apiCount = util.localStore(config.store).get(`apiCount`) + 1
-      const apiId = util.string10to62(apiCount)
-      proxyRes.headers[config.apiInHeader] = `http://${util.getOsIp()}:${config.testProt}/#/histry,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+      setApiInHeader({res: proxyRes, req})
       setHttpHistoryWrap({req, res: proxyRes})
     },
     logLevel: `silent`,
@@ -94,7 +92,8 @@ function getHistory({fullApi, id}) {
   }) || {}
 }
 
-server.use((req, res, next) => {
+server.use((req, res, next) => { // 保存自定义接口的请求历史
+  setApiInHeader({res, req})
   const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
   const oldSend = res.send
   res.send = function(data) {
@@ -547,4 +546,16 @@ function getDataRouter({method, pathname, db}) {
     }
   })
   return res
+}
+
+function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
+  const apiCount = util.localStore(config.store).get(`apiCount`) + 1
+  const apiId = util.string10to62(apiCount)
+  const testApi = `http://${util.getOsIp()}:${config.testProt}/#/histry,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+  if(res.headers) {
+    res.headers[config.apiInHeader] = testApi
+  }
+  if(res.setHeader) {
+    res.setHeader(config.apiInHeader, testApi)
+  }
 }
