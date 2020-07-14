@@ -1,15 +1,16 @@
 function localStore(storePath) { // 存取需要持久化存储的数据
   const fs = require(`fs`)
-  delRequireCache(storePath)
-  const store = require(storePath)
+  let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
   return {
     set(key, val) {
-      store[key] = val
-      fs.writeFileSync(storePath, o2s(store))
+      const newStore = store()
+      newStore[key] = val
+      fs.writeFileSync(storePath, o2s(newStore))
       return store
     },
     get(key) {
-      return store[key]
+      const newStore = store()
+      return newStore[key]
     },
     updateApiCount() {
       const apiCountOld =  this.get(`apiCount`) || 0
