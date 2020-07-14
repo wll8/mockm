@@ -34,6 +34,11 @@ window.ApiList = (() => {
 
     const columnsApiList = [
       {
+        title: 'id',
+        width: 80,
+        dataIndex: 'id'
+      },
+      {
         title: 'code',
         width: 100,
         dataIndex: 'statusCode',
