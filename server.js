@@ -298,7 +298,7 @@ function getHistoryList({method: methodFind, api: apiFind} = {}) {
   list = Object.keys(httpHistory).reduce((acc, cur) => {
     return acc.concat(httpHistory[cur])
   }, [])
-  list = list.map(({fullApi, id, data: {req, res}}) => {
+  list = list.filter(item => item.data).map(({fullApi, id, data: {req, res}}) => {
     const {method, url} = util.fullApi2Obj(fullApi)
     if(methodFind && apiFind) {
       if(((method === methodFind) && (url === apiFind)) === false) { // 如果没有找到就返回, 找到才进入数据处理
