@@ -67,7 +67,9 @@ server.use(proxy(
       TOKEN = req.get('Authorization') || TOKEN // 获取 token
     },
     onProxyRes: (proxyRes, req, res) => {
-      proxyRes.headers[config.apiInHeader] = `http://${util.getOsIp()}:${config.testProt}/#/${req.method}${req.originalUrl}`
+      const apiCount = util.localStore(config.store).get(`apiCount`) + 1
+      const apiId = util.string10to62(apiCount)
+      proxyRes.headers[config.apiInHeader] = `http://${util.getOsIp()}:${config.testProt}/#/histry,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
       setHttpHistoryWrap({req, res: proxyRes})
     },
     logLevel: `silent`,
