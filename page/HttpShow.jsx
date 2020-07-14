@@ -218,7 +218,7 @@ window.HttpShow = (() => {
         const fullApi = window.decodeURIComponent(`${method} ${api}`)
         console.log(`fullApi`, fullApi, state.parseHashData)
         http.get(`/api/getHttpData/${method}${api}`).then(data => {
-          const [, apiId = ``] = window.location.hash.match(/\#\/histry,(\w+)/) || []
+          const [, apiId = undefined] = window.location.hash.match(/\#\/histry,(\w+)/) || []
           const newData = {
             method,
             api,
@@ -299,6 +299,10 @@ window.HttpShow = (() => {
       }
 
       const columnsApiHistry = [
+        {
+          title: 'id',
+          dataIndex: 'id',
+        },
         {
           title: 'date',
           width: 100,
@@ -446,7 +450,14 @@ window.HttpShow = (() => {
                       },
                     };
                   }}
-                  rowClassName={(record, index) => record.id === state.histryId ? 'curItem':''}
+                  rowClassName={(record, index) => {
+                    const res = ((record.id === state.httpData.apiId) // 有 apiId 时高亮匹配当前 id 的行
+                      || ((state.httpData.apiId === undefined ) && (index === 0)) // 没有 appId 时, 高亮第一行
+                    )
+                      ? `curItem index_${index}`
+                      : `index_${index}`
+                    return res
+                  }}
                   showHeader={false}
                   rowKey="id"
                   size="small"
