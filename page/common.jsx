@@ -14,10 +14,10 @@ window.http = axios.create({
 window.http.interceptors.request.use(
   config => {
     const { url } = config
-    const [, histryId = ``] = window.location.hash.match(/\#\/histry,(\w+)/) || []
+    const [, apiId = ``] = window.location.hash.match(/\#\/histry,(\w+)/) || []
     let newUrl = url
     if(url.match(/^\/api\/\w+\//)) { // 当 `/api/有方法但无参数/` 时, 默认添加请求的 id
-      newUrl = url.replace(/(^\/api\/)(\w+)/, `$1$2${histryId ? `,${histryId}` : ``}`)
+      newUrl = url.replace(/(^\/api\/)(\w+)/, `$1$2${apiId ? `,${apiId}` : ``}`)
     }
     config.url = newUrl
    return config
