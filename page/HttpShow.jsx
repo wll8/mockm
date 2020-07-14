@@ -112,18 +112,14 @@ window.HttpShow = (() => {
       function replay() {
         const {method, api} = state.httpData
         const replayDone = state.replayDone
-        if(replayDone) {
-          setState(preState => ({...preState, replayDone: false}))
-          http.get(`/api/replay/${method}${api}`).then(res => {
-            setState(preState => ({...preState, replayDone: true}))
-            message.info(`重发请求成功 ${res.message}`)
-            getHttpData({method, api})
-          }).catch(err => {
-            message.error(`重发失败 ${err}`)
-          })
-        } else {
-          message.info('请等待重发结束')
-        }
+        setState(preState => ({...preState, replayDone: false}))
+        http.get(`/api/replay/${method}${api}`).then(res => {
+          setState(preState => ({...preState, replayDone: true}))
+          message.info(`重发请求成功 ${res.message}`)
+          getHttpData({method, api})
+        }).catch(err => {
+          message.error(`重发失败 ${err}`)
+        })
       }
       function hideDoc() {
         setState(preState => ({...preState, swagger: false}))
@@ -428,7 +424,7 @@ window.HttpShow = (() => {
               </div>
               <div className="options">
                 <Button onClick={() => reactHistory.push(`/`)} size="small" className="replay">apiList</Button>
-                <Button onClick={replay} size="small" className="replay">replay</Button>
+                <Button onClick={replay} size="small" className="replay">replay <icons.LoadingOutlined style={{display: state.replayDone ? `none` : undefined}} /> </Button>
                 <Button onClick={capture} size="small" type={state.captureImg ? `primary` : `default`} className="capture">capture</Button>
                 <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger" style={{display: state.pathInSwagger ? undefined : `none`}}>swagger</Button>
                 <Button onClick={() => historyFn(true)} size="small" className="history">history</Button>
