@@ -84,7 +84,7 @@ server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
 
 function getHistory({fullApi, id}) {
   const { path } = util.fullApi2Obj(fullApi)
-  return httpHistory[path] && httpHistory[path].find(item => {
+  return httpHistory[path] && [...httpHistory[path]].reverse().find(item => {
     return ( // 传入 id 时比较 id, 不传入时取第一条匹配(最新记录)
       (id === undefined ? true : (item.id === id))
       && (item.fullApi === fullApi)
