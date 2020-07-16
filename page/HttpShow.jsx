@@ -218,7 +218,7 @@ window.HttpShow = (() => {
         const fullApi = window.decodeURIComponent(`${method} ${api}`)
         console.log(`fullApi`, fullApi, state.parseHashData)
         http.get(`/api/getHttpData/${method}${api}`).then(data => {
-          const [, apiId = undefined] = window.location.hash.match(/\#\/histry,(\w+)/) || []
+          const [, apiId = undefined] = window.location.hash.match(/\#\/history,(\w+)/) || []
           const newData = {
             method,
             api,
@@ -446,7 +446,7 @@ window.HttpShow = (() => {
                   onRow={record => {
                     return {
                       onClick: event => {
-                        reactHistory.push(`/histry,${record.id}/${record.method}${record.api}`)
+                        reactHistory.push(`/history,${record.id}/${record.method}${record.api}`)
                       },
                     };
                   }}
