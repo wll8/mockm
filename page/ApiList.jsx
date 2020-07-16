@@ -61,7 +61,7 @@ window.ApiList = (() => {
         sorter: (a, b) => a.api.localeCompare(b.api),
         render: record => {
           return (
-            <a href={`#/histry,${record.id}/${record.method}${record.api}`}>
+            <a href={`#/history,${record.id}/${record.method}${record.api}`}>
               {record.api}
             </a>
           )

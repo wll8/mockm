@@ -1,3 +1,403 @@
+function customApi({api, db}) {
+  /**
+   * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
+   */
+
+  function parseApi() { // 解析自定义 api
+    const noProxyRouteList = []
+    const serverRouterList = [] // server 可使用的路由列表
+    Object.keys(api).forEach(key => {
+      let {method, url} = fullApi2Obj(key)
+      method = method.toLowerCase()
+      if((method === `*` || method === `/`) && (url === undefined)) { // 拦截所有方法所有路由
+        serverRouterList.push({method: `all`, router: `*`, action: api[key]})
+      } else if(url === undefined) { // 拦截指定方法的所有路由
+        server[method](`*`, api[key])
+        serverRouterList.push({method, router: `*`, action: api[key]})
+      }
+      if(method && url) { // 拦截指定方法的指定路由
+        noProxyRouteList.push(url)
+        serverRouterList.push({method, router: url, action: api[key]})
+      }
+    })
+    function noProxyTest(pathname) {
+      // return true 时不走真实服务器, 而是走自定义 api
+      const pathToRegexp = require('path-to-regexp')
+      return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
+    }
+    return {
+      noProxyRouteList,
+      serverRouterList,
+      noProxyTest,
+    }
+  }
+
+  function getDataRouter({method, pathname}) {
+    /**
+      给定一个 method 和 path, 根据 db.json 来判断是否应该过滤
+      根据 db.json 获取要拦截的 route , 参考 node_modules/json-server/lib/server/router/index.js
+    */
+    const pathToRegexp = require('path-to-regexp')
+
+    method = method.trim().toLowerCase()
+    const res = Object.keys(db).some(key => {
+      const val = db[key]
+      if (isType(val, `object`)) {
+        return `get post put patch `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname) // 方法与路由匹配
+      }
+      if (isType(val, `array`)) {
+        return (
+          (`get post `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname)) // 获取所有或创建单条
+          || (`get put patch delete `.includes(`${method} `) && pathToRegexp(`/${key}/:id`).exec(pathname)) // 处理针对于 id 单条数据的操作, 注意 id 的取值字段 foreignKeySuffix
+        )
+      }
+    })
+    return res
+  }
+
+  return {
+    parseApi: parseApi(),
+    getDataRouter,
+  }
+
+}
+
+function initHandle({config}) { // 初始化处理程序
+  const axios = require('axios')
+  const mockjs = require('mockjs')
+  const mime = require('mime')
+  const multiparty = require('multiparty')
+
+  function getDb() { // 根据配置返回 db
+    const fs = require(`fs`)
+    let db = config.db
+    if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
+      config.dbCover || isFileEmpty(config.dbJsonName)
+    ) {
+      db = db({mockjs})
+      fs.writeFileSync(config.dbJsonName, o2s(db))
+      return db
+    } else { // 如果 json 数据文件存在, 则从 json 文件中读取
+      db = require(config.dbJsonName)
+      return db
+    }
+  }
+
+  function init() { // 初始化, 例如创建所需文件, 以及格式化配置文件
+    const fs = require(`fs`)
+    if(hasFile(config.dataDir) === false) { // 如果没有目录则创建目录
+      fs.mkdirSync(config.dataDir, {recursive: true})
+    }
+    if(isFileEmpty(config.httpHistory)) { // 如果文件为空则创建文件
+      fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
+    }
+    if(isFileEmpty(config.store)) {
+      fs.writeFileSync(config.store, `{}`)
+    }
+    const db = getDb()
+    const api = config.api({axios, mime, mockjs, multiparty})
+
+    return {
+      db,
+      api,
+    }
+
+  }
+
+  return {
+    init,
+  }
+
+}
+
+function historyHandle({config}) {
+  /**
+   * 历史记录处理
+   */
+
+  function getHistoryList({history, method: methodRef, api: apiRef} = {}) {
+    let list = []
+    list = Object.keys(history).reduce((acc, cur) => {
+      return acc.concat(history[cur])
+    }, [])
+    list = list.filter(item => item.data).map(({fullApi, id, data: {req, res}}) => {
+      const {method, url} = fullApi2Obj(fullApi)
+      if(methodRef && apiRef) {
+        if(((method === methodRef) && (url === apiRef)) === false) { // 如果没有找到就返回, 找到才进入数据处理
+          return false
+        }
+      }
+      return {
+        id,
+        method,
+        api: url,
+        // fullApi,
+        statusCode: res.lineHeaders.line.statusCode,
+        contentType: res.lineHeaders.headers[`content-type`],
+        extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
+        date: res.lineHeaders.headers.date,
+      }
+    }).filter(item => item)
+    return list
+  }
+
+  function getHistory({history, fullApi, id}) { // 获取指定 fullApi/id 中的历史记录
+    const { path } = fullApi2Obj(fullApi)
+    return history[path] && [...history[path]].reverse().find(item => {
+      return ( // 传入 id 时比较 id, 不传入时取第一条匹配(最新记录)
+        (id === undefined ? true : (item.id === id))
+        && (item.fullApi === fullApi)
+      )
+    }) || {}
+  }
+
+  function ignoreHttpHistory({req}) { // 是否应该记录 req
+    const {method, url} = req
+    return Boolean(
+      method.match(/OPTIONS/i)
+      || (
+        method.match(/GET/i) && url.match(new RegExp(`/\/${config.pathname}\//`))
+      )
+    )
+  }
+
+  function createBodyPath({req, headersObj, reqOrRes, apiId}) { // 根据 url 生成文件路径, reqOrRes: req, res
+    const filenamify = require('filenamify')
+    const fs = require(`fs`)
+    const mime = require('mime')
+    const headers = headersObj[reqOrRes]
+    const contentType = headers[`content-type`]
+    const extensionName = mime.getExtension(contentType) || ``
+    const {url, path} = getClientUrlAndPath(req.originalUrl)
+    let {
+      method,
+    } = req
+    method = method.toLowerCase()
+
+    const newPath = () => {
+      const apiDir = `${config.dataDir}/${path}` // 以 path 创建目录
+      if(hasFile(apiDir) === false) { // 如果不存在此目录则进行创建
+        fs.mkdirSync(apiDir, { recursive: true })
+      }
+      let shortUrl = url.indexOf(path) === 0 ? url.replace(path, ``) : url // 为了节约目录长度删除 url 中的 path 部分, 因为 pathDir 已经是 path 的表示
+      shortUrl = shortUrl.slice(1, 100)
+      const filePath = `${apiDir}/${
+        filenamify(
+          `${shortUrl}_${method}_${apiId}_${reqOrRes}.${extensionName}`,
+          {maxLength: 255, replacement: '_'}
+        )
+      }`
+      // 如果 filePath 已存在于记录中, 则使用新的
+      return filePath
+    }
+
+    // 使用 bodyPath 的后缀判断文件类型, 如果与新请求的 contentType 不同, 则更改原文件名后缀
+    let bodyPath = newPath()
+    return bodyPath
+  }
+
+  function createHttpHistory({history, dataDir, buffer, req, res}) {
+    const fs = require(`fs`)
+    let {
+      method,
+    } = req
+    method = method.toLowerCase()
+    const {url, path} = getClientUrlAndPath(req.originalUrl)
+    const headersObj = {req: req.headers || req.getHeaders(), res: res.headers || res.getHeaders()}
+    headersObj.res.date = headersObj.res.date || (new Date()).toGMTString() // 居然没有 date ?
+    const {statusCode, statusMessage, headers} = res
+    const fullApi = `${method} ${url}`
+    const reqBody = req.body
+
+    // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
+
+    const apiCount = localStore(config.store).updateApiCount()
+    const apiId = string10to62(apiCount)
+    function getBodyPath() {
+      const arg = {req, headersObj, dataDir, apiId}
+      return {
+        bodyPathReq: isEmpty(reqBody) === false ? createBodyPath({...arg ,reqOrRes: `req`}) : undefined,
+        bodyPathRes: isEmpty(buffer) === false ? createBodyPath({...arg ,reqOrRes: `res`}) : undefined,
+      }
+    }
+    const {bodyPathReq, bodyPathRes} = getBodyPath()
+    bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
+    bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
+    const resDataObj = {
+      req: {
+        lineHeaders: {
+          line: removeEmpty({
+            method,
+            url,
+            path,
+            query: req.query,
+            params: req.params,
+            version: req.httpVersion,
+          }),
+          headers: headersObj.req,
+          // _header: proxyRes.req._header,
+        },
+        // body: null,
+        bodyPath: bodyPathReq,
+      },
+      res: {
+        lineHeaders: {
+          line: {
+            statusCode,
+            statusMessage,
+            version: res.httpVersion,
+          },
+          headers: headersObj.res,
+          // _header: res._header,
+        },
+        // body: null,
+        bodyPath: bodyPathRes,
+      },
+    }
+    setHttpHistory({
+      data: {path, fullApi, id: apiId, data: resDataObj},
+      history,
+    })
+  }
+
+  function setHttpHistory({data, history}) {
+    const fs = require(`fs`)
+    const {path} = data
+    history[path] = (history[path] || []).concat(data)
+    fs.writeFileSync(config.httpHistory, o2s(history))
+  }
+
+  function setHttpHistoryWrap({history, req, res, mock = false, buffer}) { // 从 req, res 记录 history
+    if(ignoreHttpHistory({req}) === false) {
+      const data = [];
+      const arg = {
+        history,
+        buffer,
+        req,
+        res,
+      }
+      if(mock === true) {
+        createHttpHistory(arg)
+        return false
+      } else {
+        res.on('data', function(chunk) {
+          data.push(chunk)
+        }).on('end', function() {
+          const buffer = Buffer.concat(data)
+          createHttpHistory({...arg, buffer})
+        })
+      }
+    }
+  }
+
+  return {
+    setHttpHistoryWrap,
+    createHttpHistory,
+    createBodyPath,
+    getHistory,
+    getHistoryList,
+    ignoreHttpHistory,
+  }
+
+}
+
+function clientInjection({config}) { // 到客户端前的数据注入, 例如 添加测试 api, 统一处理数据格式
+  function handleRes(res, data) {
+    return {
+      code: res.statusCode,
+      success: Boolean(('' + res.statusCode).match(/^[2]/)), // 如果状态码以2开头则为 true
+      data,
+    }
+  }
+
+  function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
+    const apiCount = localStore(config.store).get(`apiCount`) + 1
+    const apiId = string10to62(apiCount)
+    const testApi = `http://${getOsIp()}:${config.testProt}/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+    if(res.headers) {
+      res.headers[config.apiInHeader] = testApi
+    }
+    if(res.setHeader) {
+      res.setHeader(config.apiInHeader, testApi)
+    }
+  }
+
+  return {
+    handleRes,
+    setApiInHeader,
+  }
+}
+
+function reqHandle({config}) { // 请求处理程序
+  function sendReq({token, getHistory, history, api, cb, apiId}) { // 发送请求
+    const axios = require('axios')
+    const fs = require(`fs`)
+
+    // api httpHistory 中的 api
+    // console.log(`httpHistory[api]`, httpHistory[api])
+    const httpDataReq = getHistory({history, fullApi: api, id: apiId}).data.req
+    const {line: {path, query, params}, headers} = httpDataReq.lineHeaders
+    const [, method, url] = api.match(/(\w+)\s+(.*)/)
+    let resErr = {message: ``, config: {}}
+    if(token && config.updateToken) { // 更新 TOKEN
+      headers.authorization = token
+    }
+    axios({
+      baseURL: `http://localhost:${config.prot}`,
+      method,
+      url: path || url, // 注意不要 url 和 params 上都同时存在 query
+      params: query,
+      headers,
+      data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
+      responseType: 'arraybuffer',
+    }).then(res => {
+      const {data, status, statusText, headers, config, request} = res
+      resErr = {
+        success: true,
+        message: `${status} ${statusText}`,
+        config: res.config,
+      }
+    }).catch(err => {
+      let message = ``
+      if(err.response) {
+        const {status, statusText} = err.response
+        message = `${status} ${statusText}`
+      } else {
+        message = err.toString()
+      }
+      resErr = {
+        success: false,
+        message,
+        config: err.config,
+      }
+    }).finally(() => {
+      cb(resErr)
+    })
+  }
+
+  return {
+    sendReq,
+  }
+
+}
+
+function getJsonServerMiddlewares() { // 获取 jsonServer 中的中间件
+  // 利用 jsonServer 已有的中间件, 而不用额外的安装
+  // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
+
+  const jsonServer = require('json-server')
+  const middlewares = jsonServer.defaults({bodyParser: true}) // 可以直接使用的所有中间件数组
+  const middlewaresObj = middlewares.flat().reduce((res, item) => {
+    // 使用 jsonServer 里面的中间件, 以保持一致:
+    // compression, corsMiddleware, serveStatic, logger, jsonParser, urlencodedParser
+    return ({
+      ...res,
+      [item.name]: item,
+    })
+  }, {})
+  return {middlewares, middlewaresObj}
+}
+
 function localStore(storePath) { // 存取需要持久化存储的数据
   const fs = require(`fs`)
   let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
@@ -198,6 +598,12 @@ function delRequireCache(filePath) {
 }
 
 module.exports = {
+  initHandle,
+  reqHandle,
+  clientInjection,
+  historyHandle,
+  customApi,
+  getJsonServerMiddlewares,
   localStore,
   delRequireCache,
   isFileEmpty,
