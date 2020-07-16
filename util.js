@@ -167,7 +167,7 @@ function emptyFn(f) {  // 把函数的参数 {}, [], null 转为默认值
   return (...a) => {
     return f(...a.map(
       v => {
-        return (util.isEmpty(v) ? undefined : v)
+        return (isEmpty(v) ? undefined : v)
       }
     ))
   }
