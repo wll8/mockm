@@ -85,7 +85,7 @@ window.ApiList = (() => {
     }
     return (
       <div className="ApiList">
-        <Table size="small" pagination={false} rowKey="id" columns={columnsApiList} dataSource={apiList} onChange={onChange} />
+        <Table size="small" rowKey="id" pagination={{defaultPageSize: 100}} columns={columnsApiList} dataSource={apiList} onChange={onChange} />
       </div>
     )
   }
