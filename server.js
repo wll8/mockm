@@ -38,6 +38,7 @@ const {
 } = util.historyHandle({config})
 const {
   handleRes,
+  allowCors,
   setApiInHeader,
 } = util.clientInjection({config})
 const {
@@ -61,6 +62,7 @@ const server = () => {
           target: config.origin,
           changeOrigin: true,
           onProxyReq: (proxyReq, req, res) => {
+            allowCors({req: proxyReq})
             logger(req, res, () => {})
             middlewaresObj.jsonParser(req, res, () => {
               const {
@@ -74,6 +76,7 @@ const server = () => {
             TOKEN = req.get('Authorization') || TOKEN // 获取 token
           },
           onProxyRes: (proxyRes, req, res) => {
+            allowCors({res: proxyRes, req})
             setApiInHeader({res: proxyRes, req})
             setHttpHistoryWrap({history: HTTPHISTORY, req, res: proxyRes})
           },
@@ -163,7 +166,7 @@ const server = () => {
             const httpData = getHistory({history: HTTPHISTORY, fullApi, id}).data[reqOrRes]
             if(reqOrRes === `res`) { // 模仿 res 中的响应头, 但是开启跨域
               res.set(httpData.lineHeaders.headers)
-              res.set(`access-control-allow-origin`, req.headers.origin)
+              allowCors({res, req})
             }
             res.sendFile(path.resolve(httpData.bodyPath))
           } catch (error) {
@@ -273,7 +276,7 @@ const server = () => {
         try {
           const lineHeaders = history.res.lineHeaders
           res.set(lineHeaders.headers) // 还原 headers
-          res.set(`access-control-allow-origin`, req.headers.origin)
+          allowCors({res, req})
           const bodyPath = history.res.bodyPath
           if(bodyPath) {
             const newPath = path.resolve(bodyPath) // 发送 body

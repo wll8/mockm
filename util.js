@@ -302,6 +302,26 @@ function historyHandle({config}) {
 }
 
 function clientInjection({config}) { // 到客户端前的数据注入, 例如 添加测试 api, 统一处理数据格式
+  function setHeader(reqOrRes, headerObj = {}) {
+    reqOrRes.setHeader = reqOrRes.setHeader || reqOrRes.set || function (key, val) {reqOrRes.headers[key] = val}
+    Object.keys(headerObj).forEach(key => {
+      reqOrRes.setHeader(key, headerObj[key])
+    })
+  }
+
+  function allowCors({res, req}) { // 设置为允许跨域
+    if(config.cors === false) { // config.cors 为 false 时, 则不允许跨域
+      return false
+    }
+    res && setHeader(res, {
+      'access-control-allow-origin': req.headers.origin || `*`
+    })
+    req && setHeader(req, { // 一些服务器会校验 req 中的 referer, host
+      'referer': config.origin,
+      'host': (new URL(config.origin)).host
+    })
+  }
+
   function handleRes(res, data) {
     return {
       code: res.statusCode,
@@ -314,15 +334,12 @@ function clientInjection({config}) { // 到客户端前的数据注入, 例如 �
     const apiCount = localStore(config.store).get(`apiCount`) + 1
     const apiId = string10to62(apiCount)
     const testApi = `http://${getOsIp()}:${config.testProt}/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
-    if(res.headers) {
-      res.headers[config.apiInHeader] = testApi
-    }
-    if(res.setHeader) {
-      res.setHeader(config.apiInHeader, testApi)
-    }
+    setHeader(res, {[config.apiInHeader]: testApi})
   }
 
   return {
+    setHeader,
+    allowCors,
     handleRes,
     setApiInHeader,
   }
