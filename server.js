@@ -8,11 +8,11 @@ const cloneDeep = require('lodash/cloneDeep')
 const morgan = require('morgan')
 const logger = morgan('dev')
 
-const {logHelper, print} = require('./log.js')
+const {logHelper, print} = require('./util/log.js')
 logHelper()
 
 const config = require(`./config.js`)
-const util = require(`./util.js`)
+const util = require(`./util/index.js`)
 
 const {
   toolObj,

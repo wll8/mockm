@@ -11,7 +11,7 @@ const {
       parseArgv,
     },
   },
-} = require(`./util.js`)
+} = require(`./util/index.js`)
 
 let cliArg = parseArgv()
 if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
