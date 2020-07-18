@@ -1,7 +1,7 @@
 require(`util`).inspect.defaultOptions.depth = null // console.log 展开对象
 
 const { inspect } = require('util')
-const util = require('./util.js')
+const util = require('./index.js')
 
 function print(...argList) { // 用于输出有用信息, 而不是调试信息
   const resList = []

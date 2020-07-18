@@ -8,7 +8,7 @@
  */
 
 const path = require(`path`)
-const { toolObj } = require(`./util.js`)
+const { toolObj } = require(`./util/index.js`)
 const cliArg = toolObj.cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
