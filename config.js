@@ -1,8 +1,16 @@
 const path = require(`path`)
 const {
-  parseArgv,
-  handlePathArg,
-  isType,
+  toolObj: {
+    type: {
+      isType,
+    },
+    url: {
+      handlePathArg,
+    },
+    cli: {
+      parseArgv,
+    },
+  },
 } = require(`./util.js`)
 
 let cliArg = parseArgv()

@@ -8,8 +8,8 @@
  */
 
 const path = require(`path`)
-const { parseArgv } = require(`./util.js`)
-let cliArg = parseArgv()
+const { toolObj } = require(`./util.js`)
+const cliArg = toolObj.cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
