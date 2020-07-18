@@ -15,35 +15,49 @@ const config = require(`./config.js`)
 const util = require(`./util.js`)
 
 const {
-  init,
-} = util.initHandle({config})
-const { api, db } = init()
+  toolObj,
+  business,
+} = util
 
+const {
+  initHandle,
+  reqHandle: {
+    sendReq,
+  },
+  clientInjection: {
+    handleRes,
+    allowCors,
+    setApiInHeader,
+  },
+  historyHandle: {
+    setHttpHistoryWrap,
+    getHistory,
+    getHistoryList,
+    ignoreHttpHistory,
+  },
+  customApi,
+} = business({config})
+
+const { api, db } = initHandle.init()
+const {
+  middleware,
+  httpClient,
+  url: {
+    parseRegPath,
+  },
+} = toolObj
 const {
   middlewares,
   middlewaresObj,
-} = util.getJsonServerMiddlewares()
+} = middleware.getJsonServerMiddlewares()
+
 const {
   parseApi: {
     noProxyTest,
     serverRouterList,
   },
   getDataRouter,
-} = util.customApi({api, db})
-const {
-  setHttpHistoryWrap,
-  getHistory,
-  getHistoryList,
-  ignoreHttpHistory,
-} = util.historyHandle({config})
-const {
-  handleRes,
-  allowCors,
-  setApiInHeader,
-} = util.clientInjection({config})
-const {
-  sendReq,
-} = util.reqHandle({config})
+} = customApi({api, db})
 
 const HTTPHISTORY = require(config.httpHistory) // 请求历史
 let TOKEN = ''
@@ -139,7 +153,7 @@ const server = () => {
       serverTest.use(middlewaresObj.corsMiddleware)
 
       serverTest.get(`*`, (req, res, next) => {
-        const {path} = util.getClientUrlAndPath(req.originalUrl)
+        const {path} = httpClient.getClientUrlAndPath(req.originalUrl)
         if(path.match(/^\/api\//)) { // 为 /api/ 则视为 api, 否则为静态文件
           next()
         } else {
@@ -152,7 +166,7 @@ const server = () => {
       })
 
       serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查询前端请求的接口
-        let {actionRaw, api0} = util.parseRePath(req.route.path, req.url)
+        let {actionRaw, api0} = parseRegPath(req.route.path, req.url)
 
         const [action, ...actionArg] = actionRaw.split(`,`)
         api0 = `/${api0}`
