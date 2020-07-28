@@ -31,7 +31,7 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
   updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
   apiInHeader: true, // 在 header 中添加调试 api 地址, true: 是; false, 否; string: 以 string 为 header key
   proxy: 'http://httpbin.org/', // 后台服务器的的 api
-  openApi: `httpbin.org/spec.json`, // 关联的 openApi 数据文件
+  openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
   store: './httpData/store.json', // 录制信息保存位置
