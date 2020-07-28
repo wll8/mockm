@@ -396,6 +396,16 @@ function business({config}) { // 与业务相关性较大的函数
     const mime = require('mime')
     const multiparty = require('multiparty')
 
+    function getOpenApi() { // 使用服务器获取远程 openApi , 避免跨域
+      return new Promise((resolve, reject) => {
+        axios.get(config.openApi, {}).then(res => {
+          resolve(res.data)
+        }).catch(err => {
+          reject(err.message)
+        })
+      })
+    }
+
     function getDb() { // 根据配置返回 db
       const fs = require(`fs`)
       let db = config.db
@@ -434,6 +444,7 @@ function business({config}) { // 与业务相关性较大的函数
 
     return {
       init,
+      getOpenApi,
     }
 
   }

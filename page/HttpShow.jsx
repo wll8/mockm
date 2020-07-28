@@ -272,7 +272,7 @@ window.HttpShow = (() => {
 
         $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
           window.swaggerUi = SwaggerUIBundle({
-            url: serverConfig.openApi,
+            url: `/api/getOpenApi/`,
             dom_id: '#swagger-ui',
             plugins: [
               UrlMutatorPlugin,
