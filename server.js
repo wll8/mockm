@@ -198,6 +198,11 @@ const server = () => {
             const list = getHistoryList({history: HTTPHISTORY, method, api})
             res.send(list)
           },
+          getOpenApi() {
+            initHandle.getOpenApi().then(oepnApiData => {
+              res.send(oepnApiData)
+            })
+          },
           getApiListSse() {
             res.writeHead(200, {
               "Content-Type": "text/event-stream",
