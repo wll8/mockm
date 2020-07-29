@@ -396,6 +396,19 @@ function business({config}) { // 与业务相关性较大的函数
     const mime = require('mime')
     const multiparty = require('multiparty')
 
+    function getConfigFile() {
+      const cliArg = toolObj.cli.parseArgv()
+      const cwdConfigPath = `${process.cwd()}/ms.config.js`
+      let res = `${__dirname}/../config.js` // 默认配置文件
+      if(cliArg.config) { // 命令行上指定的 config 文件
+        res = cliArg.config
+      } else if(tool().file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
+        res = cwdConfigPath
+      }
+      res = require(`path`).normalize(res)
+      return res
+    }
+
     function getOpenApi() { // 使用服务器获取远程 openApi , 避免跨域
       return new Promise((resolve, reject) => {
         axios.get(config.openApi, {}).then(res => {
@@ -443,6 +456,7 @@ function business({config}) { // 与业务相关性较大的函数
     }
 
     return {
+      getConfigFile,
       init,
       getOpenApi,
     }
