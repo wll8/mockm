@@ -6,8 +6,8 @@ const fs = require('fs')
 const path = require('path')
 const cloneDeep = require('lodash/cloneDeep')
 const morgan = require('morgan')
-const logger = morgan('dev')
-
+morgan.token('dateLcoal', (req, res) => (new Date()).toLocaleString())
+const logger = morgan(`:dateLcoal :remote-addr :method :url :status :response-time ms - :res[content-length]`)
 const {logHelper, print} = require('./util/log.js')
 logHelper()
 
@@ -249,7 +249,6 @@ const server = () => {
             getFilePath({reqOrRes: `res`, id: actionArg0})
           },
           getHttpData() {
-            console.log(`actionArg0`, {actionArg0, fullApi})
             res.send(getHistory({history: HTTPHISTORY, fullApi, id: actionArg0}).data)
           },
           getConfig() {
