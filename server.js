@@ -5,9 +5,6 @@ const jsonServer = require('json-server')
 const fs = require('fs')
 const path = require('path')
 const cloneDeep = require('lodash/cloneDeep')
-const morgan = require('morgan')
-morgan.token('dateLcoal', (req, res) => (new Date()).toLocaleString())
-const logger = morgan(`:dateLcoal :remote-addr :method :url :status :response-time ms - :res[content-length]`)
 const {logHelper, print} = require('./util/log.js')
 logHelper()
 
@@ -77,7 +74,7 @@ const server = () => {
           changeOrigin: true,
           onProxyReq: (proxyReq, req, res) => {
             allowCors({req: proxyReq})
-            logger(req, res, () => {})
+            middlewaresObj.logger(req, res, () => {})
             middlewaresObj.jsonParser(req, res, () => {
               const {
                 method,

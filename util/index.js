@@ -186,12 +186,31 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function middleware() { // express 中间件
+     function httpLog() { // 设置 http 请求日志中间件
+      const morgan = require('morgan')
+      morgan.token('dateLcoal', (req, res) => (new Date()).toLocaleString())
+      return morgan( (tokens, req, res) => {
+        return [
+          tokens.dateLcoal(req, res),
+          tokens['remote-addr'](req, res),
+          tokens.method(req, res),
+          tokens.url(req, res),
+          tokens.status(req, res),
+          tokens['response-time'](req, res),
+          'ms',
+          '-',
+          tokens.res(req, res, 'content-length'),
+        ].join(' ')
+      })
+    }
+
     function getJsonServerMiddlewares() { // 获取 jsonServer 中的中间件
       // 利用 jsonServer 已有的中间件, 而不用额外的安装
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
 
       const jsonServer = require('json-server')
-      const middlewares = jsonServer.defaults({bodyParser: true}) // 可以直接使用的所有中间件数组
+      const middlewares = jsonServer.defaults({bodyParser: true, logger: false}) // 可以直接使用的所有中间件数组
+      middlewares.push(httpLog())
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
         // 使用 jsonServer 里面的中间件, 以保持一致:
         // compression, corsMiddleware, serveStatic, logger, jsonParser, urlencodedParser
@@ -204,6 +223,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      httpLog,
       getJsonServerMiddlewares,
     }
 
