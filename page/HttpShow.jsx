@@ -113,7 +113,7 @@ window.HttpShow = (() => {
         const {method, api} = state.httpData
         const replayDone = state.replayDone
         setState(preState => ({...preState, replayDone: false}))
-        http.get(`/api/replay/${method}${api}`).then(res => {
+        http.get(`${cfg.baseURL}/api/replay/${method}${api}`).then(res => {
           setState(preState => ({...preState, replayDone: true}))
           message.info(`重发请求成功 ${res.message}`)
           getHttpData({method, api})
@@ -217,7 +217,7 @@ window.HttpShow = (() => {
         console.log(`method, api`, method, api)
         const fullApi = window.decodeURIComponent(`${method} ${api}`)
         console.log(`fullApi`, fullApi, state.parseHashData)
-        http.get(`/api/getHttpData/${method}${api}`).then(data => {
+        http.get(`${cfg.baseURL}/api/getHttpData/${method}${api}`).then(data => {
           const [, apiId = undefined] = window.location.hash.match(/\#\/history,(\w+)/) || []
           const newData = {
             method,
@@ -237,13 +237,13 @@ window.HttpShow = (() => {
       }
 
       function getApiList() {
-        http.get(`/api/getApiList/`).then(res => {
+        http.get(`${cfg.baseURL}/api/getApiList/`).then(res => {
           setState(preState => ({...deepSet(preState, `apiList`, res)}))
         })
       }
 
       function getApiListSse() {
-        const source = new EventSource(`/api/getApiListSse/`)
+        const source = new EventSource(`${cfg.baseURL}/api/getApiListSse/`)
         source.onopen = event => {console.log(`sse onopen`) }
         source.onerror = event => { console.log(`sse onerror`) }
         source.addEventListener('message', event => {
@@ -272,7 +272,7 @@ window.HttpShow = (() => {
 
         $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
           window.swaggerUi = SwaggerUIBundle({
-            url: `/api/getOpenApi/`,
+            url: `${cfg.baseURL}/api/getOpenApi/`,
             dom_id: '#swagger-ui',
             plugins: [
               UrlMutatorPlugin,
@@ -324,7 +324,7 @@ window.HttpShow = (() => {
 
       function historyFn(isShow) {
         setState(preState => ({...deepSet(preState, `showHistry`, isShow)}))
-        isShow && http.get(`/api/getApiHistry/${state.httpData.api0}`).then(res => {
+        isShow && http.get(`${cfg.baseURL}/api/getApiHistry/${state.httpData.api0}`).then(res => {
           console.log(`resres`, res)
           setState(preState => ({...deepSet(preState, `dataApiHistry`, res)}))
         })
@@ -335,7 +335,7 @@ window.HttpShow = (() => {
       }, [state.activeTabs]);
 
       useEffect(() => {
-        http.get(`/api/getConfig/`).then(res => {
+        http.get(`${cfg.baseURL}/api/getConfig/`).then(res => {
           setState(preState => ({...deepSet(preState, `serverConfig`, res)}))
           const {openApi} = res
           openApi && initSwagger(res)

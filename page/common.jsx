@@ -11,6 +11,10 @@ window.http = axios.create({
   headers: {'X-Custom-Header': 'foobar'}
 })
 
+window.cfg = {
+  baseURL: `http://localhost:9005`,
+}
+
 window.http.interceptors.request.use(
   config => {
     const { url } = config
