@@ -150,11 +150,13 @@ const server = () => {
       serverTest.use(middlewaresObj.corsMiddleware)
 
       serverTest.get(`*`, (req, res, next) => {
-        const {path} = httpClient.getClientUrlAndPath(req.originalUrl)
+        let {path} = httpClient.getClientUrlAndPath(req.originalUrl)
         if(path.match(/^\/api\//)) { // 为 /api/ 则视为 api, 否则为静态文件
           next()
         } else {
-          res.sendFile(__dirname + `/page/${path}`, err => {
+          path = path === `/` ? `/index.html` : path // 访问 / 时默认返回 index.html
+          const filePath = require(`path`).resolve(__dirname, `../page/${path}`)
+          res.sendFile(filePath, err => {
             if (err) {
               res.status(404).send({msg: `文件未找到: ${path}`})
             }
