@@ -15,9 +15,11 @@ window.http.interceptors.request.use(
   config => {
     const { url } = config
     const [, apiId = ``] = window.location.hash.match(/\#\/history,(\w+)/) || []
+    const origin = (new URL(url)).origin
+    const re = new RegExp(`(${origin}\\/api\\/)(\\w+)`)
     let newUrl = url
-    if(url.match(/^\/api\/\w+\//)) { // 当 `/api/有方法但无参数/` 时, 默认添加请求的 id
-      newUrl = url.replace(/(^\/api\/)(\w+)/, `$1$2${apiId ? `,${apiId}` : ``}`)
+    if(url.match(re)) { // 当 `/api/有方法但无参数/` 时, 默认添加请求的 id
+      newUrl = url.replace(re, `$1$2${apiId ? `,${apiId}` : ``}`)
     }
     config.url = newUrl
    return config
