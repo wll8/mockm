@@ -62,7 +62,7 @@ window.ReqRes = (() => {
     }, [props.httpData]);
 
     function getAllTypeBody(reqOrRes, state) {
-      deepGet(state, `newHttpData.data.${reqOrRes}.bodyPath`) && http.get(`/api/getBodyFile${toUpperCase(reqOrRes)}/${state.newHttpData.method}${state.newHttpData.api}`, {responseType: 'blob'}).then(res => {
+      deepGet(state, `newHttpData.data.${reqOrRes}.bodyPath`) && http.get(`${cfg.baseURL}/api/getBodyFile${toUpperCase(reqOrRes)}/${state.newHttpData.method}${state.newHttpData.api}`, {responseType: 'blob'}).then(res => {
         const blob = res
         Promise.all([
           blobTool(blob, `toText`),
@@ -131,7 +131,7 @@ window.ReqRes = (() => {
       } = deepGet(state, `newHttpData.data.${reqOrRes}`)
       const contentType = deepGet(state, keyPath, '').split(`;`)[0]
       const shortType = contentType.replace(/\/.*/, '')
-      const file = `${location.origin}/api/getBodyFile${toUpperCase(reqOrRes)},${newHttpData.apiId}/${newHttpData.method}${newHttpData.api}`
+      const file = `${cfg.baseURL}/api/getBodyFile${toUpperCase(reqOrRes)},${newHttpData.apiId}/${newHttpData.method}${newHttpData.api}`
       const noPreRender = obj => (
         <div className="noPre">
           <div className="msg">此文件类型暂不支持预览:</div>

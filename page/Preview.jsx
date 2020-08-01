@@ -48,7 +48,7 @@ window.Preview = (() => {
     const resBodyBase64 = state.resBodyBase64
     const resBodyText = state.resBodyText
     const resBodyObjectURL = state.resBodyObjectURL
-    const file = `http://localhost:9005/${httpData.method},getBodyFile${httpData.api}`
+    const file = `${cfg.baseURL}/${httpData.method},getBodyFile${httpData.api}`
     const contentType = httpData.data.res.headers[`content-type`]
     const shortType = contentType.replace(/\/.*/, '')
 
@@ -68,7 +68,7 @@ window.Preview = (() => {
     ))
 
     useEffect(() => {
-      http.get(`/api/getBodyFile/${httpData.method}${httpData.api}`, {responseType: 'blob'}).then(res => {
+      http.get(`${cfg.baseURL}/api/getBodyFile/${httpData.method}${httpData.api}`, {responseType: 'blob'}).then(res => {
         const blob = res
         setState(preState => ({...deepSet(preState, `resBodyBlob`, blob)}))
         blobTool(blob, `toText`).then(res => {
