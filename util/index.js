@@ -411,6 +411,9 @@ function business({config}) { // 与业务相关性较大的函数
   }
 
   function initHandle({config}) { // 初始化处理程序
+    const fetch = require('node-fetch')
+    const request = require('request')
+    const curlconverter = require('curlconverter')
     const axios = require('axios')
     const mockjs = require('mockjs')
     const mime = require('mime')
@@ -466,7 +469,41 @@ function business({config}) { // 与业务相关性较大的函数
         fs.writeFileSync(config.store, `{}`)
       }
       const db = getDb()
-      const api = config.api({axios, mime, mockjs, multiparty})
+      const run = {
+        curl({req, res, cmd}) { // cmd: curl/bash
+          const requestStr = curlconverter.toNode(cmd)
+          const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
+          eval(optionStr)
+          return new Promise((resolve, reject) => {
+            request(options, (err, curlRes, body) => {
+              clientInjection({config}).setHeader(res, curlRes.headers)
+              const mergeRes = curlRes
+              err ? reject(err) : resolve(mergeRes)
+            })
+          })
+        },
+        fetch({req, res, fetchRes}) { // node-fetch
+          return new Promise((resolve, reject) => {
+            fetchRes.then(fetchThenRes => {
+              const headers = [...fetchThenRes.headers].reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
+              clientInjection({config}).setHeader(res, headers)
+              const mergeRes = fetchThenRes
+              resolve(mergeRes)
+            }).catch(err => {
+              reject(err)
+            })
+          })
+        },
+      }
+      const api = config.api({ // 向 config.api 暴露一些工具库
+        run,
+        fetch,
+        curlconverter,
+        axios,
+        mime,
+        mockjs,
+        multiparty,
+      })
 
       return {
         db,

@@ -37,7 +37,7 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
   store: './httpData/store.json', // 录制信息保存位置
   cors: true, // 是否允许通过跨域
   api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
-    const { axios, mime, mockjs, multiparty } = util
+    const { run, fetch, axios, mime, mockjs, multiparty } = util
     return { // api 拦截器
       '*' (req, res, next) { // 拦截所有方法和路由
         next()
@@ -58,6 +58,21 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
       'get /status/:code' (req, res, next) { // 使用 params 参数
         res.statusCode = req.params.code
         res.json(req.params)
+      },
+      'get /curl' (req, res, next) { // 输出 curl/bash 的执行结果
+        run.curl({req, res, cmd: `curl 'http://www.httpbin.org/ip'`}).then(curRes => {
+          res.send(curRes.body)
+        })
+      },
+      'get /fetch' (req, res, next) { // 使用 node-fetch 的执行结果
+        run.fetch({
+          req,
+          res,
+          fetchRes: fetch(`http://www.httpbin.org/ip`)
+        }).then(async thenRes => {
+          const thenResOk = await thenRes.buffer()
+          res.send(thenResOk)
+        })
       },
     }
   },
