@@ -1,0 +1,65 @@
+#root {
+  .ReqRes {
+    .preview {
+      font-family: 'Courier New', Courier, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow: auto;
+      resize: vertical;
+      &[class*="image"],
+      &[class*="video"],
+      &[class*="audio"] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        & > * {
+          max-width: 80%;
+          max-height: 50vh;
+          margin-top: 20px;
+          margin-bottom: 20px;
+          box-shadow: 5px 5px 10px;
+        }
+      }
+      &[class*="json"] {
+        font-size: 12px;
+        .variable-row {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+      }
+      .noPre {
+        text-align: center;
+      }
+      .link{
+        display: inline-block;
+      }
+      .htmlViewIframe{
+        border: 0;
+        width: 100%;
+        height: 50vh;
+      }
+    }
+    .detailsBox {
+      details {
+        details {
+          summary {
+            border-bottom: 1px solid #fff;
+            background: rgba(238, 238, 238, .5);
+            margin-left: 10px;
+          }
+          .content {
+            padding-left: 10px;
+          }
+        }
+        summary {
+          cursor: pointer;
+          border-bottom: 1px solid #ccc;
+          background-color: #eee;
+          outline: none;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}

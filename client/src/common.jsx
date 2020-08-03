@@ -1,21 +1,25 @@
 // 本文件用于全局方法配置
+import axios from 'axios'
+import * as icons from '@ant-design/icons'
+import './common.scss'
+const common = {}
 
-window.IconFont = icons.createFromIconfontCN({
+common.IconFont = icons.createFromIconfontCN({
   scriptUrl: 'font/iconfont.js',
 });
 
-window.http = axios.create({
+common.http = axios.create({
   // baseURL: `http://localhost:9005/`,
   baseURL: `/`,
   timeout: 0,
   headers: {'X-Custom-Header': 'foobar'}
 })
 
-window.cfg = {
+common.cfg = {
   baseURL: `http://localhost:9005`,
 }
 
-window.http.interceptors.request.use(
+common.http.interceptors.request.use(
   config => {
     const { url } = config
     const [, apiId = ``] = window.location.hash.match(/\#\/history,(\w+)/) || []
@@ -30,7 +34,7 @@ window.http.interceptors.request.use(
   },
 )
 
-window.http.interceptors.response.use(
+common.http.interceptors.response.use(
   response => {
     const res = response.data
     return Promise.resolve(res)
@@ -39,3 +43,5 @@ window.http.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+export default common

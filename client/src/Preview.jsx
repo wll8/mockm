@@ -1,3 +1,16 @@
+import React from 'react'
+import * as icons from '@ant-design/icons'
+import * as antd from 'antd'
+import utils from './utils.jsx'
+import common from './common.jsx'
+import './Preview.scss'
+
+const {
+  http,
+  cfg,
+  IconFont,
+} = common
+
 const {
   copyToClipboard,
   wordToUpperCase,
@@ -7,9 +20,9 @@ const {
   deepSet,
   fetchDownload,
   blobTool,
-} = window.utils
+} = utils
 
-window.Preview = (() => {
+const Preview = (() => {
   const {
     useState,
     useEffect,
@@ -19,11 +32,11 @@ window.Preview = (() => {
     Button,
     Tag,
     message,
-  } = window.antd
+  } = antd
 
   const { Panel } = Collapse;
 
-  function com(props) {
+  function Com(props) {
     const initState = (() => {
       try {
         return JSON.parse(window.localStorage.getItem(`PreviewState`)) || {}
@@ -290,5 +303,7 @@ window.Preview = (() => {
     )
   }
 
-  return com
+  return Com
 })()
+
+export default Preview
