@@ -1,5 +1,20 @@
 // http 协议概述
 // https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview
+import React from 'react'
+import ReactJson from 'react-json-view'
+import * as antd from 'antd'
+import utils from './utils.jsx'
+import common from './common.jsx'
+import ApiList from './ApiList.jsx'
+import './ReqRes.scss'
+import * as icons from '@ant-design/icons'
+
+const $ = window.$
+const HotKey = window.HotKey
+const {
+  http,
+  cfg,
+} = common
 
 const {
   copyToClipboard,
@@ -8,9 +23,10 @@ const {
   formatData,
   deepGet,
   deepSet,
-} = window.utils
+  blobTool,
+} = utils
 
-window.ReqRes = (() => {
+const ReqRes = (() => {
   const {
     useState,
     useEffect,
@@ -22,11 +38,9 @@ window.ReqRes = (() => {
     Button,
     Tag,
     message,
-  } = window.antd
+  } = antd
 
-  const { Panel } = Collapse;
-
-  function com(props) {
+  function Com(props) {
     const activePanelCanSel = { // 可选值
       activePanel: [`req`, `res`],
       activePanelPanel: {
@@ -101,7 +115,6 @@ window.ReqRes = (() => {
         } else {
           jsonObj = json
         }
-        const ReactJson = reactJsonView.default
         return JSON.stringify(jsonObj, null, 2)
         // ReactJson 当数据过多时渲染较慢
         return <ReactJson {...{
@@ -195,7 +208,7 @@ window.ReqRes = (() => {
       setState(preState => ({...deepSet(preState, key, val)}))
     }
 
-    function comDetails(props) {
+    function ComDetails(props) {
       const [state, setState] = useState(JSON.parse(JSON.stringify(props)))
       function removeItem(arr, val) {
         arr = [...arr]
@@ -271,7 +284,7 @@ window.ReqRes = (() => {
     }
     return (
       <div className="ReqRes">
-        {comDetails({
+        {ComDetails({
           activePanel: state.activePanel,
           activePanelPanel: state.activePanelPanel,
           cb: (val) => {
@@ -284,5 +297,7 @@ window.ReqRes = (() => {
     )
   }
 
-  return com
+  return Com
 })()
+
+export default ReqRes

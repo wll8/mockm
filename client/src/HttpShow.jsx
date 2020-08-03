@@ -1,19 +1,39 @@
+import React from 'react'
+import domtoimage from 'dom-to-image'
+import * as ReactRouterDOM from 'react-router-dom'
+import * as antd from 'antd'
+import * as icons from '@ant-design/icons'
+import utils from './utils.jsx'
+import common from './common.jsx'
+import ApiList from './ApiList.jsx'
+import ReqRes from './ReqRes.jsx'
+import './HttpShow.scss'
+
 const {
-  getSelectionText,
-  getMethodUrl,
-  wordToUpperCase,
-  sortKey,
-  formatData,
-  deepGet,
-  deepSet,
-  blobTool,
+  http,
+  cfg,
+} = common
+
+const $ = window.$
+const HotKey = window.HotKey
+
+const {
+  swgPathToReg,
   getAbsolutePosition,
   debounce,
-  swgPathToReg,
   dateDiff,
-} = window.utils
+  getSelectionText,
+  blobTool,
+  getMethodUrl,
+  fetchDownload,
+  copyToClipboard,
+  wordToUpperCase,
+  sortKey,
+  deepGet,
+  deepSet,
+} = utils
 
-window.HttpShow = (() => {
+const HttpShow = (() => {
   const {
     useState,
     useEffect,
@@ -29,14 +49,14 @@ window.HttpShow = (() => {
     message,
     Spin,
     Table,
-  } = window.antd
+  } = antd
 
   const { Panel } = Collapse;
   const { TabPane } = Tabs;
 
   const {
     HashRouter,
-  } = window.ReactRouterDOM
+  } = ReactRouterDOM
 
   function com() {
     function App() {
@@ -47,7 +67,7 @@ window.HttpShow = (() => {
         Route,
         Switch,
         Redirect,
-      } = window.ReactRouterDOM
+      } = ReactRouterDOM
       const reactHistory = useHistory()
       let apiToken = `` // 组件内全局变量, 可以在其他闭包函数中使用, 避免获取到旧值, 也可使用 useRef 来总是获取新值
 
@@ -271,7 +291,7 @@ window.HttpShow = (() => {
         });
 
         $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
-          window.swaggerUi = SwaggerUIBundle({
+          window.swaggerUi = window.SwaggerUIBundle({
             url: `${cfg.baseURL}/api/getOpenApi/`,
             dom_id: '#swagger-ui',
             plugins: [
@@ -497,6 +517,8 @@ window.HttpShow = (() => {
       </div>
     )
   }
-
   return com
 })()
+
+
+export default HttpShow
