@@ -388,7 +388,7 @@ const HttpShow = (() => {
         function parseHash() {
           let res = {}
           if(reactLocation.pathname.match(/^\/(\w+),(.*)/)) { // 如果 url 上有 /id,123/post/books/ 类似的参数, 则先取出 `id,123` 参数
-            let {argList, path} = reactLocation.pathname.match(new RegExp(`\/(?<argList>.*?)(?<path>\/.*)`)).groups
+            let [, argList, path] = reactLocation.pathname.match(/\/(.*?)(\/.*)/)
             const [action, ...actionArg] = argList.split(',')
             const actionArgStr = actionArg.join(`,`)
             res = {...res, action, actionArg, actionArgStr}
