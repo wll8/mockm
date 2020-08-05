@@ -161,7 +161,7 @@ const HttpShow = (() => {
           method = method.toLowerCase()
           // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
           const basePath = $(`.swagger-ui .info .base-url`).text().match(/(\/.*) ]/)[1] // 其实就是 json 中的 basePath, 只是不想再请求并解析这个 json 文件, 所以直接在 dom 中获取
-          const re = new RegExp(`^(${basePath})(\/.*)`)
+          const re = new RegExp(`^(${basePath})(/.*)`)
           const swgPath = path.replace(re, '$2')
           const $swaggerApiDom = $([...$(`.opblock-summary-${method} [data-path]`)].find(item => {
             let re = swgPathToReg($(item).data(`path`))
@@ -238,7 +238,7 @@ const HttpShow = (() => {
         const fullApi = window.decodeURIComponent(`${method} ${api}`)
         console.log(`fullApi`, fullApi, state.parseHashData)
         http.get(`${cfg.baseURL}/api/getHttpData/${method}${api}`).then(data => {
-          const [, apiId = undefined] = window.location.hash.match(/\#\/history,(\w+)/) || []
+          const [, apiId = undefined] = window.location.hash.match(/#\/history,(\w+)/) || []
           const newData = {
             method,
             api,
@@ -361,6 +361,7 @@ const HttpShow = (() => {
           openApi && initSwagger(res)
         })
         getApiListSse()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
       useEffect(() => { // 判断是否有 swagger, 如果有则显示 swagger 按钮
@@ -369,7 +370,7 @@ const HttpShow = (() => {
           let {paths, basePath} = state.spec
           method = method.toLowerCase()
           // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
-          const re = new RegExp(`^(${basePath})(\/.*)`)
+          const re = new RegExp(`^(${basePath})(/.*)`)
           const swgPath = path.replace(re, '$2')
           const res = Object.keys(paths).some(path => {
             let re = swgPathToReg(path)
@@ -423,6 +424,7 @@ const HttpShow = (() => {
         });
         hotKey.start();
         return () => hotKey.stop();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [reactLocation]);
 
       const tabList = {

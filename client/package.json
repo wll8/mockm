@@ -20,13 +20,16 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "start": "cross-env SKIP_PREFLIGHT_CHECK=true react-app-rewired start",
+    "start": "cross-env SKIP_PREFLIGHT_CHECK=true EXTEND_ESLINT=true react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "rules": {
+      "no-unused-vars": 0
+    }
   },
   "browserslist": {
     "production": [
