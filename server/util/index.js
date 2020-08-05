@@ -186,6 +186,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function middleware() { // express 中间件
+    const compression = require('compression') // 压缩 http 响应
+
      function httpLog() { // 设置 http 请求日志中间件
       const morgan = require('morgan')
       morgan.token('dateLcoal', (req, res) => (new Date()).toLocaleString())
@@ -223,6 +225,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      compression,
       httpLog,
       getJsonServerMiddlewares,
     }
