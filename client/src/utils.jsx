@@ -10,6 +10,7 @@ function getAbsolutePosition(domObj) { // 获取元素位置及大小
   var w = domObj.offsetWidth, h = domObj.offsetHeight;
   // 从目标元素开始向外遍历，累加top和left值
   var t, l;
+  // eslint-disable-next-line no-cond-assign
   for (t = domObj.offsetTop, l = domObj.offsetLeft; domObj = domObj.offsetParent;) {
     t += domObj.offsetTop;
     l += domObj.offsetLeft;
@@ -63,7 +64,7 @@ function getSelectionText() { // 获取选中的文本
     var text = "";
     if (window.getSelection) {
         text = window.getSelection().toString();
-    } else if (document.selection && document.selection.type != "Control") {
+    } else if (document.selection && document.selection.type !== "Control") {
         text = document.selection.createRange().text;
     }
     return text;
@@ -106,7 +107,7 @@ async function blobTool(blob, action, fileName) {
       }
     }
     if(action === `toObjectURL`) {
-      var blobUrl = window.URL.createObjectURL(blob)
+      const blobUrl = window.URL.createObjectURL(blob)
       resolve(blobUrl)
     }
     if(action === `toText`) {
