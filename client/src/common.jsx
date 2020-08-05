@@ -22,7 +22,7 @@ common.cfg = {
 common.http.interceptors.request.use(
   config => {
     const { url } = config
-    const [, apiId = ``] = window.location.hash.match(/\#\/history,(\w+)/) || []
+    const [, apiId = ``] = window.location.hash.match(/#\/history,(\w+)/) || []
     const origin = (new URL(url)).origin
     const re = new RegExp(`(${origin}\\/api\\/)(\\w+)`)
     let newUrl = url
@@ -31,7 +31,7 @@ common.http.interceptors.request.use(
     }
     config.url = newUrl
    return config
-  },
+  }
 )
 
 common.http.interceptors.response.use(

@@ -73,6 +73,7 @@ const ReqRes = (() => {
       getAllTypeBody(`req`, {...state, newHttpData: props.httpData})
       getAllTypeBody(`res`, {...state, newHttpData: props.httpData})
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.httpData]);
 
     function getAllTypeBody(reqOrRes, state) {
@@ -115,16 +116,20 @@ const ReqRes = (() => {
         } else {
           jsonObj = json
         }
-        return JSON.stringify(jsonObj, null, 2)
-        // ReactJson 当数据过多时渲染较慢
-        return <ReactJson {...{
-          indentWidth: 2,
-          displayObjectSize: false,
-          enableClipboard: true,
-          name: false,
-          displayDataTypes: false,
-          src: jsonObj,
-        }} />
+        const useRawJson = true
+        if(useRawJson) {
+          return JSON.stringify(jsonObj, null, 2)
+        } else {
+          // ReactJson 当数据过多时渲染较慢
+          return <ReactJson {...{
+            indentWidth: 2,
+            displayObjectSize: false,
+            enableClipboard: true,
+            name: false,
+            displayDataTypes: false,
+            src: jsonObj,
+          }} />
+        }
       }
 
       function wrap({type, chidren}) {
@@ -150,7 +155,7 @@ const ReqRes = (() => {
           <div className="msg">此文件类型暂不支持预览:</div>
           <div className="type">{contentType}</div>
           <div className="msg">链接:</div>
-          <div className="linkBox"><a className="link" rel="noopener" target="_blank" href={file}>{file}</a></div>
+          <div className="linkBox"><a className="link" rel="noopener noreferrer" target="_blank" href={file}>{file}</a></div>
         </div>
       )
       const bodyTextRender = obj => (
@@ -168,7 +173,7 @@ const ReqRes = (() => {
       const dom = (() => {
         let getDom = (({ // 根据 contentType 渲染 dom
           "text/html": () => (
-            <iframe className="htmlViewIframe" src={bodyObjectURL}></iframe>
+            <iframe title={bodyObjectURL} className="htmlViewIframe" src={bodyObjectURL}></iframe>
             // <object className="htmlViewIframe" data={bodyObjectURL} type="text/html"></object>
           ),
           "application/json": () => jsonRender(bodyText),
@@ -230,7 +235,7 @@ const ReqRes = (() => {
 
       function copyBtn(ev, ...arg) {
         console.log(`evev`, ev, arg)
-        return false
+        // return false
         ev.nativeEvent.stopImmediatePropagation()
         ev.stopPropagation()
       }
@@ -254,7 +259,7 @@ const ReqRes = (() => {
                     {
                       activePanelCanSel.activePanelPanel[panel].filter(item => (
                         (item !== `body`)
-                        || (item === `body`) && (deepGet(newHttpData, `data.${panel}.bodyPath`) !== undefined) // 当 bodyPath 为空时, 不渲染 body 折叠面板
+                        || ((item === `body`) && (deepGet(newHttpData, `data.${panel}.bodyPath`) !== undefined)) // 当 bodyPath 为空时, 不渲染 body 折叠面板
                       )).map(panelPanel => {
                         return (
                           <details
