@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "axios": "^0.19.1",
+    "compression": "^1.7.4",
     "curlconverter": "^2.16.0",
     "escape-goat": "^3.0.0",
     "express-interceptor": "fuminchao/express-interceptor",
