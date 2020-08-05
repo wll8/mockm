@@ -8,16 +8,16 @@ common.IconFont = icons.createFromIconfontCN({
   scriptUrl: 'font/iconfont.js',
 });
 
+common.cfg = {
+  baseURL: window.location.origin,
+}
+
 common.http = axios.create({
   // baseURL: `http://localhost:9005/`,
-  baseURL: `/`,
+  baseURL: common.cfg.baseURL,
   timeout: 0,
   headers: {'X-Custom-Header': 'foobar'}
 })
-
-common.cfg = {
-  baseURL: `http://localhost:9005`,
-}
 
 common.http.interceptors.request.use(
   config => {
