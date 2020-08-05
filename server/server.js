@@ -148,6 +148,7 @@ const server = () => {
     serverTest() {
       const serverTest = jsonServer.create()
       serverTest.use(middlewaresObj.corsMiddleware)
+      serverTest.use(middleware.compression())
 
       serverTest.get(`*`, (req, res, next) => {
         let {path} = httpClient.getClientUrlAndPath(req.originalUrl)
@@ -220,6 +221,7 @@ const server = () => {
                 if(stats.size !== oldSize) {
                   const str = JSON.stringify(getHistoryList({history: HTTPHISTORY}))
                   res.write(`data:${str}\n\n`)
+                  res.flush()
                   oldSize = stats.size
                 }
               })
