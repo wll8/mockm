@@ -14,8 +14,6 @@
     "axios": "^0.19.1",
     "compression": "^1.7.4",
     "curlconverter": "^2.16.0",
-    "escape-goat": "^3.0.0",
-    "express-interceptor": "fuminchao/express-interceptor",
     "filenamify": "^4.1.0",
     "http-proxy-middleware": "^0.20.0",
     "json-server": "^0.16.1",
@@ -25,7 +23,6 @@
     "morgan": "^1.10.0",
     "multiparty": "^4.2.1",
     "node-fetch": "^2.6.0",
-    "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.4",
     "path-to-regexp": "^0.1.7"
   },
