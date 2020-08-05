@@ -20,7 +20,7 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "start": "cross-env SKIP_PREFLIGHT_CHECK=true EXTEND_ESLINT=true react-app-rewired start",
+    "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
@@ -44,7 +44,6 @@
     ]
   },
   "devDependencies": {
-    "react-app-rewired": "^2.1.6",
-    "cross-env": "^7.0.2"
+    "react-app-rewired": "^2.1.6"
   }
 }
