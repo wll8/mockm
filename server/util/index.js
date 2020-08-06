@@ -472,6 +472,7 @@ function business({config}) { // 与业务相关性较大的函数
         fs.writeFileSync(config.store, `{}`)
       }
       const db = getDb()
+      const { setHeader, allowCors } = clientInjection({config})
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
           const requestStr = curlconverter.toNode(cmd)
@@ -479,7 +480,8 @@ function business({config}) { // 与业务相关性较大的函数
           eval(optionStr)
           return new Promise((resolve, reject) => {
             request(options, (err, curlRes, body) => {
-              clientInjection({config}).setHeader(res, curlRes.headers)
+              setHeader(res, curlRes.headers) // 复制远程的 header
+              allowCors({req, res}) // 设置 header 为允许跨域模式
               const mergeRes = curlRes
               err ? reject(err) : resolve(mergeRes)
             })
@@ -489,7 +491,14 @@ function business({config}) { // 与业务相关性较大的函数
           return new Promise((resolve, reject) => {
             fetchRes.then(fetchThenRes => {
               const headers = [...fetchThenRes.headers].reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
-              clientInjection({config}).setHeader(res, headers)
+              const contentEncoding = headers[`content-encoding`]
+              if(contentEncoding && contentEncoding.includes(`gzip`)) {
+                // 由于返回的内容其实已经被解码过了, 所以不能再告诉客户端 content-encoding 是压缩的 `gzip`, 否则会导致客户端无法解压缩
+                // - 例如导致浏览器无法解码: net::ERR_CONTENT_DECODING_FAILED 200 (OK)
+                delete headers[`content-encoding`]
+              }
+              setHeader(res, headers)
+              allowCors({req, res})
               const mergeRes = fetchThenRes
               resolve(mergeRes)
             }).catch(err => {
