@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const proxy = require('http-proxy-middleware')
+const proxy = require('http-proxy-middleware').createProxyMiddleware
 const jsonServer = require('json-server')
 const fs = require('fs')
 const path = require('path')
