@@ -291,7 +291,7 @@ const server = () => {
       serverReplay.use(middlewares)
       serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
         const fullApi = `${req.method.toLowerCase()} ${req.originalUrl}`
-        const history = getHistory({history: HTTPHISTORY, fullApi}).data
+        const history = getHistory({history: HTTPHISTORY, fullApi, status: 200}).data
         try {
           const lineHeaders = history.res.lineHeaders
           res.set(lineHeaders.headers) // 还原 headers
