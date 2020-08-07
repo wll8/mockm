@@ -563,11 +563,19 @@ function business({config}) { // 与业务相关性较大的函数
       return list
     }
 
-    function getHistory({history, fullApi, id}) { // 获取指定 fullApi/id 中的历史记录
+    function getHistory({history, fullApi, id, status}) { // 获取指定 fullApi/id 中的历史记录
       const { path } = toolObj.url.fullApi2Obj(fullApi)
+      function getStatus(item) {
+        try {
+          return item.data.res.lineHeaders.line.statusCode
+        } catch (err) {
+          console.log(err)
+        }
+      }
       return history[path] && [...history[path]].reverse().find(item => {
         return ( // 传入 id 时比较 id, 不传入时取第一条匹配(最新记录)
           (id === undefined ? true : (item.id === id))
+          && (status === undefined ? true : (getStatus(item) === status))
           && (item.fullApi === fullApi)
         )
       }) || {}
