@@ -65,6 +65,14 @@ const server = () => {
       const server = jsonServer.create()
       const router = jsonServer.router(config.dbJsonName)
       server.use(middlewaresObj.corsMiddleware)
+      config.proxy.forEach(item => {
+        if(item.context === `/`) { // 过滤掉主 URL, 给后面的拦截器使用
+          return false
+        } else {
+          const mid = proxy(item.context, item.options)
+          server.use(mid)
+        }
+      })
       server.use(proxy(
         (pathname, {method}) => { // 返回 true 时进行转发
           return (noProxyTest(pathname) || getDataRouter({method, pathname, db})) ? false : true

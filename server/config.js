@@ -6,6 +6,8 @@ const {
     },
     url: {
       handlePathArg,
+      prepareProxy,
+      prepareOrigin,
     },
     cli: {
       parseArgv,
@@ -30,7 +32,19 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
   replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
   updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
   apiInHeader: true, // 在 header 中添加调试 api 地址, true: 是; false, 否; string: 以 string 为 header key
-  proxy: 'http://httpbin.org/', // 后台服务器的的 api
+  // proxy: 'http://httpbin.org/', // 后台服务器的的 api
+  proxy: { // string | object
+    '/': `http://www.httpbin.org/`,
+    '/get': { // 使用配置, 参考 https://github.com/chimurai/http-proxy-middleware#http-proxy-options
+        target: `http://www.httpbin.org/`,
+        onProxyReq (proxyReq, req, res) { // 拦截请求
+          proxyReq.setHeader('x-added', 'req');
+        },
+        onProxyRes (proxyRes, req, res) { // 拦截响应
+          proxyRes.headers['x-added'] = 'res';
+        },
+    },
+  },
   openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
@@ -103,12 +117,12 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       ? false
       : config.apiInHeader
     ),
-  pathname: (new URL(config.proxy)).pathname.replace(/\/$/, '') + '/',
-  origin: (new URL(config.proxy)).origin,
+  pathname: prepareOrigin(config.proxy).pathname,
+  origin: prepareOrigin(config.proxy).origin,
   dbJsonName: handlePathArg(config.dbJsonName),
   dataDir: handlePathArg(config.dataDir),
   httpHistory: handlePathArg(config.httpHistory),
-  proxy: config.proxy.replace(/\/$/, '') + '/',
+  proxy: prepareProxy(config.proxy),
   api: isType(config.api, `object`) ? () => config.api : config.api,
   db: isType(config.db, `object`) ? () => config.db : config.db,
 }
