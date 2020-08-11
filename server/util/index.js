@@ -91,6 +91,59 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function url() { // url 处理程序
+    function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
+      let resProxy = []
+      if(typeof(proxy) === `string`) { // 任何路径都转发到 proxy
+        proxy = {
+          '/': proxy,
+        }
+      }
+      if(typeof(proxy) === `object`) { // 转发 key 到 target
+        function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
+          const indexVal = proxy[`/`]
+          delete proxy[`/`]
+          proxy[`/`] = indexVal
+          return proxy
+        }
+        proxy = setIndexOfEnd(proxy)
+        resProxy = Object.keys(proxy).map(context => {
+          let options = proxy[context]
+          if(typeof(options) === `string`) { // 转换字符串的 value 为对象
+            options = {
+              pathRewrite: { [`^${context}`]: `` }, // 原样代理 /a 到 /a
+              target: options,
+            }
+          }
+          return {
+            context,
+            options,
+          }
+        })
+      }
+      return resProxy
+    }
+
+    function prepareOrigin (proxy) { // 解析 proxy 为 {pathname, origin}
+      let origin = ``
+      try {
+        if(typeof(proxy) === `string`) {
+          origin = proxy
+        }
+        if(typeof(proxy) === `object`) {
+          origin = proxy[`/`].target || proxy[`/`]
+        }
+        const parentUrl = new URL(origin)
+        const res = {
+          pathname: parentUrl.pathname.replace(/\/$/, '') + '/',
+          origin: parentUrl.origin,
+        }
+        return res
+      } catch (error) {
+        console.error(`请正确填写 proxy 参数`, error)
+        process.exit()
+      }
+    }
+
     function fullApi2Obj(api) {
       let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, api.trim()]
       const {path} = toolObj.httpClient.getClientUrlAndPath(url)
@@ -134,6 +187,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      prepareProxy,
+      prepareOrigin,
       fullApi2Obj,
       handlePathArg,
       parseRegPath,
