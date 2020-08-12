@@ -60,6 +60,47 @@ const HTTPHISTORY = require(config.httpHistory) // 请求历史
 let TOKEN = ''
 
 const server = () => {
+  const getProxyConfig = (userConfig = {}) => {
+    const defaultConfig = {
+      changeOrigin: true,
+      onProxyReq: (proxyReq, req, res) => {
+        allowCors({req: proxyReq})
+        middlewaresObj.logger(req, res, () => {})
+        middlewaresObj.jsonParser(req, res, () => {
+          const {
+            method,
+            url,
+          } = req
+          if(ignoreHttpHistory({req}) === false) {
+            // setHttpHistory(`${method} ${url}`, {req})
+          }
+        })
+        TOKEN = req.get('Authorization') || TOKEN // 获取 token
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        allowCors({res: proxyRes, req})
+        setApiInHeader({res: proxyRes, req})
+        setHttpHistoryWrap({history: HTTPHISTORY, req, res: proxyRes})
+      },
+      logLevel: `silent`,
+    }
+    // 为了默认注入一些功能, 例如历史记录功能, 需要把用户添加的函数与程序中的函数合并
+    Object.keys(defaultConfig).forEach(key => {
+      const defaultVal = defaultConfig[key]
+      if(typeof(defaultVal) === `function`) {
+        const userVal = userConfig[key] || (() => undefined)
+        userConfig[key] = (...arg) => {
+          defaultVal(...arg)
+          return userVal(...arg)
+        }
+      }
+    })
+    return {
+      ...defaultConfig,
+      ...userConfig,
+    }
+  }
+
   return {
     serverProxy() {
       const server = jsonServer.create()
@@ -69,7 +110,7 @@ const server = () => {
         if(item.context === `/`) { // 过滤掉主 URL, 给后面的拦截器使用
           return false
         } else {
-          const mid = proxy(item.context, item.options)
+          const mid = proxy(item.context, getProxyConfig(item.options))
           server.use(mid)
         }
       })
@@ -78,28 +119,8 @@ const server = () => {
           return (noProxyTest(pathname) || getDataRouter({method, pathname, db})) ? false : true
         },
         {
+          ...getProxyConfig(),
           target: config.origin,
-          changeOrigin: true,
-          onProxyReq: (proxyReq, req, res) => {
-            allowCors({req: proxyReq})
-            middlewaresObj.logger(req, res, () => {})
-            middlewaresObj.jsonParser(req, res, () => {
-              const {
-                method,
-                url,
-              } = req
-              if(ignoreHttpHistory({req}) === false) {
-                // setHttpHistory(`${method} ${url}`, {req})
-              }
-            })
-            TOKEN = req.get('Authorization') || TOKEN // 获取 token
-          },
-          onProxyRes: (proxyRes, req, res) => {
-            allowCors({res: proxyRes, req})
-            setApiInHeader({res: proxyRes, req})
-            setHttpHistoryWrap({history: HTTPHISTORY, req, res: proxyRes})
-          },
-          logLevel: `silent`,
         },
       ))
 
