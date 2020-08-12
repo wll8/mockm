@@ -40,6 +40,9 @@ const config = { // 预置配置, 方便用户编写, 例如可以写多少形�
         onProxyReq (proxyReq, req, res) { // 拦截请求
           proxyReq.setHeader('x-added', 'req');
         },
+        mid (req, res, next) { // 在进行代理之前添加中间件
+          setTimeout(next, 5000) // 延时
+        },
         onProxyRes (proxyRes, req, res) { // 拦截响应
           proxyRes.headers['x-added'] = 'res';
         },
