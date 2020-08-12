@@ -111,7 +111,7 @@ const server = () => {
           return false
         } else {
           const mid = proxy(item.context, getProxyConfig(item.options))
-          server.use(mid)
+          server.use(item.context, mid)
         }
       })
       server.use(proxy(
