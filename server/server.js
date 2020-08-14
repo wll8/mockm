@@ -64,7 +64,7 @@ const server = () => {
     const defaultConfig = {
       changeOrigin: true,
       onProxyReq: (proxyReq, req, res) => {
-        allowCors({req: proxyReq})
+        allowCors({req: proxyReq, proxyConfig: userConfig})
         middlewaresObj.logger(req, res, () => {})
         middlewaresObj.jsonParser(req, res, () => {
           const {
