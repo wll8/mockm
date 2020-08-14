@@ -534,7 +534,7 @@ function business({config}) { // 与业务相关性较大的函数
           const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
           eval(optionStr)
           return new Promise((resolve, reject) => {
-            request(options, (err, curlRes, body) => {
+            request(options, (err, curlRes = {}, body) => {
               setHeader(res, curlRes.headers) // 复制远程的 header
               allowCors({req, res}) // 设置 header 为允许跨域模式
               const mergeRes = curlRes
@@ -794,7 +794,8 @@ function business({config}) { // 与业务相关性较大的函数
       })
     }
 
-    function allowCors({res, req}) { // 设置为允许跨域
+    function allowCors({res, req, proxyConfig = {}}) { // 设置为允许跨域
+      const target = proxyConfig.target || config.origin // 自定义代理时应使用 proxyConfig.target 中的 host
       if(config.cors === false) { // config.cors 为 false 时, 则不允许跨域
         return false
       }
@@ -802,8 +803,8 @@ function business({config}) { // 与业务相关性较大的函数
         'access-control-allow-origin': req.headers.origin || `*`
       })
       req && setHeader(req, { // 一些服务器会校验 req 中的 referer, host
-        'referer': config.origin,
-        'host': (new URL(config.origin)).host
+        'referer': target,
+        'host': (new URL(target)).host
       })
     }
 
