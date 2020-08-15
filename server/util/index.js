@@ -403,7 +403,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 }
 
-function business({config}) { // 与业务相关性较大的函数
+function business() { // 与业务相关性较大的函数
   function customApi({api, db}) {
     /**
     * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
@@ -468,7 +468,7 @@ function business({config}) { // 与业务相关性较大的函数
 
   }
 
-  function initHandle({config}) { // 初始化处理程序
+  function initHandle() { // 初始化处理程序
     const fetch = require('node-fetch')
     const request = require('request')
     const curlconverter = require('curlconverter')
@@ -490,7 +490,7 @@ function business({config}) { // 与业务相关性较大的函数
       return res
     }
 
-    function getOpenApi() { // 使用服务器获取远程 openApi , 避免跨域
+    function getOpenApi({config}) { // 使用服务器获取远程 openApi , 避免跨域
       return new Promise((resolve, reject) => {
         axios.get(config.openApi, {}).then(res => {
           resolve(res.data)
@@ -500,7 +500,7 @@ function business({config}) { // 与业务相关性较大的函数
       })
     }
 
-    function getDb() { // 根据配置返回 db
+    function getDb({config}) { // 根据配置返回 db
       const fs = require(`fs`)
       let db = config.db
       if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
@@ -515,7 +515,7 @@ function business({config}) { // 与业务相关性较大的函数
       }
     }
 
-    function init() { // 初始化, 例如创建所需文件, 以及格式化配置文件
+    function init({config}) { // 初始化, 例如创建所需文件, 以及格式化配置文件
       const fs = require(`fs`)
       if(toolObj.file.hasFile(config.dataDir) === false) { // 如果没有目录则创建目录
         fs.mkdirSync(config.dataDir, {recursive: true})
@@ -526,7 +526,7 @@ function business({config}) { // 与业务相关性较大的函数
       if(toolObj.file.isFileEmpty(config.store)) {
         fs.writeFileSync(config.store, `{}`)
       }
-      const db = getDb()
+      const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
@@ -587,7 +587,7 @@ function business({config}) { // 与业务相关性较大的函数
 
   }
 
-  function historyHandle({config}) {
+  function historyHandle() {
     /**
     * 历史记录处理
     */
@@ -636,7 +636,7 @@ function business({config}) { // 与业务相关性较大的函数
       }) || {}
     }
 
-    function ignoreHttpHistory({req}) { // 是否应该记录 req
+    function ignoreHttpHistory({config, req}) { // 是否应该记录 req
       const {method, url} = req
       return Boolean(
         method.match(/OPTIONS/i)
@@ -646,7 +646,7 @@ function business({config}) { // 与业务相关性较大的函数
       )
     }
 
-    function createBodyPath({req, headersObj, reqOrRes, apiId}) { // 根据 url 生成文件路径, reqOrRes: req, res
+    function createBodyPath({config, req, headersObj, reqOrRes, apiId}) { // 根据 url 生成文件路径, reqOrRes: req, res
       const filenamify = require('filenamify')
       const fs = require(`fs`)
       const mime = require('mime')
@@ -681,7 +681,7 @@ function business({config}) { // 与业务相关性较大的函数
       return bodyPath
     }
 
-    function createHttpHistory({history, dataDir, buffer, req, res}) {
+    function createHttpHistory({config, history, dataDir, buffer, req, res}) {
       const fs = require(`fs`)
       let {
         method,
@@ -699,7 +699,7 @@ function business({config}) { // 与业务相关性较大的函数
       const apiCount = toolObj.file.fileStore(config.store).updateApiCount()
       const apiId = toolObj.hex.string10to62(apiCount)
       function getBodyPath() {
-        const arg = {req, headersObj, dataDir, apiId}
+        const arg = {config, req, headersObj, dataDir, apiId}
         return {
           bodyPathReq: toolObj.type.isEmpty(reqBody) === false ? createBodyPath({...arg ,reqOrRes: `req`}) : undefined,
           bodyPathRes: toolObj.type.isEmpty(buffer) === false ? createBodyPath({...arg ,reqOrRes: `res`}) : undefined,
@@ -740,22 +740,24 @@ function business({config}) { // 与业务相关性较大的函数
         },
       }
       setHttpHistory({
+        config,
         data: {path, fullApi, id: apiId, data: resDataObj},
         history,
       })
     }
 
-    function setHttpHistory({data, history}) {
+    function setHttpHistory({config, data, history}) {
       const fs = require(`fs`)
       const {path} = data
       history[path] = (history[path] || []).concat(data)
       fs.writeFileSync(config.httpHistory, toolObj.obj.o2s(history))
     }
 
-    function setHttpHistoryWrap({history, req, res, mock = false, buffer}) { // 从 req, res 记录 history
-      if(ignoreHttpHistory({req}) === false) {
+    function setHttpHistoryWrap({config, history, req, res, mock = false, buffer}) { // 从 req, res 记录 history
+      if(ignoreHttpHistory({config, req}) === false) {
         const data = [];
         const arg = {
+          config,
           history,
           buffer,
           req,
@@ -885,10 +887,10 @@ function business({config}) { // 与业务相关性较大的函数
   }
 
   return {
-    initHandle: initHandle({config}),
-    reqHandle: reqHandle({config}),
-    clientInjection: clientInjection({config}),
-    historyHandle: historyHandle({config}),
+    initHandle,
+    reqHandle,
+    clientInjection,
+    historyHandle,
     customApi,
   }
 }
