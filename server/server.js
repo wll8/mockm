@@ -18,24 +18,32 @@ const {
 
 const {
   initHandle,
-  reqHandle: {
-    sendReq,
-  },
-  clientInjection: {
-    handleRes,
-    allowCors,
-    setApiInHeader,
-  },
-  historyHandle: {
-    setHttpHistoryWrap,
-    getHistory,
-    getHistoryList,
-    ignoreHttpHistory,
-  },
+  reqHandle,
+  clientInjection,
+  historyHandle,
   customApi,
-} = business({config})
+} = business()
+const {
+  handleRes,
+  allowCors,
+  setApiInHeader,
+} = clientInjection({config})
+const {
+  setHttpHistoryWrap,
+  getHistory,
+  getHistoryList,
+  ignoreHttpHistory,
+} = historyHandle({config})
+const {
+  sendReq,
+} = reqHandle({config})
 
-const { api, db } = initHandle.init()
+const {
+  init,
+  getOpenApi,
+} = initHandle()
+
+const { api, db } = init({config})
 const {
   middleware,
   httpClient,
@@ -71,7 +79,7 @@ const server = () => {
             method,
             url,
           } = req
-          if(ignoreHttpHistory({req}) === false) {
+          if(ignoreHttpHistory({config, req}) === false) {
             // setHttpHistory(`${method} ${url}`, {req})
           }
         })
@@ -80,7 +88,12 @@ const server = () => {
       onProxyRes: (proxyRes, req, res) => {
         allowCors({res: proxyRes, req})
         setApiInHeader({res: proxyRes, req})
-        setHttpHistoryWrap({history: HTTPHISTORY, req, res: proxyRes})
+        setHttpHistoryWrap({
+          config,
+          history: HTTPHISTORY,
+          req,
+          res: proxyRes,
+        })
       },
       logLevel: `silent`,
     }
@@ -139,6 +152,7 @@ const server = () => {
         res.send = function(data) {
           res.send = oldSend
           setHttpHistoryWrap({
+            config,
             history: HTTPHISTORY,
             req: {...req, body: reqBody},
             res,
@@ -229,7 +243,7 @@ const server = () => {
             res.send(list)
           },
           getOpenApi() {
-            initHandle.getOpenApi().then(oepnApiData => {
+            getOpenApi({config}).then(oepnApiData => {
               res.send(oepnApiData)
             })
           },
