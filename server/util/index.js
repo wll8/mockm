@@ -469,13 +469,6 @@ function business() { // 与业务相关性较大的函数
   }
 
   function initHandle() { // 初始化处理程序
-    const fetch = require('node-fetch')
-    const request = require('request')
-    const curlconverter = require('curlconverter')
-    const axios = require('axios')
-    const mockjs = require('mockjs')
-    const mime = require('mime')
-    const multiparty = require('multiparty')
 
     function getConfigFile() {
       const cliArg = toolObj.cli.parseArgv()
@@ -491,6 +484,7 @@ function business() { // 与业务相关性较大的函数
     }
 
     function getOpenApi({config}) { // 使用服务器获取远程 openApi , 避免跨域
+      const axios = require('axios')
       return new Promise((resolve, reject) => {
         axios.get(config.openApi, {}).then(res => {
           resolve(res.data)
@@ -506,7 +500,7 @@ function business() { // 与业务相关性较大的函数
       if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
         config.dbCover || toolObj.file.isFileEmpty(config.dbJsonName)
       ) {
-        db = db({mockjs})
+        db = db()
         fs.writeFileSync(config.dbJsonName, toolObj.obj.o2s(db))
         return db
       } else { // 如果 json 数据文件存在, 则从 json 文件中读取
@@ -530,6 +524,8 @@ function business() { // 与业务相关性较大的函数
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
+          const request = require('request')
+          const curlconverter = require('curlconverter')
           const requestStr = curlconverter.toNode(cmd)
           const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
           eval(optionStr)
@@ -564,12 +560,6 @@ function business() { // 与业务相关性较大的函数
       }
       const api = config.api({ // 向 config.api 暴露一些工具库
         run,
-        fetch,
-        curlconverter,
-        axios,
-        mime,
-        mockjs,
-        multiparty,
       })
 
       return {
