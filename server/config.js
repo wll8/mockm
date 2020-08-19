@@ -48,6 +48,10 @@ function baseConfigFn(util) {
     testProt: 9005, // 调试端口
     replayProt: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
     replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
+    replayProxyFind (item) { // 自定义请求重放时的逻辑
+      const body = require(item.data.res.bodyPath)
+      return body.status === 200 || body.status === `200`
+    },
     updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
     apiInHeader: true, // 在 header 中添加调试 api 地址, true: 是; false, 否; string: 以 string 为 header key
     // proxy: 'http://httpbin.org/', // 后台服务器的的 api
