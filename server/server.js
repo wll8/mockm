@@ -335,7 +335,26 @@ const server = () => {
       serverReplay.use(middlewares)
       serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
         const fullApi = `${req.method.toLowerCase()} ${req.originalUrl}`
-        const history = getHistory({history: HTTPHISTORY, fullApi, status: 200}).data
+        const history = getHistory({history: HTTPHISTORY, fullApi, find: list => {
+          const getStatus = (item) => {
+            try {
+              return item.data.res.lineHeaders.line.statusCode
+            } catch (err) {
+              console.log(err)
+            }
+          }
+          const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
+          let getItemRes = undefined
+          if(config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
+            try {
+              getItemRes = list.find((...arg) => config.replayProxyFind(...arg))
+            } catch (error) {
+              console.log(error)
+            }
+          }
+          getItemRes = getItemRes || getStatusCodeItem(list) || list[0] // 如果也没有找到状态码为 200 的, 则直接取第一条
+          return getItemRes
+        }}).data
         try {
           const lineHeaders = history.res.lineHeaders
           res.set(lineHeaders.headers) // 还原 headers
