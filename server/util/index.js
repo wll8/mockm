@@ -25,7 +25,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const arr = []
       let qutient = +number
       do {
-        mod = qutient % radix;
+        const mod = qutient % radix;
         qutient = (qutient - mod) / radix;
         arr.unshift(chars[mod]);
       } while (qutient);
