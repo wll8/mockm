@@ -200,7 +200,7 @@ const server = () => {
           next()
         } else {
           path = path === `/` ? `/index.html` : path // 访问 / 时默认返回 index.html
-          const filePath = require(`path`).resolve(__dirname, `../client/build/${path}`)
+          const filePath = require(`path`).resolve(__dirname, `./client/${path}`)
           res.sendFile(filePath, err => {
             if (err) {
               res.status(404).send({msg: `文件未找到: ${path}`})
