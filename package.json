@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "cd release && npx gulp",
+    "build": "cd client && npm run build && cd ../release && npx gulp",
     "bt": "npm run build && npm run test",
     "test": "cd dist/server && cnpm i && cd ../../ && node dist/server/run.js"
   }
