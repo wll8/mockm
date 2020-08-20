@@ -642,7 +642,9 @@ function business() { // 与业务相关性较大的函数
       method = method.toLowerCase()
 
       const newPath = () => {
-        const apiDir = `${config.dataDir}/${path}` // 以 path 创建目录
+        const osPath = require(`path`)
+        const basePath = osPath.parse(config.dataDir).base // 获取相对路径下的 dataDir 目录
+        const apiDir =  osPath.normalize(`./${basePath}/${path}`) // 以 path 创建目录, 生成相对路径以避免移动 dataDir 后无法使用
         if(toolObj.file.hasFile(apiDir) === false) { // 如果不存在此目录则进行创建
           fs.mkdirSync(apiDir, { recursive: true })
         }
