@@ -21,7 +21,7 @@ gulp.task(`copyServer`, () => { // 复制 server 中的文件, 例如 package.js
 
 gulp.task(`uglify`, () => {
   // uglify-es - https://github.com/mishoo/UglifyJS/tree/harmony
-  return gulp.src([`../server/**/*.js`, '!../server/node_modules/**'])
+  return gulp.src([`../server/**/*.js`, '!../server/page/**', '!../server/node_modules/**'])
     .pipe(uglify())
     .pipe(gulp.dest(`../dist/server`))
 });
