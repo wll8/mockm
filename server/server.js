@@ -352,7 +352,7 @@ const server = () => {
               console.log(error)
             }
           }
-          getItemRes = getItemRes || getStatusCodeItem(list) || list[0] // 如果也没有找到状态码为 200 的, 则直接取第一条
+          getItemRes = getItemRes || getStatusCodeItem(list) || list[0] || {} // 如果也没有找到状态码为 200 的, 则直接取第一条
           return getItemRes
         }}).data
         try {
