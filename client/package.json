@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build && npx shx mv build page && npx shx mv page ../server/",
+    "build": "react-app-rewired build && npx shx rm -rf ../server/page && npx shx mv build ../server/page",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
