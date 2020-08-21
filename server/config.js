@@ -11,6 +11,9 @@ const libObj = {
 
 const {
   toolObj: {
+    httpClient: {
+      midResJson,
+    },
     type: {
       isType,
     },
@@ -45,7 +48,7 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 }
 
 function baseConfigFn(util) {
-  const { fetch, axios, mime, mockjs, multiparty } = util
+  const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
   return { // 预置配置, 方便用户编写, 例如可以写多少形式
     prot: 9000, // 本地端口
     testProt: 9005, // 调试端口
@@ -71,6 +74,7 @@ function baseConfigFn(util) {
             setTimeout(next, 5000) // 延时
           },
           onProxyRes (proxyRes, req, res) { // 拦截响应
+            midResJson({proxyRes, res, key: `origin`, val: `127.0.0.1`}) // 修改 response
             proxyRes.headers['x-added'] = 'res';
           },
       },
@@ -139,6 +143,7 @@ function baseConfigFn(util) {
   }
 }
 
+libObj.midResJson = midResJson
 const config = baseConfigFn(libObj)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
   ...config,
