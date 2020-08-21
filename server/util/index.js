@@ -289,6 +289,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function httpClient() {
 
+    function midResJson({res, proxyRes, key, val, cb = body => body}) {
+      const modifyResponse = require('node-http-proxy-json')
+      modifyResponse(res, proxyRes, body => {
+        body && key && obj().deepSet(body, key, val)
+        return cb(body)
+      })
+    }
+
     function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
       // 当重定向路由(mock api)时, req.originalUrl 和 req.url 不一致, req.originalUrl 为浏览器中访问的 url, 应该基于这个 url 获取 path
       return {
@@ -311,6 +319,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      midResJson,
       getClientUrlAndPath,
       getClientIp,
     }
@@ -333,6 +342,32 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
+
+    function deepGet(object, keys, defaultValue) { // 深层获取对象值
+      let res = (!Array.isArray(keys)
+        ? keys
+          .replace(/\[/g, '.')
+          .replace(/\]/g, '')
+          .split('.')
+        : keys
+      ).reduce((o, k) => (o || {})[k], object)
+      return res !== undefined ? res : defaultValue
+    }
+
+    function deepSet(object, keys, val) { // 深层设置对象值
+      keys = Array.isArray(keys) ? keys : keys
+        .replace(/\[/g, '.')
+        .replace(/\]/g, '')
+        .split('.');
+      if (keys.length > 1) {
+        object[keys[0]] = object[keys[0]] || {}
+        deepSet(object[keys[0]], keys.slice(1), val)
+        return object
+      }
+      object[keys[0]] = val
+      return object
+    }
+
     function removeEmpty(obj) { // 删除对象中为空值的键
       obj = {...obj}
       Object.keys(obj).forEach(key => {
@@ -347,6 +382,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      deepGet,
+      deepSet,
       removeEmpty,
       o2s,
     }

@@ -23,6 +23,7 @@
     "morgan": "^1.10.0",
     "multiparty": "^4.2.1",
     "node-fetch": "^2.6.0",
+    "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.4",
     "path-to-regexp": "^0.1.7"
   },
