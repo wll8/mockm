@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "react-app-rewired": "^2.1.6",
-    "shx": "^0.3.2"
+    "shx": "^0.3.2",
+    "webpack-bundle-analyzer": "^3.8.0"
   }
 }
