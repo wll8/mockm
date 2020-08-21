@@ -66,7 +66,6 @@ function baseConfigFn(util) {
     proxy: { // string | object
       '/': `http://www.httpbin.org/`,
       '/get': { // 使用配置, 参考 https://github.com/chimurai/http-proxy-middleware#http-proxy-options
-          target: `http://www.httpbin.org/`,
           onProxyReq (proxyReq, req, res) { // 拦截请求
             proxyReq.setHeader('x-added', 'req');
           },
