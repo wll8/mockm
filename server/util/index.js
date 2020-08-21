@@ -805,7 +805,7 @@ function business() { // 与业务相关性较大的函数
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
       const apiCount = toolObj.file.fileStore(config.store).get(`apiCount`) + 1
       const apiId = toolObj.hex.string10to62(apiCount)
-      const testApi = `http://${toolObj.os.getOsIp()}:${config.testProt}/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+      const testApi = `http://${config.testIp}:${config.testProt}/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
       setHeader(res, {[config.apiInHeader]: testApi})
     }
 

@@ -360,7 +360,7 @@ const server = () => {
           res.set(lineHeaders.headers) // 还原 headers
           { // 更新 x-test-api, 因为如果 httpData 移动到其他设备时, ip 会改变, 所以应更新为当前 ip
             let testUrl = lineHeaders.headers[config.apiInHeader] || ``
-            testUrl = testUrl.replace(/:\/\/.+?\/#/, `://${toolObj.os.getOsIp()}:${config.testProt}/#`)
+            testUrl = testUrl.replace(/:\/\/.+?\/#/, `://${config.testIp}:${config.testProt}/#`)
             res.set({
               [config.apiInHeader]: testUrl,
             })
