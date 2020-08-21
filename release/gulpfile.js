@@ -30,12 +30,24 @@ gulp.task(`uglify`, () => {
     .pipe(gulp.dest(`../dist/package`))
 })
 
+gulp.task(`tar`, () => {
+  const tar = require(`tar`)
+  return tar.c( // or tar.create
+    {
+      gzip: true,
+      cwd: `${__dirname}/../dist/`,
+      file: `../dist/package.tgz`,
+    },
+    [`package/`]
+  )
+})
+
 // see: https://github.com/gulpjs/gulp/issues/1091#issuecomment-163151632
 gulp.task(
   `default`,
   gulp.series(
     `clear`,
     gulp.parallel(`copyServer`),
-    gulp.series(`uglify`, done => done())
+    gulp.series(`uglify`, `tar`, done => done())
   ),
 )
