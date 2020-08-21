@@ -68,7 +68,9 @@ let TOKEN = ''
 
 const server = () => {
   const getProxyConfig = (userConfig = {}) => {
+    const rootTarget = config.proxy.find(item => (item.context === `/`)).options.target
     const defaultConfig = {
+      target: rootTarget,
       changeOrigin: true,
       onProxyReq: (proxyReq, req, res) => {
         allowCors({req: proxyReq, proxyConfig: userConfig})
