@@ -10,10 +10,8 @@
   "devDependencies": {
     "del": "^5.1.0",
     "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-clean": "^0.4.0",
-    "gulp-copy": "^4.0.1",
-    "gulp-uglify": "^3.0.2",
-    "gulp-uglify-es": "^2.0.0"
+    "gulp-uglify-es": "^2.0.0",
+    "shelljs": "^0.8.4",
+    "tar": "^6.0.5"
   }
 }
