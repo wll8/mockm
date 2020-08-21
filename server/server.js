@@ -6,8 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const cloneDeep = require('lodash/cloneDeep')
 const {logHelper, print} = require('./util/log.js')
-logHelper()
-
+process.argv.includes(`dev`) && logHelper()
 const config = require(`./config.js`)
 const util = require(`./util/index.js`)
 
