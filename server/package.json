@@ -28,8 +28,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "nodemon -q -w \"*.js\" --exec \"node server.js\"",
-    "serve": "node run.js",
+    "start": "nodemon -q -w \"*.js\" --exec \" node server.js dev\"",
+    "serve": "node run.js dev",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
