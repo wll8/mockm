@@ -72,6 +72,19 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }, {})
     }
 
+    function getWatchArg({cliArgWatch, configFile}) { // 传入 watch 参数与 configFile 合并, 多个 watch 值用逗号分隔
+      if(typeof(cliArgWatch) === `undefined`) {
+        return [configFile]
+      } else if(typeof(cliArgWatch) !== `string`) {
+        console.log(`watch 参数错误: ${cliArgWatch}, 不能为 true|false, 或文件名不能包含逗号(,)`)
+        process.exit()
+      } else {
+        let watch = cliArgWatch.split(`,`)
+        watch = [configFile, ...watch]
+        return watch
+      }
+    }
+
     function getOptions(cmd) { // curl 命令转 body
       const curlconverter = require('curlconverter');
       let str = curlconverter.toNode(cmd)
@@ -86,6 +99,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return res
     }
     return {
+      getWatchArg,
       parseArgv,
       getOptions,
     }
