@@ -1,14 +1,14 @@
 {
-  "name": "mock-server",
-  "version": "1.0.1",
+  "name": "mock-mock",
+  "version": "1.0.2",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
-    "ms": "run.js"
+    "mm": "run.js"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/wll8/mock-server.git"
+    "url": "git://github.com/wll8/mock-mock.git"
   },
   "dependencies": {
     "axios": "^0.19.1",

@@ -1,8 +1,7 @@
 {
-  "name": "minjs",
+  "name": "mock-mock-release",
   "version": "1.0.0",
-  "description": "",
-  "main": "bin.js",
+  "description": "mock-mock 发布脚本",
   "scripts": {},
   "keywords": [],
   "author": "",
