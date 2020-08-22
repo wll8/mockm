@@ -99,6 +99,9 @@ function baseConfigFn(util) {
         'get /name' (req, res, next) { // 使用 mock 功能
           res.json({name: mockjs.mock(`@cname`)})
         },
+        'get /json': { // 直接返回 json 数据
+          msg: `json api`
+        },
         'get /file' (req, res, next) { // 发送文件
           res.sendFile(`${__dirname}/readme.md`)
         },
