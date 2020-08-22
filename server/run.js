@@ -16,6 +16,6 @@ const configFile = business().initHandle().getConfigFile()
 cliArg.config = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
 nodemon({
-  exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64==${base64config}`,
+  exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config}`,
   watch: configFile,
 })

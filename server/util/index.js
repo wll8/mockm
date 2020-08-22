@@ -55,8 +55,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function cli() { // 命令行相关处理程序
     function parseArgv(arr) { // 解析命令行参数
       return (arr || process.argv.slice(2)).reduce((acc, arg) => {
-        let [k, v] = arg.split('==')
-        acc[k] = v === undefined // 没有值时, 则表示为 true
+        let [k, ...v] = arg.split('=')
+        v = v.join(`=`) // 把带有 = 的值合并为字符串
+        acc[k] = v === '' // 没有值时, 则表示为 true
           ? true
           : (
             /^(true|false)$/.test(v) // 转换指明的 true/false
