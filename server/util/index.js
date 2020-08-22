@@ -466,16 +466,21 @@ function business() { // 与业务相关性较大的函数
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = toolObj.url.fullApi2Obj(key)
+        let val = api[key]
+        if(typeof(val) === `object`) { // 如果配置的值是对象, 那么直接把对象作为返回值, 注意, 读取一个文件也是对象
+          const backVal = val
+          val = (req, res, next) => res.json(backVal)
+        }
         method = method.toLowerCase()
         if((method === `*` || method === `/`) && (url === undefined)) { // 拦截所有方法所有路由
-          serverRouterList.push({method: `all`, router: `*`, action: api[key]})
+          serverRouterList.push({method: `all`, router: `*`, action: val})
         } else if(url === undefined) { // 拦截指定方法的所有路由
-          server[method](`*`, api[key])
-          serverRouterList.push({method, router: `*`, action: api[key]})
+          server[method](`*`, val)
+          serverRouterList.push({method, router: `*`, action: val})
         }
         if(method && url) { // 拦截指定方法的指定路由
           noProxyRouteList.push(url)
-          serverRouterList.push({method, router: url, action: api[key]})
+          serverRouterList.push({method, router: url, action: val})
         }
       })
       function noProxyTest(pathname) {
