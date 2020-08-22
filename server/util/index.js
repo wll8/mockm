@@ -524,7 +524,7 @@ function business() { // 与业务相关性较大的函数
 
     function getConfigFile() {
       const cliArg = toolObj.cli.parseArgv()
-      const cwdConfigPath = `${process.cwd()}/ms.config.js`
+      const cwdConfigPath = `${process.cwd()}/mm.config.js`
       let res = `${__dirname}/../config.js` // 默认配置文件
       if(cliArg.config) { // 命令行上指定的 config 文件
         res = cliArg.config

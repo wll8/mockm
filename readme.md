@@ -1,4 +1,4 @@
-# mock-server
+# mock-mock
 前端接口模拟, 快速同步开发.
 
 ``` sh
