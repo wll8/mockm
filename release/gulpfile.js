@@ -32,11 +32,13 @@ gulp.task(`uglify`, () => {
 
 gulp.task(`tar`, () => {
   const tar = require(`tar`)
+  const package = require(`../dist/package/package.json`)
+  const filePath = `../dist/${package.name}-${package.version}.tgz`
   return tar.c( // or tar.create
     {
       gzip: true,
       cwd: `${__dirname}/../dist/`,
-      file: `../dist/package.tgz`,
+      file: filePath,
     },
     [`package/`]
   )
