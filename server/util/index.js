@@ -108,12 +108,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function url() { // url 处理程序
     function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
       let resProxy = []
-      if(typeof(proxy) === `string`) { // 任何路径都转发到 proxy
+      const isType = type().isType
+      const proxyType = isType(proxy)
+      if(proxyType === `string`) { // 任何路径都转发到 proxy
         proxy = {
           '/': proxy,
         }
       }
-      if(typeof(proxy) === `object`) { // 转发 key 到 target
+      if(proxyType === `object`) { // 转发 key 到 target
         function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
           const indexVal = proxy[`/`]
           delete proxy[`/`]
@@ -123,10 +125,44 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         proxy = setIndexOfEnd(proxy)
         resProxy = Object.keys(proxy).map(context => {
           let options = proxy[context]
-          if(typeof(options) === `string`) { // 转换字符串的 value 为对象
+          const optionsType = isType(options)
+          if(optionsType === `string`) { // 转换字符串的 value 为对象
             options = {
               pathRewrite: { [`^${context}`]: `` }, // 原样代理 /a 到 /a
               target: options,
+            }
+          }
+          if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
+            const [item1, item2] = options
+            const item1Type = isType(item1)
+            const midResJson = httpClient().midResJson
+            const deepMergeObject = obj().deepMergeObject
+
+            if(options.length <= 1) { // 只有0个或一个项, 直接替换 res
+              options = {
+                onProxyRes (proxyRes, req, res) {
+                  midResJson({proxyRes, res, cb: () => item1})
+                },
+              }
+            }
+            if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
+              options = {
+                onProxyRes (proxyRes, req, res) {
+                  midResJson({proxyRes, res, key: item1, val: item2})
+                },
+              }
+            }
+            if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
+              options = {
+                onProxyRes (proxyRes, req, res) {
+                  midResJson({proxyRes, res, cb: body => {
+                    return ({
+                      'deep': deepMergeObject(body, item1), // 父级【不会】被替换
+                      '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
+                    })[item2 || `deep`]
+                  }})
+                },
+              }
             }
           }
           return {
@@ -357,6 +393,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
+    function flatObj(value, currentKey) { // 展开对象
+      let result = {};
+      Object.keys(value).forEach(key => {
+        const tempKey = currentKey ? `${currentKey}.${key}` : key;
+        if (typeof value[key] !== "object") {
+          result[tempKey] = value[key];
+        } else {
+          result = { ...result, ...flatObj(value[key], tempKey) };
+        }
+      });
+      return result;
+    }
 
     function deepGet(object, keys, defaultValue) { // 深层获取对象值
       let res = (!Array.isArray(keys)
@@ -367,6 +415,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         : keys
       ).reduce((o, k) => (o || {})[k], object)
       return res !== undefined ? res : defaultValue
+    }
+
+    function deepMergeObject(originObj, adventObj) { // 深层合并对象
+      const flatObjRes = flatObj(adventObj)
+      Object.keys(flatObjRes).forEach(key => {
+        deepSet(originObj, key, flatObjRes[key])
+      })
+      return originObj
     }
 
     function deepSet(object, keys, val) { // 深层设置对象值
@@ -397,6 +453,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      deepMergeObject,
+      flatObj,
       deepGet,
       deepSet,
       removeEmpty,
@@ -429,7 +487,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           )
       )
     }
-    function isType(data, type) { // 判断数据是否为 type, 或返回 type
+    function isType(data, type = undefined) { // 判断数据是否为 type, 或返回 type
       const dataType = Object.prototype.toString.call(data).match(/\s(.+)]/)[1].toLowerCase()
       return type ? (dataType === type.toLowerCase()) : dataType
     }
