@@ -77,6 +77,9 @@ function baseConfigFn(util) {
             proxyRes.headers['x-added'] = 'res';
           },
       },
+      // '/get': [`origin`, `127.0.0.1`], // 第二个值存在, 以第二个值替换 origin, 第二个值为 undefined 时相当于删除
+      // '/get': [{msg: `ok`}], // 只有0个或一个值, 直接替换 res
+      // '/get': [{origin: `127.0.0.1`, msg: `ok`, headers: {tips: `mid`}}, `deep`], // 合并: [要合并的对象, 合并的方式], 合并的方式: deep(父级不会被替换), ...(父级会被替换, 类似于js扩展运行符)
     },
     openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
     dataDir: './httpData/', // 数据保存目录
