@@ -196,7 +196,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     function fullApi2Obj(api) {
-      let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, api.trim()]
+      let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, `*`, api.trim()]
+      if(method === `*`) {
+        method = `all`
+      }
+      if((url === undefined) || (url === `/`)) {
+        url = `*`
+      }
       const {path} = toolObj.httpClient.getClientUrlAndPath(url)
       return {path, method, url}
     }
@@ -520,7 +526,6 @@ function business() { // 与业务相关性较大的函数
     */
 
     function parseApi() { // 解析自定义 api
-      const noProxyRouteList = []
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = toolObj.url.fullApi2Obj(key)
@@ -530,24 +535,21 @@ function business() { // 与业务相关性较大的函数
           val = (req, res, next) => res.json(backVal)
         }
         method = method.toLowerCase()
-        if((method === `*` || method === `/`) && (url === undefined)) { // 拦截所有方法所有路由
-          serverRouterList.push({method: `all`, router: `*`, action: val})
-        } else if(url === undefined) { // 拦截指定方法的所有路由
-          server[method](`*`, val)
-          serverRouterList.push({method, router: `*`, action: val})
-        }
-        if(method && url) { // 拦截指定方法的指定路由
-          noProxyRouteList.push(url)
-          serverRouterList.push({method, router: url, action: val})
-        }
+        serverRouterList.push({method, router: url, action: val})
       })
-      function noProxyTest(pathname) {
+      function noProxyTest({method, pathname}) {
         // return true 时不走真实服务器, 而是走自定义 api
         const pathToRegexp = require('path-to-regexp')
-        return noProxyRouteList.some(route => pathToRegexp(route).exec(pathname))
+        return serverRouterList.some(item => {
+          // 当方法不同时才去匹配 url
+          if(((item.method === `all`) || (item.method === method))) {
+            return pathToRegexp(item.router).exec(pathname)
+          } else {
+            return false
+          }
+        })
       }
       return {
-        noProxyRouteList,
         serverRouterList,
         noProxyTest,
       }
@@ -676,10 +678,17 @@ function business() { // 与业务相关性较大的函数
       const api = config.api({ // 向 config.api 暴露一些工具库
         run,
       })
-
+      const apiRootInjection = api[`*`] || api[`/`] || function (req, res, next) {return next()} // 统一处理所有自定义的根级别拦截器
+      // 移交给 apiRootInjection, 它表示所有【自定义api】前的拦截功能
+      // 为什么要删掉?
+      // 因为这是用于判断是否进入 proxy 的条件
+      // 如果不删除会导致恒等匹配成功, 无法进入 proxy
+      delete api[`/`]
+      delete api[`*`]
       return {
         db,
         api,
+        apiRootInjection,
       }
 
     }
