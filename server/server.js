@@ -42,7 +42,11 @@ const {
   getOpenApi,
 } = initHandle()
 
-const { api, db } = init({config})
+const {
+  apiRootInjection,
+  api,
+  db,
+} = init({config})
 const {
   middleware,
   httpClient,
@@ -130,8 +134,13 @@ const server = () => {
         }
       })
       server.use(proxy(
-        (pathname, {method}) => { // 返回 true 时进行转发
-          return (noProxyTest(pathname) || getDataRouter({method, pathname, db})) ? false : true
+        (pathname, {method}) => { // 返回 true 时进行转发, 真实服务器
+          method = method.toLowerCase()
+          if(noProxyTest({method, pathname}) || getDataRouter({method, pathname, db})) {
+            return false
+          } else {
+            return true
+          }
         },
         {
           ...getProxyConfig(),
@@ -166,6 +175,7 @@ const server = () => {
       })
 
       // 前端自行添加的测试 api
+      server.use(`*`, apiRootInjection)
       serverRouterList.forEach(({method, router, action}) => {
         server[method](router, action)
       })
@@ -318,11 +328,12 @@ const server = () => {
       serverReplay.use(middlewaresObj.corsMiddleware)
       serverReplay.use(proxy(
         (pathname, req) => {
-          const fullApi = `${req.method.toLowerCase()} ${req.originalUrl}`
+          const method = req.method.toLowerCase()
+          const fullApi = `${method} ${req.originalUrl}`
           const history = getHistory({history: HTTPHISTORY, fullApi}).data
           if(history) { // 当存在 history 则不进入代理
             return false
-          } else if(noProxyTest(pathname) === true) { // 当没有 history, 则使用 noProxy 规则
+          } else if(noProxyTest({method, pathname}) === true) { // 当没有 history, 则使用 noProxy 规则
             return true
           } else { // 当没有 history 也不匹配 noProxy 时, 则根据 replayProxy 规则
             return config.replayProxy
@@ -335,7 +346,8 @@ const server = () => {
       ))
       serverReplay.use(middlewares)
       serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
-        const fullApi = `${req.method.toLowerCase()} ${req.originalUrl}`
+        const method = req.method.toLowerCase()
+        const fullApi = `${method} ${req.originalUrl}`
         const history = getHistory({history: HTTPHISTORY, fullApi, find: list => {
           const getStatus = (item) => {
             try {
