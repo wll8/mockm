@@ -294,7 +294,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function middleware() { // express 中间件
     const compression = require('compression') // 压缩 http 响应
 
-     function httpLog() { // 设置 http 请求日志中间件
+    function httpLog() { // 设置 http 请求日志中间件
       const morgan = require('morgan')
       morgan.token('dateLcoal', (req, res) => (new Date()).toLocaleString())
       return morgan( (tokens, req, res) => {
@@ -330,7 +330,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return {middlewares, middlewaresObj}
     }
 
+    function reWriteRouter({app, routes = {}}) { // 根据 routes 对象, 重写路由
+      const rewrite = require('express-urlrewrite')
+      Object.keys(routes).forEach(key => {
+        app.use(rewrite(key, routes[key]))
+      })
+    }
+
     return {
+      reWriteRouter,
       compression,
       httpLog,
       getJsonServerMiddlewares,
@@ -563,7 +571,7 @@ function business() { // 与业务相关性较大的函数
       method = method.trim().toLowerCase()
       const isType = toolObj.type.isType
       const res = Object.keys(db).some(key => {
-      const execPathname = pathToRegexp(`/${key}`).exec(pathname)
+        const execPathname = pathToRegexp(`/${key}`).exec(pathname)
         const val = db[key]
         if (isType(val, `object`)) {
           return `get post put patch `.includes(`${method} `) && execPathname // 方法与路由匹配

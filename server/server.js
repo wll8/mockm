@@ -117,6 +117,7 @@ const server = () => {
   return {
     serverProxy() {
       const server = jsonServer.create()
+      middleware.reWriteRouter({app: server, routes: config.route})
       const router = jsonServer.router(config.dbJsonName)
       server.use(middlewaresObj.corsMiddleware)
       config.proxy.forEach(item => {
@@ -313,6 +314,7 @@ const server = () => {
     },
     serverReplay() {
       const serverReplay = jsonServer.create()
+      middleware.reWriteRouter({app: serverReplay, routes: config.route})
       serverReplay.use(middlewaresObj.corsMiddleware)
       serverReplay.use(proxy(
         (pathname, req) => {
