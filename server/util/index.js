@@ -561,14 +561,16 @@ function business() { // 与业务相关性较大的函数
       const pathToRegexp = require('path-to-regexp')
 
       method = method.trim().toLowerCase()
+      const isType = toolObj.type.isType
       const res = Object.keys(db).some(key => {
+      const execPathname = pathToRegexp(`/${key}`).exec(pathname)
         const val = db[key]
-        if (toolObj.type.isType(val, `object`)) {
-          return `get post put patch `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname) // 方法与路由匹配
+        if (isType(val, `object`)) {
+          return `get post put patch `.includes(`${method} `) && execPathname // 方法与路由匹配
         }
-        if (toolObj.type.isType(val, `array`)) {
+        if (isType(val, `array`)) {
           return (
-            (`get post `.includes(`${method} `) && pathToRegexp(`/${key}`).exec(pathname)) // 获取所有或创建单条
+            (`get post `.includes(`${method} `) && execPathname) // 获取所有或创建单条
             || (`get put patch delete `.includes(`${method} `) && pathToRegexp(`/${key}/:id`).exec(pathname)) // 处理针对于 id 单条数据的操作, 注意 id 的取值字段 foreignKeySuffix
           )
         }
