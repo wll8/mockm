@@ -143,6 +143,26 @@ function baseConfigFn(util) {
       })
       return data
     },
+    resHandleReplay({req, res}) {
+      // 处理重放请求出错时会进入这个方法
+      // 对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能)
+      // 所以这里直接告诉前面接口正常(200ok), 并返回前约定的接口数据结构, 让前端页面可以尽量正常运行
+      res.statusCode = 200
+      return {
+        code: res.statusCode,
+        success: Boolean(('' + res.statusCode).match(/^[2]/)), // 如果状态码以2开头则为 true
+        data: {},
+      }
+    },
+    resHandleJsonApi({req, res, data}) {
+      // 由 db.json 生成的接口的最后一个拦截器
+      // 可以用来构建项目所需的数据结构
+      return {
+        code: res.statusCode,
+        success: Boolean(('' + res.statusCode).match(/^[2]/)), // 如果状态码以2开头则为 true
+        data,
+      }
+    },
     ...cliArg,
     ...userConfig(util),
   }

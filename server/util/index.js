@@ -909,14 +909,6 @@ function business() { // 与业务相关性较大的函数
       })
     }
 
-    function handleRes(res, data) {
-      return {
-        code: res.statusCode,
-        success: Boolean(('' + res.statusCode).match(/^[2]/)), // 如果状态码以2开头则为 true
-        data,
-      }
-    }
-
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
       const apiCount = toolObj.file.fileStore(config.store).get(`apiCount`) + 1
       const apiId = toolObj.hex.string10to62(apiCount)
@@ -927,7 +919,6 @@ function business() { // 与业务相关性较大的函数
     return {
       setHeader,
       allowCors,
-      handleRes,
       setApiInHeader,
     }
   }
