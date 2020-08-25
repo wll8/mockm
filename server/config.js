@@ -130,7 +130,7 @@ function baseConfigFn(util) {
       }
     },
     dbJsonName: './db.json', // json 数据生成的保存位置
-    dbCover: false, // 每次启动总是生成新的 db.json
+    dbCover: false, // 每次启动总是生成新的 db
     db () { // 供 json-server 使用的 json 数据, function || object
       const data = mockjs.mock({
         'books|3-7': [
@@ -155,7 +155,7 @@ function baseConfigFn(util) {
       }
     },
     resHandleJsonApi({req, res, data}) {
-      // 由 db.json 生成的接口的最后一个拦截器
+      // 由 db 生成的接口的最后一个拦截器
       // 可以用来构建项目所需的数据结构
       return {
         code: res.statusCode,
