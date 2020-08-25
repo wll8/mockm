@@ -143,6 +143,9 @@ function baseConfigFn(util) {
       })
       return data
     },
+    route: { // db 数据路由映射, 参考: https://github.com/typicode/json-server#add-custom-routes
+      '/db/api/*': '/$1', // /api/a => /a
+    },
     resHandleReplay({req, res}) {
       // 处理重放请求出错时会进入这个方法
       // 对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能)
