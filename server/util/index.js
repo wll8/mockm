@@ -621,17 +621,15 @@ function business() { // 与业务相关性较大的函数
 
     function getDb({config}) { // 根据配置返回 db
       const fs = require(`fs`)
-      let db = config.db
-      if( // 如果没有生成 json 数据文件, 才进行覆盖(为了数据持久)
-        config.dbCover || toolObj.file.isFileEmpty(config.dbJsonName)
-      ) {
-        db = db()
-        fs.writeFileSync(config.dbJsonName, toolObj.obj.o2s(db))
-        return db
-      } else { // 如果 json 数据文件存在, 则从 json 文件中读取
-        db = require(config.dbJsonName)
-        return db
+      const newDb = config.db()
+      const o2s = toolObj.obj.o2s
+      if(toolObj.file.isFileEmpty(config.dbJsonName) || config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
+        fs.writeFileSync(config.dbJsonName, o2s(newDb))
       }
+      const oldDb = require(config.dbJsonName)
+      const resDb = {...newDb, ...oldDb}
+      fs.writeFileSync(config.dbJsonName, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+      return resDb
     }
 
     function init({config}) { // 初始化, 例如创建所需文件, 以及格式化配置文件
