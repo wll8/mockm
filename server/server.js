@@ -23,7 +23,6 @@ const {
   customApi,
 } = business()
 const {
-  handleRes,
   allowCors,
   setApiInHeader,
 } = clientInjection({config})
@@ -185,8 +184,7 @@ const server = () => {
             results: res.locals.data,
           }
         }
-
-        res.json(handleRes(res, returnData))
+        res.json(config.resHandleJsonApi({req, res, data: returnData}))
       }
 
     },
@@ -379,10 +377,7 @@ const server = () => {
           }
         } catch (error) {
           console.log(`error`, error)
-          // 对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能)
-          // 所以这里直接告诉前面接口正常(200ok), 并返回前约定的接口数据结构, 让前端页面可以正常运行
-          res.statusCode = 200
-          res.json(handleRes(res, {}))
+          res.json(config.resHandleReplay({req, res}))
         }
       })
       serverReplay.listen(config.replayProt, () => {
