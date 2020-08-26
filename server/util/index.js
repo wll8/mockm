@@ -115,62 +115,60 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           '/': proxy,
         }
       }
-      if(proxyType === `object`) { // 转发 key 到 target
-        function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
-          const indexVal = proxy[`/`]
-          delete proxy[`/`]
-          proxy[`/`] = indexVal
-          return proxy
-        }
-        proxy = setIndexOfEnd(proxy)
-        resProxy = Object.keys(proxy).map(context => {
-          let options = proxy[context]
-          const optionsType = isType(options)
-          if(optionsType === `string`) { // 转换字符串的 value 为对象
-            options = {
-              pathRewrite: { [`^${context}`]: `` }, // 原样代理 /a 到 /a
-              target: options,
-            }
-          }
-          if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
-            const [item1, item2] = options
-            const item1Type = isType(item1)
-            const midResJson = httpClient().midResJson
-            const deepMergeObject = obj().deepMergeObject
-
-            if(options.length <= 1) { // 只有0个或一个项, 直接替换 res
-              options = {
-                onProxyRes (proxyRes, req, res) {
-                  midResJson({proxyRes, res, cb: () => item1})
-                },
-              }
-            }
-            if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
-              options = {
-                onProxyRes (proxyRes, req, res) {
-                  midResJson({proxyRes, res, key: item1, val: item2})
-                },
-              }
-            }
-            if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
-              options = {
-                onProxyRes (proxyRes, req, res) {
-                  midResJson({proxyRes, res, cb: body => {
-                    return ({
-                      'deep': deepMergeObject(body, item1), // 父级【不会】被替换
-                      '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
-                    })[item2 || `deep`]
-                  }})
-                },
-              }
-            }
-          }
-          return {
-            context,
-            options,
-          }
-        })
+      function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
+        const indexVal = proxy[`/`]
+        delete proxy[`/`]
+        proxy[`/`] = indexVal
+        return proxy
       }
+      proxy = setIndexOfEnd(proxy)
+      resProxy = Object.keys(proxy).map(context => {
+        let options = proxy[context]
+        const optionsType = isType(options)
+        if(optionsType === `string`) { // 转换字符串的 value 为对象
+          options = {
+            pathRewrite: { [`^${context}`]: `` }, // 原样代理 /a 到 /a
+            target: options,
+          }
+        }
+        if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
+          const [item1, item2] = options
+          const item1Type = isType(item1)
+          const midResJson = httpClient().midResJson
+          const deepMergeObject = obj().deepMergeObject
+
+          if(options.length <= 1) { // 只有0个或一个项, 直接替换 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: () => item1})
+              },
+            }
+          }
+          if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, key: item1, val: item2})
+              },
+            }
+          }
+          if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: body => {
+                  return ({
+                    'deep': deepMergeObject(body, item1), // 父级【不会】被替换
+                    '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
+                  })[item2 || `deep`]
+                }})
+              },
+            }
+          }
+        }
+        return {
+          context,
+          options,
+        }
+      })
       return resProxy
     }
 
