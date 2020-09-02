@@ -13,11 +13,32 @@ const cli = toolObj.cli
 const cliArg = cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
-const configFile = business().initHandle().getConfigFile()
+const {
+  initHandle,
+  plugin,
+} = business()
+const configFile = initHandle().getConfigFile()
 cliArg.config = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
 const watch = cli.getWatchArg({cliArgWatch: cliArg.watch, configFile})
+const os = require(`os`)
+const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) // 此文件用于 run.js 与 server.js 共享变量
 nodemon({
-  exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config}`,
+  exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
   watch,
+})
+
+new Promise(async () => {
+  const {
+    showLocalInfo,
+    remoteServer,
+  } = plugin()
+  await toolObj.control.awaitTrue(() => toolObj.file.hasFile(sharePath)) // 等待 sharePath 文件存在, 期望 config 已经存入
+  const share = toolObj.file.fileStore(sharePath)
+  const config = share.get(`config`)
+  const store = toolObj.file.fileStore(config.store)
+  showLocalInfo({store, config})
+  if(config.remote) { // 如果启用远程则进行相关功能处理
+    remoteServer({store, config})
+  }
 })

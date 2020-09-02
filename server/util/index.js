@@ -1,4 +1,38 @@
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
+  function control() { // 流程控制
+    /**
+    * 以 Promise 方式等待条件成立
+    * @param {*} condition 条件函数, 返回 true 时才陈立
+    * @param {*} ms 检测条件的实时间隔毫秒
+    */
+    function awaitTrue(condition, ms = 250) {
+      return new Promise(async resolve => {
+        let res = await condition()
+        while (res !== true) {
+          res = await condition()
+          await sleep(ms)
+        }
+        if(res === true) {
+          resolve(true)
+        }
+      })
+    }
+
+    /**
+     * 异步等待 sleep
+     * @param {*} ms 毫秒
+     */
+    function sleep(ms = 1e3) { // 异步 sleep
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    return {
+      awaitTrue,
+      sleep,
+    }
+
+  }
+
   function cache() { // 缓存处理程序
     function delRequireCache(filePath) {
       delete require.cache[require.resolve(filePath)]
@@ -53,6 +87,29 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function cli() { // 命令行相关处理程序
+    /**
+     * 以 Promise 方式运行 spawn
+     * @param {*} cmd 主程序
+     * @param {*} args 程序参数数组
+     * @param {*} opts spawn 选项
+     */
+    function spawn (cmd, args, opts) {
+      opts = { stdio: `inherit`, ...opts }
+      opts.shell = opts.shell || process.platform === 'win32'
+      return new Promise((resolve, reject) => {
+        const cp = require('child_process')
+        const child = cp.spawn(cmd, args, opts)
+        let stdout = ''
+        let stderr = ''
+        child.stdout && child.stdout.on('data', d => { stdout += d })
+        child.stderr && child.stderr.on('data', d => { stderr += d })
+        child.on('error', reject)
+        child.on('close', code => {
+          resolve({code, stdout, stderr})
+        })
+      })
+    }
+
     function parseArgv(arr) { // 解析命令行参数
       return (arr || process.argv.slice(2)).reduce((acc, arg) => {
         let [k, ...v] = arg.split('=')
@@ -99,6 +156,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return res
     }
     return {
+      spawn,
       getWatchArg,
       parseArgv,
       getOptions,
@@ -199,7 +257,11 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return {path, method, url}
     }
 
-    function handlePathArg(pathStr) { // 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+    /**
+     * 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+     * @param {*} pathStr 路径
+     */
+    function handlePathArg(pathStr) {
       const path = require(`path`)
       let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
       newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
@@ -248,18 +310,25 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function file() { // 文件相关
     function fileStore(storePath) { // 存取需要持久化存储的数据
       const fs = require(`fs`)
+      const {
+        o2s,
+        deepSet,
+        deepGet,
+      } = obj()
+      if(hasFile(storePath) === false) {
+        fs.writeFileSync(storePath, o2s({}))
+      }
       let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
       return {
         set(key, val) {
-          const o2s = obj().o2s
           const newStore = store()
-          newStore[key] = val
+          deepSet(newStore, key, val)
           fs.writeFileSync(storePath, o2s(newStore))
           return store
         },
         get(key) {
           const newStore = store()
-          return newStore[key]
+          return deepGet(newStore, key)
         },
         updateApiCount() {
           const apiCountOld =  this.get(`apiCount`) || 0
@@ -504,6 +573,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   return {
+    control: control(),
     cache: cache(),
     generate: generate(),
     url: url(),
@@ -641,6 +711,7 @@ function business() { // 与业务相关性较大的函数
       if(toolObj.file.isFileEmpty(config.store)) {
         fs.writeFileSync(config.store, `{}`)
       }
+      toolObj.file.fileStore(config._share).set(`config`, config)
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
@@ -982,7 +1053,77 @@ function business() { // 与业务相关性较大的函数
 
   }
 
+  function plugin() {
+    /**
+     * 显示本地服务信息
+     * @param {*} param0
+     */
+    function showLocalInfo({store, config}) {
+      store.set(`note.local.prot`, `http://${config.testIp}:${config.prot}/`)
+      store.set(`note.local.replayProt`, `http://${config.testIp}:${config.replayProt}/`)
+      store.set(`note.local.testProt`, `http://${config.testIp}:${config.testProt}/`)
+      console.log(`
+本地服务信息:
+prot: ${store.get(`note.local.prot`) || ``}
+replayProt: ${store.get(`note.local.replayProt`) || ``}
+testProt: ${store.get(`note.local.testProt`) || ``}
+      `)
+    }
+
+    /**
+     * 启动和显示远程服务信息
+     * @param {*} param0
+     */
+    function remoteServer({store, config}) {
+      console.log(`远程服务加载中...`)
+      new Promise(async () => {
+        const cli = toolObj.cli
+        const path = require(`path`)
+        const mainPath = path.join(__dirname, '../') // 主程序目录
+        const ngrokBin =  `${mainPath}/node_modules/ngrok/bin/ngrok`
+        const package =  require(`${mainPath}/package.json`)
+        const hasNgrok = toolObj.file.hasFile(ngrokBin)
+        if(hasNgrok === false) { // 如果 ngrok 不存在, 则安装它
+          await cli.spawn(
+            `npx`, [`cnpm`, `i`, `ngrok@${package.pluginDependencies.ngrok}`, `--no-save`],
+            {cwd: mainPath}
+          )
+        }
+        const arr = [
+          `testProt`,
+          `replayProt`,
+          `prot`,
+        ]
+        const ngrok = require('ngrok')
+        for (let index = 0; index < arr.length; index++) {
+          const protKey = arr[index]
+          const url = await ngrok.connect({
+            addr: config[protKey],
+            ...config.remote[protKey],
+          }).catch(err => {
+            // console.log(protKey, err)
+          })
+          store.set(`note.remote.${protKey}`, url)
+        }
+      console.log(`远程服务加载完成.`)
+      console.log(`
+远程服务信息:
+prot: ${store.get(`note.remote.prot`) || ``}
+replayProt: ${store.get(`note.remote.replayProt`) || ``}
+testProt: ${store.get(`note.remote.testProt`) || ``}
+      `)
+      })
+    }
+
+    return {
+      showLocalInfo,
+      remoteServer,
+    }
+
+  }
+
   return {
+    plugin,
     initHandle,
     reqHandle,
     clientInjection,
