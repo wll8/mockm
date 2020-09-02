@@ -173,7 +173,7 @@ const server = () => {
       server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 
       server.listen(config.prot, () => {
-        console.log(`服务运行于: http://localhost:${config.prot}/`)
+        // console.log(`服务运行于: http://localhost:${config.prot}/`)
       })
 
       router.render = (req, res) => { // 修改输出的数据, 符合项目格式
@@ -308,7 +308,7 @@ const server = () => {
       })
 
       serverTest.listen(config.testProt, () => {
-        console.log(`接口调试地址: http://localhost:${config.testProt}/`)
+        // console.log(`接口调试地址: http://localhost:${config.testProt}/`)
       })
 
     },
@@ -383,7 +383,7 @@ const server = () => {
         }
       })
       serverReplay.listen(config.replayProt, () => {
-        console.log(`服务器重放地址: http://localhost:${config.replayProt}/`)
+        // console.log(`服务器重放地址: http://localhost:${config.replayProt}/`)
       })
 
     }
