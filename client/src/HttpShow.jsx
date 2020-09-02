@@ -273,8 +273,8 @@ const HttpShow = (() => {
       }
       function initSwagger(serverConfig) {
         // 添加 swagger-ui.css
-        $(`head`).append($(`<link rel="stylesheet" href="/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui.css">`))
-        $(`head`).append($(`<link rel="stylesheet" href="/swagger.css">`))
+        $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui.css">`))
+        $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
         // 添加 swagger-ui-bundle.js 并初始化 swg
 
         // swagger-ui v3 没有 setHost 方法, 这里注入此方法
@@ -290,7 +290,7 @@ const HttpShow = (() => {
           }
         });
 
-        $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
+        $.getScript(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui-bundle.min.js`, () => {
           window.swaggerUi = window.SwaggerUIBundle({
             url: `${cfg.baseURL}/api/getOpenApi/`,
             dom_id: '#swagger-ui',
