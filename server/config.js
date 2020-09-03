@@ -192,12 +192,11 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   proxy: prepareProxy(config.proxy),
   api: isType(config.api, `object`) ? () => config.api : config.api,
   db: isType(config.db, `object`) ? () => config.db : config.db,
-  remote: config.remote === false ? false : { // 每个服务的 remote 配置
-    prot: { proto: `http` },
-    replayProt: { proto: `http` },
-    testProt: { proto: `http` },
-    ...(config.remote === true ? {} : config.remote),
-  },
+  remote: config.remote === false // 每个服务的 remote 配置
+    ? false
+    : config.remote === true
+      ? {}
+      : config.remote
 }
 
 module.exports = handleConfig

@@ -30,6 +30,8 @@
   },
   "devDependencies": {},
   "pluginDependencies": {
+    "get-port": "5.1.1",
+    "yaml": "1.10.0",
     "ngrok": "3.2.7"
   },
   "scripts": {
