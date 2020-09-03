@@ -299,6 +299,10 @@ const server = () => {
           getConfig() {
             res.send(config)
           },
+          getStore() {
+            const str = require(`fs`).readFileSync(config.store, `utf8`)
+            res.json(JSON.parse(str))
+          },
         }
         if (actionFnObj[action]) {
           actionFnObj[action](...actionArg)
