@@ -4,17 +4,22 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     * 以 Promise 方式等待条件成立
     * @param {*} condition 条件函数, 返回 true 时才陈立
     * @param {*} ms 检测条件的实时间隔毫秒
+    * @param {*} timeout 超时
     */
-    function awaitTrue(condition, ms = 250) {
+    function awaitTrue({
+      condition,
+      ms = 250,
+      timeout = 5e3,
+    }) {
       return new Promise(async resolve => {
+        let timeStart = Date.now()
         let res = await condition()
-        while (res !== true) {
+        while (res !== true && res !== `timeout`) {
           res = await condition()
+          res = ((Date.now() - timeStart) > timeout) ? `timeout` : res
           await sleep(ms)
         }
-        if(res === true) {
-          resolve(true)
-        }
+        resolve(res)
       })
     }
 
@@ -43,11 +48,32 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function generate() { // 生成器
+    /**
+     * 如果某个依赖不存在, 则安装它
+     * @param {*} packge 依赖名称
+     * @param {*} version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
+     */
+    async function initPackge(packge, version) {
+      const path = require(`path`)
+      const mainPath = path.join(__dirname, '../') // 主程序目录
+      const packageJson =  require(`${mainPath}/package.json`)
+      version = version || packageJson.pluginDependencies[packge]
+      const packgePath =  `${mainPath}/node_modules/${packge}`
+      const hasPackge = toolObj.file.hasFile(packgePath)
+      if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
+        await cli().spawn(
+          `npx`, `cnpm i ${packge}@${version} --no-save`.split(/\s+/),
+          {cwd: mainPath}
+        ).catch(err => console.log(err))
+      }
+    }
+
     function nextId() { // 获取全局自增 id
       global.id = (global.id || 0) + Date.now() + 1
       return global.id
     }
     return {
+      initPackge,
       nextId,
     }
   }
@@ -1055,18 +1081,75 @@ function business() { // 与业务相关性较大的函数
 
   function plugin() {
     /**
+     * 运行多个 nginx 实例并获取他们的 url
+     * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
+     */
+    async function runNgrok({serverList}) {
+      await toolObj.generate.initPackge(`yaml`)
+      await toolObj.generate.initPackge(`get-port`)
+      const yaml = require(`yaml`)
+      const getPort = require('get-port')
+      const spawn = toolObj.cli.spawn
+      const fs = require(`fs`)
+
+      // 获取未占用的 tcp 端口, 用于 ngrok 的 web_addr, 会生成一个 api 供我们调用
+      const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) ))
+
+      // 使用这些端口以及用户配置生成 ngrok yaml 格式的配置文件
+      portList.forEach((freePort, index) => {
+        const {name, config} = serverList[index]
+        const json = {
+          web_addr: `localhost:${freePort}`,
+          tunnels: {
+            [name]: { // 服务名称
+              proto: `http`,
+              ...config,
+            },
+          }
+        }
+
+        // 存储 nginx 配置文件, 然后让 ngrok 读取它们
+        const yamlStr = yaml.stringify(json)
+        const configPath = require(`path`).normalize(`${require(`os`).tmpdir()}/ngrok_${freePort}.yaml`)
+        fs.writeFileSync(configPath, yamlStr)
+        spawn( // 使用配置文件运行 ngrok
+          `npx`, `ngrok start --config "${configPath}" ${name}`.split(/\s+/),
+          {stdio: [0, `pipe`, 2]}
+        )
+      })
+
+      // 收集启动 nginx 之后的公网 url
+      const urlList = []
+      const axios = require(`axios`)
+      await Promise.all(portList.map((item, index) => {
+        return toolObj.control.awaitTrue({
+          timeout: 30e3,
+          condition: () => { // 等待 /api/tunnels 接口返回所需的 url
+            return new Promise(async resolve => {
+              const res = await axios.get(`http://localhost:${item}/api/tunnels`)
+              const tunnels = res.data.tunnels
+              const hasUrl = tunnels.length > 0
+              if(hasUrl) {
+                urlList[index] = tunnels[0].public_url
+              }
+              resolve(hasUrl)
+            })
+          },
+        })
+      }))
+      return urlList
+    }
+
+    /**
      * 显示本地服务信息
      * @param {*} param0
      */
     function showLocalInfo({store, config}) {
-      store.set(`note.local.prot`, `http://${config.testIp}:${config.prot}/`)
-      store.set(`note.local.replayProt`, `http://${config.testIp}:${config.replayProt}/`)
-      store.set(`note.local.testProt`, `http://${config.testIp}:${config.testProt}/`)
       console.log(`
 本地服务信息:
-prot: ${store.get(`note.local.prot`) || ``}
-replayProt: ${store.get(`note.local.replayProt`) || ``}
-testProt: ${store.get(`note.local.testProt`) || ``}
+prot: ${`http://${config.testIp}:${config.prot}/`}
+replayProt: ${`http://${config.testIp}:${config.replayProt}/`}
+testProt: ${`http://${config.testIp}:${config.testProt}/`}
       `)
     }
 
@@ -1074,37 +1157,25 @@ testProt: ${store.get(`note.local.testProt`) || ``}
      * 启动和显示远程服务信息
      * @param {*} param0
      */
-    function remoteServer({store, config}) {
+    async function remoteServer({store, config}) {
       console.log(`远程服务加载中...`)
-      new Promise(async () => {
-        const cli = toolObj.cli
-        const path = require(`path`)
-        const mainPath = path.join(__dirname, '../') // 主程序目录
-        const ngrokBin =  `${mainPath}/node_modules/ngrok/bin/ngrok`
-        const package =  require(`${mainPath}/package.json`)
-        const hasNgrok = toolObj.file.hasFile(ngrokBin)
-        if(hasNgrok === false) { // 如果 ngrok 不存在, 则安装它
-          await cli.spawn(
-            `npx`, [`cnpm`, `i`, `ngrok@${package.pluginDependencies.ngrok}`, `--no-save`],
-            {cwd: mainPath}
-          )
-        }
-        const arr = [
-          `testProt`,
-          `replayProt`,
-          `prot`,
-        ]
-        const ngrok = require('ngrok')
-        for (let index = 0; index < arr.length; index++) {
-          const protKey = arr[index]
-          const url = await ngrok.connect({
-            addr: config[protKey],
-            ...config.remote[protKey],
-          }).catch(err => {
-            // console.log(protKey, err)
-          })
-          store.set(`note.remote.${protKey}`, url)
-        }
+      await toolObj.generate.initPackge(`ngrok`)
+      const serverList = [
+        `prot`,
+        `replayProt`,
+        `testProt`,
+      ].map(name => ({
+        name,
+        config: {
+          proto: `http`,
+          addr: config[name],
+          ...config.remote[name],
+        },
+      }))
+      const urlList = await runNgrok({serverList})
+      serverList.forEach((item, index) => {
+        store.set(`note.remote.${item.name}`, urlList[index])
+      })
       console.log(`远程服务加载完成.`)
       console.log(`
 远程服务信息:
@@ -1112,10 +1183,10 @@ prot: ${store.get(`note.remote.prot`) || ``}
 replayProt: ${store.get(`note.remote.replayProt`) || ``}
 testProt: ${store.get(`note.remote.testProt`) || ``}
       `)
-      })
     }
 
     return {
+      runNgrok,
       showLocalInfo,
       remoteServer,
     }
