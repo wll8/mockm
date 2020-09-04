@@ -89,8 +89,13 @@ function baseConfigFn(util) {
     api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
       const { run } = util
       return { // api 拦截器
-        '*' (req, res, next) { // 拦截所有方法和路由
+        '/' (req, res, next) { // 在所有自定义 api 之前添加中间件
+          // 注意, 如果不 next 将不会进入后面的中间件
+          // 如果需要拦截所有到达服务器前的请求, 请从 config.proxy 中配置
           next()
+        },
+        '/all/method' (req, res, next) { // 所有方法都会进入此路由
+          res.json({msg: req.method, url: req.url})
         },
         'post /file/upload' (req, res, next) { // 获取上传的文件
           const form = new multiparty.Form()
