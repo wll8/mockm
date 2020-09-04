@@ -271,10 +271,10 @@ const HttpShow = (() => {
           setState(preState => ({...deepSet(preState, `apiList`, newData)}))
         }, false);
       }
-      function initSwagger(serverConfig) {
+      function initSwagger({serverConfig, store}) {
         // 添加 swagger-ui.css
-        $(`head`).append($(`<link rel="stylesheet" href="/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui.css">`))
-        $(`head`).append($(`<link rel="stylesheet" href="/swagger.css">`))
+        $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui.css">`))
+        $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
         // 添加 swagger-ui-bundle.js 并初始化 swg
 
         // swagger-ui v3 没有 setHost 方法, 这里注入此方法
@@ -290,7 +290,7 @@ const HttpShow = (() => {
           }
         });
 
-        $.getScript(`/unpkg.com/swagger-ui-dist@3.25.1/swagger-ui-bundle.js`, () => {
+        $.getScript(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui-bundle.min.js`, () => {
           window.swaggerUi = window.SwaggerUIBundle({
             url: `${cfg.baseURL}/api/getOpenApi/`,
             dom_id: '#swagger-ui',
@@ -311,8 +311,14 @@ const HttpShow = (() => {
               }
             },
             onComplete () {
-              const host = `${window.location.hostname}:${serverConfig.prot}`
-              window.swaggerUi.setSpec({host, protocol: `http`, schemes: [`http`]})
+              let host = ``
+              if(serverConfig.remote === false) { // 本地模式
+                host = `${window.location.hostname}:${serverConfig.prot}`
+              } else { // 公网模式
+                host = new URL(store.note.remote.prot).host
+              }
+              const protocol = window.location.protocol.replace(`:`, ``) // 协议跟随当前页面
+              window.swaggerUi.setSpec({host, protocol, schemes: [protocol]})
             }
           })
         })
@@ -355,10 +361,13 @@ const HttpShow = (() => {
       }, [state.activeTabs]);
 
       useEffect(() => {
-        http.get(`${cfg.baseURL}/api/getConfig/`).then(res => {
-          setState(preState => ({...deepSet(preState, `serverConfig`, res)}))
-          const {openApi} = res
-          openApi && initSwagger(res)
+        Promise.all([
+          http.get(`${cfg.baseURL}/api/getConfig/`),
+          http.get(`${cfg.baseURL}/api/getStore/`),
+        ]).then(([config, store]) => {
+          setState(preState => ({...deepSet(preState, `serverConfig`, config)}))
+          const {openApi} = config
+          openApi && initSwagger({serverConfig: config, store})
         })
         getApiListSse()
       // eslint-disable-next-line react-hooks/exhaustive-deps
