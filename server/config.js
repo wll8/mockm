@@ -81,6 +81,7 @@ function baseConfigFn(util) {
       // '/get': [{msg: `ok`}], // 只有0个或一个值, 直接替换 res
       // '/get': [{origin: `127.0.0.1`, msg: `ok`, headers: {tips: `mid`}}, `deep`], // 合并: [要合并的对象, 合并的方式], 合并的方式: deep(父级不会被替换), ...(父级会被替换, 类似于js扩展运行符)
     },
+    remote: false, // false | object, 为 false 是不需要外网映射, 为 object 时是对每个服务端口的配置 `{testProt: { proto: `http` }}` , 参考 https://github.com/bubenshchykov/remote
     openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
     dataDir: './httpData/', // 数据保存目录
     httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
@@ -191,10 +192,16 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   origin: prepareOrigin(config.proxy).origin,
   dbJsonName: handlePathArg(config.dbJsonName),
   dataDir: handlePathArg(config.dataDir),
+  store: handlePathArg(config.store),
   httpHistory: handlePathArg(config.httpHistory),
   proxy: prepareProxy(config.proxy),
   api: isType(config.api, `object`) ? () => config.api : config.api,
   db: isType(config.db, `object`) ? () => config.db : config.db,
+  remote: config.remote === false // 每个服务的 remote 配置
+    ? false
+    : config.remote === true
+      ? {}
+      : config.remote
 }
 
 module.exports = handleConfig

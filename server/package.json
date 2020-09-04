@@ -1,6 +1,6 @@
 {
   "name": "mock-mock",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -29,8 +29,13 @@
     "path-to-regexp": "^0.1.7"
   },
   "devDependencies": {},
+  "pluginDependencies": {
+    "get-port": "5.1.1",
+    "yaml": "1.10.0",
+    "ngrok": "3.2.7"
+  },
   "scripts": {
-    "start": "nodemon -q -w \"*.js\" --exec \" node server.js dev\"",
+    "start": "nodemon -q -w \"*.js\" --exec \" node run.js dev\"",
     "serve": "node run.js dev",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"

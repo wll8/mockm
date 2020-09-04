@@ -7,11 +7,22 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "启动程序",
+      "name": "调试 run.js",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/server/server.js"
+      "program": "${workspaceFolder}/server/run.js",
+      "cwd": "${workspaceFolder}/server",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "调试当前文件",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${file}",
+      "cwd": "${workspaceFolder}/server",
     }
   ]
 }

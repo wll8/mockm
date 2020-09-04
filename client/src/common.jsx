@@ -10,10 +10,10 @@ common.IconFont = icons.createFromIconfontCN({
 
 common.cfg = {
   baseURL: window.location.origin,
+  // baseURL: `http://localhost:9005`,
 }
 
 common.http = axios.create({
-  // baseURL: `http://localhost:9005/`,
   baseURL: common.cfg.baseURL,
   timeout: 0,
   headers: {'X-Custom-Header': 'foobar'}
