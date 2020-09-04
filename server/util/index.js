@@ -1,4 +1,43 @@
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
+  function control() { // 流程控制
+    /**
+    * 以 Promise 方式等待条件成立
+    * @param {*} condition 条件函数, 返回 true 时才陈立
+    * @param {*} ms 检测条件的实时间隔毫秒
+    * @param {*} timeout 超时
+    */
+    function awaitTrue({
+      condition,
+      ms = 250,
+      timeout = 5e3,
+    }) {
+      return new Promise(async resolve => {
+        let timeStart = Date.now()
+        let res = await condition()
+        while (res !== true && res !== `timeout`) {
+          res = await condition()
+          res = ((Date.now() - timeStart) > timeout) ? `timeout` : res
+          await sleep(ms)
+        }
+        resolve(res)
+      })
+    }
+
+    /**
+     * 异步等待 sleep
+     * @param {*} ms 毫秒
+     */
+    function sleep(ms = 1e3) { // 异步 sleep
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    return {
+      awaitTrue,
+      sleep,
+    }
+
+  }
+
   function cache() { // 缓存处理程序
     function delRequireCache(filePath) {
       delete require.cache[require.resolve(filePath)]
@@ -9,11 +48,32 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function generate() { // 生成器
+    /**
+     * 如果某个依赖不存在, 则安装它
+     * @param {*} packge 依赖名称
+     * @param {*} version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
+     */
+    async function initPackge(packge, version) {
+      const path = require(`path`)
+      const mainPath = path.join(__dirname, '../') // 主程序目录
+      const packageJson =  require(`${mainPath}/package.json`)
+      version = version || packageJson.pluginDependencies[packge]
+      const packgePath =  `${mainPath}/node_modules/${packge}`
+      const hasPackge = toolObj.file.hasFile(packgePath)
+      if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
+        await cli().spawn(
+          `npx`, `cnpm i ${packge}@${version} --no-save`.split(/\s+/),
+          {cwd: mainPath}
+        ).catch(err => console.log(err))
+      }
+    }
+
     function nextId() { // 获取全局自增 id
       global.id = (global.id || 0) + Date.now() + 1
       return global.id
     }
     return {
+      initPackge,
       nextId,
     }
   }
@@ -53,6 +113,29 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function cli() { // 命令行相关处理程序
+    /**
+     * 以 Promise 方式运行 spawn
+     * @param {*} cmd 主程序
+     * @param {*} args 程序参数数组
+     * @param {*} opts spawn 选项
+     */
+    function spawn (cmd, args, opts) {
+      opts = { stdio: `inherit`, ...opts }
+      opts.shell = opts.shell || process.platform === 'win32'
+      return new Promise((resolve, reject) => {
+        const cp = require('child_process')
+        const child = cp.spawn(cmd, args, opts)
+        let stdout = ''
+        let stderr = ''
+        child.stdout && child.stdout.on('data', d => { stdout += d })
+        child.stderr && child.stderr.on('data', d => { stderr += d })
+        child.on('error', reject)
+        child.on('close', code => {
+          resolve({code, stdout, stderr})
+        })
+      })
+    }
+
     function parseArgv(arr) { // 解析命令行参数
       return (arr || process.argv.slice(2)).reduce((acc, arg) => {
         let [k, ...v] = arg.split('=')
@@ -99,6 +182,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return res
     }
     return {
+      spawn,
       getWatchArg,
       parseArgv,
       getOptions,
@@ -115,62 +199,60 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           '/': proxy,
         }
       }
-      if(proxyType === `object`) { // 转发 key 到 target
-        function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
-          const indexVal = proxy[`/`]
-          delete proxy[`/`]
-          proxy[`/`] = indexVal
-          return proxy
-        }
-        proxy = setIndexOfEnd(proxy)
-        resProxy = Object.keys(proxy).map(context => {
-          let options = proxy[context]
-          const optionsType = isType(options)
-          if(optionsType === `string`) { // 转换字符串的 value 为对象
-            options = {
-              pathRewrite: { [`^${context}`]: `` }, // 原样代理 /a 到 /a
-              target: options,
-            }
-          }
-          if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
-            const [item1, item2] = options
-            const item1Type = isType(item1)
-            const midResJson = httpClient().midResJson
-            const deepMergeObject = obj().deepMergeObject
-
-            if(options.length <= 1) { // 只有0个或一个项, 直接替换 res
-              options = {
-                onProxyRes (proxyRes, req, res) {
-                  midResJson({proxyRes, res, cb: () => item1})
-                },
-              }
-            }
-            if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
-              options = {
-                onProxyRes (proxyRes, req, res) {
-                  midResJson({proxyRes, res, key: item1, val: item2})
-                },
-              }
-            }
-            if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
-              options = {
-                onProxyRes (proxyRes, req, res) {
-                  midResJson({proxyRes, res, cb: body => {
-                    return ({
-                      'deep': deepMergeObject(body, item1), // 父级【不会】被替换
-                      '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
-                    })[item2 || `deep`]
-                  }})
-                },
-              }
-            }
-          }
-          return {
-            context,
-            options,
-          }
-        })
+      function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
+        const indexVal = proxy[`/`]
+        delete proxy[`/`]
+        proxy[`/`] = indexVal
+        return proxy
       }
+      proxy = setIndexOfEnd(proxy)
+      resProxy = Object.keys(proxy).map(context => {
+        let options = proxy[context]
+        const optionsType = isType(options)
+        if(optionsType === `string`) { // 转换字符串的 value 为对象
+          options = {
+            pathRewrite: { [`^${context}`]: `` }, // 原样代理 /a 到 /a
+            target: options,
+          }
+        }
+        if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
+          const [item1, item2] = options
+          const item1Type = isType(item1)
+          const midResJson = httpClient().midResJson
+          const deepMergeObject = obj().deepMergeObject
+
+          if(options.length <= 1) { // 只有0个或一个项, 直接替换 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: () => item1})
+              },
+            }
+          }
+          if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, key: item1, val: item2})
+              },
+            }
+          }
+          if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: body => {
+                  return ({
+                    'deep': deepMergeObject(body, item1), // 父级【不会】被替换
+                    '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
+                  })[item2 || `deep`]
+                }})
+              },
+            }
+          }
+        }
+        return {
+          context,
+          options,
+        }
+      })
       return resProxy
     }
 
@@ -207,7 +289,11 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return {path, method, url}
     }
 
-    function handlePathArg(pathStr) { // 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+    /**
+     * 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+     * @param {*} pathStr 路径
+     */
+    function handlePathArg(pathStr) {
       const path = require(`path`)
       let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
       newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
@@ -256,18 +342,25 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function file() { // 文件相关
     function fileStore(storePath) { // 存取需要持久化存储的数据
       const fs = require(`fs`)
+      const {
+        o2s,
+        deepSet,
+        deepGet,
+      } = obj()
+      if(hasFile(storePath) === false) {
+        fs.writeFileSync(storePath, o2s({}))
+      }
       let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
       return {
         set(key, val) {
-          const o2s = obj().o2s
           const newStore = store()
-          newStore[key] = val
+          deepSet(newStore, key, val)
           fs.writeFileSync(storePath, o2s(newStore))
           return store
         },
         get(key) {
           const newStore = store()
-          return newStore[key]
+          return deepGet(newStore, key)
         },
         updateApiCount() {
           const apiCountOld =  this.get(`apiCount`) || 0
@@ -512,6 +605,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   return {
+    control: control(),
     cache: cache(),
     generate: generate(),
     url: url(),
@@ -645,6 +739,7 @@ function business() { // 与业务相关性较大的函数
       if(toolObj.file.isFileEmpty(config.store)) {
         fs.writeFileSync(config.store, `{}`)
       }
+      toolObj.file.fileStore(config._share).set(`config`, config)
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
@@ -993,7 +1088,130 @@ function business() { // 与业务相关性较大的函数
 
   }
 
+  function plugin() {
+    /**
+     * 运行多个 nginx 实例并获取他们的 url
+     * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
+     */
+    async function runNgrok({serverList}) {
+      await toolObj.generate.initPackge(`yaml`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`get-port`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
+      const path = require(`path`)
+      const mainPath = path.join(__dirname, '../') // 主程序目录
+      const yaml = require(`yaml`)
+      const getPort = require('get-port')
+      const spawn = toolObj.cli.spawn
+      const fs = require(`fs`)
+
+      // 获取未占用的 tcp 端口, 用于 ngrok 的 web_addr, 会生成一个 api 供我们调用
+      const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) )).catch(err => console.log(err))
+
+      // 使用这些端口以及用户配置生成 ngrok yaml 格式的配置文件
+      portList.forEach((freePort, index) => {
+        const {name, config} = serverList[index]
+        const json = {
+          web_addr: `localhost:${freePort}`,
+          tunnels: {
+            [name]: { // 服务名称
+              proto: `http`,
+              ...config,
+            },
+          }
+        }
+
+        // 存储 nginx 配置文件, 然后让 ngrok 读取它们
+        const yamlStr = yaml.stringify(json)
+        const configPath = require(`path`).normalize(`${require(`os`).tmpdir()}/ngrok_${freePort}.yaml`)
+        fs.writeFileSync(configPath, yamlStr)
+        spawn( // 使用配置文件运行 ngrok
+          `npx`, `ngrok start --config "${configPath}" ${name}`.split(/\s+/),
+          {
+            stdio: [0, `pipe`, 2],
+            cwd: mainPath,
+          }
+        )
+      })
+
+      // 收集启动 nginx 之后的公网 url
+      const urlList = []
+      const axios = require(`axios`)
+      await Promise.all(portList.map((item, index) => {
+        return toolObj.control.awaitTrue({
+          timeout: 30e3,
+          condition: () => { // 等待 /api/tunnels 接口返回所需的 url
+            return new Promise(async resolve => {
+              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => console.log(err))
+              if(res) {
+                const tunnels = res.data.tunnels
+                const hasUrl = tunnels.length > 0
+                if(hasUrl) {
+                  urlList[index] = tunnels[0].public_url
+                }
+                resolve(hasUrl)
+              }
+            })
+          },
+        })
+      })).catch(err => console.log(err))
+      return urlList
+    }
+
+    /**
+     * 显示本地服务信息
+     * @param {*} param0
+     */
+    function showLocalInfo({store, config}) {
+      console.log(`
+本地服务信息:
+prot: ${`http://${config.testIp}:${config.prot}/`}
+replayProt: ${`http://${config.testIp}:${config.replayProt}/`}
+testProt: ${`http://${config.testIp}:${config.testProt}/`}
+      `)
+    }
+
+    /**
+     * 启动和显示远程服务信息
+     * @param {*} param0
+     */
+    async function remoteServer({store, config}) {
+      console.log(`远程服务加载中...`)
+      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
+      const serverList = [
+        `prot`,
+        `replayProt`,
+        `testProt`,
+      ].map(name => ({
+        name,
+        config: {
+          proto: `http`,
+          addr: config[name],
+          ...config.remote[name],
+        },
+      }))
+      const urlList = await runNgrok({serverList}).catch(err => console.log(err))
+      serverList.forEach((item, index) => {
+        store.set(`note.remote.${item.name}`, urlList[index])
+      })
+      console.log(`远程服务加载完成.`)
+      console.log(`
+远程服务信息:
+prot: ${store.get(`note.remote.prot`) || ``}
+replayProt: ${store.get(`note.remote.replayProt`) || ``}
+testProt: ${store.get(`note.remote.testProt`) || ``}
+      `)
+    }
+
+    return {
+      runNgrok,
+      showLocalInfo,
+      remoteServer,
+    }
+
+  }
+
   return {
+    plugin,
     initHandle,
     reqHandle,
     clientInjection,
