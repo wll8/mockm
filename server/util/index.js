@@ -1085,15 +1085,18 @@ function business() { // 与业务相关性较大的函数
      * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
      */
     async function runNgrok({serverList}) {
-      await toolObj.generate.initPackge(`yaml`)
-      await toolObj.generate.initPackge(`get-port`)
+      await toolObj.generate.initPackge(`yaml`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`get-port`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
+      const path = require(`path`)
+      const mainPath = path.join(__dirname, '../') // 主程序目录
       const yaml = require(`yaml`)
       const getPort = require('get-port')
       const spawn = toolObj.cli.spawn
       const fs = require(`fs`)
 
       // 获取未占用的 tcp 端口, 用于 ngrok 的 web_addr, 会生成一个 api 供我们调用
-      const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) ))
+      const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) )).catch(err => console.log(err))
 
       // 使用这些端口以及用户配置生成 ngrok yaml 格式的配置文件
       portList.forEach((freePort, index) => {
@@ -1114,7 +1117,10 @@ function business() { // 与业务相关性较大的函数
         fs.writeFileSync(configPath, yamlStr)
         spawn( // 使用配置文件运行 ngrok
           `npx`, `ngrok start --config "${configPath}" ${name}`.split(/\s+/),
-          {stdio: [0, `pipe`, 2]}
+          {
+            stdio: [0, `pipe`, 2],
+            cwd: mainPath,
+          }
         )
       })
 
@@ -1126,17 +1132,19 @@ function business() { // 与业务相关性较大的函数
           timeout: 30e3,
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
-              const res = await axios.get(`http://localhost:${item}/api/tunnels`)
-              const tunnels = res.data.tunnels
-              const hasUrl = tunnels.length > 0
-              if(hasUrl) {
-                urlList[index] = tunnels[0].public_url
+              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => console.log(err))
+              if(res) {
+                const tunnels = res.data.tunnels
+                const hasUrl = tunnels.length > 0
+                if(hasUrl) {
+                  urlList[index] = tunnels[0].public_url
+                }
+                resolve(hasUrl)
               }
-              resolve(hasUrl)
             })
           },
         })
-      }))
+      })).catch(err => console.log(err))
       return urlList
     }
 
@@ -1159,7 +1167,7 @@ testProt: ${`http://${config.testIp}:${config.testProt}/`}
      */
     async function remoteServer({store, config}) {
       console.log(`远程服务加载中...`)
-      await toolObj.generate.initPackge(`ngrok`)
+      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
       const serverList = [
         `prot`,
         `replayProt`,
@@ -1172,7 +1180,7 @@ testProt: ${`http://${config.testIp}:${config.testProt}/`}
           ...config.remote[name],
         },
       }))
-      const urlList = await runNgrok({serverList})
+      const urlList = await runNgrok({serverList}).catch(err => console.log(err))
       serverList.forEach((item, index) => {
         store.set(`note.remote.${item.name}`, urlList[index])
       })
