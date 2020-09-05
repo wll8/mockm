@@ -57,7 +57,8 @@ const ApiList = (() => {
       {
         title: 'id',
         width: 80,
-        dataIndex: 'id'
+        dataIndex: 'id',
+        sorter: true,
       },
       {
         title: 'code',
@@ -80,6 +81,7 @@ const ApiList = (() => {
       {
         title: 'api',
         sorter: true,
+        ellipsis: true,
         render: record => {
           return (
             <a href={`#/history,${record.id}/${record.method}${record.api}`}>
@@ -132,6 +134,9 @@ const ApiList = (() => {
         <Table size="small" rowKey="key" pagination={{
           defaultPageSize: state.defaultPageSize,
           total: state.apiListData.count,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: total => `Total ${total} items`,
         }} columns={columnsApiList} dataSource={state.apiListData.results} onChange={onChange} />
       </div>
     )
