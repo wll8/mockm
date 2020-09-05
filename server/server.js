@@ -246,7 +246,40 @@ const server = () => {
           getApiList() {
 
             const list = getHistoryList({history: HTTPHISTORY})
-            res.send(list)
+            let {
+              _sort = ``,
+              _order = ``,
+              _page = 1,
+              _limit = 10,
+            } = req.query
+            _sort = _sort.split(`,`)
+            _order = _order.split(`,`)
+            if(_sort[0] === `id`) { // 把 id 转换为数字, 这样 orderBy 才能进行比较
+              _sort[0] = item => Number(toolObj.hex.string62to10(item.id))
+            }
+            if(_sort[0] === `date`) {
+              _sort[0] = item => new Date(item.date).getTime()
+            }
+            const page = _page;
+            const limit = _limit;
+            const orderBy = require(`lodash.orderby`);
+            const drop = require(`lodash.drop`);
+            const take = require(`lodash.take`);
+            const results = take(
+              drop(
+                orderBy(
+                  list,
+                  _sort, _order,
+                ),
+                (page - 1) * limit,
+              ),
+              limit,
+            )
+            const sendData = {
+              count: list.length,
+              results,
+            }
+            res.send(sendData)
           },
           getApiHistry(apiId) {
             const list = getHistoryList({history: HTTPHISTORY, method, api})

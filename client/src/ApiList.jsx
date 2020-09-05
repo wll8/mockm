@@ -42,7 +42,16 @@ const ApiList = (() => {
   const { TabPane } = Tabs;
 
   function Com(props) {
-    const apiList = props.apiList
+    const [state, setState] = useState({
+      defaultPageSize: 100,
+      defaultPageIndex: 1,
+      defaultSort: `date`,
+      defaultOrder: `desc`,
+      apiListData: {
+        count: 0,
+        results: [],
+      },
+    })
 
     const columnsApiList = [
       {
@@ -54,23 +63,23 @@ const ApiList = (() => {
         title: 'code',
         width: 100,
         dataIndex: 'statusCode',
-        sorter: (a, b) => a.statusCode - b.statusCode,
+        sorter: true,
       },
       {
         title: 'type',
         width: 100,
         dataIndex: 'extensionName',
-        sorter: (a, b) => a.extensionName.localeCompare(b.extensionName),
+        sorter: true,
       },
       {
         title: 'method',
         width: 120,
         dataIndex: 'method',
-        sorter: (a, b) => a.method.localeCompare(b.method),
+        sorter: true,
       },
       {
         title: 'api',
-        sorter: (a, b) => a.api.localeCompare(b.api),
+        sorter: true,
         render: record => {
           return (
             <a href={`#/history,${record.id}/${record.method}${record.api}`}>
@@ -83,7 +92,7 @@ const ApiList = (() => {
         title: 'date',
         width: 100,
         dataIndex: 'date',
-        sorter: (a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime(),
+        sorter: true,
         defaultSortOrder: 'descend',
         render: record => {
           // return dayjs(record).format('YYYY-MM-DD HH:mm:ss')
@@ -94,10 +103,36 @@ const ApiList = (() => {
 
     function onChange(pagination, filters, sorter, extra) {
       console.log('params', pagination, filters, sorter, extra);
+      getApiList({
+        _sort: sorter.field,
+        _order: {ascend: `asc`, descend: `desc`}[sorter.order || `ascend`],
+        _page: pagination.current,
+        _limit: pagination.pageSize,
+      })
+    }
+
+    useEffect(() => {
+      getApiList()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    function getApiList (params = {
+      _sort: state.defaultSort,
+      _order: state.defaultOrder,
+      _page: state.defaultPageIndex,
+      _limit: state.defaultPageSize,
+      }) {
+      http.get(`${cfg.baseURL}/api/getApiList/`, {params}).then(res => {
+        res.results = res.results.map((item, index) => ({...item, key: index}))
+        setState(preState => ({...deepSet(preState, `apiListData`, res)}))
+      })
     }
     return (
       <div className="ApiList">
-        <Table size="small" rowKey="id" pagination={{defaultPageSize: 100}} columns={columnsApiList} dataSource={apiList} onChange={onChange} />
+        <Table size="small" rowKey="key" pagination={{
+          defaultPageSize: state.defaultPageSize,
+          total: state.apiListData.count,
+        }} columns={columnsApiList} dataSource={state.apiListData.results} onChange={onChange} />
       </div>
     )
   }
