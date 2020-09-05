@@ -2,6 +2,7 @@ import React from 'react'
 import domtoimage from 'dom-to-image'
 import * as ReactRouterDOM from 'react-router-dom'
 import * as antd from 'antd'
+import en_GB from 'antd/es/locale/en_GB';
 import * as icons from '@ant-design/icons'
 import utils from './utils.jsx'
 import common from './common.jsx'
@@ -49,6 +50,7 @@ const HttpShow = (() => {
     message,
     Spin,
     Table,
+    ConfigProvider,
   } = antd
 
   const { Panel } = Collapse;
@@ -505,10 +507,12 @@ const HttpShow = (() => {
 
     return (
       <div className="HttpShow">
-        <HashRouter>
-          <BackTop visibilityHeight={0} target={() => document.querySelector(`#root`)}/>
-          <App />
-        </HashRouter>
+        <ConfigProvider locale={en_GB}>
+          <HashRouter>
+            <BackTop visibilityHeight={0} target={() => document.querySelector(`#root`)}/>
+            <App />
+          </HashRouter>
+        </ConfigProvider>
       </div>
     )
   }
