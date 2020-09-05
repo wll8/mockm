@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+})
 const proxy = require('http-proxy-middleware').createProxyMiddleware
 const jsonServer = require('json-server')
 const fs = require('fs')
