@@ -256,21 +256,6 @@ const HttpShow = (() => {
         })
       }
 
-      function getApiList() {
-        http.get(`${cfg.baseURL}/api/getApiList/`).then(res => {
-          setState(preState => ({...deepSet(preState, `apiList`, res)}))
-        })
-      }
-
-      function getApiListSse() {
-        const source = new EventSource(`${cfg.baseURL}/api/getApiListSse/`)
-        source.onopen = event => {console.log(`sse onopen`) }
-        source.onerror = event => { console.log(`sse onerror`) }
-        source.addEventListener('message', event => {
-          const newData = JSON.parse(event.data)
-          setState(preState => ({...deepSet(preState, `apiList`, newData)}))
-        }, false);
-      }
       function initSwagger({serverConfig, store}) {
         // 添加 swagger-ui.css
         $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui.css">`))
@@ -369,7 +354,6 @@ const HttpShow = (() => {
           const {openApi} = config
           openApi && initSwagger({serverConfig: config, store})
         })
-        getApiListSse()
       // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
@@ -443,7 +427,7 @@ const HttpShow = (() => {
       return (
         <Switch>
           <Route cache exact path="/">
-            <ApiList apiList={state.apiList} />
+            <ApiList />
           </Route>
           <Route cache path="/*">
             <>
