@@ -1122,10 +1122,12 @@ function business() { // 与业务相关性较大的函数
 
         // 存储 nginx 配置文件, 然后让 ngrok 读取它们
         const yamlStr = yaml.stringify(json)
+        // todo 注意 configPath 路径中暂不支持空格
+        // fix: configPath 添加引号在 mac 上会出现 configPath=mainPath+configPath 拼接的现象
         const configPath = require(`path`).normalize(`${require(`os`).tmpdir()}/ngrok_${freePort}.yaml`)
         fs.writeFileSync(configPath, yamlStr)
         spawn( // 使用配置文件运行 ngrok
-          `npx`, `ngrok start --config "${configPath}" ${name}`.split(/\s+/),
+          `npx`, `ngrok start --config ${configPath} ${name}`.split(/\s+/),
           {
             stdio: [0, `pipe`, 2],
             cwd: mainPath,
@@ -1141,7 +1143,7 @@ function business() { // 与业务相关性较大的函数
           timeout: 30e3,
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
-              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => console.log(err))
+              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => resolve(false))
               if(res) {
                 const tunnels = res.data.tunnels
                 const hasUrl = tunnels.length > 0
