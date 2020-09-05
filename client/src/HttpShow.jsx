@@ -339,6 +339,7 @@ const HttpShow = (() => {
         setState(preState => ({...deepSet(preState, `showHistry`, isShow)}))
         isShow && http.get(`${cfg.baseURL}/api/getApiHistry/${state.httpData.api0}`).then(res => {
           console.log(`resres`, res)
+          res = res.map((item, key) => ({...item, key}))
           setState(preState => ({...deepSet(preState, `dataApiHistry`, res)}))
         })
       }
@@ -476,7 +477,7 @@ const HttpShow = (() => {
                     return res
                   }}
                   showHeader={false}
-                  rowKey="id"
+                  rowKey="key"
                   size="small"
                   pagination={false}
                   columns={columnsApiHistry}
