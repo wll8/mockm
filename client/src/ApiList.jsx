@@ -125,7 +125,7 @@ const ApiList = (() => {
       _limit: state.defaultPageSize,
       }) {
       http.get(`${cfg.baseURL}/api/getApiList/`, {params}).then(res => {
-        res.results = res.results.map((item, index) => ({...item, key: index}))
+        res.results = res.results.map((item, key) => ({...item, key}))
         setState(preState => ({...deepSet(preState, `apiListData`, res)}))
       })
     }
