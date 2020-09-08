@@ -782,7 +782,7 @@ function business() { // 与业务相关性较大的函数
         run,
       })
       const apiRootInjection = api[`*`] || api[`/`] || function (req, res, next) {return next()} // 统一处理所有自定义的根级别拦截器
-      // 移交给 apiRootInjection, 它表示所有【自定义api】前的拦截功能
+      // 移交给 apiRootInjection, 它表示所有【自定义api, config.api 和 config.db 产生的 api】前的拦截功能
       // 为什么要删掉?
       // 因为这是用于判断是否进入 proxy 的条件
       // 如果不删除会导致恒等匹配成功, 无法进入 proxy
