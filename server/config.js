@@ -149,7 +149,9 @@ function baseConfigFn(util) {
       })
       return data
     },
-    route: { // db 数据路由映射, 参考: https://github.com/typicode/json-server#add-custom-routes
+    route: {
+      // 路由映射, 作用于 config.api 及 config.db 产生的 api
+      // 参考: https://github.com/typicode/json-server#add-custom-routes
       '/db/api/*': '/$1', // /api/a => /a
     },
     resHandleReplay({req, res}) {

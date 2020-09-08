@@ -178,7 +178,7 @@ const server = () => {
       })
 
       // 前端自行添加的测试 api
-      server.use(`*`, apiRootInjection)
+      server.use(apiRootInjection)
       serverRouterList.forEach(({method, router, action}) => {
         server[method](router, action)
       })
