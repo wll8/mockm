@@ -410,12 +410,17 @@ const server = () => {
         }}).data
         try {
           const lineHeaders = history.res.lineHeaders
-          res.set(lineHeaders.headers) // 还原 headers
+          const headers = lineHeaders.headers
+          res.set(headers) // 还原 headers
           { // 更新 x-test-api, 因为如果 httpData 移动到其他设备时, ip 会改变, 所以应更新为当前 ip
-            let testUrl = lineHeaders.headers[config.apiInHeader] || ``
-            testUrl = testUrl.replace(/:\/\/.+?\/#/, `://${config.testIp}:${config.testProt}/#`)
+            const store = toolObj.file.fileStore(config.store)
+            const note = store.get(`note`)
+            const apiInHeader = config.apiInHeader
+            const testUrl = (headers[apiInHeader] || ``).replace(/(.+?)(\/#\/.*)/, `${note.local.testProt}$2`)
+            const testUrlRemote = config.remote ? (headers[apiInHeader + `-remote`] || ``).replace(/(.+?)(\/#\/.*)/, `${note.remote.testProt}$2`) : undefined
             res.set({
-              [config.apiInHeader]: testUrl,
+              [apiInHeader]: testUrl,
+              [apiInHeader + `-remote`]: testUrlRemote,
             })
           }
           allowCors({res, req})

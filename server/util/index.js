@@ -739,6 +739,16 @@ function business() { // 与业务相关性较大的函数
       if(toolObj.file.isFileEmpty(config.store)) {
         fs.writeFileSync(config.store, `{}`)
       }
+      { // 初始化 store 中的内容
+        const store = toolObj.file.fileStore(config.store)
+        const osIp = config.osIp
+        store.set(`note`, {})
+        store.set(`note.local`, {
+          prot: `http://${osIp}:${config.prot}`,
+          replayProt: `http://${osIp}:${config.replayProt}`,
+          testProt: `http://${osIp}:${config.testProt}`,
+        })
+      }
       toolObj.file.fileStore(config._share).set(`config`, config)
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
@@ -1003,7 +1013,8 @@ function business() { // 与业务相关性较大的函数
     function setHeader(reqOrRes, headerObj = {}) {
       reqOrRes.setHeader = reqOrRes.setHeader || reqOrRes.set || function (key, val) {reqOrRes.headers[key] = val}
       Object.keys(headerObj).forEach(key => {
-        reqOrRes.setHeader(key, headerObj[key])
+        const val = headerObj[key]
+        val && reqOrRes.setHeader(key, val)
       })
     }
 
@@ -1022,10 +1033,17 @@ function business() { // 与业务相关性较大的函数
     }
 
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
-      const apiCount = toolObj.file.fileStore(config.store).get(`apiCount`) + 1
+      const store = toolObj.file.fileStore(config.store)
+      const note = store.get(`note`)
+      const apiCount = store.get(`apiCount`) + 1
       const apiId = toolObj.hex.string10to62(apiCount)
-      const testApi = `http://${config.testIp}:${config.testProt}/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
-      setHeader(res, {[config.apiInHeader]: testApi})
+      const testPath = `/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+      const testApi = `${note.local.testProt}${testPath}`
+      const testApiRemote = config.remote ? `${note.remote.testProt}${testPath}` : undefined
+      setHeader(res, {
+        [config.apiInHeader]: testApi,
+        [config.apiInHeader + `-remote`]: testApiRemote,
+      })
     }
 
     return {
@@ -1166,9 +1184,9 @@ function business() { // 与业务相关性较大的函数
     function showLocalInfo({store, config}) {
       console.log(`
 本地服务信息:
-prot: ${`http://${config.testIp}:${config.prot}/`}
-replayProt: ${`http://${config.testIp}:${config.replayProt}/`}
-testProt: ${`http://${config.testIp}:${config.testProt}/`}
+prot: ${`http://${config.osIp}:${config.prot}/`}
+replayProt: ${`http://${config.osIp}:${config.replayProt}/`}
+testProt: ${`http://${config.osIp}:${config.testProt}/`}
       `)
     }
 

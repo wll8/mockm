@@ -50,9 +50,9 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 function baseConfigFn(util) {
   const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
   return { // 预置配置, 方便用户编写, 例如可以写多少形式
+    osIp: getOsIp(), // 调试端口
     prot: 9000, // 本地端口
     testProt: 9005, // 调试端口
-    testIp: getOsIp(), // 调试端口
     replayProt: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
     replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
     replayProxyFind (item) { // 自定义请求重放时的逻辑
