@@ -27,7 +27,6 @@ const {
 } = business()
 const {
   allowCors,
-  setApiInHeader,
 } = clientInjection({config})
 const {
   setHttpHistoryWrap,
@@ -94,7 +93,6 @@ const server = () => {
       },
       onProxyRes: (proxyRes, req, res) => {
         allowCors({res: proxyRes, req})
-        setApiInHeader({res: proxyRes, req})
         setHttpHistoryWrap({
           config,
           history: HTTPHISTORY,
@@ -159,7 +157,6 @@ const server = () => {
         next()
       })
       server.use((req, res, next) => { // 保存自定义接口的请求历史
-        setApiInHeader({res, req})
         const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
         const oldSend = res.send
         res.send = function(data) {
