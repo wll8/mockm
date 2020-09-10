@@ -39,6 +39,7 @@ new Promise(async () => {
   const share = toolObj.file.fileStore(sharePath)
   const config = share.get(`config`)
   const store = toolObj.file.fileStore(config.store)
+  store.set(`note.remote`, {})
   showLocalInfo({store, config})
   if(config.remote) { // 如果启用远程则进行相关功能处理
     remoteServer({store, config}).catch(err => console.log(err))
