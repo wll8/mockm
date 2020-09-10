@@ -983,6 +983,7 @@ function business() { // 与业务相关性较大的函数
           req,
           res,
         }
+        clientInjection({config}).setApiInHeader({req, res})
         if(mock === true) {
           createHttpHistory(arg)
           return false
