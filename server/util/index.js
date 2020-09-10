@@ -340,15 +340,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function file() { // 文件相关
-    function fileStore(storePath) { // 存取需要持久化存储的数据
+    function fileStore(storePath, initValue = {}) { // 存取需要持久化存储的数据
       const fs = require(`fs`)
       const {
         o2s,
         deepSet,
         deepGet,
       } = obj()
-      if(hasFile(storePath) === false) {
-        fs.writeFileSync(storePath, o2s({}))
+      if(isFileEmpty(storePath)) {
+        fs.writeFileSync(storePath, o2s(initValue))
       }
       let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
       return {
@@ -730,17 +730,13 @@ function business() { // 与业务相关性较大的函数
 
     function init({config}) { // 初始化, 例如创建所需文件, 以及格式化配置文件
       const fs = require(`fs`)
+      const fileStore = toolObj.file.fileStore
       if(toolObj.file.hasFile(config.dataDir) === false) { // 如果没有目录则创建目录
         fs.mkdirSync(config.dataDir, {recursive: true})
       }
-      if(toolObj.file.isFileEmpty(config.httpHistory)) { // 如果文件为空则创建文件
-        fs.writeFileSync(config.httpHistory, `{}`) // 请求历史存储文件
-      }
-      if(toolObj.file.isFileEmpty(config.store)) {
-        fs.writeFileSync(config.store, `{}`)
-      }
+      fileStore(config.httpHistory)
       { // 初始化 store 中的内容
-        const store = toolObj.file.fileStore(config.store)
+        const store = fileStore(config.store)
         const osIp = config.osIp
         store.set(`note.local`, {
           prot: `http://${osIp}:${config.prot}`,
@@ -748,7 +744,7 @@ function business() { // 与业务相关性较大的函数
           testProt: `http://${osIp}:${config.testProt}`,
         })
       }
-      toolObj.file.fileStore(config._share).set(`config`, config)
+      fileStore(config._share, {config}).set(`config`, config)
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
