@@ -742,7 +742,6 @@ function business() { // 与业务相关性较大的函数
       { // 初始化 store 中的内容
         const store = toolObj.file.fileStore(config.store)
         const osIp = config.osIp
-        store.set(`note`, {})
         store.set(`note.local`, {
           prot: `http://${osIp}:${config.prot}`,
           replayProt: `http://${osIp}:${config.replayProt}`,
@@ -1039,7 +1038,7 @@ function business() { // 与业务相关性较大的函数
       const apiId = toolObj.hex.string10to62(apiCount)
       const testPath = `/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
       const testApi = `${note.local.testProt}${testPath}`
-      const testApiRemote = config.remote ? `${note.remote.testProt}${testPath}` : undefined
+      const testApiRemote = (config.remote && note.remote) ? `${note.remote.testProt}${testPath}` : undefined
       setHeader(res, {
         [config.apiInHeader]: testApi,
         [config.apiInHeader + `-remote`]: testApiRemote,
