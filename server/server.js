@@ -190,6 +190,15 @@ const server = () => {
       })
 
       router.render = (req, res) => { // 修改输出的数据, 符合项目格式
+        // 在 render 方法中, req.query 会被删除
+        // https://github.com/typicode/json-server/issues/311
+        // https://github.com/typicode/json-server/issues/314
+
+        const querystring = require('querystring')
+        if(req._parsedUrl) {
+          const query = querystring.parse(req._parsedUrl.query)
+          req.query = query
+        }
         let returnData = res.locals.data // 前面的数据返回的 data 结构
         const xTotalCount = res.get('X-Total-Count')
         if(xTotalCount) {
