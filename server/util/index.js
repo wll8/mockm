@@ -572,6 +572,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function os() { // 系统工具
+    function portIsOk (port) { // 判断端口是否可用
+      if(typeof(port) === `object`) { // 判断多个端口
+        return Promise.all(port.map(item => portIsOk(item)))
+      }
+      return new Promise(resolve => {
+        const net = require('net')
+        const server = net.createServer().listen(port)
+        server.on('listening', () => server.close(resolve(true)))
+        server.on('error', () => resolve(port))
+      })
+    }
     function getOsIp() { // 获取系统 ip
       const obj = require(`os`).networkInterfaces()
       const ip = Object.keys(obj).reduce((res, cur, index) => {
@@ -581,6 +592,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
     return {
       getOsIp,
+      portIsOk,
     }
   }
 
