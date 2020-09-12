@@ -7,7 +7,7 @@ const proxy = require('http-proxy-middleware').createProxyMiddleware
 const jsonServer = require('json-server')
 const fs = require('fs')
 const path = require('path')
-const cloneDeep = require('lodash/cloneDeep')
+const cloneDeep = require('lodash.cloneDeep')
 const {logHelper, print} = require('./util/log.js')
 process.argv.includes(`dev`) && logHelper()
 const config = require(`./config.js`)
