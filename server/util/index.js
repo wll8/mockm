@@ -11,12 +11,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       ms = 250,
       timeout = 5e3,
     }) {
-      return new Promise(async resolve => {
+      return new Promise(async (resolve, reject) => {
         let timeStart = Date.now()
         let res = await condition()
-        while (res !== true && res !== `timeout`) {
+        while (res !== true) {
           res = await condition()
-          res = ((Date.now() - timeStart) > timeout) ? `timeout` : res
+          if(((Date.now() - timeStart) > timeout)) { // 超时
+            reject(false)
+          }
           await sleep(ms)
         }
         resolve(res)
