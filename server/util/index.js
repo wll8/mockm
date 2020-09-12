@@ -170,18 +170,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }
     }
 
-    function getOptions(cmd) { // curl 命令转 body
-      const curlconverter = require('curlconverter');
-      let str = curlconverter.toNode(cmd)
-      let res = {}
-      str = str.replace(`request(options, callback)`, `res = options`)
-      eval(str)
-      try {
-        res.body = JSON.parse(res.body)
-      } catch (error) {
-        res.body = {}
-      }
-      return res
+    /**
+     * 从 curl 命令中解析 request 库的 options 参数
+     * @param {string} cmd // curl/bash 命令
+     */
+    function getOptions(cmd) {
+      var options = {} // 注意: options 的内容从 eval(optionStr) 中得到
+      const curlconverter = require('curlconverter')
+      const requestStr = curlconverter.toNode(cmd)
+      const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
+      eval(optionStr)
+      return options
     }
     return {
       spawn,
@@ -711,7 +710,7 @@ function business() { // 与业务相关性较大的函数
       let res = `${__dirname}/../config.js` // 默认配置文件
       if(cliArg.config) { // 命令行上指定的 config 文件
         res = cliArg.config
-      } else if(tool().file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
+      } else if(toolObj.file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
         res = cwdConfigPath
       }
       res = require(`path`).normalize(res)
@@ -763,11 +762,8 @@ function business() { // 与业务相关性较大的函数
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
+          const options = toolObj.cli.getOptions(cmd)
           const request = require('request')
-          const curlconverter = require('curlconverter')
-          const requestStr = curlconverter.toNode(cmd)
-          const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
-          eval(optionStr)
           return new Promise((resolve, reject) => {
             request(options, (err, curlRes = {}, body) => {
               setHeader(res, curlRes.headers) // 复制远程的 header
