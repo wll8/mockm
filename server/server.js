@@ -3,11 +3,6 @@
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
 })
-const proxy = require('http-proxy-middleware').createProxyMiddleware
-const jsonServer = require('json-server')
-const fs = require('fs')
-const path = require('path')
-const cloneDeep = require('lodash.cloneDeep')
 const {logHelper, print} = require('./util/log.js')
 process.argv.includes(`dev`) && logHelper()
 const config = require(`./config.js`)
@@ -121,6 +116,8 @@ const server = () => {
 
   return {
     serverProxy() {
+      const jsonServer = require('json-server')
+      const proxy = require('http-proxy-middleware').createProxyMiddleware
       const server = jsonServer.create()
       middleware.reWriteRouter({app: server, routes: config.route})
       const router = jsonServer.router(config.dbJsonName)
@@ -157,6 +154,7 @@ const server = () => {
         next()
       })
       server.use((req, res, next) => { // 保存自定义接口的请求历史
+        const cloneDeep = require('lodash.cloneDeep')
         const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
         const oldSend = res.send
         res.send = function(data) {
@@ -209,6 +207,7 @@ const server = () => {
 
     },
     serverTest() {
+      const jsonServer = require('json-server')
       const serverTest = jsonServer.create()
       serverTest.use(middlewaresObj.corsMiddleware)
       serverTest.use(middleware.compression())
@@ -245,6 +244,7 @@ const server = () => {
               res.set(httpData.lineHeaders.headers)
               allowCors({res, req})
             }
+            const path = require('path')
             res.sendFile(path.resolve(httpData.bodyPath))
           } catch (error) {
             console.log('error', {api, error})
@@ -369,6 +369,8 @@ const server = () => {
 
     },
     serverReplay() {
+      const jsonServer = require('json-server')
+      const proxy = require('http-proxy-middleware').createProxyMiddleware
       const serverReplay = jsonServer.create()
       middleware.reWriteRouter({app: serverReplay, routes: config.route})
       serverReplay.use(middlewaresObj.corsMiddleware)
@@ -432,6 +434,7 @@ const server = () => {
           allowCors({res, req})
           const bodyPath = history.res.bodyPath
           if(bodyPath) {
+            const path = require('path')
             const newPath = path.resolve(bodyPath) // 发送 body
             res.sendFile(newPath)
           } else {
