@@ -84,8 +84,6 @@ function baseConfigFn(util) {
     remote: false, // false | object, 为 false 是不需要外网映射, 为 object 时是对每个服务端口的配置 `{testProt: { proto: `http` }}` , 参考 https://github.com/bubenshchykov/remote
     openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
     dataDir: './httpData/', // 数据保存目录
-    httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
-    store: './httpData/store.json', // 录制信息保存位置
     cors: true, // 是否允许通过跨域
     api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
       const { run } = util
@@ -135,7 +133,7 @@ function baseConfigFn(util) {
         },
       }
     },
-    dbJsonName: './db.json', // json 数据生成的保存位置
+    dbJsonPath: './httpData/db.json', // json 数据生成的保存位置
     dbCover: false, // 每次启动总是生成新的 db
     db () { // 供 json-server 使用的 json 数据, function || object
       const data = mockjs.mock({
@@ -191,12 +189,9 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       ? false
       : config.apiInHeader
     ),
-  _proxyTargetInfo,
   prot: config.hostMode ? _proxyTargetInfo.port : config.prot, // 如果是 host 模式, 强制更改端口与目标端口一致
-  dbJsonName: handlePathArg(config.dbJsonName),
+  dbJsonPath: handlePathArg(config.dbJsonPath),
   dataDir: handlePathArg(config.dataDir),
-  store: handlePathArg(config.store),
-  httpHistory: handlePathArg(config.httpHistory),
   proxy: prepareProxy(config.proxy),
   api: isType(config.api, `object`) ? () => config.api : config.api,
   db: isType(config.db, `object`) ? () => config.db : config.db,
@@ -204,7 +199,12 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     ? false
     : config.remote === true
       ? {}
-      : config.remote
+      : config.remote,
+
+  // 约定下划线开关的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
+  _proxyTargetInfo, // 解析 proxy[`/`] 的内容
+  _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
+  _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
 }
 
 module.exports = handleConfig
