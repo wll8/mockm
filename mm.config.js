@@ -4,6 +4,7 @@ module.exports = ({mockjs}) => {
     testProt: 8105,
     replayProt: 8101,
     remote: true,
+    hostMode: true,
     api (util) {
       const { run } = util
       return {

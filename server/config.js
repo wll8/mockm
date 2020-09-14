@@ -23,7 +23,7 @@ const {
     url: {
       handlePathArg,
       prepareProxy,
-      prepareOrigin,
+      parseProxyTarget,
     },
     cli: {
       parseArgv,
@@ -181,6 +181,7 @@ function baseConfigFn(util) {
 
 libObj.midResJson = midResJson
 const config = baseConfigFn(libObj)
+const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
   ...config,
   apiInHeader:
@@ -190,8 +191,8 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       ? false
       : config.apiInHeader
     ),
-  pathname: prepareOrigin(config.proxy).pathname,
-  origin: prepareOrigin(config.proxy).origin,
+  _proxyTargetInfo,
+  prot: config.hostMode ? _proxyTargetInfo.port : config.prot, // 如果是 host 模式, 强制更改端口与目标端口一致
   dbJsonName: handlePathArg(config.dbJsonName),
   dataDir: handlePathArg(config.dataDir),
   store: handlePathArg(config.store),

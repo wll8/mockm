@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-})
 const {logHelper, print} = require('./util/log.js')
 process.argv.includes(`dev`) && logHelper()
 const config = require(`./config.js`)
@@ -19,6 +16,13 @@ new Promise(async () => {
     process.exit()
   }
 
+  const {isIp, hostname} =  config._proxyTargetInfo
+  if(config.hostMode && (isIp === false)) {
+    await toolObj.os.sysHost(`set`, {hostname})
+    toolObj.os.clearProcess({hostname})
+  } else {
+    toolObj.os.clearProcess()
+  }
   const {
     initHandle,
     reqHandle,
@@ -129,7 +133,7 @@ new Promise(async () => {
         const router = jsonServer.router(config.dbJsonName)
         server.use(middlewaresObj.corsMiddleware)
         config.proxy.forEach(item => {
-          if(item.context === `/`) { // 过滤掉主 URL, 给后面的拦截器使用
+          if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
             return false
           } else {
             const mid = proxy(item.context, getProxyConfig(item.options))
@@ -140,7 +144,7 @@ new Promise(async () => {
         server.use(proxy(
           (pathname, {method}) => { // 返回 true 时进行转发, 真实服务器
             method = method.toLowerCase()
-            if(noProxyTest({method, pathname}) || getDataRouter({method, pathname, db})) {
+            if(config.hostMode || noProxyTest({method, pathname}) || getDataRouter({method, pathname, db})) {
               return false
             } else {
               return true
@@ -148,7 +152,7 @@ new Promise(async () => {
           },
           {
             ...getProxyConfig(),
-            target: config.origin,
+            target: config._proxyTargetInfo.origin,
           },
         ))
 
@@ -385,7 +389,7 @@ new Promise(async () => {
             const method = req.method.toLowerCase()
             const fullApi = `${method} ${req.originalUrl}`
             const history = getHistory({history: HTTPHISTORY, fullApi}).data
-            if(history) { // 当存在 history 则不进入代理
+            if(history || config.hostMode) { // 当存在 history 则不进入代理
               return false
             } else if(noProxyTest({method, pathname}) === true) { // 当没有 history, 则使用 noProxy 规则
               return true
