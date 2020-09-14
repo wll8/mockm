@@ -769,12 +769,12 @@ function business() { // 与业务相关性较大的函数
       const fs = require(`fs`)
       const newDb = config.db()
       const o2s = toolObj.obj.o2s
-      if(toolObj.file.isFileEmpty(config.dbJsonName) || config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
-        fs.writeFileSync(config.dbJsonName, o2s(newDb))
+      if(toolObj.file.isFileEmpty(config.dbJsonPath) || config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
+        fs.writeFileSync(config.dbJsonPath, o2s(newDb))
       }
-      const oldDb = require(config.dbJsonName)
+      const oldDb = require(config.dbJsonPath)
       const resDb = {...newDb, ...oldDb}
-      fs.writeFileSync(config.dbJsonName, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+      fs.writeFileSync(config.dbJsonPath, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
       return resDb
     }
 
@@ -784,9 +784,9 @@ function business() { // 与业务相关性较大的函数
       if(toolObj.file.hasFile(config.dataDir) === false) { // 如果没有目录则创建目录
         fs.mkdirSync(config.dataDir, {recursive: true})
       }
-      fileStore(config.httpHistory)
+      fileStore(config._httpHistory)
       { // 初始化 store 中的内容
-        const store = fileStore(config.store)
+        const store = fileStore(config._store)
         const osIp = config.osIp
         store.set(`note.local`, {
           prot: `http://${osIp}:${config.prot}`,
@@ -959,7 +959,7 @@ function business() { // 与业务相关性较大的函数
 
       // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
 
-      const apiCount = toolObj.file.fileStore(config.store).updateApiCount()
+      const apiCount = toolObj.file.fileStore(config._store).updateApiCount()
       const apiId = toolObj.hex.string10to62(apiCount)
       function getBodyPath() {
         const arg = {config, req, headersObj, dataDir, apiId}
@@ -1013,7 +1013,7 @@ function business() { // 与业务相关性较大的函数
       const fs = require(`fs`)
       const {path} = data
       history[path] = (history[path] || []).concat(data)
-      fs.writeFileSync(config.httpHistory, toolObj.obj.o2s(history))
+      fs.writeFileSync(config._httpHistory, toolObj.obj.o2s(history))
     }
 
     function setHttpHistoryWrap({config, history, req, res, mock = false, buffer}) { // 从 req, res 记录 history
@@ -1076,7 +1076,7 @@ function business() { // 与业务相关性较大的函数
     }
 
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
-      const store = toolObj.file.fileStore(config.store)
+      const store = toolObj.file.fileStore(config._store)
       const note = store.get(`note`)
       const apiCount = store.get(`apiCount`) + 1
       const apiId = toolObj.hex.string10to62(apiCount)

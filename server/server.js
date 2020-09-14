@@ -73,7 +73,7 @@ new Promise(async () => {
     getDataRouter,
   } = customApi({api, db})
 
-  const HTTPHISTORY = require(config.httpHistory) // 请求历史
+  const HTTPHISTORY = require(config._httpHistory) // 请求历史
   let TOKEN = ''
 
   const server = () => {
@@ -130,7 +130,7 @@ new Promise(async () => {
         const proxy = require('http-proxy-middleware').createProxyMiddleware
         const server = jsonServer.create()
         middleware.reWriteRouter({app: server, routes: config.route})
-        const router = jsonServer.router(config.dbJsonName)
+        const router = jsonServer.router(config.dbJsonPath)
         server.use(middlewaresObj.corsMiddleware)
         config.proxy.forEach(item => {
           if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
@@ -320,7 +320,7 @@ new Promise(async () => {
               let oldSize = -1
               const interval = setInterval( () => {
                 const fs = require(`fs`)
-                fs.stat(config.httpHistory, (err, stats) => { // 不用全部读取文件即可读取文件大小信息, 减少内存占用
+                fs.stat(config._httpHistory, (err, stats) => { // 不用全部读取文件即可读取文件大小信息, 减少内存占用
                   if (err) {
                     return console.error(err);
                   }
@@ -362,7 +362,7 @@ new Promise(async () => {
               res.send(config)
             },
             getStore() {
-              const str = require(`fs`).readFileSync(config.store, `utf8`)
+              const str = require(`fs`).readFileSync(config._store, `utf8`)
               res.json(JSON.parse(str))
             },
           }
@@ -431,7 +431,7 @@ new Promise(async () => {
             const headers = lineHeaders.headers
             res.set(headers) // 还原 headers
             { // 更新 x-test-api, 因为如果 httpData 移动到其他设备时, ip 会改变, 所以应更新为当前 ip
-              const store = toolObj.file.fileStore(config.store)
+              const store = toolObj.file.fileStore(config._store)
               const note = store.get(`note`)
               const apiInHeader = config.apiInHeader
               const testUrl = (headers[apiInHeader] || ``).replace(/(.+?)(\/#\/.*)/, `${note.local.testProt}$2`)
