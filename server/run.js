@@ -35,6 +35,7 @@ new Promise(async () => {
   } = plugin()
   toolObj.control.awaitTrue({ // 等待 sharePath 文件存在, 期望 config 已经存入
     condition: () => toolObj.file.hasFile(sharePath),
+    timeout: 60e3,
   }).then(() => {
     const share = toolObj.file.fileStore(sharePath)
     const config = share.get(`config`)
