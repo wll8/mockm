@@ -39,7 +39,7 @@ new Promise(async () => {
   }).then(() => {
     const share = toolObj.file.fileStore(sharePath)
     const config = share.get(`config`)
-    const store = toolObj.file.fileStore(config.store)
+    const store = toolObj.file.fileStore(config._store)
     store.set(`note.remote`, {})
     showLocalInfo({store, config})
     if(config.remote) { // 如果启用远程则进行相关功能处理

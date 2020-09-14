@@ -31,12 +31,12 @@ curl http://localhost:9001/image/svg # 从 GET method `/image/svg` 保存的的�
   noProxy: 't/', // 不进行代理的路由
   dataDir: './httpData/', // 数据保存目录
   httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
-  dbJsonName: './db.json', // mockjs 生成的 json 数据文件名
+  dbJsonPath: './db.json', // mockjs 生成的 json 数据文件名
 }
 ```
 
 ### json-srver 数据文件
-- **config.dbJsonName** `string`
+- **config.dbJsonPath** `string`
   数据文件的保存文件名, 相对于命令运行位置, 默认 db.json
   
 - **config.dbCover** `boolean`
