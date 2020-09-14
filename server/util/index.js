@@ -257,7 +257,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return resProxy
     }
 
-    function prepareOrigin (proxy) { // 解析 proxy 为 {pathname, origin}
+    function parseProxyTarget (proxy) { // 解析 proxy 为 {pathname, origin}
       let origin = ``
       try {
         if(typeof(proxy) === `string`) {
@@ -268,8 +268,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }
         const parentUrl = new URL(origin)
         const res = {
+          host: parentUrl.host,
+          port: parentUrl.port || 80,
+          hostname: parentUrl.hostname,
           pathname: parentUrl.pathname.replace(/\/$/, '') + '/',
           origin: parentUrl.origin,
+          isIp: parentUrl.host.match(/\./g).length === 3,
         }
         return res
       } catch (error) {
@@ -332,7 +336,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     return {
       prepareProxy,
-      prepareOrigin,
+      parseProxyTarget,
       fullApi2Obj,
       handlePathArg,
       parseRegPath,
@@ -571,6 +575,37 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function os() { // 系统工具
+    /**
+     *
+     * @param {string} param0 动作, set, remove
+     * @param {object} param1.ip 对应的 ip, 默认 127.0.0.1
+     * @param {object} param1.hostname 对应的 hostname
+     */
+    async function sysHost(action, {ip = `127.0.0.1`, hostname}) {
+      await toolObj.generate.initPackge(`hostile`).catch(err => console.log(err))
+      const hostile = require('hostile')
+      return new Promise((resolve, reject) => {
+        hostile[action](ip, hostname, err => {
+          err ? reject(err) : resolve(true)
+        })
+      })
+    }
+
+    /**
+     * 程序退出前清理工具
+     * @param {object} param0.hostname 恢复 host 文件修改
+     */
+    function clearProcess({hostname} = {}) {
+      function killProcess(...arg) {
+        console.log(`err:`, ...arg)
+        hostname ? sysHost(`remove`, {hostname}).finally(process.exit) : process.exit()
+      }
+      process.on(`SIGTERM`, killProcess)
+      process.on(`SIGINT`, killProcess)
+      process.on(`uncaughtException`, killProcess)
+      process.on(`unhandledRejection`, killProcess)
+    }
+
     function portIsOk (port) { // 判断端口是否可用
       if(typeof(port) === `object`) { // 判断多个端口
         return Promise.all(port.map(item => portIsOk(item)))
@@ -590,6 +625,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return ip
     }
     return {
+      clearProcess,
+      sysHost,
       getOsIp,
       portIsOk,
     }
@@ -865,7 +902,7 @@ function business() { // 与业务相关性较大的函数
       return Boolean(
         method.match(/OPTIONS/i)
         || (
-          method.match(/GET/i) && url.match(new RegExp(`/\/${config.pathname}\//`))
+          method.match(/GET/i) && url.match(new RegExp(`/\/${config._proxyTargetInfo.pathname}\//`))
         )
       )
     }
@@ -1025,7 +1062,7 @@ function business() { // 与业务相关性较大的函数
     }
 
     function allowCors({res, req, proxyConfig = {}}) { // 设置为允许跨域
-      const target = proxyConfig.target || config.origin // 自定义代理时应使用 proxyConfig.target 中的 host
+      const target = proxyConfig.target || config._proxyTargetInfo.origin // 自定义代理时应使用 proxyConfig.target 中的 host
       if(config.cors === false) { // config.cors 为 false 时, 则不允许跨域
         return false
       }
