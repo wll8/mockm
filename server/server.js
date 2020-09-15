@@ -136,9 +136,16 @@ new Promise(async () => {
           if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
             return false
           } else {
+            // 在统一的中间件里判断经过 proxy 的路由是否也存在于自定义 api 中, 如果存在则不进入代理, 即当 proxy 和自定义 api 同时存在时, 后者优先
+            function midHandler(fn) {
+              return (req, res, next) => {
+                const hasFind = serverRouterList.some(item => item.re.test(req.baseUrl))
+                hasFind ? next() : fn(req, res, next)
+              }
+            }
             const mid = proxy(item.context, getProxyConfig(item.options))
-            item.options.mid && server.use(item.context, item.options.mid)
-            server.use(item.context, mid)
+            item.options.mid && server.use(item.context, midHandler(item.options.mid))
+            server.use(item.context, midHandler(mid))
           }
         })
         server.use(proxy(
