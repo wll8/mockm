@@ -192,9 +192,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function url() { // url 处理程序
     function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
-      let resProxy = []
+      const pathToRegexp = require('path-to-regexp')
       const isType = type().isType
       const proxyType = isType(proxy)
+      let resProxy = []
       if(proxyType === `string`) { // 任何路径都转发到 proxy
         proxy = {
           '/': proxy,
@@ -249,7 +250,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
             }
           }
         }
+        const re = pathToRegexp(context)
         return {
+          re,
           context,
           options,
         }
@@ -678,6 +681,7 @@ function business() { // 与业务相关性较大的函数
     */
 
     function parseApi() { // 解析自定义 api
+      const pathToRegexp = require('path-to-regexp')
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = toolObj.url.fullApi2Obj(key)
@@ -687,15 +691,15 @@ function business() { // 与业务相关性较大的函数
           val = (req, res, next) => res.json(backVal)
         }
         method = method.toLowerCase()
-        serverRouterList.push({method, router: url, action: val})
+        const re = pathToRegexp(url)
+        serverRouterList.push({method, router: url, action: val, re})
       })
       function noProxyTest({method, pathname}) {
         // return true 时不走真实服务器, 而是走自定义 api
-        const pathToRegexp = require('path-to-regexp')
         return serverRouterList.some(item => {
           // 当方法不同时才去匹配 url
           if(((item.method === `all`) || (item.method === method))) {
-            return pathToRegexp(item.router).exec(pathname)
+            return item.re.exec(pathname)
           } else {
             return false
           }
