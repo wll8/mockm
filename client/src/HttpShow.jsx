@@ -318,7 +318,6 @@ const HttpShow = (() => {
         },
         {
           title: 'date',
-          width: 100,
           dataIndex: 'date',
           sorter: (a, b) => (new Date(a.date)).getTime() - (new Date(b.date)).getTime(),
           defaultSortOrder: 'descend',
@@ -329,9 +328,18 @@ const HttpShow = (() => {
         },
         {
           title: 'code',
-          width: 100,
           dataIndex: 'statusCode',
           sorter: (a, b) => a.statusCode - b.statusCode,
+        },
+        {
+          title: 'res',
+          dataIndex: 'resBodySize',
+          sorter: (a, b) => b.resBodySize - a.resBodySize,
+        },
+        {
+          title: 'req',
+          dataIndex: 'reqBodySize',
+          sorter: (a, b) => b.reqBodySize - a.reqBodySize,
         },
       ]
 
@@ -457,6 +465,7 @@ const HttpShow = (() => {
               <Drawer
                 className="drawer"
                 title="history"
+                width={400}
                 onClose={() => historyFn(false)}
                 visible={state.showHistry}
               >
@@ -476,7 +485,7 @@ const HttpShow = (() => {
                       : `index_${index}`
                     return res
                   }}
-                  showHeader={false}
+                  showHeader={true}
                   rowKey="key"
                   size="small"
                   pagination={false}

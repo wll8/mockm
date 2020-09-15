@@ -862,6 +862,7 @@ function business() { // 与业务相关性较大的函数
     */
 
     function getHistoryList({history, method: methodRef, api: apiRef} = {}) {
+      const fs = require(`fs`)
       let list = []
       list = Object.keys(history).reduce((acc, cur) => {
         return acc.concat(history[cur])
@@ -873,6 +874,8 @@ function business() { // 与业务相关性较大的函数
             return false
           }
         }
+        const resBodySize = res.bodyPath ? fs.statSync(res.bodyPath).size : 0
+        const reqBodySize = req.bodyPath ? fs.statSync(req.bodyPath).size : 0
         return {
           id,
           method,
@@ -881,6 +884,8 @@ function business() { // 与业务相关性较大的函数
           statusCode: res.lineHeaders.line.statusCode,
           contentType: res.lineHeaders.headers[`content-type`],
           extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
+          resBodySize,
+          reqBodySize,
           date: res.lineHeaders.headers.date,
         }
       }).filter(item => item)
