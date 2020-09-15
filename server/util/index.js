@@ -286,7 +286,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     function fullApi2Obj(api) {
-      let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, `*`, api.trim()]
+      let [, method, url] = api.match(/(\S+)\s+(.*)/) || [, `*`, api.trim()]
       if(method === `*`) {
         method = `all`
       }

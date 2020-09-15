@@ -93,7 +93,7 @@ function baseConfigFn(util) {
           // 如果需要拦截所有到达服务器前的请求, 请从 config.proxy 中配置
           next()
         },
-        '/all/method' (req, res, next) { // 所有方法都会进入此路由
+        '* /all/method' (req, res, next) { // 所有方法都会进入此路由
           res.json({msg: req.method, url: req.url})
         },
         'post /file/upload' (req, res, next) { // 获取上传的文件
