@@ -478,8 +478,9 @@ const HttpShow = (() => {
                     };
                   }}
                   rowClassName={(record, index) => {
+                    const fullHistoryUrl = reactLocation.pathname.match(/\/history,(\w+)/) // 判断是否是含有 id 的 url
                     const res = ((record.id === state.httpData.apiId) // 有 apiId 时高亮匹配当前 id 的行
-                      || ((state.httpData.apiId === undefined ) && (index === 0)) // 没有 appId 时, 高亮第一行
+                      || ((fullHistoryUrl === null) && (index === 0)) // 没有 appId 时, 高亮第一行
                     )
                       ? `curItem index_${index}`
                       : `index_${index}`
