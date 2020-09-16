@@ -11,12 +11,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       ms = 250,
       timeout = 5e3,
     }) {
-      return new Promise(async resolve => {
+      return new Promise(async (resolve, reject) => {
         let timeStart = Date.now()
         let res = await condition()
-        while (res !== true && res !== `timeout`) {
+        while (res !== true) {
           res = await condition()
-          res = ((Date.now() - timeStart) > timeout) ? `timeout` : res
+          if(((Date.now() - timeStart) > timeout)) { // 超时
+            reject(false)
+          }
           await sleep(ms)
         }
         resolve(res)
@@ -168,18 +170,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }
     }
 
-    function getOptions(cmd) { // curl 命令转 body
-      const curlconverter = require('curlconverter');
-      let str = curlconverter.toNode(cmd)
-      let res = {}
-      str = str.replace(`request(options, callback)`, `res = options`)
-      eval(str)
-      try {
-        res.body = JSON.parse(res.body)
-      } catch (error) {
-        res.body = {}
-      }
-      return res
+    /**
+     * 从 curl 命令中解析 request 库的 options 参数
+     * @param {string} cmd // curl/bash 命令
+     */
+    function getOptions(cmd) {
+      var options = {} // 注意: options 的内容从 eval(optionStr) 中得到
+      const curlconverter = require('curlconverter')
+      const requestStr = curlconverter.toNode(cmd)
+      const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
+      eval(optionStr)
+      return options
     }
     return {
       spawn,
@@ -191,9 +192,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function url() { // url 处理程序
     function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
-      let resProxy = []
+      const pathToRegexp = require('path-to-regexp')
       const isType = type().isType
       const proxyType = isType(proxy)
+      let resProxy = []
       if(proxyType === `string`) { // 任何路径都转发到 proxy
         proxy = {
           '/': proxy,
@@ -248,7 +250,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
             }
           }
         }
+        const re = pathToRegexp(context)
         return {
+          re,
           context,
           options,
         }
@@ -256,7 +260,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return resProxy
     }
 
-    function prepareOrigin (proxy) { // 解析 proxy 为 {pathname, origin}
+    function parseProxyTarget (proxy) { // 解析 proxy 为 {pathname, origin}
       let origin = ``
       try {
         if(typeof(proxy) === `string`) {
@@ -267,8 +271,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }
         const parentUrl = new URL(origin)
         const res = {
+          host: parentUrl.host,
+          port: parentUrl.port || 80,
+          hostname: parentUrl.hostname,
           pathname: parentUrl.pathname.replace(/\/$/, '') + '/',
           origin: parentUrl.origin,
+          isIp: parentUrl.host.match(/\./g).length === 3,
         }
         return res
       } catch (error) {
@@ -278,7 +286,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     function fullApi2Obj(api) {
-      let [, method, url] = api.match(/(\w+)\s+(.*)/) || [, `*`, api.trim()]
+      let [, method, url] = api.match(/(\S+)\s+(.*)/) || [, `*`, api.trim()]
       if(method === `*`) {
         method = `all`
       }
@@ -331,7 +339,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     return {
       prepareProxy,
-      prepareOrigin,
+      parseProxyTarget,
       fullApi2Obj,
       handlePathArg,
       parseRegPath,
@@ -570,6 +578,48 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function os() { // 系统工具
+    /**
+     *
+     * @param {string} param0 动作, set, remove
+     * @param {object} param1.ip 对应的 ip, 默认 127.0.0.1
+     * @param {object} param1.hostname 对应的 hostname
+     */
+    async function sysHost(action, {ip = `127.0.0.1`, hostname}) {
+      await toolObj.generate.initPackge(`hostile`).catch(err => console.log(err))
+      const hostile = require('hostile')
+      return new Promise((resolve, reject) => {
+        hostile[action](ip, hostname, err => {
+          err ? reject(err) : resolve(true)
+        })
+      })
+    }
+
+    /**
+     * 程序退出前清理工具
+     * @param {object} param0.hostname 恢复 host 文件修改
+     */
+    function clearProcess({hostname} = {}) {
+      function killProcess(...arg) {
+        console.log(`err:`, ...arg)
+        hostname ? sysHost(`remove`, {hostname}).finally(process.exit) : process.exit()
+      }
+      process.on(`SIGTERM`, killProcess)
+      process.on(`SIGINT`, killProcess)
+      process.on(`uncaughtException`, killProcess)
+      process.on(`unhandledRejection`, killProcess)
+    }
+
+    function portIsOk (port) { // 判断端口是否可用
+      if(typeof(port) === `object`) { // 判断多个端口
+        return Promise.all(port.map(item => portIsOk(item)))
+      }
+      return new Promise(resolve => {
+        const net = require('net')
+        const server = net.createServer().listen(port)
+        server.on('listening', () => server.close(resolve(true)))
+        server.on('error', () => resolve(port))
+      })
+    }
     function getOsIp() { // 获取系统 ip
       const obj = require(`os`).networkInterfaces()
       const ip = Object.keys(obj).reduce((res, cur, index) => {
@@ -578,7 +628,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return ip
     }
     return {
+      clearProcess,
+      sysHost,
       getOsIp,
+      portIsOk,
     }
   }
 
@@ -628,6 +681,7 @@ function business() { // 与业务相关性较大的函数
     */
 
     function parseApi() { // 解析自定义 api
+      const pathToRegexp = require('path-to-regexp')
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = toolObj.url.fullApi2Obj(key)
@@ -637,15 +691,15 @@ function business() { // 与业务相关性较大的函数
           val = (req, res, next) => res.json(backVal)
         }
         method = method.toLowerCase()
-        serverRouterList.push({method, router: url, action: val})
+        const re = pathToRegexp(url)
+        serverRouterList.push({method, router: url, action: val, re})
       })
       function noProxyTest({method, pathname}) {
         // return true 时不走真实服务器, 而是走自定义 api
-        const pathToRegexp = require('path-to-regexp')
         return serverRouterList.some(item => {
           // 当方法不同时才去匹配 url
           if(((item.method === `all`) || (item.method === method))) {
-            return pathToRegexp(item.router).exec(pathname)
+            return item.re.exec(pathname)
           } else {
             return false
           }
@@ -697,7 +751,7 @@ function business() { // 与业务相关性较大的函数
       let res = `${__dirname}/../config.js` // 默认配置文件
       if(cliArg.config) { // 命令行上指定的 config 文件
         res = cliArg.config
-      } else if(tool().file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
+      } else if(toolObj.file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
         res = cwdConfigPath
       }
       res = require(`path`).normalize(res)
@@ -719,12 +773,12 @@ function business() { // 与业务相关性较大的函数
       const fs = require(`fs`)
       const newDb = config.db()
       const o2s = toolObj.obj.o2s
-      if(toolObj.file.isFileEmpty(config.dbJsonName) || config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
-        fs.writeFileSync(config.dbJsonName, o2s(newDb))
+      if(toolObj.file.isFileEmpty(config.dbJsonPath) || config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
+        fs.writeFileSync(config.dbJsonPath, o2s(newDb))
       }
-      const oldDb = require(config.dbJsonName)
+      const oldDb = require(config.dbJsonPath)
       const resDb = {...newDb, ...oldDb}
-      fs.writeFileSync(config.dbJsonName, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+      fs.writeFileSync(config.dbJsonPath, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
       return resDb
     }
 
@@ -734,9 +788,9 @@ function business() { // 与业务相关性较大的函数
       if(toolObj.file.hasFile(config.dataDir) === false) { // 如果没有目录则创建目录
         fs.mkdirSync(config.dataDir, {recursive: true})
       }
-      fileStore(config.httpHistory)
+      fileStore(config._httpHistory)
       { // 初始化 store 中的内容
-        const store = fileStore(config.store)
+        const store = fileStore(config._store)
         const osIp = config.osIp
         store.set(`note.local`, {
           prot: `http://${osIp}:${config.prot}`,
@@ -749,11 +803,8 @@ function business() { // 与业务相关性较大的函数
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
+          const options = toolObj.cli.getOptions(cmd)
           const request = require('request')
-          const curlconverter = require('curlconverter')
-          const requestStr = curlconverter.toNode(cmd)
-          const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
-          eval(optionStr)
           return new Promise((resolve, reject) => {
             request(options, (err, curlRes = {}, body) => {
               setHeader(res, curlRes.headers) // 复制远程的 header
@@ -815,6 +866,7 @@ function business() { // 与业务相关性较大的函数
     */
 
     function getHistoryList({history, method: methodRef, api: apiRef} = {}) {
+      const fs = require(`fs`)
       let list = []
       list = Object.keys(history).reduce((acc, cur) => {
         return acc.concat(history[cur])
@@ -826,6 +878,8 @@ function business() { // 与业务相关性较大的函数
             return false
           }
         }
+        const resBodySize = res.bodyPath ? fs.statSync(res.bodyPath).size : 0
+        const reqBodySize = req.bodyPath ? fs.statSync(req.bodyPath).size : 0
         return {
           id,
           method,
@@ -834,6 +888,8 @@ function business() { // 与业务相关性较大的函数
           statusCode: res.lineHeaders.line.statusCode,
           contentType: res.lineHeaders.headers[`content-type`],
           extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
+          resBodySize,
+          reqBodySize,
           date: res.lineHeaders.headers.date,
         }
       }).filter(item => item)
@@ -855,7 +911,7 @@ function business() { // 与业务相关性较大的函数
       return Boolean(
         method.match(/OPTIONS/i)
         || (
-          method.match(/GET/i) && url.match(new RegExp(`/\/${config.pathname}\//`))
+          method.match(/GET/i) && url.match(new RegExp(`/\/${config._proxyTargetInfo.pathname}\//`))
         )
       )
     }
@@ -875,8 +931,8 @@ function business() { // 与业务相关性较大的函数
 
       const newPath = () => {
         const osPath = require(`path`)
-        const basePath = osPath.parse(config.dataDir).base // 获取相对路径下的 dataDir 目录
-        const apiDir =  osPath.normalize(`./${basePath}/${path}`) // 以 path 创建目录, 生成相对路径以避免移动 dataDir 后无法使用
+        const basePath = osPath.parse(config.dataDir).base + `/request` // 获取相对路径下的 dataDir 目录
+        const apiDir =  osPath.normalize(`./${basePath}/${path}`).replace(/\\/g, `/`) // 以 path 创建目录, 生成相对路径以避免移动 dataDir 后无法使用
         if(toolObj.file.hasFile(apiDir) === false) { // 如果不存在此目录则进行创建
           fs.mkdirSync(apiDir, { recursive: true })
         }
@@ -912,7 +968,7 @@ function business() { // 与业务相关性较大的函数
 
       // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
 
-      const apiCount = toolObj.file.fileStore(config.store).updateApiCount()
+      const apiCount = toolObj.file.fileStore(config._store).updateApiCount()
       const apiId = toolObj.hex.string10to62(apiCount)
       function getBodyPath() {
         const arg = {config, req, headersObj, dataDir, apiId}
@@ -966,7 +1022,7 @@ function business() { // 与业务相关性较大的函数
       const fs = require(`fs`)
       const {path} = data
       history[path] = (history[path] || []).concat(data)
-      fs.writeFileSync(config.httpHistory, toolObj.obj.o2s(history))
+      fs.writeFileSync(config._httpHistory, toolObj.obj.o2s(history))
     }
 
     function setHttpHistoryWrap({config, history, req, res, mock = false, buffer}) { // 从 req, res 记录 history
@@ -1015,7 +1071,7 @@ function business() { // 与业务相关性较大的函数
     }
 
     function allowCors({res, req, proxyConfig = {}}) { // 设置为允许跨域
-      const target = proxyConfig.target || config.origin // 自定义代理时应使用 proxyConfig.target 中的 host
+      const target = proxyConfig.target || config._proxyTargetInfo.origin // 自定义代理时应使用 proxyConfig.target 中的 host
       if(config.cors === false) { // config.cors 为 false 时, 则不允许跨域
         return false
       }
@@ -1029,7 +1085,7 @@ function business() { // 与业务相关性较大的函数
     }
 
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
-      const store = toolObj.file.fileStore(config.store)
+      const store = toolObj.file.fileStore(config._store)
       const note = store.get(`note`)
       const apiCount = store.get(`apiCount`) + 1
       const apiId = toolObj.hex.string10to62(apiCount)
