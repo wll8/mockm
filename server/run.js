@@ -33,15 +33,20 @@ new Promise(async () => {
     showLocalInfo,
     remoteServer,
   } = plugin()
-  await toolObj.control.awaitTrue({ // 等待 sharePath 文件存在, 期望 config 已经存入
+  toolObj.control.awaitTrue({ // 等待 sharePath 文件存在, 期望 config 已经存入
     condition: () => toolObj.file.hasFile(sharePath),
+    timeout: 60e3,
+  }).then(() => {
+    const share = toolObj.file.fileStore(sharePath)
+    const config = share.get(`config`)
+    const store = toolObj.file.fileStore(config._store)
+    store.set(`note.remote`, {})
+    showLocalInfo({store, config})
+    if(config.remote) { // 如果启用远程则进行相关功能处理
+      remoteServer({store, config}).catch(err => console.log(err))
+    }
+  }).catch(() => {
+    console.log(`启动超时, 请检查配置是否有误`)
+    process.exit()
   })
-  const share = toolObj.file.fileStore(sharePath)
-  const config = share.get(`config`)
-  const store = toolObj.file.fileStore(config.store)
-  store.set(`note.remote`, {})
-  showLocalInfo({store, config})
-  if(config.remote) { // 如果启用远程则进行相关功能处理
-    remoteServer({store, config}).catch(err => console.log(err))
-  }
 })
