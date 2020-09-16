@@ -1,6 +1,6 @@
 {
   "name": "mock-mock",
-  "version": "1.0.5",
+  "version": "1.0.10",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -18,7 +18,7 @@
     "filenamify": "^4.1.0",
     "http-proxy-middleware": "^1.0.5",
     "json-server": "^0.16.1",
-    "lodash": "^4.17.19",
+    "lodash.clonedeep": "^4.5.0",
     "lodash.drop": "^4.1.1",
     "lodash.orderby": "^4.6.0",
     "lodash.take": "^4.1.1",
@@ -33,6 +33,7 @@
   },
   "devDependencies": {},
   "pluginDependencies": {
+    "hostile": "^1.3.2",
     "get-port": "5.1.1",
     "yaml": "1.10.0",
     "ngrok": "3.2.7"
