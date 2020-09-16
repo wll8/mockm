@@ -13,6 +13,7 @@
     "@vuepress/plugin-google-analytics": "^1.5.4",
     "@vuepress/plugin-medium-zoom": "^1.5.4",
     "@vuepress/plugin-nprogress": "^1.5.4",
+    "markdown-it-task-lists": "^2.1.1",
     "vuepress": "^1.5.4",
     "vuepress-plugin-copy-code": "^0.0.1"
   }
