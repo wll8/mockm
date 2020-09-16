@@ -1,9 +1,19 @@
 {
   "scripts": {
+    "doc:dev": "vuepress dev doc",
+    "doc:build": "vuepress build doc",
     "build:client": "cd client && npm run build",
     "build:server": "cd release && npx gulp",
     "bt": "npm run build:client && npm run build:server && npm run test",
     "bt:server": "npm run build:server && npm run test",
     "test": "cd dist/package && cnpm i && cd ../../ && node dist/package/run.js"
+  },
+  "devDependencies": {
+    "@vuepress/plugin-back-to-top": "^1.5.4",
+    "@vuepress/plugin-google-analytics": "^1.5.4",
+    "@vuepress/plugin-medium-zoom": "^1.5.4",
+    "@vuepress/plugin-nprogress": "^1.5.4",
+    "vuepress": "^1.5.4",
+    "vuepress-plugin-copy-code": "^0.0.1"
   }
 }
