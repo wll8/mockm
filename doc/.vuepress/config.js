@@ -2,6 +2,7 @@ module.exports = {
   markdown: {
     // lineNumbers: true,
     extendMarkdown: md => {
+      md.use(require('markdown-it-task-lists')) // todo list 支持
       md.set({
         breaks: true, // 转换段落里的 '\n' 到 <br>
         linkify: true,
