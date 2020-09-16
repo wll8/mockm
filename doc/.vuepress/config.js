@@ -35,8 +35,7 @@ module.exports = {
     search: false,
     sidebarDepth: 2,
     nav: [
-      { text: '安装', link: '/use/安装' },
-      { text: '配置文件', link: '/config/配置文件' },
+      { text: '配置项', link: '/config/选项' },
       {
         text: '源码',
         link: 'https://github.com/wll8/mock-server',
