@@ -133,7 +133,7 @@ function baseConfigFn(util) {
         },
       }
     },
-    dbJsonPath: './httpData/db.json', // json 数据生成的保存位置
+    dbJsonPath: undefined, // json 数据生成的保存位置, 默认为 dataDir 下的 db.json
     dbCover: false, // 每次启动总是生成新的 db
     db () { // 供 json-server 使用的 json 数据, function || object
       const data = mockjs.mock({
@@ -190,7 +190,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       : config.apiInHeader
     ),
   prot: config.hostMode ? _proxyTargetInfo.port : config.prot, // 如果是 host 模式, 强制更改端口与目标端口一致
-  dbJsonPath: handlePathArg(config.dbJsonPath),
+  dbJsonPath: config.dbJsonPath ? handlePathArg(config.dbJsonPath) : handlePathArg(`${config.dataDir}/db.json`),
   dataDir: handlePathArg(config.dataDir),
   proxy: prepareProxy(config.proxy),
   api: isType(config.api, `object`) ? () => config.api : config.api,
