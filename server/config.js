@@ -172,8 +172,8 @@ function baseConfigFn(util) {
         data,
       }
     },
-    ...cliArg,
     ...fileArgFn(util),
+    ...cliArg,
   }
 }
 
