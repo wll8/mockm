@@ -1,4 +1,14 @@
+const path = require('path')
+
 module.exports = {
+  base: `/doc/mock-mock/`, // 部署地址
+  configureWebpack: {
+    resolve: {
+      alias: {
+        '@doc': path.join(__dirname, '../'),
+      }
+    }
+  },
   markdown: {
     // lineNumbers: true,
     extendMarkdown: md => {
@@ -10,6 +20,7 @@ module.exports = {
     },
   },
   plugins: [
+    ['fulltext-search'],
     ['vuepress-plugin-code-copy', {
       successText: `复制成功`
     }],
@@ -28,7 +39,7 @@ module.exports = {
   themeConfig : {
     lastUpdated: '最后更新时间',
     sidebar: 'auto',
-    search: false,
+    // search: false,
     sidebarDepth: 2,
     nav: [
       { text: '配置项', link: '/config/选项' },
