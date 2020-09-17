@@ -23,6 +23,21 @@ gulp.task(`copyServer`, (cb) => { // 复制 server 中的文件, 例如 package.
   cb()
 })
 
+gulp.task(`pushDoc`, (cb) => { // 发布文档
+  const shell = require(`shelljs`)
+  const cmdList = `
+    cd ../ && npm run doc:build
+    cd ../doc/.vuepress/ && scp -r dist root@hongqiye.com:/home/www/doc/mock-mock
+  `.split(`\n`).map(item => item.trim()).filter(item => item)
+  cmdList.forEach(cmd => {
+    console.log(`run: ${cmd}`)
+    if(shell.exec(cmd).code !== 0) {
+      new Error(`运行错误: ${cmd}`)
+    }
+  })
+  cb()
+})
+
 gulp.task(`uglify`, () => {
   // uglify-es - https://github.com/mishoo/UglifyJS/tree/harmony
   return gulp.src([`../server/**/*.js`, '!../server/page/**', '!../server/node_modules/**'])
