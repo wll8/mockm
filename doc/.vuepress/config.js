@@ -10,13 +10,9 @@ module.exports = {
     },
   },
   plugins: [
-    ['copy-code', { // 复制代码
-      copyMessage: '复制成功', // default is 'Copy successfully and then paste it for use.'
+    ['vuepress-plugin-code-copy', {
+      successText: `复制成功`
     }],
-    // ['vuepress-plugin-code-copy', {
-    //     successText: `String`
-    //     }
-    // ],
     ['@vuepress/back-to-top'], // 回到顶部
     ['@vuepress/nprogress'], // 进度条
     ['@vuepress/medium-zoom'], // 图片缩放

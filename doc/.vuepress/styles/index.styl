@@ -1,14 +1,3 @@
-// fix: 期望高亮行时, 也能选择代码
-div[class*="language-"] .highlight-lines {
-  pointer-events: none;
-}
-
-// 让代码块中标记的行显示得更明显
-div[class*="language-"] .highlight-lines .highlighted,
-div[class*="language-"].line-numbers-mode .highlight-lines .highlighted:before {
-  background-color: rgba(255,255,255,.5);
-}
-
 // 隐藏 todo list li 小圆点
 .contains-task-list li {
   list-style-type:none;
