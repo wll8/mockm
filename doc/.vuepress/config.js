@@ -2,6 +2,26 @@ const path = require('path')
 
 module.exports = {
   base: `/doc/mock-mock/`, // 部署地址
+  head: [
+    // 百度统计
+    ['script', {}, `
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?b4e8c1562822aa669e5555887c7b2760";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    `],
+    // 隐藏友盟统计的文字
+    ['style', { type: 'text/css' }, `
+      a[href*="www.cnzz.com"] {
+        display: none;
+      }
+    `],
+    // 添加友盟统计功能
+    ['script', {src: `https://v1.cnzz.com/z_stat.php?id=1279281360&web_id=1279281360`}],
+  ],
   configureWebpack: {
     resolve: {
       alias: {
@@ -30,7 +50,7 @@ module.exports = {
     [
       '@vuepress/google-analytics', // 谷歌统计
       {
-        'ga': '' // UA-00000000-0
+        'ga': 'UA-178264895-1' // UA-00000000-0
       }
     ]
   ],
