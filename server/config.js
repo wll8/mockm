@@ -32,16 +32,16 @@ const {
 } = require(`./util/index.js`)
 
 let cliArg = parseArgv()
-let userConfig = () => {}
+let fileArgFn = () => {}
 if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
   const base64deCode = JSON.parse(Buffer.from(cliArg._base64, 'base64').toString())
   if (base64deCode.config) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
     const fileArg = require(handlePathArg(base64deCode.config))
     if(typeof(fileArg) === `object`) {
-      userConfig = () => fileArg
+      fileArgFn = () => fileArg
     }
     if(typeof(fileArg) === `function`) {
-      userConfig = fileArg
+      fileArgFn = fileArg
     }
   }
   cliArg = {...base64deCode, ...cliArg}
@@ -173,7 +173,7 @@ function baseConfigFn(util) {
       }
     },
     ...cliArg,
-    ...userConfig(util),
+    ...fileArgFn(util),
   }
 }
 
