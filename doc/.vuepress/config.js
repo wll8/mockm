@@ -3,6 +3,7 @@ const path = require('path')
 module.exports = {
   base: `/doc/mock-mock/`, // 部署地址
   head: [
+    ['link', { rel: 'shortcut icon', href: '/icon/favicon.ico' }],
     // 百度统计
     ['script', {}, `
       var _hmt = _hmt || [];
