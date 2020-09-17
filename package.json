@@ -15,6 +15,6 @@
     "@vuepress/plugin-nprogress": "^1.5.4",
     "markdown-it-task-lists": "^2.1.1",
     "vuepress": "^1.5.4",
-    "vuepress-plugin-copy-code": "^0.0.1"
+    "vuepress-plugin-code-copy": "^1.0.6"
   }
 }
