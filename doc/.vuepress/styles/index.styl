@@ -2,3 +2,9 @@
 .contains-task-list li {
   list-style-type:none;
 }
+
+// fix: The plugin adds extra space to bottom of code blocks
+// https://github.com/znicholasbrown/vuepress-plugin-code-copy/issues/13
+pre .code-copy {
+  margin-top: -1.3rem;
+}
