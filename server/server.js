@@ -10,7 +10,7 @@ new Promise(async () => {
     toolObj,
     business,
   } = util
-  const portIsOkRes = await (toolObj.os.portIsOk([config.prot, config.testProt, config.replayProt])).catch(err => console.log(err))
+  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testProt, config.replayProt])).catch(err => console.log(err))
   if(portIsOkRes.every(item => (item === true)) === false) {
     console.log(`端口被占用:`, portIsOkRes)
     process.exit()
@@ -197,8 +197,8 @@ new Promise(async () => {
 
         server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 
-        server.listen(config.prot, () => {
-          // console.log(`服务运行于: http://localhost:${config.prot}/`)
+        server.listen(config.port, () => {
+          // console.log(`服务运行于: http://localhost:${config.port}/`)
         })
 
         router.render = (req, res) => { // 修改输出的数据, 符合项目格式
@@ -405,7 +405,7 @@ new Promise(async () => {
             }
           },
           {
-            target: `http://localhost:${config.prot}/`,
+            target: `http://localhost:${config.port}/`,
             logLevel: `silent`,
           },
         ))

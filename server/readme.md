@@ -21,7 +21,7 @@
 ## 安装和使用
 ``` sh
 npm i -g mockm
-mm prot=http://example.com/
+mm proxy=http://example.com/
 ```
 
 文档: https://www.hongqiye.com/doc/mockm

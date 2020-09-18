@@ -793,7 +793,7 @@ function business() { // 与业务相关性较大的函数
         const store = fileStore(config._store)
         const osIp = config.osIp
         store.set(`note.local`, {
-          prot: `http://${osIp}:${config.prot}`,
+          port: `http://${osIp}:${config.port}`,
           replayProt: `http://${osIp}:${config.replayProt}`,
           testProt: `http://${osIp}:${config.testProt}`,
         })
@@ -1120,7 +1120,7 @@ function business() { // 与业务相关性较大的函数
         headers.authorization = token
       }
       axios({
-        baseURL: `http://localhost:${config.prot}`,
+        baseURL: `http://localhost:${config.port}`,
         method,
         url: path || url, // 注意不要 url 和 params 上都同时存在 query
         params: query,
@@ -1236,7 +1236,7 @@ function business() { // 与业务相关性较大的函数
     function showLocalInfo({store, config}) {
       console.log(`
 本地服务信息:
-prot: ${`http://${config.osIp}:${config.prot}/`}
+port: ${`http://${config.osIp}:${config.port}/`}
 replayProt: ${`http://${config.osIp}:${config.replayProt}/`}
 testProt: ${`http://${config.osIp}:${config.testProt}/`}
       `)
@@ -1250,7 +1250,7 @@ testProt: ${`http://${config.osIp}:${config.testProt}/`}
       console.log(`远程服务加载中...`)
       await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
       const serverList = [
-        `prot`,
+        `port`,
         `replayProt`,
         `testProt`,
       ].map(name => ({
@@ -1268,7 +1268,7 @@ testProt: ${`http://${config.osIp}:${config.testProt}/`}
       console.log(`远程服务加载完成.`)
       console.log(`
 远程服务信息:
-prot: ${store.get(`note.remote.prot`) || ``}
+port: ${store.get(`note.remote.port`) || ``}
 replayProt: ${store.get(`note.remote.replayProt`) || ``}
 testProt: ${store.get(`note.remote.testProt`) || ``}
       `)
