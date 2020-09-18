@@ -1,51 +1,27 @@
 # mock-mock
-前端接口模拟, 快速同步开发.
+一款便于使用, 功能灵活的接口工具.
 
+## 特性
+- 0 侵入, 无需修改项目中的任何代码即可投入使用
+- 快速生成接口和数据, 以及文档
+- 支持 Restful API
+- 以最方便的形式支持 api 拦截, 注入, 请求及响应修改
+- 修改实时生效
+- 支持自动允许跨域
+- 自动带参调试, 无需登录
+- 自动根据接口查找文档和调试地址, 标识字段描述
+- 请求记录, 重放
+- 当提供接口的后端服务出现问题, 也可最大程度还原接口响应
+- 参数预校验, 助你分析接口联调的问题所在
+- 无需数据库支持
+- 根据接口生成业务代码
+- 跨平台, 支持 linux macos windows
+- 支持远程调试, 一个属性完成内网穿透
+
+## 安装和使用
 ``` sh
-npm i
-npm start
-curl http://localhost:9000/image/svg # => 访问 http://httpbin.org/image/svg
-curl http://localhost:9000/status/200 # 拦截并修改原接口 res `/status/200`
-curl http://localhost:9001/image/svg # 从 GET method `/image/svg` 保存的的信息中获取 response
-# open http://localhost:9005/#/GET/image/svg => 查看 GET method `/image/svg` 接口的调试页面
-``` 
-
-## 功能
-- [x] 请求转发, 不影响联调完成的接口
-- [x] 请求重放, 当后端无法正常运行时也无忧演示
-- [x] 常用中间件 upload/formData/body/query/params
-- [x] 基于 express, 可使用正则快速创建 api
-- [x] 基于 json-srver/mockjs, 快速生成数据及 Restful API
-- [x] 方便前后端检测请求的调试页面
-
-## 配置
-参考 `config.js` 文件.
-
-``` js
-{
-  prot: 9000, // 本地端口, 配置后你应在你的前端项目中使用此端口
-  testProt: 9005, // 调试服务所使用的端口
-  replayProt: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
-  updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
-  proxy: 'http://httpbin.org/image/', // 转发URL, 即真实服务器
-  noProxy: 't/', // 不进行代理的路由
-  dataDir: './httpData/', // 数据保存目录
-  httpHistory: './httpData/httpHistory.json', // 录制信息保存位置
-  dbJsonPath: './db.json', // mockjs 生成的 json 数据文件名
-}
+npm i -g mock-mock
+mm prot=http://example.com/
 ```
 
-### json-srver 数据文件
-- **config.dbJsonPath** `string`
-  数据文件的保存文件名, 相对于命令运行位置, 默认 db.json
-  
-- **config.dbCover** `boolean`
-  重新启动时是否根据 config.db 覆盖 db.json 文件. 默认 false
-  
-- **config.db** `function | object`
-  生成 db.json 的函数或对象, 使用函数时可以获取一些常用工具库, 默认为 function
-
-## 相关文档
-- expressjs: http://expressjs.com/
-- mockjs: http://mockjs.com/examples.html
-- json-server: https://github.com/typicode/json-server
+文档: https://www.hongqiye.com/doc/mock-mock
