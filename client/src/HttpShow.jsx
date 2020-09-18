@@ -300,9 +300,9 @@ const HttpShow = (() => {
             onComplete () {
               let host = ``
               if(serverConfig.remote === false) { // 本地模式
-                host = `${window.location.hostname}:${serverConfig.prot}`
+                host = `${window.location.hostname}:${serverConfig.port}`
               } else { // 公网模式
-                host = new URL(store.note.remote.prot).host
+                host = new URL(store.note.remote.port).host
               }
               const protocol = window.location.protocol.replace(`:`, ``) // 协议跟随当前页面
               window.swaggerUi.setSpec({host, protocol, schemes: [protocol]})

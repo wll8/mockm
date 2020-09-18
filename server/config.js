@@ -51,7 +51,7 @@ function baseConfigFn(util) {
   const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
   return { // 预置配置, 方便用户编写, 例如可以写多少形式
     osIp: getOsIp(), // 调试端口
-    prot: 9000, // 本地端口
+    port: 9000, // 本地端口
     testProt: 9005, // 调试端口
     replayProt: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
     replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
@@ -190,7 +190,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       ? false
       : config.apiInHeader
     ),
-  prot: config.hostMode ? _proxyTargetInfo.port : config.prot, // 如果是 host 模式, 强制更改端口与目标端口一致
+  port: config.hostMode ? _proxyTargetInfo.port : config.port, // 如果是 host 模式, 强制更改端口与目标端口一致
   dbJsonPath: config.dbJsonPath ? handlePathArg(config.dbJsonPath) : handlePathArg(`${config.dataDir}/db.json`),
   dataDir: handlePathArg(config.dataDir),
   proxy: prepareProxy(config.proxy),
