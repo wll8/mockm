@@ -1,7 +1,7 @@
 {
-  "name": "mock-mock-release",
+  "name": "mockm-release",
   "version": "1.0.0",
-  "description": "mock-mock 发布脚本",
+  "description": "mockm 发布脚本",
   "scripts": {},
   "keywords": [],
   "author": "",

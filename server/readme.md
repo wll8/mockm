@@ -1,4 +1,4 @@
-# mock-mock
+# mockm
 一款便于使用, 功能灵活的接口工具.
 
 ## 特性
@@ -20,8 +20,8 @@
 
 ## 安装和使用
 ``` sh
-npm i -g mock-mock
+npm i -g mockm
 mm prot=http://example.com/
 ```
 
-文档: https://www.hongqiye.com/doc/mock-mock
+文档: https://www.hongqiye.com/doc/mockm
