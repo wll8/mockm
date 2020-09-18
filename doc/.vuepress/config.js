@@ -1,7 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  base: `/doc/mock-mock/`, // 部署地址
+  base: `/doc/mockm/`, // 部署地址
   head: [
     ['link', { rel: 'shortcut icon', href: '/icon/favicon.ico' }],
     // 百度统计
@@ -9,7 +9,7 @@ module.exports = {
       var _hmt = _hmt || [];
       (function() {
         var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?b4e8c1562822aa669e5555887c7b2760";
+        hm.src = "https://hm.baidu.com/hm.js?2d22c415e87bb32e7e06ce85c1934fb6";
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(hm, s);
       })();
@@ -55,7 +55,7 @@ module.exports = {
       }
     ]
   ],
-  title: `mock-mock`,
+  title: `mockm`,
   description : `极简, 灵活, 强大的 api 神器, 开箱即用.`,
   themeConfig : {
     lastUpdated: '最后更新时间',
