@@ -27,7 +27,7 @@ gulp.task(`pushDoc`, (cb) => { // 发布文档
   const shell = require(`shelljs`)
   const cmdList = `
     cd ../ && npm run doc:build
-    cd ../doc/.vuepress/ && scp -r dist/** root@hongqiye.com:/home/www/doc/mock-mock/
+    cd ../doc/.vuepress/ && scp -r dist/** root@hongqiye.com:/home/www/doc/mockm/
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
     console.log(`run: ${cmd}`)
