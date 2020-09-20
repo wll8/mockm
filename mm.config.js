@@ -1,8 +1,8 @@
 module.exports = ({mockjs}) => {
   return {
     port: 8100,
-    testProt: 8105,
-    replayProt: 8101,
+    testPort: 8105,
+    replayPort: 8101,
     remote: true,
     hostMode: true,
     api (util) {
