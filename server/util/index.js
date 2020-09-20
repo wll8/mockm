@@ -794,8 +794,8 @@ function business() { // 与业务相关性较大的函数
         const osIp = config.osIp
         store.set(`note.local`, {
           port: `http://${osIp}:${config.port}`,
-          replayProt: `http://${osIp}:${config.replayProt}`,
-          testProt: `http://${osIp}:${config.testProt}`,
+          replayPort: `http://${osIp}:${config.replayPort}`,
+          testPort: `http://${osIp}:${config.testPort}`,
         })
       }
       fileStore(config._share, {config}).set(`config`, config)
@@ -1090,8 +1090,8 @@ function business() { // 与业务相关性较大的函数
       const apiCount = store.get(`apiCount`) + 1
       const apiId = toolObj.hex.string10to62(apiCount)
       const testPath = `/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
-      const testApi = `${note.local.testProt}${testPath}`
-      const testApiRemote = (config.remote && note.remote) ? `${note.remote.testProt}${testPath}` : undefined
+      const testApi = `${note.local.testPort}${testPath}`
+      const testApiRemote = (config.remote && note.remote) ? `${note.remote.testPort}${testPath}` : undefined
       setHeader(res, {
         [config.apiInHeader]: testApi,
         [config.apiInHeader + `-remote`]: testApiRemote,
@@ -1237,8 +1237,8 @@ function business() { // 与业务相关性较大的函数
       console.log(`
 本地服务信息:
 port: ${`http://${config.osIp}:${config.port}/`}
-replayProt: ${`http://${config.osIp}:${config.replayProt}/`}
-testProt: ${`http://${config.osIp}:${config.testProt}/`}
+replayPort: ${`http://${config.osIp}:${config.replayPort}/`}
+testPort: ${`http://${config.osIp}:${config.testPort}/`}
       `)
     }
 
@@ -1251,8 +1251,8 @@ testProt: ${`http://${config.osIp}:${config.testProt}/`}
       await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
       const serverList = [
         `port`,
-        `replayProt`,
-        `testProt`,
+        `replayPort`,
+        `testPort`,
       ].map(name => ({
         name,
         config: {
@@ -1269,8 +1269,8 @@ testProt: ${`http://${config.osIp}:${config.testProt}/`}
       console.log(`
 远程服务信息:
 port: ${store.get(`note.remote.port`) || ``}
-replayProt: ${store.get(`note.remote.replayProt`) || ``}
-testProt: ${store.get(`note.remote.testProt`) || ``}
+replayPort: ${store.get(`note.remote.replayPort`) || ``}
+testPort: ${store.get(`note.remote.testPort`) || ``}
       `)
     }
 

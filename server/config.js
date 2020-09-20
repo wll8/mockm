@@ -52,8 +52,8 @@ function baseConfigFn(util) {
   return { // 预置配置, 方便用户编写, 例如可以写多少形式
     osIp: getOsIp(), // 调试端口
     port: 9000, // 本地端口
-    testProt: 9005, // 调试端口
-    replayProt: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
+    testPort: 9005, // 调试端口
+    replayPort: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
     replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
     replayProxyFind (item) { // 自定义请求重放时的逻辑
       const bodyPath = require(`path`).join(process.cwd(), item.data.res.bodyPath)
@@ -82,7 +82,7 @@ function baseConfigFn(util) {
       // '/get': [{msg: `ok`}], // 只有0个或一个值, 直接替换 res
       // '/get': [{origin: `127.0.0.1`, msg: `ok`, headers: {tips: `mid`}}, `deep`], // 合并: [要合并的对象, 合并的方式], 合并的方式: deep(父级不会被替换), ...(父级会被替换, 类似于js扩展运行符)
     },
-    remote: false, // false | object, 为 false 是不需要外网映射, 为 object 时是对每个服务端口的配置 `{testProt: { proto: `http` }}` , 参考 https://github.com/bubenshchykov/remote
+    remote: false, // false | object, 为 false 是不需要外网映射, 为 object 时是对每个服务端口的配置 `{testPort: { proto: `http` }}` , 参考 https://github.com/bubenshchykov/remote
     openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
     dataDir: './httpData/', // 数据保存目录
     cors: true, // 是否允许通过跨域

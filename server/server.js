@@ -10,7 +10,7 @@ new Promise(async () => {
     toolObj,
     business,
   } = util
-  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testProt, config.replayProt])).catch(err => console.log(err))
+  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(err))
   if(portIsOkRes.every(item => (item === true)) === false) {
     console.log(`端口被占用:`, portIsOkRes)
     process.exit()
@@ -380,8 +380,8 @@ new Promise(async () => {
           }
         })
 
-        serverTest.listen(config.testProt, () => {
-          // console.log(`接口调试地址: http://localhost:${config.testProt}/`)
+        serverTest.listen(config.testPort, () => {
+          // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
         })
 
       },
@@ -441,8 +441,8 @@ new Promise(async () => {
               const store = toolObj.file.fileStore(config._store)
               const note = store.get(`note`)
               const apiInHeader = config.apiInHeader
-              const testUrl = (headers[apiInHeader] || ``).replace(/(.+?)(\/#\/.*)/, `${note.local.testProt}$2`)
-              const testUrlRemote = config.remote ? (headers[apiInHeader + `-remote`] || ``).replace(/(.+?)(\/#\/.*)/, `${note.remote.testProt}$2`) : undefined
+              const testUrl = (headers[apiInHeader] || ``).replace(/(.+?)(\/#\/.*)/, `${note.local.testPort}$2`)
+              const testUrlRemote = config.remote ? (headers[apiInHeader + `-remote`] || ``).replace(/(.+?)(\/#\/.*)/, `${note.remote.testPort}$2`) : undefined
               res.set({
                 [apiInHeader]: testUrl,
                 [apiInHeader + `-remote`]: testUrlRemote,
@@ -465,8 +465,8 @@ new Promise(async () => {
             res.json(config.resHandleReplay({req, res}))
           }
         })
-        serverReplay.listen(config.replayProt, () => {
-          // console.log(`服务器重放地址: http://localhost:${config.replayProt}/`)
+        serverReplay.listen(config.replayPort, () => {
+          // console.log(`服务器重放地址: http://localhost:${config.replayPort}/`)
         })
 
       }
