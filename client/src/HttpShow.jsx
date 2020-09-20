@@ -465,7 +465,7 @@ const HttpShow = (() => {
               <Drawer
                 className="drawer"
                 title="history"
-                width={400}
+                width="none"
                 onClose={() => historyFn(false)}
                 visible={state.showHistry}
               >
