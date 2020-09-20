@@ -1,3 +1,9 @@
+.drawer {
+  .ant-drawer-content-wrapper {
+    max-width: 50%;
+    min-width: 320px;
+  }
+}
 #root {
   .HttpShow {
     background-color: #fff;
