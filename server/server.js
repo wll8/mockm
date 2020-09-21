@@ -312,7 +312,21 @@ new Promise(async () => {
               res.send(list)
             },
             getOpenApi() {
-              getOpenApi({config}).then(oepnApiData => {
+              const api = req.query.api
+              const openApi = {
+                string: () => config.openApi, // 字符串时, 直接返回
+                array: () => { // 数组时, 返回 pathname 匹配度最高的项
+                  const pathname = new URL(`http://127.0.0.1${api}`).pathname
+                  return toolObj.url.findLikeUrl({
+                    urlList: config.openApi,
+                    pathname,
+                  })
+                },
+                object: () => { // todo 对象时, 以 key 为匹配规则
+                  return config.openApi
+                },
+              }[toolObj.type.isType(config.openApi)]()
+              getOpenApi({openApi}).then(oepnApiData => {
                 res.send(oepnApiData)
               })
             },
