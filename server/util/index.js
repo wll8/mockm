@@ -191,6 +191,32 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function url() { // url 处理程序
+    /**
+     * 根据 pathname 返回最匹配的 url
+     * @param {*} param0.urlList url 列表
+     * @param {*} param0.pathname pathname
+     */
+    function findLikeUrl({
+      urlList,
+      pathname
+    }) {
+      const apiSplitList = new URL(`http://127.0.0.1${pathname}`).pathname.split(`/`)
+      const lvList = urlList.map((openApiItem) => {
+        const openApiSplitList = new URL(openApiItem).pathname.split(`/`)
+        const lv = apiSplitList.reduce((acc, apiSplitListItem, apiSplitListItemIndex) => {
+          return acc + (apiSplitListItem === openApiSplitList[apiSplitListItemIndex] ? 1 : 0)
+        }, 0)
+        return lv
+      })
+
+      function findMaxIndex(arr) { // 查找数组中最大的数的索引
+        const sortRes = [...arr].sort((a, b) => a - b)
+        return arr.findIndex((item) => item === sortRes[arr.length - 1])
+      }
+      const maxIndex = findMaxIndex(lvList)
+      return urlList[maxIndex]
+    }
+
     function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
       const pathToRegexp = require('path-to-regexp')
       const isType = type().isType
@@ -338,6 +364,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      findLikeUrl,
       prepareProxy,
       parseProxyTarget,
       fullApi2Obj,
@@ -758,10 +785,10 @@ function business() { // 与业务相关性较大的函数
       return res
     }
 
-    function getOpenApi({config}) { // 使用服务器获取远程 openApi , 避免跨域
+    function getOpenApi({openApi}) { // 使用服务器获取远程 openApi , 避免跨域
       const axios = require('axios')
       return new Promise((resolve, reject) => {
-        axios.get(config.openApi, {}).then(res => {
+        axios.get(openApi, {}).then(res => {
           resolve(res.data)
         }).catch(err => {
           reject(err.message)

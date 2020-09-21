@@ -278,8 +278,9 @@ const HttpShow = (() => {
         });
 
         $.getScript(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui-bundle.min.js`, () => {
+          const parseHashData = parseHash()
           window.swaggerUi = window.SwaggerUIBundle({
-            url: `${cfg.baseURL}/api/getOpenApi/`,
+            url: `${cfg.baseURL}/api/getOpenApi/${parseHashData.api ? `?api=${parseHashData.api}` : ``}`,
             dom_id: '#swagger-ui',
             plugins: [
               UrlMutatorPlugin,
@@ -352,6 +353,22 @@ const HttpShow = (() => {
         })
       }
 
+      function parseHash() {
+        let res = {}
+        if(reactLocation.pathname.match(/^\/(\w+),(.*)/)) { // 如果 url 上有 /id,123/post/books/ 类似的参数, 则先取出 `id,123` 参数
+          let [, argList, path] = reactLocation.pathname.match(/\/(.*?)(\/.*)/)
+          const [action, ...actionArg] = argList.split(',')
+          const actionArgStr = actionArg.join(`,`)
+          res = {...res, action, actionArg, actionArgStr}
+          const [, method, api] = (`#${path}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
+          res = {...res, method, api}
+        } else {
+          const [, method, api] = (`#${reactLocation.pathname}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
+          res = {...res, method, api}
+        }
+        return res
+      }
+
       useEffect(() => {
         window.localStorage.setItem(`HttpShowState`, JSON.stringify({activeTabs: state.activeTabs}, null, 2))
       }, [state.activeTabs]);
@@ -366,7 +383,7 @@ const HttpShow = (() => {
           openApi && initSwagger({serverConfig: config, store})
         })
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
+      }, [reactLocation]);
 
       useEffect(() => { // 判断是否有 swagger, 如果有则显示 swagger 按钮
         try {
@@ -390,21 +407,6 @@ const HttpShow = (() => {
         hideDoc()
         console.log(`location`, reactLocation)
         console.log(`location.pathname`, reactLocation.pathname)
-        function parseHash() {
-          let res = {}
-          if(reactLocation.pathname.match(/^\/(\w+),(.*)/)) { // 如果 url 上有 /id,123/post/books/ 类似的参数, 则先取出 `id,123` 参数
-            let [, argList, path] = reactLocation.pathname.match(/\/(.*?)(\/.*)/)
-            const [action, ...actionArg] = argList.split(',')
-            const actionArgStr = actionArg.join(`,`)
-            res = {...res, action, actionArg, actionArgStr}
-            const [, method, api] = (`#${path}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
-            res = {...res, method, api}
-          } else {
-            const [, method, api] = (`#${reactLocation.pathname}${reactLocation.search}`).match(/#\/(\w+)(.*)/) || []
-            res = {...res, method, api}
-          }
-          return res
-        }
         const parseHashData = parseHash()
         setState(preState => ({...preState, parseHashData}))
         const {api, method, action, actionArg} = parseHashData
