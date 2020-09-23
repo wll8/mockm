@@ -130,7 +130,7 @@ function baseConfigFn(util) {
           }).then(async thenRes => {
             const thenResOk = await thenRes.buffer()
             res.send(thenResOk)
-          })
+          }).catch(err => console.log(`err`, err))
         },
       }
     },
