@@ -66,7 +66,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         await cli().spawn(
           `npx`, `cnpm i ${packge}@${version} --no-save`.split(/\s+/),
           {cwd: mainPath}
-        ).catch(err => console.log(err))
+        ).catch(err => console.log(`err`, err))
       }
     }
 
@@ -612,7 +612,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {object} param1.hostname 对应的 hostname
      */
     async function sysHost(action, {ip = `127.0.0.1`, hostname}) {
-      await toolObj.generate.initPackge(`hostile`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`hostile`).catch(err => console.log(`err`, err))
       const hostile = require('hostile')
       return new Promise((resolve, reject) => {
         hostile[action](ip, hostname, err => {
@@ -791,6 +791,7 @@ function business() { // 与业务相关性较大的函数
         axios.get(openApi, {}).then(res => {
           resolve(res.data)
         }).catch(err => {
+          console.log(`err`, `openApi 获取失败`)
           reject(err.message)
         })
       })
@@ -856,6 +857,7 @@ function business() { // 与业务相关性较大的函数
               const mergeRes = fetchThenRes
               resolve(mergeRes)
             }).catch(err => {
+              console.log(`err`, err)
               reject(err)
             })
           })
@@ -1146,10 +1148,11 @@ function business() { // 与业务相关性较大的函数
       if(token && config.updateToken) { // 更新 TOKEN
         headers.authorization = token
       }
+      const pathOrUrl = path || url
       axios({
         baseURL: `http://localhost:${config.port}`,
         method,
-        url: path || url, // 注意不要 url 和 params 上都同时存在 query
+        url: pathOrUrl, // 注意不要 url 和 params 上都同时存在 query
         params: query,
         headers,
         data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
@@ -1162,6 +1165,7 @@ function business() { // 与业务相关性较大的函数
           config: res.config,
         }
       }).catch(err => {
+        console.log(`err`, `内部请求失败`, pathOrUrl)
         let message = ``
         if(err.response) {
           const {status, statusText} = err.response
@@ -1191,9 +1195,9 @@ function business() { // 与业务相关性较大的函数
      * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
      */
     async function runNgrok({serverList}) {
-      await toolObj.generate.initPackge(`yaml`).catch(err => console.log(err))
-      await toolObj.generate.initPackge(`get-port`).catch(err => console.log(err))
-      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`yaml`).catch(err => console.log(`err`, err))
+      await toolObj.generate.initPackge(`get-port`).catch(err => console.log(`err`, err))
+      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(`err`, err))
       const path = require(`path`)
       const mainPath = path.join(__dirname, '../') // 主程序目录
       const yaml = require(`yaml`)
@@ -1202,7 +1206,7 @@ function business() { // 与业务相关性较大的函数
       const fs = require(`fs`)
 
       // 获取未占用的 tcp 端口, 用于 ngrok 的 web_addr, 会生成一个 api 供我们调用
-      const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) )).catch(err => console.log(err))
+      const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) )).catch(err => console.log(`err`, err))
 
       // 使用这些端口以及用户配置生成 ngrok yaml 格式的配置文件
       portList.forEach((freePort, index) => {
@@ -1240,7 +1244,10 @@ function business() { // 与业务相关性较大的函数
           timeout: 30e3,
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
-              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => resolve(false))
+              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => {
+                console.log(`err`, err)
+                resolve(false)
+              })
               if(res) {
                 const tunnels = res.data.tunnels
                 const hasUrl = tunnels.length > 0
@@ -1252,7 +1259,7 @@ function business() { // 与业务相关性较大的函数
             })
           },
         })
-      })).catch(err => console.log(err))
+      })).catch(err => console.log(`err`, err))
       return urlList
     }
 
@@ -1275,7 +1282,7 @@ testPort: ${`http://${config.osIp}:${config.testPort}/`}
      */
     async function remoteServer({store, config}) {
       console.log(`远程服务加载中...`)
-      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(err))
+      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(`err`, err))
       const serverList = [
         `port`,
         `replayPort`,
@@ -1288,7 +1295,7 @@ testPort: ${`http://${config.osIp}:${config.testPort}/`}
           ...config.remote[name],
         },
       }))
-      const urlList = await runNgrok({serverList}).catch(err => console.log(err))
+      const urlList = await runNgrok({serverList}).catch(err => console.log(`err`, err))
       serverList.forEach((item, index) => {
         store.set(`note.remote.${item.name}`, urlList[index])
       })

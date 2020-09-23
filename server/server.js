@@ -10,7 +10,7 @@ new Promise(async () => {
     toolObj,
     business,
   } = util
-  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(err))
+  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(`err`, err))
   if(portIsOkRes.every(item => (item === true)) === false) {
     console.log(`端口被占用:`, portIsOkRes)
     process.exit()
@@ -328,7 +328,7 @@ new Promise(async () => {
               }[toolObj.type.isType(config.openApi)]()
               getOpenApi({openApi}).then(oepnApiData => {
                 res.send(oepnApiData)
-              })
+              }).catch(err => console.log(`err`, err))
             },
             getApiListSse() {
               res.writeHead(200, {
@@ -432,7 +432,7 @@ new Promise(async () => {
               try {
                 return item.data.res.lineHeaders.line.statusCode
               } catch (err) {
-                console.log(err)
+                console.log(`err`, err)
               }
             }
             const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
@@ -474,8 +474,8 @@ new Promise(async () => {
               res.statusMessage = statusMessage
               res.send()
             }
-          } catch (error) {
-            console.log(`error`, error)
+          } catch (err) {
+            console.log(`err`, err)
             res.json(config.resHandleReplay({req, res}))
           }
         })
