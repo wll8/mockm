@@ -43,9 +43,10 @@ new Promise(async () => {
     store.set(`note.remote`, {})
     showLocalInfo({store, config})
     if(config.remote) { // 如果启用远程则进行相关功能处理
-      remoteServer({store, config}).catch(err => console.log(err))
+      remoteServer({store, config}).catch(err => console.log(`err`, err))
     }
-  }).catch(() => {
+  }).catch(err => {
+    console.log(`err`, err)
     console.log(`启动超时, 请检查配置是否有误`)
     process.exit()
   })
