@@ -322,8 +322,17 @@ new Promise(async () => {
                     pathname,
                   })
                 },
-                object: () => { // todo 对象时, 以 key 为匹配规则
-                  return config.openApi
+                object: () => { // 对象时, 以 `new RegExp(key, 'i').test(pathname)` 的形式匹配
+                  const pathname = new URL(`http://127.0.0.1${api}`).pathname
+                  let firstKey = ``
+                  const key = Object.keys(config.openApi).find(key => {
+                    if (firstKey === ``) { // 把第一个 key 保存起来, 当没有找到对应的 key 时则把它作为默认的 key
+                      firstKey = key
+                    }
+                    const re = new RegExp(key, `i`)
+                    return re.test(pathname)
+                  })
+                  return config.openApi[key || firstKey]
                 },
               }[toolObj.type.isType(config.openApi)]()
               getOpenApi({openApi}).then(oepnApiData => {
