@@ -50,6 +50,7 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 function baseConfigFn(util) {
   const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
   return { // 预置配置, 方便用户编写, 例如可以写多少形式
+    disable: false, // 是否禁用所有自定义 api, 直接通往目标服务器
     osIp: getOsIp(), // 调试端口
     port: 9000, // 本地端口
     testPort: 9005, // 调试端口

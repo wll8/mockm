@@ -132,7 +132,8 @@ new Promise(async () => {
         middleware.reWriteRouter({app: server, routes: config.route})
         const router = jsonServer.router(config.dbJsonPath)
         server.use(middlewaresObj.corsMiddleware)
-        config.proxy.forEach(item => {
+        // disable = false 才走自定义 proxy
+        config.disable === false && config.proxy.forEach(item => {
           if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
             return false
           } else {
@@ -151,7 +152,10 @@ new Promise(async () => {
         server.use(proxy(
           (pathname, {method}) => { // 返回 true 时进行转发, 真实服务器
             method = method.toLowerCase()
-            if(config.hostMode || noProxyTest({method, pathname}) || getDataRouter({method, pathname, db})) {
+            if(
+              (config.disable === false) // disable = false 才走自定义 api
+              && (config.hostMode || noProxyTest({method, pathname}) || getDataRouter({method, pathname, db}))
+            ) {
               return false
             } else {
               return true
