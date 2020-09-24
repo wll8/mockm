@@ -49,9 +49,9 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 
 function baseConfigFn(util) {
   const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
-  return { // 预置配置, 方便用户编写, 例如可以写多少形式
+  return { // 预置配置, 方便用户编写, 例如可以写多种形式
     disable: false, // 是否禁用所有自定义 api, 直接通往目标服务器
-    osIp: getOsIp(), // 调试端口
+    osIp: getOsIp(), // 调试IP
     port: 9000, // 本地端口
     testPort: 9005, // 调试端口
     replayPort: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
@@ -107,6 +107,9 @@ function baseConfigFn(util) {
         },
         'get /name' (req, res, next) { // 使用 mock 功能
           res.json({name: mockjs.mock(`@cname`)})
+        },
+        'get /ip' (req, res, next) {
+          res.json({res: `127.0.0.1`})
         },
         'get /json': { // 直接返回 json 数据
           msg: `json api`
