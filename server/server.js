@@ -129,6 +129,9 @@ new Promise(async () => {
         const jsonServer = require('json-server')
         const proxy = require('http-proxy-middleware').createProxyMiddleware
         const server = jsonServer.create()
+        server.use((req, res, next) => {
+          next()
+        })
         middleware.reWriteRouter({app: server, routes: config.route})
         const router = jsonServer.router(config.dbJsonPath)
         server.use(middlewaresObj.corsMiddleware)
