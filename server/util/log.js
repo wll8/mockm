@@ -6,7 +6,7 @@ const util = require('./index.js')
 function print(...argList) { // 用于输出有用信息, 而不是调试信息
   const resList = []
   argList.map(item => {
-    const type = util.isType(item)
+    const type = util.toolObj.type.isType(item)
     ;([
       ['undefined', ''],
       ['string', 'number', item],
