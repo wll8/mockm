@@ -116,6 +116,28 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function cli() { // 命令行相关处理程序
     /**
+    * 自定义控制台颜色
+    * https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
+    * nodejs 内置颜色: https://nodejs.org/api/util.html#util_foreground_colors
+    */
+    function colors () {
+      const util = require('util')
+
+      function colorize (color, text) {
+        const codes = util.inspect.colors[color]
+        return `\x1b[${codes[0]}m${text}\x1b[${codes[1]}m`
+      }
+
+      let returnValue = {}
+      Object.keys(util.inspect.colors).forEach((color) => {
+        returnValue[color] = (text) => colorize(color, text)
+      })
+      // 取消下行注释, 查看所有的颜色和名字:
+      // Object.keys(returnValue).forEach((color) => console.log(returnValue[color](color)))
+      return returnValue
+    }
+
+    /**
      * 以 Promise 方式运行 spawn
      * @param {*} cmd 主程序
      * @param {*} args 程序参数数组
@@ -187,6 +209,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       getWatchArg,
       parseArgv,
       getOptions,
+      colors: colors(),
     }
   }
 
@@ -430,19 +453,30 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function httpLog() { // 设置 http 请求日志中间件
       const morgan = require('morgan')
-      morgan.token('dateLcoal', (req, res) => (new Date()).toLocaleString())
+      const toolObj = tool()
+      const {print} = require('./log.js')
+      const colors = toolObj.cli.colors
       return morgan( (tokens, req, res) => {
-        return [
-          tokens.dateLcoal(req, res),
-          tokens['remote-addr'](req, res),
-          tokens.method(req, res),
-          tokens.url(req, res),
-          tokens.status(req, res),
-          tokens['response-time'](req, res),
-          'ms',
-          '-',
-          tokens.res(req, res, 'content-length'),
-        ].join(' ')
+        const colorTable = {
+          1: `gray`,
+          2: `green`,
+          3: `yellowBright`,
+          4: `yellow`,
+          5: `red`,
+        }
+        const statusCode = String(res.statusCode)
+        const str = [
+          toolObj.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date),
+          toolObj.httpClient.getClientIp(req),
+          req.method,
+          req.url,
+          `${statusCode} ${res.statusMessage}`,
+          `${tokens['response-time'](req, res)} ms`,
+          `${res.getHeader(`Content-Length`)} byte`,
+        ].join(` `)
+        // 使用原生 nodejs 打印日志
+        print(colors[colorTable[statusCode[0]]](str)) // 根据状态码的第一位获取颜色函数
+        return [] // return list.join(' ')
       })
     }
 
@@ -684,6 +718,36 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
   }
 
+  function time() {
+    /**
+     * 时间格式化
+     * @param {string} fmt 格式
+     * @param {Date} date 时间对象
+     */
+    function dateFormat(fmt, date) {
+      let ret
+      const opt = {
+        'Y+': date.getFullYear().toString(),        // 年
+        'M+': (date.getMonth() + 1).toString(),     // 月
+        'D+': date.getDate().toString(),            // 日
+        'h+': date.getHours().toString(),           // 时
+        'm+': date.getMinutes().toString(),         // 分
+        's+': date.getSeconds().toString()          // 秒
+        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+      }
+      for (let k in opt) {
+        ret = new RegExp(`(${k})`).exec(fmt)
+        if (ret) {
+          fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, '0')))
+        }
+      }
+      return fmt
+    }
+    return {
+      dateFormat,
+    }
+  }
+
   return {
     control: control(),
     cache: cache(),
@@ -698,6 +762,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     obj: obj(),
     os: os(),
     type: type(),
+    time: time(),
   }
 }
 
