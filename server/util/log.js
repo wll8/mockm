@@ -38,7 +38,8 @@ function logHelper(isUse = true) { // 重写 console.log 方法, 打印时附带
       log(...arg)
       return undefined
     } else {
-      log(new Date().toLocaleString())
+      const dateFormat = util.toolObj.time.dateFormat
+      log(dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date()))
       log(`> ${line}`)
       log(...arg)
     }
