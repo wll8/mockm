@@ -1,6 +1,8 @@
 # mockm
 一款便于使用, 功能灵活的接口工具.
 
+QQ交流群: [62935222](https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi)
+
 ## 特性
 - 0 侵入, 无需修改项目中的任何代码即可投入使用
 - 快速生成接口和数据, 以及文档
