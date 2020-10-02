@@ -6,7 +6,7 @@ const util = require('./index.js')
 function print(...argList) { // 用于输出有用信息, 而不是调试信息
   const resList = []
   argList.map(item => {
-    const type = util.isType(item)
+    const type = util.toolObj.type.isType(item)
     ;([
       ['undefined', ''],
       ['string', 'number', item],
@@ -38,7 +38,8 @@ function logHelper(isUse = true) { // 重写 console.log 方法, 打印时附带
       log(...arg)
       return undefined
     } else {
-      log(new Date().toLocaleString())
+      const dateFormat = util.toolObj.time.dateFormat
+      log(dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date()))
       log(`> ${line}`)
       log(...arg)
     }

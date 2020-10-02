@@ -66,9 +66,9 @@ module.exports = {
       { text: '配置项', link: '/config/选项' },
       {
         text: '源码',
-        link: 'https://github.com/wll8/mock-server',
+        link: 'https://github.com/wll8/mockm',
         // items: [
-        //   { text: 'github', link: 'https://github.com/wll8/mock-server' },
+        //   { text: 'github', link: 'https://github.com/wll8/mockm' },
         //   { text: 'gitee', link: 'https://gitee.com/projects/new' }
         // ]
       }
@@ -173,6 +173,7 @@ module.exports = {
       },
       {
         title: `开发`,
+        hide: true,
         collapsable: false,
         children: [
           {
@@ -201,6 +202,6 @@ module.exports = {
           },
         ]
       },
-    ]
+    ].filter(item => item.hide !== true)
   }
 }

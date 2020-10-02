@@ -10,7 +10,7 @@ new Promise(async () => {
     toolObj,
     business,
   } = util
-  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(err))
+  const portIsOkRes = await (toolObj.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(`err`, err))
   if(portIsOkRes.every(item => (item === true)) === false) {
     console.log(`端口被占用:`, portIsOkRes)
     process.exit()
@@ -129,10 +129,14 @@ new Promise(async () => {
         const jsonServer = require('json-server')
         const proxy = require('http-proxy-middleware').createProxyMiddleware
         const server = jsonServer.create()
+        server.use((req, res, next) => {
+          next()
+        })
         middleware.reWriteRouter({app: server, routes: config.route})
         const router = jsonServer.router(config.dbJsonPath)
         server.use(middlewaresObj.corsMiddleware)
-        config.proxy.forEach(item => {
+        // disable = false 才走自定义 proxy
+        config.disable === false && config.proxy.forEach(item => {
           if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
             return false
           } else {
@@ -151,7 +155,10 @@ new Promise(async () => {
         server.use(proxy(
           (pathname, {method}) => { // 返回 true 时进行转发, 真实服务器
             method = method.toLowerCase()
-            if(config.hostMode || noProxyTest({method, pathname}) || getDataRouter({method, pathname, db})) {
+            if(
+              (config.disable === false) // disable = false 才走自定义 api
+              && (config.hostMode || noProxyTest({method, pathname}) || getDataRouter({method, pathname, db}))
+            ) {
               return false
             } else {
               return true
@@ -322,13 +329,22 @@ new Promise(async () => {
                     pathname,
                   })
                 },
-                object: () => { // todo 对象时, 以 key 为匹配规则
-                  return config.openApi
+                object: () => { // 对象时, 以 `new RegExp(key, 'i').test(pathname)` 的形式匹配
+                  const pathname = new URL(`http://127.0.0.1${api}`).pathname
+                  let firstKey = ``
+                  const key = Object.keys(config.openApi).find(key => {
+                    if (firstKey === ``) { // 把第一个 key 保存起来, 当没有找到对应的 key 时则把它作为默认的 key
+                      firstKey = key
+                    }
+                    const re = new RegExp(key, `i`)
+                    return re.test(pathname)
+                  })
+                  return config.openApi[key || firstKey]
                 },
               }[toolObj.type.isType(config.openApi)]()
               getOpenApi({openApi}).then(oepnApiData => {
                 res.send(oepnApiData)
-              })
+              }).catch(err => console.log(`err`, err))
             },
             getApiListSse() {
               res.writeHead(200, {
@@ -432,7 +448,7 @@ new Promise(async () => {
               try {
                 return item.data.res.lineHeaders.line.statusCode
               } catch (err) {
-                console.log(err)
+                console.log(`err`, err)
               }
             }
             const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
@@ -474,8 +490,8 @@ new Promise(async () => {
               res.statusMessage = statusMessage
               res.send()
             }
-          } catch (error) {
-            console.log(`error`, error)
+          } catch (err) {
+            console.log(`err`, err)
             res.json(config.resHandleReplay({req, res}))
           }
         })
