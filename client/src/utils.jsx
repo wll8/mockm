@@ -162,17 +162,31 @@ function deepGet(object, keys, defaultValue) { // 深层获取对象值
   return res !== undefined ? res : defaultValue
 }
 
-function deepSet(object, keys, val) { // 深层设置对象值
+/**
+ *
+ * @param {*} object 要修改的对象
+ * @param {*} keys 对象的键
+ * @param {*} val 把指定的键替换为些 val 值
+ * @param {*} removeUndefined 当 val 为 undefined 时, 是否进行删除操作, 例如对数组的某个值设置为 undefined 则表示删除该值
+ */
+function deepSet(object, keys, val, removeUndefined = false) { // 深层设置对象值
   keys = Array.isArray(keys) ? keys : keys
     .replace(/\[/g, '.')
     .replace(/\]/g, '')
     .split('.');
   if (keys.length > 1) {
     object[keys[0]] = object[keys[0]] || {}
-    deepSet(object[keys[0]], keys.slice(1), val)
+    deepSet(object[keys[0]], keys.slice(1), val, removeUndefined)
     return object
   }
   object[keys[0]] = val
+  if(removeUndefined && (val === undefined)) {
+    if(Array.isArray(object)){ // 如果是数组则换一种方式删除, 避免还存在长度
+      object.splice(keys[0], 1)
+    } else {
+      delete object[keys[0]]
+    }
+  }
   return object
 }
 
