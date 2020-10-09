@@ -4,6 +4,7 @@ import * as antd from 'antd'
 import en_GB from 'antd/es/locale/en_GB'
 import ApiList from './ApiList.jsx'
 import ApiDetail from './ApiDetail.jsx'
+import ApiStudio from './ApiStudio.jsx'
 import './HttpShow.scss'
 
 const HttpShow = (() => {
@@ -26,6 +27,9 @@ const HttpShow = (() => {
         <Switch>
           <Route cache exact path="/">
             <ApiList />
+          </Route>
+          <Route cache path="/apiStudio">
+            <ApiStudio />
           </Route>
           <Route cache path="/*">
             <ApiDetail />
