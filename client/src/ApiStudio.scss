@@ -1,8 +1,11 @@
 .ApiStudio {
   padding-top: 6px;
+  pre {
+    font-size: 10px;
+  }
   .headerBox {
     .apiPath {
-      font-weight: bold;
+      // font-weight: bold;
     }
   }
 }
