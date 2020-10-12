@@ -20,6 +20,12 @@ const {
 
 const EditableContext = React.createContext();
 
+function removeKeys(data, keys) { // 从数据中删除某个些键
+  return JSON.parse(
+    JSON.stringify(data, (key, value)=> keys.includes(key) ? undefined : value)
+  )
+}
+
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
   return (
@@ -209,11 +215,18 @@ function EditableTable (props) {
   } = React
 
   const [state, setState] = useState({
-    dataSource: props.dataSource,
+    dataSource: props.dataSource || [{key: Date.now()}],
   });
 
   useEffect(() => {
-    props.dataOnChange(state.dataSource)
+    if(state.dataSource !== undefined) {
+      const res = removeKeys(state.dataSource, [`key`])
+      props.dataOnChange(res)
+    }
+    // 注意:
+    // 不要 props.dataOnChange 写到变更依赖数组中, 否则会造成死循环
+    // 因为 props.dataOnChange 带表 props 重新渲染, 并不代表组件内的 state.dataSource 变更
+    // eslint-disable-next-line
   }, [state.dataSource])
 
   const handleDelete = (key) => {
