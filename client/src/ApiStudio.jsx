@@ -103,10 +103,10 @@ const ApiStudio = (() => {
     ]
     const parametersList = [ // 参数列表
       `query`,
-      `path`,
       `header`,
-      `formData`,
-      `json`,
+      `path`,
+      `cookie`,
+      `form/body`,
     ]
     const responsesList = [ // 参数列表
       `200`,
@@ -115,26 +115,37 @@ const ApiStudio = (() => {
       `500`,
     ]
 
+    // [`get`,`put`,`post`,`delete`,`options`,`head`,`patch`,]
+    // https://swagger.io/specification/v2/?sbsearch=parameters#parameterObject
     const baseApiInfo = () => { // api 默认值
-      return { // 方法
-        summary: ``,
-        parameters: { // 参数
-          query: {},
-          path: {},
-          header: {},
-          formData: {},
+      return { // 某个 API 的请求方法, 操作对象
+        description: ``, // 对此操作行为的详细解释
+        parameters: {
+          query: [ // query header path cookie form/body
+            {
+              key: Date.now(),
+              name: `name`, // 参数的名称, 区分大小写
+              description: `姓名`, // 参数描述
+              required: false, // 是否必选参数
+              type: `array`, // 参数类型
+              example: `张三`, // 示例
+              // children: [], // 子键
+            },
+          ],
         },
-        responses: { // 响应
-          200: {
-            description: ``,
-          },
+        responses: {
+          // 200: [],
         },
       }
     }
 
     const [state, setState] = useState({ // 默认值
-      path: ``, // 路径
-      method: `get`,
+      hand: { // 标识各个 tab 所在位置
+        method: `get`, // api 方法
+        parameters: `query`, // 参数
+        responses: `200`, // 响应
+      },
+      path: ``, // api 路径
       data: {
         get: baseApiInfo(),
       },
@@ -146,11 +157,16 @@ const ApiStudio = (() => {
     }
 
     function onChange(ev, stateKey) {
-      if(typeof(ev) === `string`) {
-        setState(preState => ({...deepSet(preState, stateKey, ev)}))
-      } else {
+      console.log(`stateKey`, stateKey)
+      console.log(`ev`, ev)
+      let value = ev
+      if(typeof(ev) !== `string` && ev?.constructor?.name === `SyntheticEvent`) { // 绑定 event 形式的 value
         ev.persist()
-        const value = ev.target.value
+        value = ev.target.value
+      }
+      const oldValue = deepGet(state, stateKey)
+      if(JSON.stringify(oldValue) !== JSON.stringify(value)) {
+        console.log({oldValue, value})
         setState(preState => ({...deepSet(preState, stateKey, value)}))
       }
     }
@@ -166,37 +182,55 @@ const ApiStudio = (() => {
             className="apiPath"
           />
           {/* 请求方法 */}
-          <Tabs onChange={val => onChange(val, `method`)}>
+          <Tabs onChange={val => onChange(val, `hand.method`)}>
             {
               methodList.map(methodItem => {
                 return (
                   <TabPane tab={methodItem} key={methodItem}>
                     {/* 接口描述 */}
                     <Input.TextArea
-                      value={state.data[state.method]?.summary}
-                      onChange={ev => onChange(ev, `data.${state.method}.summary`)}
+                      value={state.data[state.hand.method]?.description}
+                      onChange={ev => onChange(ev, `data.${state.hand.method}.description`)}
                       autoSize={{ minRows: 2, maxRows: 6 }}
                       placeholder="接口描述, 例如对应的原型地址"
                     />
                     {/* 接口入参 */}
-                    <Tabs onChange={val => onChange(val, `data.${state.method}.parameters.${val}`)}>
+                    <Tabs onChange={val => onChange(val, `hand.parameters`)}>
                       {
-                        parametersList.map(methodItem => {
+                        parametersList.map(parametersItem => {
                           return (
-                            <TabPane tab={methodItem} key={methodItem}>
-                              <EditTable dataOnChange={(data) => {console.log(`data`, data)}} dataSource={parametersListDataSource} columns={columns} />
+                            <TabPane tab={parametersItem} key={parametersItem}>
+                              <EditTable
+                                dataOnChange={data => {
+                                  onChange(
+                                    data,
+                                    `data.${state.hand.method}.parameters.${state.hand.parameters}`
+                                  )
+                                }}
+                                dataSource={state.data[state.hand.method]?.parameters[state.hand.parameters]}
+                                columns={columns}
+                              />
                             </TabPane>
                           )
                         })
                       }
                     </Tabs>
                     {/* 接口出参 */}
-                    <Tabs onChange={val => onChange(val, `data.${state.method}.responses.${val}`)}>
+                    <Tabs onChange={val => onChange(val, `hand.responses`)}>
                       {
-                        responsesList.map(methodItem => {
+                        responsesList.map(responsesItem => {
                           return (
-                            <TabPane tab={methodItem} key={methodItem}>
-                              <EditTable dataOnChange={(data) => {console.log(`data`, data)}} dataSource={responseListDataSource} columns={columns} />
+                            <TabPane tab={responsesItem} key={responsesItem}>
+                              <EditTable
+                                dataOnChange={data => {
+                                  onChange(
+                                    data,
+                                    `data.${state.hand.method}.responses.${state.hand.responses}`
+                                  )
+                                }}
+                                dataSource={state.data[state.hand.method]?.responses[state.hand.responses]}
+                                columns={columns}
+                              />
                             </TabPane>
                           )
                         })
