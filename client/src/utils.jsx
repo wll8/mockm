@@ -1,5 +1,90 @@
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
+/**
+ *
+ * @param {*} object 对象或数组
+ * @param {*} findKey 要查找的 key
+ * @param {*} value 要查找的 value
+ */
+function search(object, findKey, value) {
+  for (const key in object) {
+    if ((key === findKey) && (object[key] === value)) return [key];
+    if (typeof(object[key]) === "object") {
+      const temp = search(object[key], findKey, value);
+      if (temp) return [key, temp].flat();
+    }
+  }
+}
+
+/**
+ * 向数组键值
+ * @param {object} param0.arr 要处理的数组
+ * @param {object} param0.key 要添加的 key
+ * @param {object} param0.val 要添加的值, 为函数时会使用函数返回值
+ * @param {object} param0.childrenKey 要处理的子数组键名
+ * @param {object} param0.cover 当 key 存在时是否覆盖, 默认否
+ * @example setListVal({arr: list, key: `uuid`, val: uuid(), childrenKey: `children`})
+ */
+function setListVal({arr, key, val, childrenKey, cover = false}) {
+  arr.forEach(arrItem => {
+    arrItem[key] = (arrItem[key] === undefined || cover === true)
+      ? (typeof(val) === 'function' ? val() : val)
+      : arrItem[key]
+    if(Array.isArray(arrItem[childrenKey])) {
+      setListVal({arr: arrItem[childrenKey], key, val, childrenKey})
+    }
+  })
+  return arr
+}
+
+/**
+ * 生成 guid
+ * @param {string} format 格式
+ */
+function guid(format = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx') {
+  return format.replace(/[x]/g, function(c) {
+    // eslint-disable-next-line
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
+/**
+ * 从数据中删除某个些键
+ * @param {object} data 要处理的数据
+ * @param {array} keys 要删除的键列表
+ */
+function removeKeys(data, keys) { // 从数据中删除某个些键
+  return JSON.parse(
+    JSON.stringify(data, (key, value)=> keys.includes(key) ? undefined : value)
+  )
+}
+
+/**
+ * 判断是否为空值
+ * @param {*} value 要判断的值
+ */
+function isEmpty(value) {
+  return [NaN, null, undefined, "", [], {}].some((emptyItem) =>
+    typeof value === `string` && value
+      ? false
+      : JSON.stringify(value) === JSON.stringify(emptyItem)
+  );
+}
+
+/**
+ * 删除空值
+ * @param {object} obj 要处理的数据
+ */
+function removeEmpty(obj) {
+  return JSON.parse(JSON.stringify(obj), (key, value) => {
+    if (isEmpty(value) === false && Array.isArray(value)) {
+      value = value.filter((v) => !isEmpty(v));
+    }
+    return isEmpty(value) ? undefined : value;
+  });
+}
+
 function swgPathToReg(path) { // 把 swagger 的 path /status/{codes} 转为正则 /status/.+?$
   return new RegExp(path.replace(/\{.+?\}/g, '.+?')+`$`)
 }
@@ -191,6 +276,11 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
 }
 
 export default  {
+  search,
+  setListVal,
+  guid,
+  removeKeys,
+  removeEmpty,
   swgPathToReg,
   getAbsolutePosition,
   debounce,
