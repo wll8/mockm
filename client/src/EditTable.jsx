@@ -13,18 +13,16 @@ import {
 } from 'antd';
 const { Option } = Select;
 const {
+  search,
+  setListVal,
+  removeKeys,
+  guid,
   getSelectionText,
   deepGet,
   deepSet,
 } = utils
 
 const EditableContext = React.createContext();
-
-function removeKeys(data, keys) { // 从数据中删除某个些键
-  return JSON.parse(
-    JSON.stringify(data, (key, value)=> keys.includes(key) ? undefined : value)
-  )
-}
 
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
@@ -36,23 +34,6 @@ const EditableRow = ({ index, ...props }) => {
     </Form>
   );
 };
-
-
-/**
- *
- * @param {*} object 对象或数组
- * @param {*} findKey 要查找的 key
- * @param {*} value 要查找的 value
- */
-function search(object, findKey, value) {
-  for (const key in object) {
-    if ((key === findKey) && (object[key] === value)) return [key];
-    if (typeof(object[key]) === "object") {
-      const temp = search(object[key], findKey, value);
-      if (temp) return [key, temp].flat();
-    }
-  }
-}
 
 const EditableCell = ({
     title,
@@ -86,7 +67,6 @@ const EditableCell = ({
       const values = await form.validateFields();
       const res = { ...record, ...values }
       res[dataIndex] = res[dataIndex] === `` ? undefined : res[dataIndex]
-      console.log(`resresres`, res)
       handleSave(res);
     } catch (errInfo) {
       console.log('Save failed:', errInfo);
@@ -215,7 +195,12 @@ function EditableTable (props) {
   } = React
 
   const [state, setState] = useState({
-    dataSource: props.dataSource || [{key: Date.now()}],
+    dataSource: setListVal({
+      arr: JSON.parse(JSON.stringify(props.dataSource || [{key: guid()}])),
+      key: `key`,
+      val: guid,
+      childrenKey: `children`,
+    }),
   });
 
   useEffect(() => {
@@ -240,13 +225,13 @@ function EditableTable (props) {
 
   const handleAdd = (record) => {
     if(record) {
-      record.children = [...(record.children || []), {key: Date.now()}]
+      record.children = [...(record.children || []), {key: guid()}]
       let searchRes = search(state.dataSource, `key`, record.key)
       searchRes = searchRes.slice(0, -2)
       handleSave(record) // 刷新数据上的展开图标
     } else {
-      let { dataSource } = state;
-      const key = Date.now()
+      let { dataSource = [] } = state;
+      const key = guid()
       const newData = {
         key,
       };
@@ -366,6 +351,7 @@ function EditableTable (props) {
   return (
     <div>
       <Table
+        pagination={false}
         expandable={{defaultExpandAllRows: true}}
         size="small"
         components={components}

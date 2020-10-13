@@ -5,6 +5,7 @@ import * as antd from 'antd'
 import EditTable from './EditTable.jsx'
 
 const {
+  removeEmpty,
   getSelectionText,
   deepGet,
   deepSet,
@@ -24,6 +25,7 @@ const {
   Checkbox,
   Row,
   Col,
+  Divider,
 } = antd
 
 
@@ -100,6 +102,12 @@ const ApiStudio = (() => {
     const methodList = [ // 请求方法列表
       `get`,
       `post`,
+      `put`,
+      `patch`,
+      `delete`,
+      `head`,
+      `options`,
+      `trace`,
     ]
     const parametersList = [ // 参数列表
       `query`,
@@ -121,20 +129,10 @@ const ApiStudio = (() => {
       return { // 某个 API 的请求方法, 操作对象
         description: ``, // 对此操作行为的详细解释
         parameters: {
-          query: [ // query header path cookie form/body
-            {
-              key: Date.now(),
-              name: `name`, // 参数的名称, 区分大小写
-              description: `姓名`, // 参数描述
-              required: false, // 是否必选参数
-              type: `array`, // 参数类型
-              example: `张三`, // 示例
-              // children: [], // 子键
-            },
-          ],
+          query: [{}],
         },
         responses: {
-          // 200: [],
+          200: [{}],
         },
       }
     }
@@ -151,14 +149,7 @@ const ApiStudio = (() => {
       },
     })
 
-
-    function handleCellChange(nextSource){
-      console.log(nextSource);
-    }
-
     function onChange(ev, stateKey) {
-      console.log(`stateKey`, stateKey)
-      console.log(`ev`, ev)
       let value = ev
       if(typeof(ev) !== `string` && ev?.constructor?.name === `SyntheticEvent`) { // 绑定 event 形式的 value
         ev.persist()
@@ -166,7 +157,6 @@ const ApiStudio = (() => {
       }
       const oldValue = deepGet(state, stateKey)
       if(JSON.stringify(oldValue) !== JSON.stringify(value)) {
-        console.log({oldValue, value})
         setState(preState => ({...deepSet(preState, stateKey, value)}))
       }
     }
@@ -182,7 +172,7 @@ const ApiStudio = (() => {
             className="apiPath"
           />
           {/* 请求方法 */}
-          <Tabs onChange={val => onChange(val, `hand.method`)}>
+          <Tabs activeKey={state.hand.method} onChange={val => onChange(val, `hand.method`)}>
             {
               methodList.map(methodItem => {
                 return (
@@ -195,7 +185,7 @@ const ApiStudio = (() => {
                       placeholder="接口描述, 例如对应的原型地址"
                     />
                     {/* 接口入参 */}
-                    <Tabs onChange={val => onChange(val, `hand.parameters`)}>
+                    <Tabs activeKey={state.hand.parameters} onChange={val => onChange(val, `hand.parameters`)}>
                       {
                         parametersList.map(parametersItem => {
                           return (
@@ -207,7 +197,7 @@ const ApiStudio = (() => {
                                     `data.${state.hand.method}.parameters.${state.hand.parameters}`
                                   )
                                 }}
-                                dataSource={state.data[state.hand.method]?.parameters[state.hand.parameters]}
+                                dataSource={state.data?.[state.hand.method]?.parameters?.[state.hand.parameters]}
                                 columns={columns}
                               />
                             </TabPane>
@@ -216,7 +206,7 @@ const ApiStudio = (() => {
                       }
                     </Tabs>
                     {/* 接口出参 */}
-                    <Tabs onChange={val => onChange(val, `hand.responses`)}>
+                    <Tabs activeKey={state.hand.responses} className="responsesTabs" onChange={val => onChange(val, `hand.responses`)}>
                       {
                         responsesList.map(responsesItem => {
                           return (
@@ -228,7 +218,7 @@ const ApiStudio = (() => {
                                     `data.${state.hand.method}.responses.${state.hand.responses}`
                                   )
                                 }}
-                                dataSource={state.data[state.hand.method]?.responses[state.hand.responses]}
+                                dataSource={state.data?.[state.hand.method]?.responses?.[state.hand.responses]}
                                 columns={columns}
                               />
                             </TabPane>
@@ -247,7 +237,7 @@ const ApiStudio = (() => {
         </div>
         <pre>
           {
-            JSON.stringify(state, null, 2)
+            JSON.stringify(removeEmpty(JSON.parse(JSON.stringify(state))), null, 2)
           }
         </pre>
       </div>
