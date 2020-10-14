@@ -72,7 +72,15 @@ const EditableCell = ({
       console.log('Save failed:', errInfo);
     }
   };
-// this.props.dataOnChange(this.state.dataSource)
+
+  const dataType = [ // 数据类型
+    `string`,
+    `boolean`,
+    `number`,
+    `object`,
+    `array`,
+  ]
+
   const save = async (e) => {
     await onChangeData(e)
     toggleEdit();
@@ -163,10 +171,21 @@ const EditableCell = ({
               onBlur={save}
               onChange={onChangeData}
             >
-              <Option disabled={[`array`, `object`].includes(record.type) && record.children?.length } value="string">string</Option>
-              <Option disabled={[`array`, `object`].includes(record.type) && record.children?.length } value="number">number</Option>
-              <Option value="array">array</Option>
-              <Option value="object">object</Option>
+              {
+                dataType.map(dataTypeItem => (
+                  <Option
+                    key={dataTypeItem}
+                    disabled={
+                      [`string`, `number`].includes(dataTypeItem)
+                        ? [`array`, `object`].includes(record.type) && record.children?.length
+                        : false
+                    }
+                    value={dataTypeItem}
+                  >
+                    {dataTypeItem}
+                  </Option>
+                ))
+              }
             </Select>
           </Form.Item>
         ) : (

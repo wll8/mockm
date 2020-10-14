@@ -3,6 +3,8 @@ import React from 'react'
 import utils from './utils.jsx'
 import * as antd from 'antd'
 import EditTable from './EditTable.jsx'
+import { DownOutlined } from '@ant-design/icons'
+import common from './common.jsx'
 
 const {
   removeEmpty,
@@ -11,8 +13,15 @@ const {
   deepSet,
 } = utils
 
+const {
+  http,
+  cfg,
+} = common
 
 const {
+  Menu,
+  Dropdown,
+  Card,
   Collapse,
   Button,
   Tabs,
@@ -138,6 +147,8 @@ const ApiStudio = (() => {
     }
 
     const [state, setState] = useState({ // 默认值
+      queryPath: new URL(window.location.href.replace(`#`, ``)).searchParams.get(`path`), // url 上的 path 参数
+      apiOk: false, // api 是否请求结束
       hand: { // 标识各个 tab 所在位置
         method: `get`, // api 方法
         parameters: `query`, // 参数
@@ -148,6 +159,26 @@ const ApiStudio = (() => {
         get: baseApiInfo(),
       },
     })
+
+    function saveApiData() { // 保存 api 数据
+      http.post(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify({
+        path: state.path,
+        data: state.data,
+      })))).then(res => {
+        message.info(`保存成功`)
+        console.log(res)
+      })
+    }
+
+    useEffect(() => {
+      const path = state.queryPath
+      path && http.get(`${cfg.baseURL}/api/studio/?path=${path}`).then(res => {
+        setState(preState => ({...deepSet(preState, `data`, res)}))
+        setState(preState => ({...deepSet(preState, `path`, path)}))
+      }).finally(() => {
+        setState(preState => ({...deepSet(preState, `apiOk`, true)}))
+      })
+    }, [state.queryPath])
 
     function onChange(ev, stateKey) {
       let value = ev
@@ -172,10 +203,38 @@ const ApiStudio = (() => {
             className="apiPath"
           />
           {/* 请求方法 */}
-          <Tabs activeKey={state.hand.method} onChange={val => onChange(val, `hand.method`)}>
+          <Tabs
+            activeKey={state.hand.method}
+            onChange={val => onChange(val, `hand.method`)}
+            tabBarExtraContent={
+              {
+                right: (
+                  <Dropdown
+                    overlay={(
+                      <Menu>
+                        <Menu.Item disabled={Boolean(state.path) === false} onClick={saveApiData}>save</Menu.Item>
+                        <Menu.Item>record</Menu.Item>
+                        <Menu.Item>swagger</Menu.Item>
+                        <Menu.Item>capture</Menu.Item>
+                        <Menu.Item danger>delete</Menu.Item>
+                      </Menu>
+                    )}
+                    trigger={['click']}
+                  >
+                    <span onClick={e => e.preventDefault()}>
+                      operation <DownOutlined />
+                    </span>
+                  </Dropdown>
+                ),
+              }
+            }
+          >
             {
               methodList.map(methodItem => {
                 return (
+                  (state.queryPath && state.apiOk)
+                  || (Boolean(state.queryPath) === false)
+                ) && (
                   <TabPane tab={methodItem} key={methodItem}>
                     {/* 接口描述 */}
                     <Input.TextArea
@@ -185,7 +244,29 @@ const ApiStudio = (() => {
                       placeholder="接口描述, 例如对应的原型地址"
                     />
                     {/* 接口入参 */}
-                    <Tabs activeKey={state.hand.parameters} onChange={val => onChange(val, `hand.parameters`)}>
+                    <Tabs
+                      activeKey={state.hand.parameters}
+                      onChange={val => onChange(val, `hand.parameters`)}
+                      tabBarExtraContent={
+                        {
+                          right: (
+                            <Dropdown
+                              overlay={(
+                                <Menu>
+                                  <Menu.Item>example</Menu.Item>
+                                  <Menu.Item>code</Menu.Item>
+                                </Menu>
+                              )}
+                              trigger={['click']}
+                            >
+                              <span onClick={e => e.preventDefault()}>
+                                operation <DownOutlined />
+                              </span>
+                            </Dropdown>
+                          ),
+                        }
+                      }
+                    >
                       {
                         parametersList.map(parametersItem => {
                           return (
@@ -206,7 +287,30 @@ const ApiStudio = (() => {
                       }
                     </Tabs>
                     {/* 接口出参 */}
-                    <Tabs activeKey={state.hand.responses} className="responsesTabs" onChange={val => onChange(val, `hand.responses`)}>
+                    <Tabs
+                      activeKey={state.hand.responses}
+                      className="responsesTabs"
+                      onChange={val => onChange(val, `hand.responses`)}
+                      tabBarExtraContent={
+                        {
+                          right: (
+                            <Dropdown
+                              overlay={(
+                                <Menu>
+                                  <Menu.Item>example</Menu.Item>
+                                  <Menu.Item>header</Menu.Item>
+                                </Menu>
+                              )}
+                              trigger={['click']}
+                            >
+                              <span onClick={e => e.preventDefault()}>
+                                operation <DownOutlined />
+                              </span>
+                            </Dropdown>
+                          ),
+                        }
+                      }
+                    >
                       {
                         responsesList.map(responsesItem => {
                           return (
@@ -235,11 +339,6 @@ const ApiStudio = (() => {
         <div className="bodyBox">
 
         </div>
-        <pre>
-          {
-            JSON.stringify(removeEmpty(JSON.parse(JSON.stringify(state))), null, 2)
-          }
-        </pre>
       </div>
     )
   }
