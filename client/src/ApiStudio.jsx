@@ -182,7 +182,7 @@ const ApiStudio = (() => {
 
     function onChange(ev, stateKey) {
       let value = ev
-      if(typeof(ev) !== `string` && ev?.constructor?.name === `SyntheticEvent`) { // 绑定 event 形式的 value
+      if(typeof(ev.persist) === `function`) { // 绑定 event 形式的 value
         ev.persist()
         value = ev.target.value
       }
@@ -197,8 +197,8 @@ const ApiStudio = (() => {
         <div className="headerBox">
           {/* api 路径 */}
           <Input
-            value={state.path}
-            onChange={ev => onChange(ev, `path`)}
+            defaultValue={state.queryPath}
+            onBlur={ev => onChange(ev, `path`)}
             placeholder="接口路径, 以 / 开头"
             className="apiPath"
           />
@@ -238,14 +238,14 @@ const ApiStudio = (() => {
                   <TabPane tab={methodItem} key={methodItem}>
                     {/* 接口描述 */}
                     <Input.TextArea
-                      value={state.data[state.hand.method]?.description}
-                      onChange={ev => onChange(ev, `data.${state.hand.method}.description`)}
+                      defaultValue={state.data[state.hand.method]?.description}
+                      onBlur={ev => onChange(ev, `data.${state.hand.method}.description`)}
                       autoSize={{ minRows: 2, maxRows: 6 }}
                       placeholder="接口描述, 例如对应的原型地址"
                     />
                     {/* 接口入参 */}
                     <Tabs
-                      activeKey={state.hand.parameters}
+                      defaultActiveKey={state.hand.parameters}
                       onChange={val => onChange(val, `hand.parameters`)}
                       tabBarExtraContent={
                         {
@@ -288,7 +288,7 @@ const ApiStudio = (() => {
                     </Tabs>
                     {/* 接口出参 */}
                     <Tabs
-                      activeKey={state.hand.responses}
+                      defaultActiveKey={state.hand.responses}
                       className="responsesTabs"
                       onChange={val => onChange(val, `hand.responses`)}
                       tabBarExtraContent={
