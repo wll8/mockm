@@ -210,6 +210,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   _proxyTargetInfo, // 解析 proxy[`/`] 的内容
   _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
   _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
+  _apiStudio: handlePathArg(`${config.dataDir}/apiStudio.json`), // 从 web 页面创建的接口数据
 }
 
 module.exports = handleConfig

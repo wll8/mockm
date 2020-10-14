@@ -7,6 +7,9 @@
     margin-top: 10px;
   }
   .headerBox {
+    .methodTabs>.ant-tabs-nav {
+      margin-bottom: 0;
+    }
     .apiPath {
       // font-weight: bold;
     }
