@@ -234,6 +234,7 @@ new Promise(async () => {
         const jsonServer = require('json-server')
         const serverTest = jsonServer.create()
         serverTest.use(middlewaresObj.corsMiddleware)
+        serverTest.use(middlewaresObj.jsonParser)
         serverTest.use(middleware.compression())
 
         serverTest.get(`*`, (req, res, next) => {
@@ -402,11 +403,36 @@ new Promise(async () => {
               const str = require(`fs`).readFileSync(config._store, `utf8`)
               res.json(JSON.parse(str))
             },
+            studio() {
+              let path = req.query.path
+              const store = toolObj.file.fileStore(config._apiStudio)
+              const sendData = store.get(path ? `paths.${req.query.path}` : `paths`)
+              res.json(sendData)
+            },
           }
           if (actionFnObj[action]) {
             actionFnObj[action](...actionArg)
           } else {
             console.log(`无匹配方法`, {action, api, method})
+            next()
+          }
+        })
+
+        serverTest.post(`/api/:actionRaw/`, (req, res, next) => {
+          const { actionRaw } = req.params
+          const actionFnObj = {
+            studio() {
+              const body = req.body
+              const store = toolObj.file.fileStore(config._apiStudio)
+              store.set(`paths.${body.path}`, body.data)
+              res.json({msg: `ok`})
+            },
+          }
+          if (actionFnObj[actionRaw]) {
+            actionFnObj[actionRaw]()
+          } else {
+            console.log(`无匹配方法`, {actionRaw})
+            next()
           }
         })
 
