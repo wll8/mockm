@@ -106,7 +106,6 @@ const EditableCell = ({
               <Input.TextArea
                 ref={inputRef}
                 onBlur={save}
-                onChange={onChangeData}
                 placeholder="请输入"
                 autoSize={{ minRows: 1 }}
               />
