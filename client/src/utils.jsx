@@ -237,6 +237,10 @@ function sortKey(obj) { // 排序对象的 key
 }
 
 function deepGet(object, keys, defaultValue) { // 深层获取对象值
+  // 如果 keys 无效时直接返回原数据
+  if(keys === undefined || keys === `` || (keys.length === 0)) {
+    return object
+  }
   let res = (!Array.isArray(keys)
     ? keys
       .replace(/\[/g, '.')

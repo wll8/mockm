@@ -10,6 +10,7 @@ import {
   Checkbox,
   Select,
   Divider,
+  message,
 } from 'antd';
 const { Option } = Select;
 const {
@@ -267,16 +268,28 @@ function EditableTable (props) {
 
   const handleSave = (row) => {
     let searchRes = search(state.dataSource, `key`, row.key)
-    searchRes = searchRes.slice(0, -1) // 去除最后一个值, 因为他是对象里面的 key, 我们需要的是对象
-    let deepSetRes = deepSet([...state.dataSource], searchRes.join(`.`), row)
-    deepSetRes = deepSet(deepSetRes, searchRes.join(`.`), {...row, children: (
-      // 如果 type 不是复合类型, 则将 children 删除, 避免出现不必要的展开图标
-      ([`array`, `object`].includes(row.type) === false)
-    ) ? undefined : row.children })
-    setState({
-      dataSource: deepSetRes,
-    });
+    if(row.name === undefined) {
+      message.warn(`字段名必填`)
+      return false
+    }
 
+    searchRes = searchRes.slice(0, -1) // 去除最后一个值, 因为他是对象里面的 key, 我们需要的是对象
+    // 查找是否已存在相同的字段名
+    const hasDouble = deepGet([...state.dataSource], searchRes.slice(0, -1).join(`.`))
+      .some(item => (item.key !== row.key) && (item.name === row.name))
+    if(hasDouble) {
+      message.warn(`当前层级已存在相同的字段名 ${row.name}`)
+      return false
+    } else {
+      let deepSetRes = deepSet([...state.dataSource], searchRes.join(`.`), row)
+      deepSetRes = deepSet(deepSetRes, searchRes.join(`.`), {...row, children: (
+        // 如果 type 不是复合类型, 则将 children 删除, 避免出现不必要的展开图标
+        ([`array`, `object`].includes(row.type) === false)
+      ) ? undefined : row.children })
+      setState({
+        dataSource: deepSetRes,
+      });
+    }
   };
 
   const { dataSource } = state;
