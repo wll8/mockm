@@ -59,6 +59,14 @@ function ApiStudio() {
   }, [reactLocation])
 
   function Com(props) {
+    const {
+      useState,
+      useEffect,
+      useRef,
+      useCallback,
+    } = React
+    const history = useHistory()
+
     const columns = [
       {
         type: `string`,
@@ -105,7 +113,7 @@ function ApiStudio() {
         ellipsis: true,
         width: 200,
       },
-    ];
+    ]
 
     const methodList = [ // 请求方法列表
       `get`,
@@ -160,12 +168,24 @@ function ApiStudio() {
     })
 
     function saveApiData() { // 保存 api 数据
-      http.post(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify({
-        path: state.path,
-        data: state.data,
-      })))).then(res => {
-        message.info(`保存成功`)
-        console.log(res)
+      // 由于 saveApiData 可以位于 useEffect 钩子中, 得到的 state 不是最新的
+      // 所以可以利用 setState 方法来获取最新的 state
+      setState(preState => {
+        const sendData = {
+          path: preState.path,
+          data: preState.data,
+        }
+        console.log(`sendData`, sendData)
+        http.post(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
+          message.info(`保存成功`)
+          // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
+          // 避免用户错误的使用浏览器地址栏中的 url
+          if (preState.path !== preState.queryPath) {
+            history.push(`/apiStudio?path=${preState.path}`);
+          }
+          console.log(res)
+        })
+        return preState
       })
     }
 
@@ -178,6 +198,24 @@ function ApiStudio() {
         setState(preState => ({...deepSet(preState, `apiOk`, true)}))
       })
     }, [state.queryPath])
+
+    const HotKey = window.HotKey
+    useEffect(() => {
+      const hotKey = new HotKey()
+      hotKey.add(`ctrl+s`, ev => {
+        ev.preventDefault()
+        // 让当前所编辑的输入内容失去焦点, 以触发数据收集, 收集后再保存
+        const focus = document.querySelector(`*:focus`)
+        focus && focus.blur()
+        setTimeout(() => saveApiData(), 0)
+      })
+      hotKey.setup({
+        metaToCtrl: true,
+      })
+      hotKey.start();
+      return () => hotKey.stop()
+      // eslint-disable-next-line
+    }, [HotKey])
 
     function onChange(ev, stateKey) {
       let value = ev
