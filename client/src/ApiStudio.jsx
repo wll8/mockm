@@ -171,20 +171,26 @@ function ApiStudio() {
       // 由于 saveApiData 可以位于 useEffect 钩子中, 得到的 state 不是最新的
       // 所以可以利用 setState 方法来获取最新的 state
       setState(preState => {
-        const sendData = {
-          path: preState.path,
-          data: preState.data,
-        }
-        console.log(`sendData`, sendData)
-        http.post(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
-          message.info(`保存成功`)
-          // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
-          // 避免用户错误的使用浏览器地址栏中的 url
-          if (preState.path !== preState.queryPath) {
-            history.push(`/apiStudio?path=${preState.path}`);
+        if(preState.path.match(new RegExp(`^/.*`)) === null) {
+          // 把 message.warn 写在setTimeout 中, 避免 react 控制台报错:
+          // Warning: Render methods should be a pure function of props and state; triggering nested component updates from render is not allowed. If necessary, trigger nested updates in componentDidUpdate.
+          setTimeout(() => message.warn(`接口路径格式错误`), 0)
+        } else {
+          const sendData = {
+            path: preState.path,
+            data: preState.data,
           }
-          console.log(res)
-        })
+          console.log(`sendData`, sendData)
+          http.post(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
+            message.info(`保存成功`)
+            // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
+            // 避免用户错误的使用浏览器地址栏中的 url
+            if (preState.path !== preState.queryPath) {
+              history.push(`/apiStudio?path=${preState.path}`);
+            }
+            console.log(res)
+          })
+        }
         return preState
       })
     }
