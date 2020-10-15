@@ -4,6 +4,7 @@ import utils from './utils.jsx'
 import * as antd from 'antd'
 import EditTable from './EditTable.jsx'
 import { DownOutlined } from '@ant-design/icons'
+import * as ReactRouterDOM from 'react-router-dom'
 import common from './common.jsx'
 
 const {
@@ -41,12 +42,21 @@ const {
 const { TabPane } = Tabs
 const { Option } = Select
 
-const ApiStudio = (() => {
+function ApiStudio() {
   const {
     useState,
     useEffect,
     useRef,
   } = React
+
+  const {
+    useHistory,
+    useLocation,
+  } = ReactRouterDOM
+  const reactLocation = useLocation()
+  useEffect(() => {
+    // 当 reactLocation 改变时重新渲染
+  }, [reactLocation])
 
   function Com(props) {
     const parametersListDataSource = [
@@ -342,7 +352,7 @@ const ApiStudio = (() => {
       </div>
     )
   }
-  return Com
-})()
+  return <Com />
+}
 
 export default ApiStudio
