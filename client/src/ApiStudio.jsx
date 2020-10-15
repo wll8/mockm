@@ -59,17 +59,6 @@ function ApiStudio() {
   }, [reactLocation])
 
   function Com(props) {
-    const parametersListDataSource = [
-      {
-        key: Date.now(),
-      },
-    ];
-    const responseListDataSource = [
-      {
-        key: Date.now(),
-      },
-    ];
-
     const columns = [
       {
         type: `string`,
@@ -96,7 +85,7 @@ function ApiStudio() {
         key: 'type',
         editable: true,
         ellipsis: true,
-        width: 100,
+        width: 80,
       },
       {
         type: `boolean`,
@@ -105,7 +94,7 @@ function ApiStudio() {
         key: 'required',
         editable: true,
         ellipsis: true,
-        width: 100,
+        width: 50,
       },
       {
         type: `string`,
@@ -242,6 +231,7 @@ function ApiStudio() {
             {
               methodList.map(methodItem => {
                 return (
+                  // 存在 queryPath 时需要等待请求结束后才渲染, 否则已渲染的组件拿不到更新的 state
                   (state.queryPath && state.apiOk)
                   || (Boolean(state.queryPath) === false)
                 ) && (
@@ -290,6 +280,7 @@ function ApiStudio() {
                                 }}
                                 dataSource={state.data?.[state.hand.method]?.parameters?.[state.hand.parameters]}
                                 columns={columns}
+                                scroll={{ x: 800 }}
                               />
                             </TabPane>
                           )
@@ -334,6 +325,7 @@ function ApiStudio() {
                                 }}
                                 dataSource={state.data?.[state.hand.method]?.responses?.[state.hand.responses]}
                                 columns={columns}
+                                scroll={{ x: 800 }}
                               />
                             </TabPane>
                           )
