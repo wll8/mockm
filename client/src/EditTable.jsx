@@ -369,6 +369,7 @@ function EditableTable (props) {
   return (
     <div>
       <Table
+        {...props}
         pagination={false}
         expandable={{defaultExpandAllRows: true}}
         size="small"
