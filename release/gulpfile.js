@@ -40,7 +40,12 @@ gulp.task(`pushDoc`, (cb) => { // 发布文档
 
 gulp.task(`uglify`, () => {
   // uglify-es - https://github.com/mishoo/UglifyJS/tree/harmony
-  return gulp.src([`../server/**/*.js`, '!../server/page/**', '!../server/node_modules/**'])
+  return gulp.src([
+    `../server/**/*.js`,
+    '!../server/page/**',
+    '!../server/node_modules/**',
+    '!../server/example.config.js', // 示例配置, 不进行压缩
+  ])
     .pipe(uglify())
     .pipe(gulp.dest(`../dist/package`))
 })

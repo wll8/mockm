@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.0.16",
+  "version": "1.0.18",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -34,7 +34,8 @@
   },
   "devDependencies": {},
   "pluginDependencies": {
-    "hostile": "^1.3.2",
+    "hostile": "1.3.2",
+    "request": "2.88.2",
     "get-port": "5.1.1",
     "yaml": "1.10.0",
     "ngrok": "3.2.7"

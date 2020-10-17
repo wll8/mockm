@@ -7,7 +7,7 @@
     "push:doc": "cd release && npx gulp pushDoc",
     "bt": "npm run build:client && npm run build:server && npm run test",
     "bt:server": "npm run build:server && npm run test",
-    "test": "cd dist/package && cnpm i && cd ../../ && node dist/package/run.js"
+    "test": "cd dist/package && cnpm i && cd ../../ && node dist/package/run.js config"
   },
   "devDependencies": {
     "@vuepress/plugin-back-to-top": "^1.5.4",
