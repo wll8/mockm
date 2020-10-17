@@ -906,8 +906,9 @@ function business() { // 与业务相关性较大的函数
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
           const options = toolObj.cli.getOptions(cmd)
-          const request = require('request')
-          return new Promise((resolve, reject) => {
+          return new Promise(async (resolve, reject) => {
+            await toolObj.generate.initPackge(`request`).catch(err => console.log(`err`, err))
+            const request = require('request')
             request(options, (err, curlRes = {}, body) => {
               setHeader(res, curlRes.headers) // 复制远程的 header
               allowCors({req, res}) // 设置 header 为允许跨域模式
