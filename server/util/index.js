@@ -838,15 +838,24 @@ function business() { // 与业务相关性较大的函数
   function initHandle() { // 初始化处理程序
 
     function getConfigFile() {
+      const path = require(`path`)
+      const fs = require(`fs`)
       const cliArg = toolObj.cli.parseArgv()
       const cwdConfigPath = `${process.cwd()}/mm.config.js`
+      const hasCwdConfig = toolObj.file.hasFile(cwdConfigPath)
       let res = `${__dirname}/../config.js` // 默认配置文件
-      if(cliArg.config) { // 命令行上指定的 config 文件
+      if((cliArg.config === true) && (hasCwdConfig === false)) { // 如果 config=true 并且当前目录没有配置时, 则生成示例配置并使用
+        const example = fs.readFileSync( `${__dirname}/../example.config.js`, `utf8`)
+        fs.writeFileSync(cwdConfigPath, example)
+        res = cwdConfigPath
+      } else if((cliArg.config === true) && (hasCwdConfig === true)) { // 使用生成的示例配置
+        res = cwdConfigPath
+      } else if(typeof(cliArg.config) === `string`) { // 命令行上指定的 config 文件
         res = cliArg.config
       } else if(toolObj.file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
         res = cwdConfigPath
       }
-      res = require(`path`).normalize(res)
+      res = path.normalize(res)
       return res
     }
 
@@ -897,8 +906,9 @@ function business() { // 与业务相关性较大的函数
       const run = {
         curl({req, res, cmd}) { // cmd: curl/bash
           const options = toolObj.cli.getOptions(cmd)
-          const request = require('request')
-          return new Promise((resolve, reject) => {
+          return new Promise(async (resolve, reject) => {
+            await toolObj.generate.initPackge(`request`).catch(err => console.log(`err`, err))
+            const request = require('request')
             request(options, (err, curlRes = {}, body) => {
               setHeader(res, curlRes.headers) // 复制远程的 header
               allowCors({req, res}) // 设置 header 为允许跨域模式
