@@ -891,6 +891,7 @@ function business() { // 与业务相关性较大的函数
         fs.mkdirSync(config.dataDir, {recursive: true})
       }
       fileStore(config._httpHistory)
+      fileStore(config.apiWeb)
       { // 初始化 store 中的内容
         const store = fileStore(config._store)
         const osIp = config.osIp

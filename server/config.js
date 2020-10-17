@@ -69,6 +69,7 @@ function defaultConfigFn(util) { // 默认配置
     cors: true,
     dataDir: './httpData/',
     dbJsonPath: undefined,
+    apiWeb: undefined,
     dbCover: false,
     db: {},
     route: {},
@@ -107,6 +108,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   dataDir: handlePathArg(config.dataDir),
   proxy: prepareProxy(config.proxy),
   api: isType(config.api, `object`) ? () => config.api : config.api,
+  apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
   db: isType(config.db, `object`) ? () => config.db : config.db,
   remote: config.remote === false // 每个服务的 remote 配置
     ? false
@@ -118,7 +120,6 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   _proxyTargetInfo, // 解析 proxy[`/`] 的内容
   _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
   _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
-  _apiStudio: handlePathArg(`${config.dataDir}/apiStudio.json`), // 从 web 页面创建的接口数据
 }
 
 module.exports = handleConfig
