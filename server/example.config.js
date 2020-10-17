@@ -44,7 +44,7 @@ module.exports = util => {
     openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
     cors: true, // 是否允许通过跨域
     dataDir: './httpData/', // 数据保存目录
-    dbJsonPath: undefined, // json 数据生成的保存位置, 默认为 dataDir 下的 db.json
+    dbJsonPath: './httpData/db.json', // json 数据生成的保存位置, 默认为 dataDir 下的 db.json
     dbCover: false, // 每次启动总是生成新的 db
     db () { // 供 json-server 使用的 json 数据, function || object
       const data = mockjs.mock({
@@ -63,6 +63,7 @@ module.exports = util => {
       // 参考: https://github.com/typicode/json-server#add-custom-routes
       '/db/api/*': '/$1', // /api/a => /a
     },
+    apiWeb: './apiWeb.json', // 从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权
     api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
       const { run } = util
       return { // api 拦截器

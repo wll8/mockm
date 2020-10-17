@@ -405,7 +405,7 @@ new Promise(async () => {
             },
             studio() {
               let path = req.query.path
-              const store = toolObj.file.fileStore(config._apiStudio)
+              const store = toolObj.file.fileStore(config.apiWeb)
               const sendData = store.get(path ? `paths.${req.query.path}` : `paths`)
               res.json(sendData)
             },
@@ -423,7 +423,7 @@ new Promise(async () => {
           const actionFnObj = {
             studio() {
               const body = req.body
-              const store = toolObj.file.fileStore(config._apiStudio)
+              const store = toolObj.file.fileStore(config.apiWeb)
               store.set(`paths.${body.path}`, body.data)
               res.json({msg: `ok`})
             },
