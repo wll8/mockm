@@ -11,6 +11,10 @@ const path = require(`path`)
 const { toolObj, business } = require(`./util/index.js`)
 const cli = toolObj.cli
 const cliArg = cli.parseArgv()
+if(cliArg.v) {
+  console.log(require(`${__dirname}/package.json`).version)
+  process.exit()
+}
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
 const {
