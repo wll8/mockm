@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
