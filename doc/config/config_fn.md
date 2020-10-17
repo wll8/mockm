@@ -7,7 +7,6 @@ util 目前包含以下内容:
 | mockjs        | 数据生成库                   | https://github.com/nuysoft/Mock               |
 | fetch         | 请求库                       | https://github.com/bitinn/node-fetch          |
 | axios         | 请求库                       | https://github.com/axios/axios                |
-| request       | 请求库                       | https://github.com/request/request            |
 | curlconverter | 转换 curl 命令为其他请求代码 | https://github.com/NickCarneiro/curlconverter |
 | mime          | 文档类型识别                 | https://github.com/broofa/mime                |
 | multiparty    | 上传文件解析器               | https://github.com/pillarjs/multiparty        |
