@@ -1,7 +1,6 @@
 const path = require(`path`)
 const libObj = {
   fetch: require('node-fetch'),
-  request: require('request'),
   curlconverter: require('curlconverter'),
   axios: require('axios'),
   mockjs: require('mockjs'),
