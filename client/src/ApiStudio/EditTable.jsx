@@ -1,5 +1,5 @@
 import './EditTable.scss'
-import utils from './utils.jsx'
+import utils from '../utils.jsx'
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Table,
