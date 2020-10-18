@@ -1,5 +1,8 @@
 .ApiStudioEdit {
   padding-top: 6px;
+  .ant-tabs-tab-btn>div:not(.hasValue) {
+    color: #ccc;
+  }
   pre {
     font-size: 10px;
   }
@@ -9,9 +12,6 @@
   .headerBox {
     .methodTabs>.ant-tabs-nav {
       margin-bottom: 0;
-    }
-    .apiPath {
-      // font-weight: bold;
     }
   }
 }
