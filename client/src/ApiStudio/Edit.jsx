@@ -312,11 +312,12 @@ function Edit() {
           >
             {
               methodList.map(methodItem => {
-                return (
-                  // 存在 queryPath 时需要等待请求结束后才渲染, 否则已渲染的组件拿不到更新的 state
+                // 存在 queryPath 时需要等待请求结束后才渲染, 否则 EditTable 组件拿不到更新的 state
+                const isRender = (
                   (state.queryPath && state.apiOk)
                   || (Boolean(state.queryPath) === false)
-                ) && (
+                )
+                return (
                   <TabPane
                     tab={
                       <div
@@ -328,12 +329,12 @@ function Edit() {
                     key={methodItem}
                   >
                     {/* 接口描述 */}
-                    <Input.TextArea
+                    {isRender && <Input.TextArea
                       defaultValue={state.data[state.hand.method]?.description}
                       onBlur={ev => onChange(ev, `data.${state.hand.method}.description`)}
                       autoSize={{ minRows: 2, maxRows: 6 }}
                       placeholder="接口描述, 例如对应的原型地址"
-                    />
+                    />}
                     {/* 接口入参 */}
                     <Tabs
                       activeKey={state.hand.parameters}
@@ -371,7 +372,7 @@ function Edit() {
                                 </div>
                               }
                             >
-                              <EditTable
+                              {isRender && <EditTable
                                 dataOnChange={data => {
                                   onChange(
                                     data,
@@ -381,7 +382,7 @@ function Edit() {
                                 dataSource={state.data?.[state.hand.method]?.parameters?.[state.hand.parameters]}
                                 columns={columns}
                                 scroll={{ x: 800 }}
-                              />
+                              />}
                             </TabPane>
                           )
                         })
@@ -425,7 +426,7 @@ function Edit() {
                               }
                               key={responsesItem}
                             >
-                              <EditTable
+                              {isRender && <EditTable
                                 dataOnChange={data => {
                                   onChange(
                                     data,
@@ -435,7 +436,7 @@ function Edit() {
                                 dataSource={state.data?.[state.hand.method]?.responses?.[state.hand.responses]}
                                 columns={columns}
                                 scroll={{ x: 800 }}
-                              />
+                              />}
                             </TabPane>
                           )
                         })
