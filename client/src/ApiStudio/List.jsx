@@ -58,7 +58,7 @@ const ApiList = (() => {
           const url = querystring.stringify({
             path: record.path,
             method: record.method,
-          })
+          }, { encode: false })
           return (
             <a href={`#/apiStudio/edit?${url}`}>
               {record.path}
