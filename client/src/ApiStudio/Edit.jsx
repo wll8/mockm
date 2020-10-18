@@ -1,12 +1,11 @@
-import './ApiStudio.scss'
+import './Edit.scss'
 import React from 'react'
-import utils from './utils.jsx'
+import utils from '../utils.jsx'
 import * as antd from 'antd'
 import EditTable from './EditTable.jsx'
-import List from './ApiStudio/List.jsx'
 import { DownOutlined } from '@ant-design/icons'
 import * as ReactRouterDOM from 'react-router-dom'
-import common from './common.jsx'
+import common from '../common.jsx'
 
 const {
   removeEmpty,
@@ -43,7 +42,7 @@ const {
 const { TabPane } = Tabs
 const { Option } = Select
 
-function ApiStudioEdit() {
+function Edit() {
   const {
     useState,
     useEffect,
@@ -238,7 +237,7 @@ function ApiStudioEdit() {
     }
 
     return (
-      <div className="ApiStudio">
+      <div className="ApiStudioEdit">
         <div className="headerBox">
           {/* api 路径 */}
           <Input
@@ -393,8 +392,4 @@ function ApiStudioEdit() {
   return <Com />
 }
 
-
-export default {
-  Edit: ApiStudioEdit,
-  List,
-}
+export default Edit

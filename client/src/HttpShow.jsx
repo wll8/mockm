@@ -4,7 +4,7 @@ import * as antd from 'antd'
 import en_GB from 'antd/es/locale/en_GB'
 import ApiList from './ApiList.jsx'
 import ApiDetail from './ApiDetail.jsx'
-import ApiStudio from './ApiStudio.jsx'
+import * as ApiStudio from './ApiStudio/index.jsx'
 import './HttpShow.scss'
 
 const HttpShow = (() => {
