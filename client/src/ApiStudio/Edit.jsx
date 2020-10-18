@@ -286,6 +286,7 @@ function Edit() {
           <Tabs
             activeKey={state.hand.method}
             onChange={val => onChange(val, `hand.method`)}
+            onTabClick={key => history.push(`/apiStudio/edit?path=${state.path}&method=${key}`)}
             tabBarExtraContent={
               {
                 right: (
