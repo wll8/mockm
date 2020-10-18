@@ -28,8 +28,11 @@ const HttpShow = (() => {
           <Route cache exact path="/">
             <ApiList />
           </Route>
+          <Route cache path="/apiStudio/edit">
+            <ApiStudio.Edit />
+          </Route>
           <Route cache path="/apiStudio">
-            <ApiStudio />
+            <ApiStudio.List />
           </Route>
           <Route cache path="/*">
             <ApiDetail />

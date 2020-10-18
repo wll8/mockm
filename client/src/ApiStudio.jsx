@@ -3,6 +3,7 @@ import React from 'react'
 import utils from './utils.jsx'
 import * as antd from 'antd'
 import EditTable from './EditTable.jsx'
+import List from './ApiStudio/List.jsx'
 import { DownOutlined } from '@ant-design/icons'
 import * as ReactRouterDOM from 'react-router-dom'
 import common from './common.jsx'
@@ -42,7 +43,7 @@ const {
 const { TabPane } = Tabs
 const { Option } = Select
 
-function ApiStudio() {
+function ApiStudioEdit() {
   const {
     useState,
     useEffect,
@@ -153,11 +154,12 @@ function ApiStudio() {
       }
     }
 
+    const searchParams = new URL(window.location.href.replace(`#`, ``)).searchParams
     const [state, setState] = useState({ // 默认值
-      queryPath: new URL(window.location.href.replace(`#`, ``)).searchParams.get(`path`), // url 上的 path 参数
+      queryPath: searchParams.get(`path`), // url 上的 path 参数
       apiOk: false, // api 是否请求结束
       hand: { // 标识各个 tab 所在位置
-        method: `get`, // api 方法
+        method: searchParams.get(`method`) || `get`, // api 方法
         parameters: `query`, // 参数
         responses: `200`, // 响应
       },
@@ -186,7 +188,7 @@ function ApiStudio() {
             // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
             // 避免用户错误的使用浏览器地址栏中的 url
             if (preState.path !== preState.queryPath) {
-              history.push(`/apiStudio?path=${preState.path}`);
+              history.push(`/apiStudio/edit?path=${preState.path}`);
             }
             console.log(res)
           })
@@ -391,4 +393,8 @@ function ApiStudio() {
   return <Com />
 }
 
-export default ApiStudio
+
+export default {
+  Edit: ApiStudioEdit,
+  List,
+}
