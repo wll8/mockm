@@ -168,6 +168,15 @@ function Edit() {
       },
     })
 
+    const method = state?.hand?.method
+    const userMethods = Object.keys(removeEmpty(JSON.parse(JSON.stringify(state.data))) || {})
+    const userParameters = Object.keys(removeEmpty(JSON.parse(JSON.stringify(
+      state.data?.[method]?.parameters || {}
+    ))) || {})
+    const userResponses = Object.keys(removeEmpty(JSON.parse(JSON.stringify(
+      state.data?.[method]?.responses || {}
+    ))) || {})
+
     function saveApiData() { // 保存 api 数据
       // 由于 saveApiData 可以位于 useEffect 钩子中, 得到的 state 不是最新的
       // 所以可以利用 setState 方法来获取最新的 state
@@ -196,13 +205,40 @@ function Edit() {
       })
     }
 
+    useEffect(() => { // 当 method 改变的时候, 更新 hand
+      setState(preState => {
+        const method = preState.hand.method
+        const parameters = userParameters[0] || `query`
+        const responses = userResponses[0] || `200`
+        return {...preState, hand: {
+          method,
+          parameters,
+          responses,
+        }}
+      })
+      // eslint-disable-next-line
+    }, [state.hand.method])
+
     useEffect(() => {
       const path = state.queryPath
       path && http.get(`${cfg.baseURL}/api/studio/?path=${path}`).then(res => {
-        setState(preState => ({...deepSet(preState, `data`, res)}))
-        setState(preState => ({...deepSet(preState, `path`, path)}))
+        setState(preState => {
+          const method = preState.hand?.method
+          const parameters = Object.keys(res[method]?.parameters || {})[0] || preState.hand?.parameters
+          const responses = Object.keys(res[method]?.responses || {})[0] || preState.hand?.responses
+          return {
+            ...preState,
+            data: res,
+            path,
+            hand: {
+              method,
+              parameters,
+              responses,
+            },
+          }
+        })
       }).finally(() => {
-        setState(preState => ({...deepSet(preState, `apiOk`, true)}))
+        setState(preState => ({...preState, apiOk: true}))
       })
     }, [state.queryPath])
 
@@ -280,7 +316,16 @@ function Edit() {
                   (state.queryPath && state.apiOk)
                   || (Boolean(state.queryPath) === false)
                 ) && (
-                  <TabPane tab={methodItem} key={methodItem}>
+                  <TabPane
+                    tab={
+                      <div
+                        className={userMethods.includes(methodItem) ? `hasValue` : ''}
+                      >
+                        {methodItem}
+                      </div>
+                    }
+                    key={methodItem}
+                  >
                     {/* 接口描述 */}
                     <Input.TextArea
                       defaultValue={state.data[state.hand.method]?.description}
@@ -290,7 +335,7 @@ function Edit() {
                     />
                     {/* 接口入参 */}
                     <Tabs
-                      defaultActiveKey={state.hand.parameters}
+                      activeKey={state.hand.parameters}
                       onChange={val => onChange(val, `hand.parameters`)}
                       tabBarExtraContent={
                         {
@@ -315,7 +360,16 @@ function Edit() {
                       {
                         parametersList.map(parametersItem => {
                           return (
-                            <TabPane tab={parametersItem} key={parametersItem}>
+                            <TabPane
+                              key={parametersItem}
+                              tab={
+                                <div
+                                  className={userParameters.includes(parametersItem) ? `hasValue` : ''}
+                                >
+                                  {parametersItem}
+                                </div>
+                              }
+                            >
                               <EditTable
                                 dataOnChange={data => {
                                   onChange(
@@ -334,7 +388,7 @@ function Edit() {
                     </Tabs>
                     {/* 接口出参 */}
                     <Tabs
-                      defaultActiveKey={state.hand.responses}
+                      activeKey={state.hand.responses}
                       className="responsesTabs"
                       onChange={val => onChange(val, `hand.responses`)}
                       tabBarExtraContent={
@@ -360,7 +414,16 @@ function Edit() {
                       {
                         responsesList.map(responsesItem => {
                           return (
-                            <TabPane tab={responsesItem} key={responsesItem}>
+                            <TabPane
+                              tab={
+                                <div
+                                  className={userResponses.includes(responsesItem) ? `hasValue` : ''}
+                                >
+                                  {responsesItem}
+                                </div>
+                              }
+                              key={responsesItem}
+                            >
                               <EditTable
                                 dataOnChange={data => {
                                   onChange(
