@@ -907,6 +907,7 @@ function business() { // 与业务相关性较大的函数
         res = cwdConfigPath
       }
       res = path.normalize(res)
+      cliArg.config = res
       return res
     }
 
