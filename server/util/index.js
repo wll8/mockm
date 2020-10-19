@@ -569,6 +569,28 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
+    function listToData(list){ // 把类似 schema 的列表转换为数据
+      const res = {}
+      list.forEach(item => {
+        if([`object`, `array`].includes(item.type) && Array.isArray(item.children)) {
+          switch(item.type) {
+            case `object`:
+              res[item.name] = listToData(item.children)
+              break;
+            case `array`:
+              res[item.name] = res[item.name] || []
+              res[item.name].push(listToData(item.children))
+              break;
+            default:
+              console.log(`no type`, item.type)
+          }
+        } else {
+          res[item.name] = item.example
+        }
+      })
+      return res
+    }
+
     function flatObj(value, currentKey) { // 展开对象
       let result = {};
       Object.keys(value).forEach(key => {
@@ -629,6 +651,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      listToData,
       deepMergeObject,
       flatObj,
       deepGet,
@@ -767,6 +790,34 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 }
 
 function business() { // 与业务相关性较大的函数
+  /**
+   * 通过重新保存文件的方式触发 nodemon 的文件监听, 然后让服务重启
+   */
+  function reStartServer(filePath) {
+    const fs = require(`fs`)
+    const str = fs.readFileSync(filePath, `utf8`)
+    fs.writeFileSync(filePath, str)
+  }
+
+  function apiWebHandle(apiWebPath) { // 处理 webApi 为 api
+    const webApi = require(apiWebPath).paths || {}
+    const pathList = Object.keys(webApi).map(path => {
+      return Object.keys(webApi[path]).map(method => ({
+        key: `${method} ${path}`,
+        path,
+        method,
+        ...webApi[path][method],
+      }))
+    }).flat()
+    const apiObj = pathList.reduce((acc, cur, curIndex) => {
+      return {
+        ...acc,
+        [cur.key]: toolObj.obj.listToData(cur.responses ? (cur.responses[`200`] || []) : []),
+      }
+    }, {})
+    return apiObj
+  }
+
   function customApi({api, db}) {
     /**
     * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
@@ -939,9 +990,12 @@ function business() { // 与业务相关性较大的函数
           })
         },
       }
-      const api = config.api({ // 向 config.api 暴露一些工具库
-        run,
-      })
+      const api = {
+        ...business().apiWebHandle(config.apiWeb),
+        ...config.api({ // 向 config.api 暴露一些工具库
+          run,
+        }),
+      }
       const apiRootInjection = api[`*`] || api[`/`] || function (req, res, next) {return next()} // 统一处理所有自定义的根级别拦截器
       // 移交给 apiRootInjection, 它表示所有【自定义api, config.api 和 config.db 产生的 api】前的拦截功能
       // 为什么要删掉?
@@ -1393,6 +1447,8 @@ testPort: ${store.get(`note.remote.testPort`) || ``}
   }
 
   return {
+    reStartServer,
+    apiWebHandle,
     plugin,
     initHandle,
     reqHandle,
