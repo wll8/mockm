@@ -43,7 +43,12 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
       fileArgFn = fileArg
     }
   }
-  cliArg = {...base64deCode, ...cliArg}
+  cliArg = {
+    ...base64deCode,
+    ...cliArg,
+    // 命令行参数 config = true 时, 视为使用程序预设的路径
+    config: cliArg.config === true ? base64deCode.config : (base64deCode.config || cliArg.config),
+  }
 }
 
 function defaultConfigFn(util) { // 默认配置
