@@ -799,8 +799,16 @@ function business() { // 与业务相关性较大的函数
     fs.writeFileSync(filePath, str)
   }
 
-  function apiWebHandle(apiWebPath) { // 处理 webApi 为 api
-    const webApi = require(apiWebPath).paths || {}
+  function wrapApiData({data, code}) { // 包裹 api 的返回值
+    return {
+      code,
+      success: Boolean(('' + code).match(/^[2]/)), // 如果状态码以2开头则为 true
+      data,
+    }
+  }
+
+  function apiWebHandle({config}) { // 处理 webApi 为 api
+    const webApi = require(config.apiWeb).paths || {}
     const pathList = Object.keys(webApi).map(path => {
       return Object.keys(webApi[path]).map(method => ({
         key: `${method} ${path}`,
@@ -812,7 +820,16 @@ function business() { // 与业务相关性较大的函数
     const apiObj = pathList.reduce((acc, cur, curIndex) => {
       return {
         ...acc,
-        [cur.key]: toolObj.obj.listToData(cur.responses ? (cur.responses[`200`] || []) : []),
+        [cur.key]: (req, res, next) => {
+          let data = toolObj.obj.listToData(cur.responses ? (cur.responses[`200`] || []) : [])
+          // 根据 apiWebWrap 处理数据
+          if(config.apiWebWrap === true) {
+            data = wrapApiData({data, code: 200})
+          } else if(typeof(config.apiWebWrap) === `function`) {
+            data = config.apiWebWrap({data, code: 200})
+          }
+          res.json(data)
+        },
       }
     }, {})
     return apiObj
@@ -992,7 +1009,7 @@ function business() { // 与业务相关性较大的函数
         },
       }
       const api = {
-        ...business().apiWebHandle(config.apiWeb),
+        ...business().apiWebHandle({config}),
         ...config.api({ // 向 config.api 暴露一些工具库
           run,
         }),
@@ -1013,6 +1030,7 @@ function business() { // 与业务相关性较大的函数
     }
 
     return {
+      wrapApiData,
       getConfigFile,
       init,
       getOpenApi,

@@ -9,6 +9,7 @@ const libObj = {
 }
 
 const {
+  business,
   toolObj: {
     httpClient: {
       midResJson,
@@ -29,6 +30,9 @@ const {
     },
   },
 } = require(`./util/index.js`)
+const {
+  wrapApiData,
+} = business()
 
 let cliArg = parseArgv()
 let fileArgFn = () => {}
@@ -75,20 +79,13 @@ function defaultConfigFn(util) { // 默认配置
     dataDir: './httpData/',
     dbJsonPath: undefined,
     apiWeb: undefined,
+    apiWebWrap: wrapApiData,
     dbCover: false,
     db: {},
     route: {},
     api: {},
     resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
     resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
-  }
-}
-
-function wrapApiData({data, code}) { // 包裹 api 的返回值
-  return {
-    code,
-    success: Boolean(('' + code).match(/^[2]/)), // 如果状态码以2开头则为 true
-    data,
   }
 }
 
