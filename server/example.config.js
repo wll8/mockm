@@ -64,6 +64,7 @@ module.exports = util => {
       '/db/api/*': '/$1', // /api/a => /a
     },
     apiWeb: './apiWeb.json', // 从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权
+    apiWebWrap: wrapApiData, // boolean | function({data, code}) 处理从 web 页面创建的接口数据
     api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
       const { run } = util
       return { // api 拦截器
