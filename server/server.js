@@ -29,6 +29,7 @@ new Promise(async () => {
     clientInjection,
     historyHandle,
     customApi,
+    reStartServer,
   } = business()
   const {
     allowCors,
@@ -426,6 +427,7 @@ new Promise(async () => {
               const store = toolObj.file.fileStore(config.apiWeb)
               store.set(`paths.${body.path}`, body.data)
               res.json({msg: `ok`})
+              reStartServer(config.config)
             },
           }
           if (actionFnObj[actionRaw]) {
