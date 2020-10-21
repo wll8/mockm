@@ -1,3 +1,5 @@
+import React from 'react'
+
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
 /**
@@ -14,6 +16,15 @@ function search(object, findKey, value) {
       if (temp) return [key, temp].flat();
     }
   }
+}
+
+/**
+ *
+ * @param {*} el 是包裹的元素
+ * @param {*} title 鼠标上显示的 title
+ */
+function showTitle(el, title) {
+  return title ? <span title={title}>{el}</span> : el
 }
 
 /**
@@ -280,6 +291,7 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
 }
 
 export default  {
+  showTitle,
   search,
   setListVal,
   guid,
