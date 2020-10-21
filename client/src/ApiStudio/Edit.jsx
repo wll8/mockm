@@ -3,6 +3,7 @@ import React from 'react'
 import utils from '../utils.jsx'
 import * as antd from 'antd'
 import EditTable from './EditTable.jsx'
+import ExampleCom from './ExampleCom.jsx'
 import { DownOutlined } from '@ant-design/icons'
 import * as ReactRouterDOM from 'react-router-dom'
 import common from '../common.jsx'
@@ -20,6 +21,9 @@ const {
 } = common
 
 const {
+  Switch,
+  Radio,
+  Drawer,
   Menu,
   Dropdown,
   Card,
@@ -155,6 +159,8 @@ function Edit() {
 
     const searchParams = new URL(window.location.href.replace(`#`, ``)).searchParams
     const [state, setState] = useState({ // 默认值
+      showDrawer: true,
+      exampleCom: {}, // ExampleCom 组件返回的值
       queryPath: searchParams.get(`path`), // url 上的 path 参数
       apiOk: false, // api 是否请求结束
       hand: { // 标识各个 tab 所在位置
@@ -191,8 +197,8 @@ function Edit() {
             data: preState.data,
           }
           console.log(`sendData`, sendData)
-          http.post(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
-            message.info(`保存成功`)
+          http.patch(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
+            message.info(`上传成功`)
             // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
             // 避免用户错误的使用浏览器地址栏中的 url
             if (preState.path !== preState.queryPath) {
@@ -221,14 +227,18 @@ function Edit() {
 
     useEffect(() => {
       const path = state.queryPath
-      path && http.get(`${cfg.baseURL}/api/studio/?path=${path}`).then(res => {
+      path && http.get(`${cfg.baseURL}/api/studio/?path=${path}`).then(data => {
+        if(Boolean(data) === false) {
+          setState(preState => ({ ...preState, path}))
+          return false
+        }
         setState(preState => {
           const method = preState.hand?.method
-          const parameters = Object.keys(res[method]?.parameters || {})[0] || preState.hand?.parameters
-          const responses = Object.keys(res[method]?.responses || {})[0] || preState.hand?.responses
+          const parameters = Object.keys(data[method]?.parameters || {})[0] || preState.hand?.parameters
+          const responses = Object.keys(data[method]?.responses || {})[0] || preState.hand?.responses
           return {
             ...preState,
-            data: res,
+            data,
             path,
             hand: {
               method,
@@ -272,8 +282,31 @@ function Edit() {
       }
     }
 
+    function setDrawer(show) { // 设置 Drawer 的隐藏状态
+      setState(preState => ({...preState, showDrawer: show}))
+    }
+
+    function onChangeExampleCom(state) {
+      setState(preState => ({...preState, exampleCom: state}))
+    }
+
     return (
       <div className="ApiStudioEdit">
+        {
+          state.showDrawer && <Drawer
+            className="drawer"
+            width="none"
+            onClose={() => setDrawer(false)}
+            visible={state.showDrawer}
+          >
+            <ExampleCom
+              path={state.path}
+              onChange={onChangeExampleCom}
+              setPath={`${state.path}.${state.hand.method}.responses.${state.hand.responses}`}
+              list={state.data[state.hand.method].responses[state.hand.responses]}
+            />
+          </Drawer>
+        }
         <div className="headerBox">
           {/* api 路径 */}
           <Input
@@ -303,7 +336,7 @@ function Edit() {
                     trigger={['click']}
                   >
                     <span onClick={e => e.preventDefault()}>
-                      operation <DownOutlined />
+                      action <DownOutlined />
                     </span>
                   </Dropdown>
                 ),
@@ -352,7 +385,7 @@ function Edit() {
                               trigger={['click']}
                             >
                               <span onClick={e => e.preventDefault()}>
-                                operation <DownOutlined />
+                                action <DownOutlined />
                               </span>
                             </Dropdown>
                           ),
@@ -399,14 +432,14 @@ function Edit() {
                             <Dropdown
                               overlay={(
                                 <Menu>
-                                  <Menu.Item>example</Menu.Item>
+                                  <Menu.Item onClick={() => setDrawer(true)}>example</Menu.Item>
                                   <Menu.Item>header</Menu.Item>
                                 </Menu>
                               )}
                               trigger={['click']}
                             >
                               <span onClick={e => e.preventDefault()}>
-                                operation <DownOutlined />
+                                action <DownOutlined />
                               </span>
                             </Dropdown>
                           ),
