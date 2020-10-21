@@ -419,13 +419,14 @@ new Promise(async () => {
           }
         })
 
-        serverTest.post(`/api/:actionRaw/`, (req, res, next) => {
+        serverTest.patch(`/api/:actionRaw/`, (req, res, next) => {
           const { actionRaw } = req.params
           const actionFnObj = {
             studio() {
-              const body = req.body
+              const {setPath, data} = req.body
               const store = toolObj.file.fileStore(config.apiWeb)
-              store.set(`paths.${body.path}`, body.data)
+              const oldVal = store.get(setPath)
+              store.set(setPath, {...oldVal, ...data})
               res.json({msg: `ok`})
               reStartServer(config.config)
             },

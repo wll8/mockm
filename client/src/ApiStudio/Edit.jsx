@@ -163,8 +163,7 @@ function Edit() {
 
     const searchParams = new URL(window.location.href.replace(`#`, ``)).searchParams
     const [state, setState] = useState({ // 默认值
-      showDrawer: true,
-      exampleCom: {}, // ExampleCom 组件返回的值
+      showDrawer: `ExampleCom`,
       queryPath: searchParams.get(`path`), // url 上的 path 参数
       apiOk: false, // api 是否请求结束
       hand: { // 标识各个 tab 所在位置
@@ -197,7 +196,7 @@ function Edit() {
           setTimeout(() => message.warn(`接口路径格式错误`), 0)
         } else {
           const sendData = {
-            path: preState.path,
+            setPath: `paths.${preState.path}`,
             data: preState.data,
           }
           console.log(`sendData`, sendData)
@@ -266,6 +265,10 @@ function Edit() {
         focus && focus.blur()
         setTimeout(() => saveApiData(), 0)
       })
+      hotKey.add(`ctrl+e`, ev => {
+        ev.preventDefault()
+        setState(preState => ({...preState, showDrawer: `ExampleCom`}))
+      })
       hotKey.setup({
         metaToCtrl: true,
       })
@@ -290,8 +293,14 @@ function Edit() {
       setState(preState => ({...preState, showDrawer: show}))
     }
 
-    function onChangeExampleCom(state) {
-      setState(preState => ({...preState, exampleCom: state}))
+    function onChangeExampleCom(data) {
+      setState(preState => {
+        const setPath = `data.${preState.hand.method}.responses.${preState.hand.responses}.example`
+        const oldValue = deepGet(preState, setPath)
+        const res = {...deepSet(preState, setPath, {...oldValue, ...data})}
+        setTimeout(() => saveApiData(), 0)
+        return res
+      })
     }
 
     return (
@@ -300,15 +309,14 @@ function Edit() {
           state.showDrawer && <Drawer
             className="drawer"
             width="none"
-            onClose={() => setDrawer(false)}
+            onClose={() => setDrawer(``)}
             visible={state.showDrawer}
           >
-            <ExampleCom
-              path={state.path}
+            {state.showDrawer === `ExampleCom` && <ExampleCom
               onChange={onChangeExampleCom}
-              setPath={`${state.path}.${state.hand.method}.responses.${state.hand.responses}.table`}
-              list={state.data[state.hand.method].responses[state.hand.responses].table}
-            />
+              table={state.data[state.hand.method].responses[state.hand.responses].table}
+              example={state.data[state.hand.method].responses[state.hand.responses].example}
+            />}
           </Drawer>
         }
         <div className="headerBox">
@@ -436,7 +444,7 @@ function Edit() {
                             <Dropdown
                               overlay={(
                                 <Menu>
-                                  <Menu.Item onClick={() => setDrawer(true)}>example</Menu.Item>
+                                  <Menu.Item onClick={() => setDrawer(`ExampleCom`)}>example</Menu.Item>
                                   <Menu.Item>header</Menu.Item>
                                 </Menu>
                               )}

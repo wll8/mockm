@@ -821,7 +821,19 @@ function business() { // 与业务相关性较大的函数
       return {
         ...acc,
         [cur.key]: (req, res, next) => {
-          let data = toolObj.obj.listToData(cur.responses ? (cur.responses[`200`] || []) : [])
+          let data
+          try {
+            const example = cur.responses[`200`].example
+            if(example.templateOrResult === `templateResult`) { // 直接使用固定的值
+              data = example[example.templateOrResult]
+            } else if (example.templateOrResult === `templateRaw`) { // 使用模板从 mockjs 生成
+              const mockjs = require('mockjs')
+              data = mockjs.mock(example[example.templateOrResult]).data
+            }
+          } catch (error) { // 如果转换错误, 则使用
+            // console.log(`error`, error)
+            data = toolObj.obj.listToData(cur.responses ? (cur.responses[`200`].table || []) : [])
+          }
           // 根据 apiWebWrap 处理数据
           if(config.apiWebWrap === true) {
             data = wrapApiData({data, code: 200})
@@ -1467,6 +1479,7 @@ testPort: ${store.get(`note.remote.testPort`) || ``}
 
   return {
     reStartServer,
+    wrapApiData,
     apiWebHandle,
     plugin,
     initHandle,
