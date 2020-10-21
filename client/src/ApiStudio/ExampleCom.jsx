@@ -19,6 +19,7 @@ const {
 } = common
 
 const {
+  Checkbox,
   message,
   Alert,
   Button,
@@ -40,15 +41,30 @@ function ExampleCom(props) {
     useRef,
   } = React
   const [state, setState] = useState({
-    type: `object`, // 根结点数据类型
-    rule: ``, // 根结点数据生成规则
+    // autoUploadTemplateRaw: true, // 自动更新模板
+    type: `object`, // 根节点数据类型
+    rule: ``, // 根节点数据生成规则
     templateRaw: ``, // 模板
     templateResult: ``, // string 生成的结果
-    response: `template`, // 要使用的响应 template|value
-    headers: {
+    templateOrResult: `templateRaw`, // 要使用的响应 templateRaw|templateResult
+    headers: { // 响应头
       "content-type": `application/json`,
-    }, // 响应头
+    },
   })
+
+  useEffect(() => {
+    const example = props.example || {}
+    const templateRaw = JSON.stringify(example.templateRaw, null, 2)
+    const templateResult = JSON.stringify(example.templateResult, null, 2)
+    setState(preState => ({
+      ...preState,
+      ...props.example,
+      templateRaw,
+      templateRawOld: templateRaw,
+      templateResult,
+      templateResultOld: templateResult,
+    }))
+  }, [props.example])
 
   function onChange(ev, stateKey) {
     if(ev === null) {
@@ -58,7 +74,10 @@ function ExampleCom(props) {
     if(typeof(ev.persist) === `function`) { // 绑定 event 形式的 value
       ev.persist()
       value = ev.target.value
+    } else if(ev.target && ev.target.checked !== undefined) {
+      value = ev.target.checked
     }
+    console.log(`valuevaluevalue`, value)
     const oldValue = deepGet(state, stateKey)
     if(JSON.stringify(oldValue) !== JSON.stringify(value)) {
       setState(preState => ({...deepSet(preState, stateKey, value)}))
@@ -66,12 +85,7 @@ function ExampleCom(props) {
   }
 
   useEffect(() => {
-    props.onChange(state)
-    // eslint-disable-next-line
-  }, [state])
-
-  useEffect(() => {
-    let list = removeEmpty(JSON.parse(JSON.stringify(props.list))) || []
+    let list = removeEmpty(JSON.parse(JSON.stringify(props.table))) || []
     list = list.map(item => { // 转换字符串为对应的 type
       let example = item.example || ``
       if(example.match(/^\/.*\/$/)) { // /*/ 形式的值视为正则
@@ -109,22 +123,19 @@ function ExampleCom(props) {
       const templateRaw = {
         [`data${state.rule ? `|${state.rule}` : ''}`]: {object: data, array: [data]}[state.type]
       }
-      const templateResult = JSON.stringify(window.Mock.mock(templateRaw).data, null, 2)
       return {
         ...preState,
-        templateResult,
         templateRaw: JSON.stringify(templateRaw, null, 2),
       }
     })
-  }, [props.list, state.rule, state.type])
+  }, [props.table, state.rule, state.type])
 
-  useEffect(() => {
+  function templateToData() {
     setState(preState => {
-      console.log(`state.templateRaw`, state.templateRaw)
       let templateResult = ``
       try {
         templateResult = JSON.stringify(window.Mock.mock(
-          JSON.parse(state.templateRaw)
+          JSON.parse(state.templateRaw || `{}`)
         ).data, null, 2)
       } catch (error) {
         console.log(`error`, error)
@@ -134,23 +145,22 @@ function ExampleCom(props) {
         templateResult,
       }
     })
-  }, [state.templateRaw])
-
-  function sendExampleComData(data, type) {
-    http.patch(`${cfg.baseURL}/api/studio/`, {
-      path: props.path,
-      setPath: `response.example`,
-      data: {
-        ...state,
-        templateResult: type !== `templateResult` ? undefined : data,
-        templateRaw: type !== `templateRaw` ? undefined : data
-      },
-    }).then(res => {
-      message.info(`上传成功`)
-      console.log(res)
-    })
   }
 
+  function sendExampleComData(data) {
+    const sendData = {
+      ...state,
+      ...{
+        templateRaw: data,
+        templateResult: data,
+      },
+      templateRawOld: undefined,
+      templateResultOld: undefined,
+    }
+    // 删除用户未上传的内容
+    delete sendData[{templateRaw: `templateResult`, templateResult: `templateRaw`}[state.templateOrResult]]
+    props.onChange(sendData)
+  }
 
   return (
     <div className="ExampleCom">
@@ -162,34 +172,54 @@ function ExampleCom(props) {
           </Select>
         }
         addonAfter={
-          <Select onChange={ev => onChange(ev, `response`)} value={state.response}>
-            <Option value="template">{showTitle(`template`, `使用模板生成数据`)}</Option>
-            <Option value="value">{showTitle(`value`, `使用固定的值`)}</Option>
+          <Select onChange={ev => onChange(ev, `templateOrResult`)} value={state.templateOrResult}>
+            <Option value="templateRaw">{showTitle(`template`, `使用模板生成数据`)}</Option>
+            <Option value="templateResult">{showTitle(`value`, `使用固定的值`)}</Option>
           </Select>
         }
-        defaultValue={state.rule}
-        onBlur={ev => onChange(ev, `rule`)}
-        placeholder="跟结点生成规则"
+        value={state.rule}
+        onChange={ev => onChange(ev, `rule`)}
+        placeholder="跟节点生成规则"
       />
       <p />
       <div className="btnBox">
-        <Button size="small">{showTitle(`重置`, `使用服务器配置重置`)}</Button>
+        <Button
+          size="small"
+          disabled={state.templateOrResult === `templateRaw`}
+          onClick={templateToData}
+        >
+          {showTitle(`生成`, `使用当前模板生成数据`)}
+        </Button>
+        <Button
+          size="small"
+          onClick={() => {
+            setState(preState => ({
+              ...preState,
+              ...{
+                templateRaw: {templateRaw: preState.templateRawOld,},
+                templateResult: {templateResult: preState.templateResultOld,},
+              }[preState.templateOrResult],
+            }))
+          }}
+        >
+          {showTitle(`重置`, `使用服务器配置重置`)}
+        </Button>
         <Button
           onClick={() => {
-            if(state.response === `value`) {
+            if(state.templateOrResult === `templateResult`) { // 如果以 result 为值, 则先根据 content-type 校验
               const isToJson = state.headers[`content-type`].match(new RegExp(`^application/json`))
               if(isToJson) {
                 try {
                   const templateResult = JSON.parse(state.templateResult)
-                  sendExampleComData(templateResult, `templateResult`)
+                  sendExampleComData(templateResult)
                 } catch (error) {
                   message.error(`error 错误的 json 内容`)
                 }
               }
-            } else if(state.response === `template`) {
+            } else if(state.templateOrResult === `templateRaw`) { // 如果以模板为值, 先校验模板
               try {
                 const templateRaw = JSON.parse(state.templateRaw)
-                sendExampleComData(templateRaw, `templateRaw`)
+                sendExampleComData(templateRaw)
               } catch (error) {
                 message.error(`error 错误的 template 内容`)
               }
@@ -199,15 +229,21 @@ function ExampleCom(props) {
         >
           {showTitle(`上传`, `上传当前配置到服务器`)}
         </Button>
+        {/* <Checkbox
+          checked={state.autoUploadTemplateRaw}
+          onChange={val => onChange(val, `autoUploadTemplateRaw`)}
+        >
+          自动更新模板
+        </Checkbox> */}
       </div>
       <p />
       <div className="infoBox">
-        {state.response === `value` && <Input.TextArea
+        {state.templateOrResult === `templateResult` && <Input.TextArea
           value={state.templateResult}
           onChange={val => onChange(val, `templateResult`)}
           autoSize
         />}
-        {state.response === `template` && <Input.TextArea
+        {state.templateOrResult === `templateRaw` && <Input.TextArea
           value={state.templateRaw}
           onChange={val => onChange(val, `templateRaw`)}
           autoSize
