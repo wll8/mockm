@@ -149,10 +149,14 @@ function Edit() {
       return { // 某个 API 的请求方法, 操作对象
         description: ``, // 对此操作行为的详细解释
         parameters: {
-          query: [{}],
+          query: {
+            table: [{}],
+          },
         },
         responses: {
-          200: [{}],
+          200: {
+            table: [{}],
+          },
         },
       }
     }
@@ -302,8 +306,8 @@ function Edit() {
             <ExampleCom
               path={state.path}
               onChange={onChangeExampleCom}
-              setPath={`${state.path}.${state.hand.method}.responses.${state.hand.responses}`}
-              list={state.data[state.hand.method].responses[state.hand.responses]}
+              setPath={`${state.path}.${state.hand.method}.responses.${state.hand.responses}.table`}
+              list={state.data[state.hand.method].responses[state.hand.responses].table}
             />
           </Drawer>
         }
@@ -409,10 +413,10 @@ function Edit() {
                                 dataOnChange={data => {
                                   onChange(
                                     data,
-                                    `data.${state.hand.method}.parameters.${state.hand.parameters}`
+                                    `data.${state.hand.method}.parameters.${state.hand.parameters}.table`
                                   )
                                 }}
-                                dataSource={state.data?.[state.hand.method]?.parameters?.[state.hand.parameters]}
+                                dataSource={state.data?.[state.hand.method]?.parameters?.[state.hand.parameters]?.table}
                                 columns={columns}
                                 scroll={{ x: 800 }}
                               />}
@@ -463,10 +467,10 @@ function Edit() {
                                 dataOnChange={data => {
                                   onChange(
                                     data,
-                                    `data.${state.hand.method}.responses.${state.hand.responses}`
+                                    `data.${state.hand.method}.responses.${state.hand.responses}.table`
                                   )
                                 }}
-                                dataSource={state.data?.[state.hand.method]?.responses?.[state.hand.responses]}
+                                dataSource={state.data?.[state.hand.method]?.responses?.[state.hand.responses]?.table}
                                 columns={columns}
                                 scroll={{ x: 800 }}
                               />}
