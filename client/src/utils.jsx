@@ -34,7 +34,7 @@ function objOrLine(arg) {
     }, {})
   } else if(typeof(arg) === `object`) {
     const obj = arg
-    res = Object.keys(obj).reduce((acc, cur) => `${acc}\n\n${cur}: ${obj[cur]}`, `` ).trim()
+    res = Object.keys(obj).reduce((acc, cur) => `${acc}\n${cur}: ${obj[cur]}`, `` ).trim()
   }
   return res
 }
