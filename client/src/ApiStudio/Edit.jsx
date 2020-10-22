@@ -9,6 +9,7 @@ import * as ReactRouterDOM from 'react-router-dom'
 import common from '../common.jsx'
 
 const {
+  listToData,
   removeEmpty,
   getSelectionText,
   deepGet,
@@ -189,27 +190,42 @@ function Edit() {
     function saveApiData() { // 保存 api 数据
       // 由于 saveApiData 可以位于 useEffect 钩子中, 得到的 state 不是最新的
       // 所以可以利用 setState 方法来获取最新的 state
+
       setState(preState => {
-        if(preState.path.match(new RegExp(`^/.*`)) === null) {
-          // 把 message.warn 写在setTimeout 中, 避免 react 控制台报错:
-          // Warning: Render methods should be a pure function of props and state; triggering nested component updates from render is not allowed. If necessary, trigger nested updates in componentDidUpdate.
-          setTimeout(() => message.warn(`接口路径格式错误`), 0)
-        } else {
-          const sendData = {
-            setPath: `paths.${preState.path}`,
-            data: preState.data,
-          }
-          console.log(`sendData`, sendData)
-          http.patch(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
-            message.info(`上传成功`)
-            // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
-            // 避免用户错误的使用浏览器地址栏中的 url
-            if (preState.path !== preState.queryPath) {
-              history.push(`/apiStudio/edit?path=${preState.path}`);
+        const {rule, type, autoUploadTemplateRaw} = preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.example || {}
+        const templateRawTable = listToData(
+          removeEmpty(JSON.parse(JSON.stringify(preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.table || `{}`))),
+          {
+            rule,
+            type,
+          },
+        )
+        onChangeExampleCom({
+          templateRawTable,
+          ...(autoUploadTemplateRaw ? {templateRaw: templateRawTable} : {}),
+        }, preState)
+        setTimeout(() => {
+          if(preState.path.match(new RegExp(`^/.*`)) === null) {
+            // 把 message.warn 写在setTimeout 中, 避免 react 控制台报错:
+            // Warning: Render methods should be a pure function of props and state; triggering nested component updates from render is not allowed. If necessary, trigger nested updates in componentDidUpdate.
+            setTimeout(() => message.warn(`接口路径格式错误`), 0)
+          } else {
+            const sendData = {
+              setPath: `paths.${preState.path}`,
+              data: preState.data,
             }
-            console.log(res)
-          })
-        }
+            console.log(`sendData`, sendData.data.get.responses[200].example)
+            http.patch(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
+              message.info(`上传成功`)
+              // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
+              // 避免用户错误的使用浏览器地址栏中的 url
+              if (preState.path !== preState.queryPath) {
+                history.push(`/apiStudio/edit?path=${preState.path}`);
+              }
+              console.log(res)
+            })
+          }
+        }, 0);
         return preState
       })
     }
@@ -293,14 +309,15 @@ function Edit() {
       setState(preState => ({...preState, showDrawer: show}))
     }
 
-    function onChangeExampleCom(data) {
-      setState(preState => {
+    function onChangeExampleCom(data, myPreState) {
+      const fn = preState => {
         const setPath = `data.${preState.hand.method}.responses.${preState.hand.responses}.example`
         const oldValue = deepGet(preState, setPath)
         const res = {...deepSet(preState, setPath, {...oldValue, ...data})}
-        setTimeout(() => saveApiData(), 0)
+        Boolean(myPreState) === false && setTimeout(() => saveApiData(), 0)
         return res
-      })
+      }
+      myPreState ? fn(myPreState) : setState(fn)
     }
 
     return (
@@ -313,7 +330,7 @@ function Edit() {
             visible={state.showDrawer}
           >
             {state.showDrawer === `ExampleCom` && <ExampleCom
-              onChange={onChangeExampleCom}
+              upLoad={onChangeExampleCom}
               table={state.data[state.hand.method].responses[state.hand.responses].table}
               example={state.data[state.hand.method].responses[state.hand.responses].example}
             />}
