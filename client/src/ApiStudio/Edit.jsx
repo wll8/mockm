@@ -192,8 +192,8 @@ function Edit() {
       // 所以可以利用 setState 方法来获取最新的 state
 
       setState(preState => {
-        const {rule, type, autoUploadTemplateRaw} = preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.example || {}
-        const templateRawTable = listToData(
+        const {rule, type} = preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.example || {}
+        const templateRaw = listToData(
           removeEmpty(JSON.parse(JSON.stringify(preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.table || `{}`))),
           {
             rule,
@@ -201,8 +201,7 @@ function Edit() {
           },
         )
         onChangeExampleCom({
-          templateRawTable,
-          ...(autoUploadTemplateRaw ? {templateRaw: templateRawTable} : {}),
+          templateRaw,
         }, preState)
         setTimeout(() => {
           if(preState.path.match(new RegExp(`^/.*`)) === null) {
