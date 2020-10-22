@@ -19,6 +19,27 @@ function search(object, findKey, value) {
 }
 
 /**
+ * 对象和行形式字符字符串互相转换
+ * @param {*} arg 对象或字符串
+ */
+function objOrLine(arg) {
+  let res
+  if(typeof(arg) === `string`) {
+    const str = arg
+    res = str.replace(/[\r\n]/g, `\n`).split(/\n/).reduce((acc, cur) => {
+      let [, key = ``, val = ``] = cur.match(/(.*):(.*)/) || []
+      key = key.trim()
+      val = val.trim()
+      return {...acc, ...(key ? {[key]: val} : {} )}
+    }, {})
+  } else if(typeof(arg) === `object`) {
+    const obj = arg
+    res = Object.keys(obj).reduce((acc, cur) => `${acc}\n\n${cur}: ${obj[cur]}`, `` ).trim()
+  }
+  return res
+}
+
+/**
  *
  * @param {*} el 是包裹的元素
  * @param {*} title 鼠标上显示的 title
@@ -290,7 +311,43 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
   return object
 }
 
+
+/**
+ * 把类似 schema 的列表转换为数据
+ * @param {*} list
+ */
+function listToData(list, options = {}){
+  let res = {}
+  if(Array.isArray(list) === true) {
+    list.forEach(item => {
+      if([`object`, `array`].includes(item.type) && Array.isArray(item.children)) {
+        switch(item.type) {
+          case `object`:
+            res[item.name] = listToData(item.children)
+            break;
+          case `array`:
+            res[item.name] = res[item.name] || []
+            res[item.name].push(listToData(item.children))
+            break;
+          default:
+            console.log(`no type`, item.type)
+        }
+      } else {
+        res[item.name] = item.example
+      }
+    })
+  } else {
+    res = list
+  }
+  res = {
+    [`data${options.rule ? `|${options.rule}` : ''}`]: {object: res, array: [res]}[options.type]
+  }
+  return res
+}
+
 export default  {
+  listToData,
+  objOrLine,
   showTitle,
   search,
   setListVal,
