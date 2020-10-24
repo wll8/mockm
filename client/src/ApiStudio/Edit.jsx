@@ -192,16 +192,27 @@ function Edit() {
       // 所以可以利用 setState 方法来获取最新的 state
 
       setState(preState => {
-        const {rule, type} = preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.example || {}
+        const responses = preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses] || {}
+        const {
+          rule = ``,
+          type = `object`,
+          templateOrResult = `templateRaw`,
+        } = responses.example || {}
         const templateRaw = listToData(
-          removeEmpty(JSON.parse(JSON.stringify(preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses]?.table || `{}`))),
+          removeEmpty(JSON.parse(
+            JSON.stringify(responses.table)
+            || `{}`
+          )) || [],
           {
             rule,
             type,
           },
         )
         onChangeExampleCom({
+          rule,
+          type,
           templateRaw,
+          templateOrResult,
         }, preState)
         setTimeout(() => {
           if(preState.path.match(new RegExp(`^/.*`)) === null) {
@@ -213,7 +224,7 @@ function Edit() {
               setPath: `paths.${preState.path}`,
               data: preState.data,
             }
-            console.log(`sendData`, sendData.data.get.responses[200].example)
+            console.log(`sendData`, sendData.data)
             http.patch(`${cfg.baseURL}/api/studio/`, removeEmpty(JSON.parse(JSON.stringify(sendData)))).then(res => {
               message.info(`上传成功`)
               // 如果当前页面的 path 与 query 参数中的 path 不相同时, 更改 query 上的 path
@@ -308,7 +319,7 @@ function Edit() {
       setState(preState => ({...preState, showDrawer: show}))
     }
 
-    function onChangeExampleCom(data, myPreState) {
+    function onChangeExampleCom(data, myPreState) { // 当 ExampleCom 中的值改变时, 把值传入到 Edit
       const fn = preState => {
         const setPath = `data.${preState.hand.method}.responses.${preState.hand.responses}.example`
         const oldValue = deepGet(preState, setPath)
