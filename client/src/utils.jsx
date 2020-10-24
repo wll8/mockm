@@ -317,6 +317,27 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
  * @param {*} list
  */
 function listToData(list, options = {}){
+  function listHandle(list) { // 分析并处理数据类型, 例如把是数字的转为数字
+    const res = list.map(item => { // 转换字符串为对应的 type
+      let example = item.example || ``
+      // oops! 很遗憾, JSON.stringify 会转换正则为 {}
+      // if(example.match(/^\/.*\/$/)) { // /*/ 形式的值视为正则
+      //   // eslint-disable-next-line
+      //   example = eval(example)
+      // }
+      if(example.includes(`@`) === false && item.type === `number`) {
+        example = Number(example)
+      } else if(example.includes(`@`) === false && item.type === `boolean`) {
+        example = {0: false, false: false, 1: true, true: true}[example] || true
+      }
+      return {
+        ...item,
+        example,
+      }
+    })
+    return res
+  }
+  list = listHandle(list)
   function listToDataRef (list) {
     let res = {}
     list.forEach(item => {

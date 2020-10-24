@@ -108,19 +108,7 @@ function ExampleCom(props) {
     setState(preState => {
       let res
       let list = removeEmpty(JSON.parse(JSON.stringify(props.table))) || []
-      list = list.map(item => { // 转换字符串为对应的 type
-        let example = item.example || ``
-        if(example.match(/^\/.*\/$/)) { // /*/ 形式的值视为正则
-          // eslint-disable-next-line
-          example = eval(example)
-        }
-        return {
-          ...item,
-          example: item.type === `number` ? Number(example) : example,
-        }
-      })
-      res = list
-      res = listToData(res, {rule: state.rule, type: state.type})
+      res = listToData(list, {rule: state.rule, type: state.type})
       const templateRaw = res
       return {
         ...preState,
