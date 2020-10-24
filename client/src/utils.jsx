@@ -317,17 +317,17 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
  * @param {*} list
  */
 function listToData(list, options = {}){
-  let res = {}
-  if(Array.isArray(list) === true) {
+  function listToDataRef (list) {
+    let res = {}
     list.forEach(item => {
       if([`object`, `array`].includes(item.type) && Array.isArray(item.children)) {
         switch(item.type) {
           case `object`:
-            res[item.name] = listToData(item.children)
+            res[item.name] = listToDataRef(item.children)
             break;
           case `array`:
             res[item.name] = res[item.name] || []
-            res[item.name].push(listToData(item.children))
+            res[item.name].push(listToDataRef(item.children))
             break;
           default:
             console.log(`no type`, item.type)
@@ -336,9 +336,9 @@ function listToData(list, options = {}){
         res[item.name] = item.example
       }
     })
-  } else {
-    res = list
+    return res
   }
+  let res = listToDataRef(list)
   res = {
     [`data${options.rule ? `|${options.rule}` : ''}`]: {object: res, array: [res]}[options.type]
   }

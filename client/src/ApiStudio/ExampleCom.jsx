@@ -46,6 +46,14 @@ function ExampleCom(props) {
     useEffect,
     useRef,
   } = React
+  function usePrevious(value) { // 获取旧的 state
+    const ref = useRef()
+    useEffect(() => {
+      ref.current = value
+    })
+    return ref.current
+  }
+  const initStateData = initState()
   const [state, setState] = useState({
     type: `object`, // 根节点数据类型
     rule: ``, // 根节点数据生成规则
@@ -53,9 +61,10 @@ function ExampleCom(props) {
     templateResult: ``, // string 生成的结果
     templateOrResult: `templateRaw`, // 要使用的响应 templateRaw|templateResult
     headers: ``, // 响应头
+    ...initStateData,
   })
 
-  function exampleReSet() {
+  function initState () {
     const example = props.example || {}
     const headers = objOrLine(example.headers || { // 响应头
       "content-type": `application/json`,
@@ -64,20 +73,17 @@ function ExampleCom(props) {
     const templateResult = typeof(example.templateResult) === `object`
       ? JSON.stringify(example.templateResult, null, 2)
       : example.templateResult || `{}`
-    setState(preState => ({
-      ...preState,
+    return {
       ...props.example,
       headers,
       templateRaw,
       templateResult,
-    }))
+    }
   }
 
-  useEffect(() => {
-    [1, 2, 3].map(i => setTimeout(exampleReSet, i)) // hack: 设置初始键, 太南了
-    // eslint-disable-next-line
-  }, [props.example])
-
+  function exampleReSet() {
+    setState(preState => ({...preState, ...initState()}))
+  }
   useEffect(templateToData, [state.templateRaw])
 
   function onChange(ev, stateKey) {
@@ -123,8 +129,12 @@ function ExampleCom(props) {
     })
   }, [props.table, state.rule, state.type])
 
+  const prevTemplateRaw = usePrevious(state.templateRaw)
   function templateToData() {
     setState(preState => {
+      if( prevTemplateRaw === undefined ) { // 第一次加载时不重新生成数据, 这是为了回显后台回来的数据
+        return preState
+      }
       let templateResult = ``
       try {
         templateResult = JSON.stringify(window.Mock.mock(
