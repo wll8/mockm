@@ -319,6 +319,7 @@ function Edit() {
       myPreState ? fn(myPreState) : setState(fn)
     }
 
+    const {table = [], example = {}} = state.data[state.hand.method].responses[state.hand.responses]
     return (
       <div className="ApiStudioEdit">
         {
@@ -328,10 +329,10 @@ function Edit() {
             onClose={() => setDrawer(``)}
             visible={state.showDrawer}
           >
-            {state.showDrawer === `ExampleCom` && <ExampleCom
+            {state.showDrawer === `ExampleCom` && example && table && <ExampleCom
               upLoad={onChangeExampleCom}
-              table={state.data[state.hand.method].responses[state.hand.responses].table}
-              example={state.data[state.hand.method].responses[state.hand.responses].example}
+              table={table}
+              example={example}
             />}
           </Drawer>
         }
