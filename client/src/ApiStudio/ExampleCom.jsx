@@ -51,18 +51,18 @@ function ExampleCom(props) {
     templateRaw: ``, // 模板
     templateResult: ``, // string 生成的结果
     templateOrResult: `templateRaw`, // 要使用的响应 templateRaw|templateResult
-    headers: { // 响应头
-      "content-type": `application/json`,
-    },
+    headers: ``, // 响应头
   })
 
   function exampleReSet() {
     const example = props.example || {}
-    const headers = objOrLine(example.headers)
-    const templateRaw = JSON.stringify(example.templateRaw, null, 2)
+    const headers = objOrLine(example.headers || { // 响应头
+      "content-type": `application/json`,
+    })
+    const templateRaw = JSON.stringify(example.templateRaw || {data: {}}, null, 2)
     const templateResult = typeof(example.templateResult) === `object`
       ? JSON.stringify(example.templateResult, null, 2)
-      : example.templateResult
+      : example.templateResult || `{}`
     setState(preState => ({
       ...preState,
       ...props.example,
