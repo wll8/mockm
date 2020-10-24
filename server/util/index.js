@@ -569,28 +569,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
-    function listToData(list){ // 把类似 schema 的列表转换为数据
-      const res = {}
-      list.forEach(item => {
-        if([`object`, `array`].includes(item.type) && Array.isArray(item.children)) {
-          switch(item.type) {
-            case `object`:
-              res[item.name] = listToData(item.children)
-              break;
-            case `array`:
-              res[item.name] = res[item.name] || []
-              res[item.name].push(listToData(item.children))
-              break;
-            default:
-              console.log(`no type`, item.type)
-          }
-        } else {
-          res[item.name] = item.example
-        }
-      })
-      return res
-    }
-
     function flatObj(value, currentKey) { // 展开对象
       let result = {};
       Object.keys(value).forEach(key => {
@@ -651,7 +629,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
-      listToData,
       deepMergeObject,
       flatObj,
       deepGet,
@@ -831,8 +808,7 @@ function business() { // 与业务相关性较大的函数
               data = mockjs.mock(example[example.templateOrResult]).data
             }
           } catch (error) { // 如果转换错误, 则使用
-            // console.log(`error`, error)
-            data = toolObj.obj.listToData(cur.responses ? (cur.responses[`200`].table || []) : [])
+            res.status(500).json({msg: `转换错误: ${error.message}`})
           }
           // 根据 apiWebWrap 处理数据
           if(config.apiWebWrap === true) {

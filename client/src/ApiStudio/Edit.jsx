@@ -164,7 +164,7 @@ function Edit() {
 
     const searchParams = new URL(window.location.href.replace(`#`, ``)).searchParams
     const [state, setState] = useState({ // 默认值
-      showDrawer: `ExampleCom`,
+      showDrawer: ``,
       queryPath: searchParams.get(`path`), // url 上的 path 参数
       apiOk: false, // api 是否请求结束
       hand: { // 标识各个 tab 所在位置
@@ -319,7 +319,7 @@ function Edit() {
       myPreState ? fn(myPreState) : setState(fn)
     }
 
-    const {table = [], example = {}} = state.data[state.hand.method].responses[state.hand.responses]
+    const {table = [], example = {}} = state.data?.[state.hand.method]?.responses?.[state.hand.responses] || {}
     return (
       <div className="ApiStudioEdit">
         {

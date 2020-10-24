@@ -75,6 +75,7 @@ function ExampleCom(props) {
 
   useEffect(() => {
     [1, 2, 3].map(i => setTimeout(exampleReSet, i)) // hack: 设置初始键, 太南了
+    // eslint-disable-next-line
   }, [props.example])
 
   useEffect(templateToData, [state.templateRaw])
