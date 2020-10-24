@@ -331,6 +331,7 @@ function Edit() {
           >
             {state.showDrawer === `ExampleCom` && example && table && <ExampleCom
               upLoad={onChangeExampleCom}
+              close={() => setDrawer(``)}
               table={table}
               example={example}
             />}

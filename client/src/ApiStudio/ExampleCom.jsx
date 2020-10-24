@@ -40,6 +40,7 @@ const { TabPane } = Tabs
 const { Option } = Select
 
 function ExampleCom(props) {
+  const propsExampleCom = props
   const {
     useState,
     useEffect,
@@ -170,6 +171,7 @@ function ExampleCom(props) {
         <Space>
           <Button
             size="small"
+            onClick={propsExampleCom.close}
           >
             {showTitle(`取消`, `放弃所有修改`)}
           </Button>
@@ -233,6 +235,7 @@ function ExampleCom(props) {
           autoSize={{ minRows: 2, maxRows: 6 }}
         />
       </Card>
+      <p />
       <BtnList type="templateResult"/>
     </Space>
   )
