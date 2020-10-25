@@ -5,6 +5,7 @@ import en_GB from 'antd/es/locale/en_GB'
 import ApiList from './ApiList.jsx'
 import ApiDetail from './ApiDetail.jsx'
 import Breadcrumb from './Breadcrumb.jsx'
+import Restc from './Restc.jsx'
 import * as ApiStudio from './ApiStudio/index.jsx'
 import './HttpShow.scss'
 
@@ -34,6 +35,9 @@ const HttpShow = (() => {
           </Route>
           <Route cache path="/apiStudio">
             <ApiStudio.List />
+          </Route>
+          <Route cache path="/restc">
+            <Restc />
           </Route>
           <Route cache path="/*">
             <ApiDetail />
