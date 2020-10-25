@@ -4,6 +4,7 @@ import * as antd from 'antd'
 import en_GB from 'antd/es/locale/en_GB'
 import ApiList from './ApiList.jsx'
 import ApiDetail from './ApiDetail.jsx'
+import Breadcrumb from './Breadcrumb.jsx'
 import * as ApiStudio from './ApiStudio/index.jsx'
 import './HttpShow.scss'
 
@@ -45,6 +46,7 @@ const HttpShow = (() => {
       <div className="HttpShow">
         <ConfigProvider locale={en_GB}>
           <HashRouter>
+            <Breadcrumb />
             <BackTop visibilityHeight={0} target={() => document.querySelector(`#root`)}/>
             <App />
           </HashRouter>
