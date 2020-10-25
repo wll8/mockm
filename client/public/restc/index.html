@@ -925,7 +925,8 @@
       set headers(value) { this.headerCollection.collection = value; }
       get headers() { return this.headerCollection.value; }
       fromJSON(json) {
-        let { method, queryParameters, body, headers } = json;
+        let { method, queryParameters, body, headers, uri } = json;
+        this.uri = uri;
         if (method) this.method = method.toUpperCase();
         if (queryParameters) {
           this.queryParameters = queryParameters;
@@ -936,10 +937,10 @@
         if (headers) this.headerCollection.fromJSON(headers);
       }
       toJSON() {
-        let { method, body } = this;
+        let { method, body, uri } = this;
         let queryParameters = this.queryParameterCollection.toJSON();
         let headers = this.headerCollection.toJSON();
-        return { method, queryParameters, body, headers };
+        return { method, queryParameters, body, headers, uri };
       }
       set isBodyVisible(value) {
         if (value) {
@@ -951,18 +952,19 @@
       }
       get isBodyVisible() { return this.bodyEditor.element.style.display !== 'none'; }
       init() {
-        let { method, queryParameters, body, headers = [] } = QueryString.parse(location.hash.replace(/^#!?/, ''));
+        let { method, queryParameters, body, headers = [], uri, url} = QueryString.parse(location.hash.replace(/^#!?/, ''));
+        uri = uri || url || `${location.protocol}//${location.host}${location.pathname}`
         try { headers = JSON.parse(headers); } catch (error) { /* ignore */ }
         try { queryParameters = JSON.parse(queryParameters); } catch (error) { /* ignore */ }
-        this.fromJSON({ method, queryParameters, body, headers });
+        this.fromJSON({ method, queryParameters, body, headers, uri });
         this.methodChange();
       }
       submit(event) {
         event.preventDefault();
-        let { method, queryParameters, body, headers } = this.toJSON();
+        let { method, queryParameters, body, headers, uri } = this.toJSON();
         if (queryParameters) queryParameters = JSON.stringify(queryParameters);
         if (headers) headers = JSON.stringify(headers);
-        let hash = QueryString.stringify({ method, queryParameters, body, headers });
+        let hash = QueryString.stringify({ method, queryParameters, body, headers, uri });
         if (hash) hash = '#!' + hash;
         if (location.hash !== hash) {
           location.hash = hash;
@@ -1035,14 +1037,13 @@
         });
       }
       sendRequest() {
-        let path = location.pathname;
-        let { method, queryString, body, headers } = this.sideBar;
+        let { method, queryString, body, headers, uri } = this.sideBar;
+        let path = new URL(uri).pathname
         let defaultHeaders = {
           Accept: 'application/json, */*',
           'Content-Type': 'application/json'
         };
         headers = Object.assign({}, defaultHeaders, headers);
-        let uri = `//${location.host}${path}`;
         if (queryString) uri += '?' + queryString;
         let options = { method, headers, credentials: 'include' };
         if (this.sideBar.isBodyVisible) options.body = body;
