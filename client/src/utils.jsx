@@ -19,6 +19,63 @@ function search(object, findKey, value) {
 }
 
 /**
+ * 深拷贝
+ * @param {*} obj
+ */
+function deepCopy(obj) {
+  // 深度复制数组
+  if (Object.prototype.toString.call(obj) === "[object Array]") {
+    const object = [];
+    for (let i = 0; i < obj.length; i++) {
+      object.push(deepCopy(obj[i]));
+    }
+    return object;
+  }
+  // 深度复制对象
+  if (Object.prototype.toString.call(obj) === "[object Object]") {
+    const object = {};
+    for (let p in obj) {
+      object[p] = obj[p];
+    }
+    return object;
+  }
+}
+
+/**
+ * 转树形对象为数组
+ * @param {*} treeObj 树形对象
+ * @param {*} rootid 根结点 id
+ */
+function tree2Array(treeObj, rootid) {
+  const temp = []; // 设置临时数组，用来存放队列
+  const out = []; // 设置输出数组，用来存放要输出的一维数组
+  temp.push(treeObj);
+  // 首先把根元素存放入out中
+  let pid = rootid;
+  const obj = deepCopy(treeObj);
+  obj.pid = pid;
+  delete obj[`children`];
+  out.push(obj);
+  // 对树对象进行广度优先的遍历
+  while (temp.length > 0) {
+    const first = temp.shift();
+    const children = first.children;
+    if (children && children.length > 0) {
+      pid = first.id;
+      const len = first.children.length;
+      for (let i = 0; i < len; i++) {
+        temp.push(children[i]);
+        const obj = deepCopy(children[i]);
+        obj.pid = pid;
+        delete obj[`children`];
+        out.push(obj);
+      }
+    }
+  }
+  return out;
+}
+
+/**
  * 对象和行形式字符字符串互相转换
  * @param {*} arg 对象或字符串
  */
@@ -367,6 +424,8 @@ function listToData(list, options = {}){
 }
 
 export default  {
+  deepCopy,
+  tree2Array,
   listToData,
   objOrLine,
   showTitle,
