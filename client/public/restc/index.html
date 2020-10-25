@@ -594,8 +594,6 @@
           :scope {
             flex: 1;
             &:before {
-              margin-right: .2em;
-              content: '?';
               color: #5d6577;
             }
           }
@@ -635,7 +633,7 @@
             <jkl-side-bar-query-string-input
               ref="queryStringInput"
               on-input="{queryStringChange}"
-              placeholder="query string"></jkl-side-bar-query-string-input>
+              placeholder="URL or query string"></jkl-side-bar-query-string-input>
             <jkl-side-bar-send-button></jkl-side-bar-send-button>
           </div>
         `;
@@ -643,7 +641,20 @@
       set method(value) { this.methodSelect.value = value; }
       get method() { return this.methodSelect.value; }
       set queryString(value) { this.queryStringInput.value = value; }
-      get queryString() { return this.queryStringInput.value; }
+      get queryString() {
+        let value = this.queryStringInput.value;
+        if (value.match(new RegExp(`^https?://`)) || value.match(new RegExp(`^/`))) {
+          let [, url = value, query] = value.match(/(.*)\?(.*)/) || []
+          value = query ? query : ``;
+          if (url.match(new RegExp(`^//`))) {
+            url = `${location.protocol}${url}`
+          } else if(url.match(new RegExp(`^/`))) {
+            url = `${location.origin}${url}`
+          }
+          this.url = url
+        }
+        return value;
+      }
       methodChange() {
         this.element.dispatchEvent(new CustomEvent('methodchange', { bubbles: true, detail: this.method }));
       }
@@ -977,13 +988,14 @@
       }
       syncQueryParameters() {
         let { queryString } = this;
+        this.uri = this.methodComponent.url || this.uri
         let queryParameters = QueryString.parse(queryString, true);
         this.queryParameterCollection.collection = queryParameters;
       }
       syncQueryString() {
         let { collection } = this.queryParameterCollection;
         let queryString = QueryString.stringify(collection);
-        this.methodComponent.queryString = queryString;
+        this.methodComponent.queryString = `${this.uri}${queryString ? `?${queryString}` : ``}`;
       }
       get styleSheet() {
         return `
