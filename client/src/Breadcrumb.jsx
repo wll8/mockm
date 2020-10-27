@@ -94,6 +94,7 @@ function BreadcrumbCom() {
           state.routePath && handleMenu(state.routePath).map((item, index, arr) => (
             item.name === `首页`
               ? <Breadcrumb.Item
+                  key={index}
                   overlay={
                     <Menu>
                       <Menu.Item><a href="/#/">记录</a></Menu.Item>
