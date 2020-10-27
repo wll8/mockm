@@ -52,6 +52,8 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
     ...cliArg,
     // 命令行参数 config = true 时, 视为使用程序预设的路径
     config: cliArg.config === true ? base64deCode.config : (base64deCode.config || cliArg.config),
+    // 命令行参数 proxy 存在时, 转换为对象, 方便与文件中的 proxy 进行合并
+    ...(typeof(cliArg.proxy) === `string` ? {proxy: {"/": cliArg.proxy}} : {}),
   }
 }
 
@@ -72,7 +74,9 @@ function defaultConfigFn(util) { // 默认配置
     hostMode: false,
     updateToken: true,
     apiInHeader: true,
-    proxy: 'http://httpbin.org/',
+    proxy: {
+      '/': `http://www.httpbin.org/`,
+    },
     remote: false,
     openApi: `http://httpbin.org/spec.json`,
     cors: true,
@@ -90,11 +94,20 @@ function defaultConfigFn(util) { // 默认配置
 }
 
 libObj.midResJson = midResJson
+const defaultArg = defaultConfigFn(libObj)
+const fileArg = fileArgFn(libObj)
 const config = {
-  ...defaultConfigFn(libObj),
-  ...fileArgFn(libObj),
+  ...defaultArg,
+  ...fileArg,
   ...cliArg,
 }
+
+config.proxy = { // 合并 proxy 对象
+  ...defaultArg.proxy,
+  ...fileArg.proxy,
+  ...cliArg.proxy,
+}
+
 const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
   ...config,
