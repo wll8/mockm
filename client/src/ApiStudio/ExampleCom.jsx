@@ -176,6 +176,12 @@ function ExampleCom(props) {
           </Button>
           <Button
             size="small"
+            onClick={templateToData}
+          >
+            {showTitle(`生成`, `使用浏览器上的数据模板生成数据`)}
+          </Button>
+          <Button
+            size="small"
             onClick={exampleReSet}
           >
             {showTitle(`重置`, `使用服务器配置重置`)}
