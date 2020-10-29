@@ -53,6 +53,18 @@
     <script src="//cdn.jsdelivr.net/gh/Web-Engine/hot-key-lib/src/hot-key-lib.min.js">`热键注册`</script>
     <script src="//cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/better-mock@0.2.9/dist/mock.browser.min.js"></script>
+    <script>
+      window.Mock.Random.extend({
+        to_number: data => {
+          const res = Number(data)
+          return isNaN(res) ? 0 : res
+        },
+        to_string: data => String(data),
+        to_boolean: data => {
+          return [`false`, `0`, `假`, `T`, `t`].includes(data) ? false : Boolean(data)
+        },
+      })
+    </script>
     <script src="//cdn.jsdelivr.net/npm/jquery.scrollto@2.1.2/jquery.scrollTo.min.js"></script>
     <script>
       // 自定义新的方法来使用缓存功能
