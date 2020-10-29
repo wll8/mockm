@@ -272,7 +272,12 @@ function EditableTable (props) {
       message.warn(`字段名必填`)
       return false
     }
-
+    const example = row.example ? row.example.replace(/@to_.+?\((.*)\)/, `$1`) : row.example // 还原没有添加 @to_ 的样子
+    if([`number`, `string`, `boolean`,].includes(row.type) && example) {
+      row.example = `@to_${row.type}(${example})`
+    } else if(row.type === undefined) { // 没有输入 type 时, 还原 example 的类型转换
+      row.example = example
+    }
     searchRes = searchRes.slice(0, -1) // 去除最后一个值, 因为他是对象里面的 key, 我们需要的是对象
     // 查找是否已存在相同的字段名
     const hasDouble = deepGet([...state.dataSource], searchRes.slice(0, -1).join(`.`))
