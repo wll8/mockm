@@ -805,6 +805,16 @@ function business() { // 与业务相关性较大的函数
               data = example[example.templateOrResult]
             } else if (example.templateOrResult === `templateRaw`) { // 使用模板从 mockjs 生成
               const mockjs = require('mockjs')
+              mockjs.Random.extend({
+                to_number: data => {
+                  const res = Number(data)
+                  return isNaN(res) ? 0 : res
+                },
+                to_string: data => String(data),
+                to_boolean: data => {
+                  return [`false`, `0`, `假`, `T`, `t`].includes(data) ? false : Boolean(data)
+                },
+              })
               data = mockjs.mock(example[example.templateOrResult] || {}).data
             }
           } catch (error) { // 如果转换错误, 则使用
