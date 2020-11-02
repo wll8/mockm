@@ -39,7 +39,9 @@ let fileArgFn = () => {}
 if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
   const base64deCode = JSON.parse(Buffer.from(cliArg._base64, 'base64').toString())
   if (base64deCode.config) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
-    const fileArg = require(handlePathArg(base64deCode.config))
+    const handlePathRes = handlePathArg(base64deCode.config)
+    // 避免 node v14 上 config 文件路径相同并访问了不存在的属性而出现循环引用警告
+    const fileArg = handlePathRes === __filename ? {} : require(handlePathRes)
     if(typeof(fileArg) === `object`) {
       fileArgFn = () => fileArg
     }
