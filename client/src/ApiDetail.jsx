@@ -100,7 +100,7 @@ const ApiDetail = (() => {
       return simpleInfo
     }
 
-    function getHttpData({method, api}) {
+    function getHttpData({method, api, parseHashData}) {
       console.log(`method, api`, method, api)
       const fullApi = window.decodeURIComponent(`${method} ${api}`)
       console.log(`fullApi`, fullApi, state.parseHashData)
@@ -115,6 +115,8 @@ const ApiDetail = (() => {
         }
         setState(preState => ({
           ...preState,
+          parseHashData,
+          captureImg: undefined,
           fullApi,
           httpData: newData,
           simpleInfo: getSimpleInfo(newData),
@@ -146,15 +148,9 @@ const ApiDetail = (() => {
       console.log(`location`, reactLocation)
       console.log(`location.pathname`, reactLocation.pathname)
       const parseHashData = parseHash()
-      setState(preState => ({...preState, parseHashData}))
       const {api, method, action, actionArg} = parseHashData
-      setState(preState => ({ // 当路由改变时, 清理上一次路由中的数据
-        ...preState,
-        httpData: {},
-        captureImg: undefined,
-      }))
       if(method && api) { // 如果 true 显示某个 api 信息; 否则显示所有 api 列表
-        getHttpData({method, api})
+        getHttpData({method, api, parseHashData})
       }
 
       const hotKey = new HotKey();
@@ -191,7 +187,7 @@ const ApiDetail = (() => {
         <div className="options">
           <ToList />
           <Replay method={state.httpData.method} api={state.httpData.api} />
-          <Capture cb={captureCb} />
+          <Capture cb={captureCb} captureImg={state.captureImg} />
           {
             state?.httpData?.data?.req?.lineHeaders?.line
               &&  <Swagger
