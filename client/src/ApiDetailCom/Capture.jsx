@@ -8,6 +8,7 @@ const {
 } = utils
 const {
   useState,
+  useEffect,
 } = React
 const {
   Button,
@@ -15,8 +16,12 @@ const {
 
 function Capture(props) {
   const [state, setState] = useState({ // 默认值
-    captureImg: undefined, // 截图 objectUrl
+    captureImg: props.captureImg, // 截图 objectUrl
   });
+
+  useEffect(() => {
+    setState((preState) => ({...preState, captureImg: props.captureImg}))
+  }, [props.captureImg])
 
   function capture () {
     if(state.captureImg) {
