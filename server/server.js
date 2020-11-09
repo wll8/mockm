@@ -30,6 +30,7 @@ new Promise(async () => {
     historyHandle,
     customApi,
     reStartServer,
+    listToData,
   } = business()
   const {
     allowCors,
@@ -429,6 +430,23 @@ new Promise(async () => {
               store.set(setPath, {...oldVal, ...data})
               res.json({msg: `ok`})
               reStartServer(config.config)
+            },
+          }
+          if (actionFnObj[actionRaw]) {
+            actionFnObj[actionRaw]()
+          } else {
+            console.log(`无匹配方法`, {actionRaw})
+            next()
+          }
+        })
+
+        serverTest.post(`/api/:actionRaw/`, (req, res, next) => {
+          const { actionRaw } = req.params
+          const actionFnObj = {
+            listToData() {
+              const {table, rule, type} = req.body
+              const listToDataRes = listToData(table, {rule, type})
+              res.json(listToDataRes.data)
             },
           }
           if (actionFnObj[actionRaw]) {

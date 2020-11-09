@@ -7,7 +7,6 @@ import { DownOutlined } from '@ant-design/icons'
 import common from '../common.jsx'
 
 const {
-  listToData,
   objOrLine,
   debounce,
   removeEmpty,
@@ -46,45 +45,25 @@ function ExampleCom(props) {
     useEffect,
     useRef,
   } = React
-  function usePrevious(value) { // 获取旧的 state
-    const ref = useRef()
-    useEffect(() => {
-      ref.current = value
-    })
-    return ref.current
-  }
+
   const initStateData = initState()
   const [state, setState] = useState({
     type: `object`, // 根节点数据类型
     rule: ``, // 根节点数据生成规则
-    templateRaw: ``, // 模板
-    templateResult: ``, // string 生成的结果
-    templateOrResult: `templateRaw`, // 要使用的响应 templateRaw|templateResult
-    headers: ``, // 响应头
+    table: props.table,
+    custom: ``,
+    tableToStrData: ``,
+    useDataType: `table`, // 要使用的响应 table|custom
     ...initStateData,
   })
 
   function initState () {
-    const example = props.example || {}
-    const headers = objOrLine(example.headers || { // 响应头
-      "content-type": `application/json`,
-    })
-    const templateRaw = JSON.stringify(example.templateRaw || {data: {}}, null, 2)
-    const templateResult = typeof(example.templateResult) === `object`
-      ? JSON.stringify(example.templateResult, null, 2)
-      : example.templateResult || `{}`
-    return {
-      ...props.example,
-      headers,
-      templateRaw,
-      templateResult,
-    }
+    return props.example || {}
   }
 
   function exampleReSet() {
     setState(preState => ({...preState, ...initState()}))
   }
-  useEffect(templateToData, [state.templateRaw])
 
   function onChange(ev, stateKey) {
     if(ev === null) {
@@ -106,62 +85,40 @@ function ExampleCom(props) {
 
   useEffect(() => {
     setState(preState => {
-      let res
-      let list = removeEmpty(JSON.parse(JSON.stringify(props.table))) || []
-      res = listToData(list, {rule: state.rule, type: state.type})
-      const templateRaw = res
-      return {
-        ...preState,
-        templateRaw: JSON.stringify(templateRaw, null, 2),
-      }
+      tableToData()
+      return preState
     })
+    // eslint-disable-next-line
   }, [props.table, state.rule, state.type])
 
-  const prevTemplateRaw = usePrevious(state.templateRaw)
-  function templateToData() {
+  async function tableToData() {
+    const data = await http.post(`${cfg.baseURL}/api/listToData/`, {
+      table: props.table,
+      rule: state.rule,
+      type: state.type,
+    }).catch(err => console.log(err))
+    const str = JSON.stringify( data, null, 2 )
     setState(preState => {
-      if( prevTemplateRaw === undefined ) { // 第一次加载时不重新生成数据, 这是为了回显后台回来的数据
-        return preState
-      }
-      let templateResult = ``
-      try {
-        templateResult = JSON.stringify(window.Mock.mock(
-          JSON.parse(state.templateRaw || `{}`)
-        ).data, null, 2)
-      } catch (error) {
-        console.log(`error`, error)
-      }
       return {
         ...preState,
-        templateResult,
+        tableToStrData: str,
       }
     })
   }
 
   function sendExampleComData() {
-    const headers = objOrLine(state.headers)
-    let checkOk = true
     let sendData = {
-      ...state,
-      headers,
+      ...props.example,
+      useDataType: state.useDataType,
     }
-    if(state.templateOrResult === `templateResult`) { // 如果以 result 为值, 则先根据 content-type 校验
-      const isToJson = headers[`content-type`].match(new RegExp(`^application/json`))
-      if(isToJson) {
-        try {
-          const templateResult = JSON.parse(state.templateResult)
-          sendData.templateResult = templateResult
-        } catch (error) {
-          checkOk = false
-          message.error(`error 错误的 json 内容`)
-        }
-      }
+    if(state.useDataType === `table`) {
+      sendData.rule = state.rule
+      sendData.type = state.type
     }
-    if(checkOk) {
-      // 删除用户未上传的内容
-      delete sendData.templateRaw
-      props.upLoad(sendData)
+    if(state.useDataType === `custom`) { // 如果以 result 为值, 则先根据 content-type 校验
+      sendData.custom = state.custom
     }
+    props.upLoad(sendData)
   }
 
   function BtnList(props) {
@@ -173,12 +130,6 @@ function ExampleCom(props) {
             onClick={propsExampleCom.close}
           >
             {showTitle(`取消`, `放弃所有修改`)}
-          </Button>
-          <Button
-            size="small"
-            onClick={templateToData}
-          >
-            {showTitle(`生成`, `使用浏览器上的数据模板生成数据`)}
           </Button>
           <Button
             size="small"
@@ -198,52 +149,66 @@ function ExampleCom(props) {
 
   }
 
+  function useDataTypeToCom() {
+    return {
+      custom: (
+        <>
+          <Input.TextArea
+            placeholder="自定义接口响应逻辑"
+            value={state.custom}
+            onChange={val => onChange(val, `custom`)}
+            autoSize={{ minRows: 6, maxRows: 12 }}
+          />
+        </>
+      ),
+      table: (
+        <>
+          <Input
+            addonBefore={
+              <Select onChange={ev => onChange(ev, `type`)} value={state.type}>
+                <Option value="object">{showTitle(`object`, `以对象形式生成数据`)}</Option>
+                <Option value="array">{showTitle(`array`, `以数组形式生成数据`)}</Option>
+              </Select>
+            }
+            addonAfter={
+              <Button
+                size="small"
+                onClick={tableToData}
+              >
+                {showTitle(`示例`, `使用浏览器上的数据表格生成数据`)}
+              </Button>
+            }
+            value={state.rule}
+            onChange={ev => onChange(ev, `rule`)}
+            placeholder="生成规则"
+          />
+          <p />
+          <Input.TextArea
+            disabled
+            value={state.tableToStrData}
+            autoSize={{ minRows: 6, maxRows: 12 }}
+          />
+        </>
+      ),
+    }[state.useDataType]
+  }
+
   return (
     <Space direction="vertical" className="ExampleCom" style={{width: `100%`}}>
       <Card size="small" title="数据源">
-        <Select style={{width: `100%`}} onChange={ev => onChange(ev, `templateOrResult`)} value={state.templateOrResult}>
-          <Option value="templateRaw">{showTitle(`template`, `使用模板生成数据`)}</Option>
-          <Option value="templateResult">{showTitle(`value`, `使用固定的值`)}</Option>
+        <Select style={{width: `100%`}} onChange={ev => onChange(ev, `useDataType`)} value={state.useDataType}>
+          <Option value="table">{showTitle(`表格`, `使用表格生成数据`)}</Option>
+          <Option value="custom">{showTitle(`自定义`, `以编程方式处理接口`)}</Option>
         </Select>
-      </Card>
-      <Card size="small" title="模板">
-        <Input
-          addonBefore={
-            <Select onChange={ev => onChange(ev, `type`)} value={state.type}>
-              <Option value="object">{showTitle(`object`, `以对象形式生成数据`)}</Option>
-              <Option value="array">{showTitle(`array`, `以数组形式生成数据`)}</Option>
-            </Select>
-          }
-          value={state.rule}
-          onChange={ev => onChange(ev, `rule`)}
-          placeholder="跟节点生成规则"
-        />
         <p />
-        <Input.TextArea
-          value={state.templateRaw}
-          onChange={val => onChange(val, `templateRaw`)}
-          autoSize={{ minRows: 2, maxRows: 6 }}
-        />
-      </Card>
-      <Card size="small" title="模板生成的值">
-        <Input.TextArea
-          value={state.templateResult}
-          onChange={val => onChange(val, `templateResult`)}
-          autoSize={{ minRows: 2, maxRows: 6 }}
-        />
-      </Card>
-      <Card size="small" title="响应头">
-        <Input.TextArea
-          placeholder={`每行一个键值对:\nkey: val`}
-          value={state.headers}
-          onChange={val => onChange(val, `headers`)}
-          autoSize={{ minRows: 2, maxRows: 6 }}
-        />
+        {useDataTypeToCom()}
       </Card>
       <p />
-      <BtnList type="templateResult"/>
+      <BtnList />
     </Space>
   )
 }
+
+
 
 export default ExampleCom
