@@ -1,3 +1,12 @@
+const libObj = {
+  fetch: require('node-fetch'),
+  curlconverter: require('curlconverter'),
+  axios: require('axios'),
+  mockjs: require('better-mock'),
+  mime: require('mime'),
+  multiparty: require('multiparty'),
+}
+
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
   function control() { // 流程控制
     /**
@@ -784,6 +793,81 @@ function business() { // 与业务相关性较大的函数
     }
   }
 
+  /**
+  * 把类似 schema 的列表转换为数据
+  * @param {array} list 列表
+  * @param {object} options 规则
+  */
+  function listToData(list, options = {}){
+    const Mock = require('better-mock')
+    const mockMethods = Object.keys(Mock.Random).map(key => `@${key}`)
+
+    function listToDataRef (list) {
+      // 注: 通过此函数转换出的结果并不是可以生成随机值的模板, 而是已生成固定值模板, 因为需要使用值转换为对应的类型
+
+      let res = {}
+      list.forEach(item => {
+        let example = item.example ? String(item.example) : ``
+
+        // 处理含有 @mock 方法或为正则的 example
+        if(mockMethods.some(item => example.includes(item)) === false) { // 如果不包含 @mock 方法则进行类型转换
+          // todo 不应该直接使用 includes 判断, 例如可以是 `@inc` 或 `@inc c` 但不能是 `@incc`
+          // 根据 type 转换 example 值的类型
+          if(strReMatch(example)) { // 猜测为正则
+            example = strReMatch(example)
+          } else if(item.type === `number`) { // 数字
+            example = Number(example)
+          } else if(item.type === `boolean`) { // 布尔
+            example = [`false`, `0`, `假`, `T`, `t`].includes(example) ? false : Boolean(example)
+          }
+        }
+
+        // 如果是对象或数里进行递归调用
+        if([`object`, `array`].includes(item.type) && Array.isArray(item.children)) {
+          switch(item.type) {
+            case `object`:
+              res[item.name] = listToDataRef(item.children)
+              break;
+            case `array`:
+              res[item.name] = res[item.name] || []
+              res[item.name].push(listToDataRef(item.children))
+              break;
+            default:
+              console.log(`no type`, item.type)
+          }
+        } else { // 如果不是引用类型, 则应用最后转换后的值 example
+          res[`${item.name}#${item.type || 'string'}`] = example
+        }
+      })
+      return res
+    }
+    let res = listToDataRef(list)
+    res = {
+      [`data${options.rule ? `|${options.rule}` : ''}`]: {object: res, array: [res]}[options.type]
+    }
+    const data = Mock.mock(res)
+    return data
+  }
+
+  /**
+  * 如果字符串是正则就返回正则, 否则返回 false
+  * @param {string} str 前后有 / 号的字符串
+  */
+  function strReMatch (str) {
+    let reStr = (str.match(/^\/(.*)\/$/) || [])[1]
+    let re = undefined
+    if(reStr) {
+      try {
+        re = new RegExp(reStr)
+      } catch (error) { // 正则转换失败
+        return false
+      }
+    } else {
+      return false
+    }
+    return re
+  }
+
   function apiWebHandle({config}) { // 处理 webApi 为 api
     const webApi = require(config.apiWeb).paths || {}
     const pathList = Object.keys(webApi).map(path => {
@@ -798,35 +882,52 @@ function business() { // 与业务相关性较大的函数
       return {
         ...acc,
         [cur.key]: (req, res, next) => {
-          let data
-          try {
-            const example = cur.responses[`200`].example
-            if(example.templateOrResult === `templateResult`) { // 直接使用固定的值
-              data = example[example.templateOrResult]
-            } else if (example.templateOrResult === `templateRaw`) { // 使用模板从 mockjs 生成
-              const mockjs = require('mockjs')
-              mockjs.Random.extend({
-                to_number: data => {
-                  const res = Number(data)
-                  return isNaN(res) ? 0 : res
-                },
-                to_string: data => String(data),
-                to_boolean: data => {
-                  return [`false`, `0`, `假`, `T`, `t`].includes(data) ? false : Boolean(data)
-                },
-              })
-              data = mockjs.mock(example[example.templateOrResult] || {}).data
+          const {example = {}, table = []} = cur.responses[`200`]
+          const {useDataType = `table`, custom, rule, type} = example
+          if(useDataType === `table`) { // 使用表格中的数据
+            try {
+              let data
+              const listToDataRes = listToData(table, {rule, type})
+              data = listToDataRes.data
+              // 根据 apiWebWrap 处理数据
+              if(config.apiWebWrap === true) {
+                data = wrapApiData({data, code: 200})
+              } else if(typeof(config.apiWebWrap) === `function`) {
+                data = config.apiWebWrap({data, code: 200})
+              }
+              res.json(data)
+            } catch (error) {
+              res.status(500).json({msg: `转换错误: ${error.message}`})
             }
-          } catch (error) { // 如果转换错误, 则使用
-            res.status(500).json({msg: `转换错误: ${error.message}`})
           }
-          // 根据 apiWebWrap 处理数据
-          if(config.apiWebWrap === true) {
-            data = wrapApiData({data, code: 200})
-          } else if(typeof(config.apiWebWrap) === `function`) {
-            data = config.apiWebWrap({data, code: 200})
+          if (useDataType === `custom`) { // 自定义逻辑
+            try {
+              const { NodeVM } = require(`vm2`);
+              const vm = new NodeVM({
+                sandbox: { // 给 vm 使用的变量
+                  tool: {
+                    libObj,
+                    wrapApiData,
+                    listToData,
+                    cur,
+                  },
+                }
+              });
+              const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``;
+              const codeType = typeof(code)
+              if([`function`].includes(codeType)) { // 如果是函数则运行函数
+                code(req, res, next)
+              } else { // 函数之外的类型则当作 json 返回
+                res.json(code)
+              }
+            } catch (err) {
+              console.log(`err`, err)
+              // 处理客户端代码出现问题, 代码错误或出现不允许的权限
+              res.status(403).json({
+                msg: err.message
+              })
+            }
           }
-          res.json(data)
         },
       }
     }, {})
@@ -1464,6 +1565,7 @@ testPort: ${store.get(`note.remote.testPort`) || ``}
   }
 
   return {
+    listToData,
     reStartServer,
     wrapApiData,
     apiWebHandle,
@@ -1479,6 +1581,7 @@ testPort: ${store.get(`note.remote.testPort`) || ``}
 const toolObj = tool()
 
 module.exports = {
+  libObj,
   toolObj,
   business,
 }

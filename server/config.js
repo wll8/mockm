@@ -1,14 +1,6 @@
 const path = require(`path`)
-const libObj = {
-  fetch: require('node-fetch'),
-  curlconverter: require('curlconverter'),
-  axios: require('axios'),
-  mockjs: require('mockjs'),
-  mime: require('mime'),
-  multiparty: require('multiparty'),
-}
-
 const {
+  libObj,
   business,
   toolObj: {
     httpClient: {

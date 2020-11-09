@@ -9,7 +9,6 @@ import * as ReactRouterDOM from 'react-router-dom'
 import common from '../common.jsx'
 
 const {
-  listToData,
   removeEmpty,
   getSelectionText,
   deepGet,
@@ -196,23 +195,10 @@ function Edit() {
         const {
           rule = ``,
           type = `object`,
-          templateOrResult = `templateRaw`,
         } = responses.example || {}
-        const templateRaw = listToData(
-          removeEmpty(JSON.parse(
-            JSON.stringify(responses.table)
-            || `{}`
-          )) || [],
-          {
-            rule,
-            type,
-          },
-        )
         onChangeExampleCom({
           rule,
           type,
-          templateRaw,
-          templateOrResult,
         }, preState)
         setTimeout(() => {
           if(preState.path.match(new RegExp(`^/.*`)) === null) {
