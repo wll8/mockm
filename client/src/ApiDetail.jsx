@@ -5,7 +5,6 @@ import * as icons from '@ant-design/icons'
 import utils from './utils.jsx'
 import common from './common.jsx'
 import ReqRes from './ReqRes.jsx'
-import ToList from './ApiDetailCom/ToList.jsx'
 import Capture from './ApiDetailCom/Capture.jsx'
 import Replay from './ApiDetailCom/Replay.jsx'
 import Swagger from './ApiDetailCom/Swagger.jsx'
@@ -185,7 +184,6 @@ const ApiDetail = (() => {
           </div>
         </div>
         <div className="options">
-          <ToList />
           <Replay method={state.httpData.method} api={state.httpData.api} />
           <Capture cb={captureCb} captureImg={state.captureImg} />
           {
