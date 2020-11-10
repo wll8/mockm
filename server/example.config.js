@@ -48,10 +48,16 @@ module.exports = util => {
     dbCover: false, // 每次启动总是生成新的 db
     db () { // 供 json-server 使用的 json 数据, function || object
       const data = mockjs.mock({
-        'books|3-7': [
+        'books|40-60': [
           {
             'id|+1': 1,
-            num: /\d\d/,
+            user: /\d\d/,
+            view: /\d\d\d\d/,
+            'type|1': [`js`, `css`, `html`],
+            'discount|1': [`0`, `1`],
+            author: {
+              'name|1': [`张三`, `李四`],
+            },
             title: '@ctitle',
           }
         ],
