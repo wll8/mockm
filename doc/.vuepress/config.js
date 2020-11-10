@@ -63,6 +63,7 @@ module.exports = {
     // search: false,
     sidebarDepth: 2,
     nav: [
+      { text: '版本 v1.0.24', link: '/' },
       { text: '配置项', link: '/config/选项' },
       {
         text: '源码',
@@ -122,10 +123,16 @@ module.exports = {
             path: `/use/尝试`,
           },
           {
-            title: `内容输出`,
+            title: `web 界面`,
             collapsable: false,
-            description : `讲解默认配置下生成的目录或文件, 以及 web 界面的用处`,
-            path: `/use/输出`,
+            description : `关于 web 界面上的功能讲解`,
+            path: `/use/webui`,
+          },
+          {
+            title: `生成的文件`,
+            collapsable: false,
+            description : `生成在系统上的文件及目录`,
+            path: `/use/outfile`,
           },
         ]
       },
