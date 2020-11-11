@@ -98,21 +98,40 @@ module.exports = util => {
           const {params, query, body} = req
           res.status(params.code) .json({params, query, body})
         },
+        // curl-snippet
         'get /curl' (req, res, next) { // 运行 curl/bash 命令并获取执行结果
-          run.curl({req, res, cmd: `curl 'http://www.httpbin.org/ip'`}).then(curRes => {
+          // 示例 curl/bash 命令
+          const cmd = `
+            curl 'http://www.httpbin.org/ip' \
+              -H 'Accept: */*' \
+              -H 'Accept-Language: zh-CN,zh;q=0.9' \
+              --compressed \
+              --insecure
+          `
+          run.curl({req, res, cmd}).then(curRes => {
             res.send(curRes.body)
           })
         },
+        // curl-snippet
+        // fetch-snippet
         'get /fetch' (req, res, next) { // 运行 fetch 方法并获取执行结果
+          // 示例 fetch 方法
+          const fetchRes = fetch("http://www.httpbin.org/ip", {
+            "headers": {
+              "accept": "*/*",
+              "accept-language": "zh-CN,zh;q=0.9"
+            },
+          });
           run.fetch({
             req,
             res,
-            fetchRes: fetch(`http://www.httpbin.org/ip`)
+            fetchRes,
           }).then(async thenRes => {
             const thenResOk = await thenRes.buffer()
             res.send(thenResOk)
           }).catch(err => console.log(`err`, err))
         },
+        // fetch-snippet
       }
     },
     // 处理重放请求出错时会进入这个方法

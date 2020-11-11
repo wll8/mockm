@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "doc:dev": "vuepress dev doc",
-    "doc:build": "vuepress build doc",
+    "doc:dev": "cd doc && npm start",
+    "doc:build": "cd doc && npm run build",
     "build:client": "cd client && npm run build",
     "build:server": "cd release && npx gulp",
     "push:doc": "cd release && npx gulp pushDoc",
