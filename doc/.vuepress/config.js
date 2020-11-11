@@ -158,20 +158,27 @@ module.exports = {
             description : `各个配置项讲解`,
             path: `/config/选项`,
           },
+          {
+            title: `综合示例`,
+            collapsable: false,
+            description : `一些业务示例`,
+            path: `/config/示例`,
+          },
         ]
       },
       {
         title: `工具库`,
         collapsable: false,
+        description : `mockm 运行时自带的一些函数和库`,
         children: [
           {
-            title: `config.fn`,
+            title: `config 作为函数`,
             collapsable: false,
             description : `config 作为函数时提供的工具`,
             path: `/config/config_fn`,
           },
           {
-            title: `config.api.fn`,
+            title: `config.api 作为函数`,
             collapsable: false,
             description : `config.api 作为函数时提供的工具`,
             path: `/config/config_api_fn`,
