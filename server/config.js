@@ -60,11 +60,18 @@ function defaultConfigFn(util) { // 默认配置
     testPort: 9005,
     replayPort: 9001,
     replayProxy: true,
+    // snippet-replayProxyFind
     replayProxyFind (item) {
-      const bodyPath = require(`path`).join(process.cwd(), item.data.res.bodyPath)
-      const body = require(bodyPath)
-      return body.status === 200 || body.status === `200`
+      const bodyPath = item.data.res.bodyPath
+      if(bodyPath && bodyPath.match(/\.json$/)) {
+        bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
+        const body = require(bodyPathCwd)
+        return body.status === 200 || body.status === `200`
+      } else {
+        return false
+      }
     },
+    // snippet-replayProxyFind
     hostMode: false,
     updateToken: true,
     apiInHeader: true,

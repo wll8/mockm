@@ -12,9 +12,14 @@ module.exports = util => {
     replayPort: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
     replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
     replayProxyFind (item) { // 自定义请求重放时的逻辑
-      const bodyPath = require(`path`).join(process.cwd(), item.data.res.bodyPath)
-      const body = require(bodyPath)
-      return body.status === 200 || body.status === `200`
+      const bodyPath = item.data.res.bodyPath
+      if(bodyPath && bodyPath.match(/\.json$/)) {
+        bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
+        const body = require(bodyPathCwd)
+        return body.status === 200 || body.status === `200`
+      } else {
+        return false
+      }
     },
     hostMode: false, // host 模式
     updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
