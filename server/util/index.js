@@ -1324,7 +1324,8 @@ function business() { // 与业务相关性较大的函数
         } else {
           res.on('data', function(chunk) {
             data.push(chunk)
-          }).on('end', function() {
+          })
+          req.on('close', function() {
             const buffer = Buffer.concat(data)
             createHttpHistory({...arg, buffer})
           })
