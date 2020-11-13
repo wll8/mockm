@@ -42,7 +42,7 @@
     "ngrok": "3.2.7"
   },
   "scripts": {
-    "start": "nodemon -q -w \"*.js\" --exec \" node run.js dev\"",
+    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" node run.js dev\"",
     "serve": "node run.js dev",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
