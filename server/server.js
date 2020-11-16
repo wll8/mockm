@@ -180,7 +180,7 @@ new Promise(async () => {
           next()
         })
         server.use((req, res, next) => { // 保存自定义接口的请求历史
-          const cloneDeep = require('lodash.cloneDeep')
+          const cloneDeep = require('lodash.clonedeep')
           const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
           const oldSend = res.send
           res.send = function(data) {
