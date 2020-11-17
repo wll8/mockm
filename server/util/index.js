@@ -64,18 +64,23 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {*} packge 依赖名称
      * @param {*} version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
      */
-    async function initPackge(packge, version) {
-      const path = require(`path`)
-      const mainPath = path.join(__dirname, '../') // 主程序目录
-      const packageJson =  require(`${mainPath}/package.json`)
-      version = version || packageJson.pluginDependencies[packge]
-      const packgePath =  `${mainPath}/node_modules/${packge}`
-      const hasPackge = toolObj.file.hasFile(packgePath)
-      if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
-        await cli().spawn(
-          `npx`, `cnpm i ${packge}@${version} --no-save`.split(/\s+/),
-          {cwd: mainPath}
-        ).catch(err => console.log(`err`, err))
+    async function initPackge(packge, {version, getRequire = true} = {}) {
+      try {
+        const path = require(`path`)
+        const mainPath = path.join(__dirname, '../') // 主程序目录
+        const packageJson =  require(`${mainPath}/package.json`)
+        version = version || packageJson.pluginDependencies[packge]
+        const packgePath =  `${mainPath}/node_modules/${packge}`
+        const hasPackge = toolObj.file.hasFile(packgePath)
+        if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
+          await cli().spawn(
+            `npx`, `cnpm i ${packge}@${version} --no-save`.split(/\s+/),
+            {cwd: mainPath}
+          )
+        }
+        return getRequire ? require(packge) : undefined
+      } catch (err) {
+        console.log(`err`, err)
       }
     }
 
@@ -655,8 +660,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {object} param1.hostname 对应的 hostname
      */
     async function sysHost(action, {ip = `127.0.0.1`, hostname}) {
-      await toolObj.generate.initPackge(`hostile`).catch(err => console.log(`err`, err))
-      const hostile = require('hostile')
+      const hostile = await toolObj.generate.initPackge(`hostile`)
       return new Promise((resolve, reject) => {
         hostile[action](ip, hostname, err => {
           err ? reject(err) : resolve(true)
@@ -1081,8 +1085,7 @@ function business() { // 与业务相关性较大的函数
         curl({req, res, cmd}) { // cmd: curl/bash
           const options = toolObj.cli.getOptions(cmd)
           return new Promise(async (resolve, reject) => {
-            await toolObj.generate.initPackge(`request`).catch(err => console.log(`err`, err))
-            const request = require('request')
+            const request = await toolObj.generate.initPackge(`request`)
             request(options, (err, curlRes = {}, body) => {
               setHeader(res, curlRes.headers) // 复制远程的 header
               allowCors({req, res}) // 设置 header 为允许跨域模式
@@ -1449,13 +1452,11 @@ function business() { // 与业务相关性较大的函数
      * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
      */
     async function runNgrok({serverList}) {
-      await toolObj.generate.initPackge(`yaml`).catch(err => console.log(`err`, err))
-      await toolObj.generate.initPackge(`get-port`).catch(err => console.log(`err`, err))
-      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(`err`, err))
+      await toolObj.generate.initPackge(`ngrok`, {getRequire: false})
       const path = require(`path`)
       const mainPath = path.join(__dirname, '../') // 主程序目录
-      const yaml = require(`yaml`)
-      const getPort = require('get-port')
+      const yaml = await toolObj.generate.initPackge(`yaml`)
+      const getPort = await toolObj.generate.initPackge(`get-port`)
       const spawn = toolObj.cli.spawn
       const fs = require(`fs`)
 
@@ -1536,7 +1537,6 @@ testPort: ${`http://${config.osIp}:${config.testPort}/`}
      */
     async function remoteServer({store, config}) {
       console.log(`远程服务加载中...`)
-      await toolObj.generate.initPackge(`ngrok`).catch(err => console.log(`err`, err))
       const serverList = [
         `port`,
         `replayPort`,
