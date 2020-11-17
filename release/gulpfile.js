@@ -13,6 +13,7 @@ gulp.task(`copyServer`, (cb) => { // 复制 server 中的文件, 例如 package.
     npx shx mkdir -p ../dist/package/
     npx shx cp ../server/*.* ../dist/package/
     npx shx cp -r ../server/page ../server/util ../dist/package/
+    npx shx rm  ../dist/package/package-lock.json
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
     console.log(`run: ${cmd}`)
@@ -42,6 +43,7 @@ gulp.task(`uglify`, () => {
   // uglify-es - https://github.com/mishoo/UglifyJS/tree/harmony
   return gulp.src([
     `../server/**/*.js`,
+    '!../server/httpData/**',
     '!../server/page/**',
     '!../server/node_modules/**',
     '!../server/example.config.js', // 示例配置, 不进行压缩
