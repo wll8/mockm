@@ -4,9 +4,14 @@
     "build": "vuepress build ."
   },
   "dependencies": {
+    "@vuepress/plugin-back-to-top": "^1.5.4",
+    "@vuepress/plugin-google-analytics": "^1.5.4",
+    "@vuepress/plugin-medium-zoom": "^1.5.4",
+    "@vuepress/plugin-nprogress": "^1.5.4",
+    "vuepress-plugin-code-copy": "^1.0.6",
+    "vuepress-plugin-fulltext-search": "^2.0.6",
+    "markdown-it-task-lists": "^2.1.1",
+    "markdown-it-vuepress-code-snippet-enhanced": "^1.0.1",
     "vuepress": "^1.7.1"
-  },
-  "devDependencies": {
-    "markdown-it-vuepress-code-snippet-enhanced": "^1.0.1"
   }
 }
