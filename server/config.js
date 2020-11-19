@@ -2,6 +2,7 @@ const path = require(`path`)
 const {
   libObj,
   business,
+  toolObj,
   toolObj: {
     httpClient: {
       midResJson,
@@ -52,7 +53,10 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 }
 
 function defaultConfigFn(util) { // 默认配置
-  const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
+  const {
+    libObj: { fetch, midResJson, axios, mime, mockjs },
+    toolObj,
+  } = util
   return {
     disable: false,
     osIp: getOsIp(),
@@ -94,9 +98,10 @@ function defaultConfigFn(util) { // 默认配置
   }
 }
 
+const exportsUtil = {toolObj, libObj} // 向 config 传送的方法
 libObj.midResJson = midResJson
-const defaultArg = defaultConfigFn(libObj)
-const fileArg = fileArgFn(libObj)
+const defaultArg = defaultConfigFn(exportsUtil)
+const fileArg = fileArgFn(exportsUtil)
 const config = {
   ...defaultArg,
   ...fileArg,
