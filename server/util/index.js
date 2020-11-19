@@ -1066,16 +1066,17 @@ function business() { // 与业务相关性较大的函数
       fileStore(config.apiWeb)
       { // 初始化 store 中的内容
         const osIp = config.osIp
-        fileStore(config._store, {
+        const store = fileStore(config._store, {
           apiCount: 0,
           note: {
-            local: {
-              port: `http://${osIp}:${config.port}`,
-              replayPort: `http://${osIp}:${config.replayPort}`,
-              testPort: `http://${osIp}:${config.testPort}`,
-            },
             remote: {},
           },
+        })
+        // 需要每次根据 osIp 更新调试地址
+        store.set(`note.local`, {
+          port: `http://${osIp}:${config.port}`,
+          replayPort: `http://${osIp}:${config.replayPort}`,
+          testPort: `http://${osIp}:${config.testPort}`,
         })
       }
       fileStore(config._share, {config}).set(`config`, config)
