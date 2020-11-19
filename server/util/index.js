@@ -1,10 +1,8 @@
 const libObj = {
   fetch: require('node-fetch'),
-  curlconverter: require('curlconverter'),
   axios: require('axios'),
   mockjs: require('better-mock'),
   mime: require('mime'),
-  multiparty: require('multiparty'),
 }
 
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
@@ -210,9 +208,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 从 curl 命令中解析 request 库的 options 参数
      * @param {string} cmd // curl/bash 命令
      */
-    function getOptions(cmd) {
+    async function getOptions(cmd) {
       var options = {} // 注意: options 的内容从 eval(optionStr) 中得到
-      const curlconverter = require('curlconverter')
+      const curlconverter = await toolObj.generate.initPackge(`curlconverter`)
       const requestStr = curlconverter.toNode(cmd)
       const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
       eval(optionStr)
@@ -1083,8 +1081,8 @@ function business() { // 与业务相关性较大的函数
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
       const run = {
-        curl({req, res, cmd}) { // cmd: curl/bash
-          const options = toolObj.cli.getOptions(cmd)
+        async curl({req, res, cmd}) { // cmd: curl/bash
+          const options = await toolObj.cli.getOptions(cmd)
           return new Promise(async (resolve, reject) => {
             const request = await toolObj.generate.initPackge(`request`)
             request(options, (err, curlRes = {}, body) => {

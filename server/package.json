@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.0.29",
+  "version": "1.1.0",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -14,7 +14,6 @@
   "dependencies": {
     "axios": "^0.19.1",
     "compression": "^1.7.4",
-    "curlconverter": "^2.16.0",
     "express-urlrewrite": "^1.3.0",
     "filenamify": "^4.1.0",
     "http-proxy-middleware": "^1.0.5",
@@ -27,7 +26,6 @@
     "better-mock": "https://cdn.jsdelivr.net/gh/wll8/static@1.0.1/github.com/wll8/better-mock/releases/download/0.3.1/better-mock-0.3.1.tgz",
     "vm2": "^3.9.2",
     "morgan": "^1.10.0",
-    "multiparty": "^4.2.1",
     "node-fetch": "^2.6.0",
     "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.4",
@@ -35,6 +33,8 @@
   },
   "devDependencies": {},
   "pluginDependencies": {
+    "curlconverter": "2.16.0",
+    "multiparty": "4.2.1",
     "hostile": "1.3.2",
     "request": "2.88.2",
     "get-port": "5.1.1",
