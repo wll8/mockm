@@ -3,7 +3,10 @@
  */
 
 module.exports = util => {
-  const { fetch, midResJson, axios, mime, mockjs, multiparty } = util
+  const {
+    libObj: { fetch, midResJson, axios, mime, mockjs },
+    toolObj,
+  } = util
   return {
     disable: false, // 是否禁用所有自定义 api, 直接通往目标服务器
     osIp: `127.0.0.1`, // 调试IP
@@ -87,7 +90,8 @@ module.exports = util => {
         '* /all/method' (req, res, next) { // * 号代表处理此路径的所有方法
           res.json({msg: req.method, url: req.url})
         },
-        'post /file/upload' (req, res, next) { // 获取客户端上传的文件
+        async 'post /file/upload' (req, res, next) { // 获取客户端上传的文件
+          const multiparty = await toolObj.generate.initPackge(`multiparty`)
           const form = new multiparty.Form()
           form.parse(req, (err, fields = [], files) => {
             const data = {fields, files, err}

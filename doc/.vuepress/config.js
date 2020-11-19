@@ -64,16 +64,16 @@ module.exports = {
     // search: false,
     sidebarDepth: 2,
     nav: [
-      { text: '版本 v1.0.24', link: '/' },
+      { text: '版本 v1.1.0', link: '/' },
       { text: '配置项', link: '/config/选项' },
-      {
-        text: '源码',
-        link: 'https://github.com/wll8/mockm',
-        // items: [
-        //   { text: 'github', link: 'https://github.com/wll8/mockm' },
-        //   { text: 'gitee', link: 'https://gitee.com/projects/new' }
-        // ]
-      }
+      // {
+      //   text: '源码',
+      //   link: 'https://github.com/wll8/mockm',
+      //   items: [
+      //     { text: 'github', link: 'https://github.com/wll8/mockm' },
+      //     { text: 'gitee', link: 'https://gitee.com/projects/new' }
+      //   ]
+      // }
     ],
     sidebar: [
       {
