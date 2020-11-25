@@ -207,7 +207,7 @@ function Edit() {
             setTimeout(() => message.warn(`接口路径格式错误`), 0)
           } else {
             const sendData = {
-              setPath: `paths.${preState.path}`,
+              setPath: [`paths`, preState.path],
               data: preState.data,
             }
             console.log(`sendData`, sendData.data)
