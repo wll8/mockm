@@ -457,6 +457,13 @@ new Promise(async () => {
               const listToDataRes = listToData(table, {rule, type})
               res.json(listToDataRes.data)
             },
+            removeApi() {
+              const {setPath} = req.body
+              const store = toolObj.file.fileStore(config.apiWeb)
+              store.set(setPath, undefined)
+              res.json({msg: `ok`})
+              reStartServer(config.config)
+            },
           }
           if (actionFnObj[action]) {
             actionFnObj[action]()

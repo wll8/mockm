@@ -34,6 +34,7 @@ const ApiList = (() => {
     Button,
     Tag,
     Tabs,
+    Popconfirm,
     BackTop,
     message,
     Spin,
@@ -89,6 +90,32 @@ const ApiList = (() => {
           </div>
         ),
         width: 80,
+        render: (...record) => {
+          record = record[1]
+          const fn = () => {
+            const setPath = `paths.${record.path}.${record.method}`
+            http.post(`${cfg.baseURL}/api/removeApi/`, {setPath}).then(res => {
+              getApiList()
+            })
+          }
+          return (
+            <div>
+              <Popconfirm
+                title="确定删除此API?"
+                onConfirm={fn}
+                okText="是"
+                cancelText="否"
+              >
+                <Button
+                  title="删除此API"
+                  size="small"
+                >
+                  -
+                </Button>
+              </Popconfirm>
+            </div>
+          )
+        },
         dataIndex: 'operation',
       },
     ];
