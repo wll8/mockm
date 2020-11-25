@@ -8,6 +8,7 @@ import ReqRes from './ReqRes.jsx'
 import Capture from './ApiDetailCom/Capture.jsx'
 import Replay from './ApiDetailCom/Replay.jsx'
 import Swagger from './ApiDetailCom/Swagger.jsx'
+import FixedResponse from './ApiDetailCom/FixedResponse.jsx'
 import ApiHistory from './ApiDetailCom/ApiHistory.jsx'
 import './ApiDetail.scss'
 
@@ -195,6 +196,7 @@ const ApiDetail = (() => {
                   />
           }
           <ApiHistory apiId={state.httpData.apiId} api0={state.httpData.api0} />
+          <FixedResponse httpData={state.httpData} />
           <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
             {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
           </div>

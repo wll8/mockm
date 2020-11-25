@@ -53,6 +53,10 @@ function ExampleCom(props) {
     table: props.table,
     custom: ``,
     tableToStrData: ``,
+    getApiIdDetailsRes: {
+      headers: {},
+      data: {},
+    },
     useDataType: `table`, // 要使用的响应 table|custom
     ...initStateData,
   })
@@ -91,6 +95,14 @@ function ExampleCom(props) {
     // eslint-disable-next-line
   }, [props.table, state.rule, state.type])
 
+  useEffect(() => {
+    setState(preState => {
+      getApiIdDetails()
+      return preState
+    })
+    // eslint-disable-next-line
+  }, [state.history])
+
   async function tableToData() {
     const data = await http.post(`${cfg.baseURL}/api/listToData/`, {
       table: props.table,
@@ -118,7 +130,17 @@ function ExampleCom(props) {
     if(state.useDataType === `custom`) { // 如果以 result 为值, 则先根据 content-type 校验
       sendData.custom = state.custom
     }
+    if(state.useDataType === `history`) { // 如果以 result 为值, 则先根据 content-type 校验
+      sendData.history = state.history
+    }
     props.upLoad(sendData)
+  }
+
+  function getApiIdDetails() {
+    const id = state.history
+    id && http.get(`${cfg.baseURL}/api/getApiResponseById,${state.history}/`, {_raw: true}).then((res) => {
+      setState(preState => ({...preState, getApiIdDetailsRes: res}))
+    })
   }
 
   function BtnList(props) {
@@ -151,6 +173,43 @@ function ExampleCom(props) {
 
   function useDataTypeToCom() {
     return {
+      history: (
+        <>
+          <Input
+            addonBefore="请求ID"
+            addonAfter={
+              <Button
+                size="small"
+              >
+                {/* todo x-test-api 应根据配置文件获取 */}
+                <a target="_blank" rel="noopener noreferrer" href={state.getApiIdDetailsRes.headers[`x-test-api`]}>查看此记录</a>
+              </Button>
+            }
+            value={state.history}
+            onChange={ev => onChange(ev, `history`)}
+            placeholder="区分大小写"
+          />
+          <p />
+          响应头
+          <Input.TextArea
+            disabled
+            value={objOrLine(state.getApiIdDetailsRes.headers)}
+            autoSize={{ minRows: 6, maxRows: 12 }}
+          />
+          <p />
+          响应体
+          <Input.TextArea
+            disabled
+            value={
+              (() => {
+                const data = state.getApiIdDetailsRes.data
+                return typeof(data) === `string` ? data : JSON.stringify(data, null, 2)
+              })()
+            }
+            autoSize={{ minRows: 6, maxRows: 12 }}
+          />
+        </>
+      ),
       custom: (
         <>
           <Input.TextArea
@@ -199,6 +258,7 @@ function ExampleCom(props) {
         <Select style={{width: `100%`}} onChange={ev => onChange(ev, `useDataType`)} value={state.useDataType}>
           <Option value="table">{showTitle(`表格`, `使用表格生成数据`)}</Option>
           <Option value="custom">{showTitle(`自定义`, `以编程方式处理接口`)}</Option>
+          <Option value="history">{showTitle(`请求历史`, `使用已有请求记录的响应`)}</Option>
         </Select>
         <p />
         {useDataTypeToCom()}
