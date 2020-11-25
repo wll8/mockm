@@ -517,11 +517,79 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
+    function replayHistoryMiddleware ({
+      id,
+      HTTPHISTORY,
+      config,
+    } = {}) {
+      const {
+        clientInjection,
+        historyHandle,
+      } = business()
+      const {
+        allowCors,
+        setHeader,
+        reSetApiInHeader,
+      } = clientInjection({config})
+      const {
+        getHistory,
+      } = historyHandle({config})
+      return (req, res, next) => { // 修改分页参数, 符合项目中的参数
+        const method = req.method.toLowerCase()
+        const fullApi = id ? undefined :`${method} ${req.originalUrl}`
+        HTTPHISTORY = HTTPHISTORY || require(config._httpHistory)
+        const history = getHistory({history: HTTPHISTORY, id, fullApi, find: list => {
+          const getStatus = (item) => {
+            try {
+              return item.data.res.lineHeaders.line.statusCode
+            } catch (err) {
+              console.log(`err`, err)
+            }
+          }
+          const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
+          let getItemRes = undefined
+          if(config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
+            try {
+              getItemRes = list.find((...arg) => config.replayProxyFind(...arg))
+            } catch (error) {
+              console.log(error)
+            }
+          }
+          getItemRes = getItemRes || getStatusCodeItem(list) || list[0] || {} // 如果也没有找到状态码为 200 的, 则直接取第一条
+          return getItemRes
+        }}).data
+        try {
+          const lineHeaders = history.res.lineHeaders
+          const headers = lineHeaders.headers
+          setHeader(res, {
+            ...headers, // 还原 headers
+            ...reSetApiInHeader({headers}), // 更新 testApi
+          })
+          allowCors({res, req})
+          const bodyPath = history.res.bodyPath
+          if(bodyPath) {
+            const path = require('path')
+            const newPath = path.resolve(bodyPath) // 发送 body
+            res.sendFile(newPath)
+          } else {
+            const {statusCode, statusMessage} = lineHeaders.line
+            res.statusCode = statusCode
+            res.statusMessage = statusMessage
+            res.send()
+          }
+        } catch (err) {
+          console.log(`err`, err)
+          res.json(config.resHandleReplay({req, res}))
+        }
+      }
+    }
+
     return {
       reWriteRouter,
       compression,
       httpLog,
       getJsonServerMiddlewares,
+      replayHistoryMiddleware,
     }
 
   }
@@ -711,6 +779,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     function isEmpty(value) { // 判断空值
       return (
         value === null
+        || value === undefined // 避免存在 key 但未定义值
         || value === ``
         || typeof(value) === `object`
           && (
@@ -885,7 +954,7 @@ function business() { // 与业务相关性较大的函数
         ...acc,
         [cur.key]: (req, res, next) => {
           const {example = {}, table = []} = cur.responses[`200`]
-          const {useDataType = `table`, custom, rule, type} = example
+          const {useDataType = `table`, custom, history, rule, type} = example
           if(useDataType === `table`) { // 使用表格中的数据
             try {
               let data
@@ -929,6 +998,12 @@ function business() { // 与业务相关性较大的函数
                 msg: err.message
               })
             }
+          }
+          if (useDataType === `history`) { // 使用历史记录
+            toolObj.middleware.replayHistoryMiddleware({
+              id: history,
+              config,
+            })(req, res, next)
           }
         },
       }
@@ -1149,12 +1224,31 @@ function business() { // 与业务相关性较大的函数
     * 历史记录处理
     */
 
-    function getHistoryList({history, method: methodRef, api: apiRef} = {}) {
-      const fs = require(`fs`)
+    /**
+     * 获取原始 history
+     * @param {object} param0 参数
+     * @param {object} param0.history require(config._httpHistory)
+     */
+    function getRawHistory({history}) {
       let list = []
       list = Object.keys(history).reduce((acc, cur) => {
         return acc.concat(history[cur])
       }, [])
+      return list
+    }
+
+    /**
+     * 获取简要信息的 history 列表
+     * @param {object} param0 参数对象
+     * @param {object} param0.history require(config._httpHistory)
+     * @param {string} param0.method 方法 - 可选
+     * @param {id} param0.method 方法 - 可选
+     * @param {string} param0.api api - 可选
+     * @return {array} 数组
+     */
+    function getHistoryList({history, method: methodRef, api: apiRef} = {}) {
+      const fs = require(`fs`)
+      let list = getRawHistory({history})
       list = list.filter(item => item.data).map(({fullApi, id, data: {req, res}}) => {
         const {method, url} = toolObj.url.fullApi2Obj(fullApi)
         if(methodRef && apiRef) {
@@ -1180,7 +1274,18 @@ function business() { // 与业务相关性较大的函数
       return list
     }
 
+    /**
+     * 获取单条记录的 history
+     * @param {object} param0 参数对象
+     * @param {object} param0.history require(config._httpHistory)
+     * @param {string} param0.fullApi `method api` 可选
+     * @param {function} param0.find 自定义筛选逻辑
+     * @return {object} 为空时返回空对象
+     */
     function getHistory({history, fullApi, id, status, find}) { // 获取指定 fullApi/id 中的历史记录
+      if(fullApi === undefined && id) {
+        return getRawHistory({history}).find(item => item.id === id) || {}
+      }
       const { path } = toolObj.url.fullApi2Obj(fullApi)
       const list = [...(history[path] || [])].reverse().filter(item => ( // 传入 id 时比较 id
         (id === undefined ? true : (item.id === id))
@@ -1369,6 +1474,23 @@ function business() { // 与业务相关性较大的函数
       })
     }
 
+    function reSetApiInHeader({headers}) { // 根据当前配置刷新 testApi
+      // 更新 x-test-api, 因为如果 httpData 移动到其他设备时, ip 会改变, 所以应更新为当前 ip
+      const store = toolObj.file.fileStore(config._store)
+      const note = store.get(`note`)
+      const apiInHeader = config.apiInHeader
+      const testUrl = (headers[apiInHeader] || ``).replace(/(.+?)(\/#\/.*)/, `${note.local.testPort}$2`)
+      const testUrlRemote = config.remote
+        ? (headers[apiInHeader + `-remote`] || ``).replace(/(.+?)(\/#\/.*)/, `${note.remote.testPort}$2`)
+        : undefined
+      const obj = toolObj.obj.removeEmpty({
+        [apiInHeader]: testUrl,
+        [apiInHeader + `-remote`]: testUrlRemote,
+      })
+      obj[`Access-Control-Expose-Headers`] = Object.keys(obj).join(`,`)
+      return obj
+    }
+
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
       const store = toolObj.file.fileStore(config._store)
       const note = store.get(`note`)
@@ -1387,6 +1509,7 @@ function business() { // 与业务相关性较大的函数
       setHeader,
       allowCors,
       setApiInHeader,
+      reSetApiInHeader,
     }
   }
 

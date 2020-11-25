@@ -368,7 +368,12 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
   return object
 }
 
+function docLink(text, link) {
+  return <a rel="noopener noreferrer" target="_blank" href={`https://www.hongqiye.com/doc/mockm${link}`}>{text}</a>
+}
+
 export default  {
+  docLink,
   deepCopy,
   tree2Array,
   objOrLine,
