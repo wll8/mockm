@@ -662,7 +662,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return result;
     }
 
-    function deepGet(object, keys, defaultValue) { // 深层获取对象值
+    function deepGet(object, keys = [], defaultValue) { // 深层获取对象值
       let res = (!Array.isArray(keys)
         ? keys
           .replace(/\[/g, '.')
