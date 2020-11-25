@@ -93,7 +93,7 @@ const ApiList = (() => {
         render: (...record) => {
           record = record[1]
           const fn = () => {
-            const setPath = `paths.${record.path}.${record.method}`
+            const setPath = [`paths`, record.path, record.method]
             http.post(`${cfg.baseURL}/api/removeApi/`, {setPath}).then(res => {
               getApiList()
             })

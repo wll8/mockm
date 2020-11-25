@@ -415,7 +415,7 @@ new Promise(async () => {
             studio() {
               let path = req.query.path
               const store = toolObj.file.fileStore(config.apiWeb)
-              const sendData = store.get(path ? `paths.${req.query.path}` : `paths`)
+              const sendData = store.get(path ? [`paths`, path] : `paths`)
               res.json(sendData)
             },
           }
