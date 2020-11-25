@@ -36,8 +36,12 @@ common.http.interceptors.request.use(
 
 common.http.interceptors.response.use(
   response => {
-    const res = response.data
-    return Promise.resolve(res)
+    const {data, config} = response
+    if(config._raw) {
+      return Promise.resolve(response)
+    } else {
+      return Promise.resolve(data)
+    }
   },
   error => {
     return Promise.reject(error)

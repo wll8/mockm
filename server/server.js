@@ -262,7 +262,7 @@ new Promise(async () => {
           const [, method, api] = api0.match(/\/(\w+)(.*)/) || []
           const urlData = {actionRaw, action, actionArg, api0, method, api}
           const actionArg0 = actionArg[0]
-          const fullApi = `${method} ${api}`
+          const fullApi = api ? `${method} ${api}` : undefined
 
           function getFilePath({reqOrRes, id}) {
             try {
@@ -398,6 +398,13 @@ new Promise(async () => {
             getHttpData() {
               res.send(getHistory({history: HTTPHISTORY, fullApi, id: actionArg0}).data)
             },
+            getApiResponseById() {
+              middleware.replayHistoryMiddleware({
+                id: actionArg0,
+                HTTPHISTORY,
+                config,
+              })(req, res, next)
+            },
             getConfig() {
               res.send(config)
             },
@@ -420,8 +427,9 @@ new Promise(async () => {
           }
         })
 
-        serverTest.patch(`/api/:actionRaw/`, (req, res, next) => {
-          const { actionRaw } = req.params
+        serverTest.patch(`/api/:actionRaw/:api0(*)`, (req, res, next) => {
+          let {actionRaw, api0} = parseRegPath(req.route.path, req.url)
+          const [action, ...actionArg] = actionRaw.split(`,`)
           const actionFnObj = {
             studio() {
               const {setPath, data} = req.body
@@ -432,16 +440,17 @@ new Promise(async () => {
               reStartServer(config.config)
             },
           }
-          if (actionFnObj[actionRaw]) {
-            actionFnObj[actionRaw]()
+          if (actionFnObj[action]) {
+            actionFnObj[action]()
           } else {
-            console.log(`无匹配方法`, {actionRaw})
+            console.log(`无匹配方法`, {action})
             next()
           }
         })
 
-        serverTest.post(`/api/:actionRaw/`, (req, res, next) => {
-          const { actionRaw } = req.params
+        serverTest.post(`/api/:actionRaw/:api0(*)`, (req, res, next) => {
+          let {actionRaw, api0} = parseRegPath(req.route.path, req.url)
+          const [action, ...actionArg] = actionRaw.split(`,`)
           const actionFnObj = {
             listToData() {
               const {table, rule, type} = req.body
@@ -449,10 +458,10 @@ new Promise(async () => {
               res.json(listToDataRes.data)
             },
           }
-          if (actionFnObj[actionRaw]) {
-            actionFnObj[actionRaw]()
+          if (actionFnObj[action]) {
+            actionFnObj[action]()
           } else {
-            console.log(`无匹配方法`, {actionRaw})
+            console.log(`无匹配方法`, {action})
             next()
           }
         })
@@ -487,61 +496,10 @@ new Promise(async () => {
           },
         ))
         serverReplay.use(middlewares)
-        serverReplay.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
-          const method = req.method.toLowerCase()
-          const fullApi = `${method} ${req.originalUrl}`
-          const history = getHistory({history: HTTPHISTORY, fullApi, find: list => {
-            const getStatus = (item) => {
-              try {
-                return item.data.res.lineHeaders.line.statusCode
-              } catch (err) {
-                console.log(`err`, err)
-              }
-            }
-            const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
-            let getItemRes = undefined
-            if(config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
-              try {
-                getItemRes = list.find((...arg) => config.replayProxyFind(...arg))
-              } catch (error) {
-                console.log(error)
-              }
-            }
-            getItemRes = getItemRes || getStatusCodeItem(list) || list[0] || {} // 如果也没有找到状态码为 200 的, 则直接取第一条
-            return getItemRes
-          }}).data
-          try {
-            const lineHeaders = history.res.lineHeaders
-            const headers = lineHeaders.headers
-            res.set(headers) // 还原 headers
-            { // 更新 x-test-api, 因为如果 httpData 移动到其他设备时, ip 会改变, 所以应更新为当前 ip
-              const store = toolObj.file.fileStore(config._store)
-              const note = store.get(`note`)
-              const apiInHeader = config.apiInHeader
-              const testUrl = (headers[apiInHeader] || ``).replace(/(.+?)(\/#\/.*)/, `${note.local.testPort}$2`)
-              const testUrlRemote = config.remote ? (headers[apiInHeader + `-remote`] || ``).replace(/(.+?)(\/#\/.*)/, `${note.remote.testPort}$2`) : undefined
-              res.set({
-                [apiInHeader]: testUrl,
-                [apiInHeader + `-remote`]: testUrlRemote,
-              })
-            }
-            allowCors({res, req})
-            const bodyPath = history.res.bodyPath
-            if(bodyPath) {
-              const path = require('path')
-              const newPath = path.resolve(bodyPath) // 发送 body
-              res.sendFile(newPath)
-            } else {
-              const {statusCode, statusMessage} = lineHeaders.line
-              res.statusCode = statusCode
-              res.statusMessage = statusMessage
-              res.send()
-            }
-          } catch (err) {
-            console.log(`err`, err)
-            res.json(config.resHandleReplay({req, res}))
-          }
-        })
+        serverReplay.use(middleware.replayHistoryMiddleware({
+          HTTPHISTORY,
+          config,
+        }))
         serverReplay.listen(config.replayPort, () => {
           // console.log(`服务器重放地址: http://localhost:${config.replayPort}/`)
         })
