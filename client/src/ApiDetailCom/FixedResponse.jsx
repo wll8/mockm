@@ -34,18 +34,10 @@ function FixedResponse({httpData}) {
     const method = httpData.method
     const apiId = httpData.apiId
     http.patch(`${cfg.baseURL}/api/studio/`, {
-      setPath: [`paths`, path],
+      setPath: [`paths`, path, method, `responses`, 200, `example`],
       data: {
-        [method]: {
-          responses: {
-            200: {
-              example: {
-                useDataType: `history`,
-                history: apiId,
-              }
-            }
-          }
-        }
+        useDataType: `history`,
+        history: apiId,
       }
     }
     ).then(res => {
