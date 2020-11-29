@@ -99,7 +99,7 @@ function Swagger(props) {
       }
     });
 
-    $.getScript(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui-bundle.min.js`, () => {
+    $.getScript2(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui-bundle.min.js`, () => {
       const parseHashData = parseHash()
       window.swaggerUi = window.SwaggerUIBundle({
         url: `${cfg.baseURL}/api/getOpenApi/${parseHashData.api ? `?api=${parseHashData.api}` : ``}`,
@@ -131,7 +131,7 @@ function Swagger(props) {
           window.swaggerUi.setSpec({host, protocol, schemes: [protocol]})
         }
       })
-    })
+    }, true)
   }
 
   useEffect(() => {
