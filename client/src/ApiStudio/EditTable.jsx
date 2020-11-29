@@ -80,6 +80,7 @@ const EditableCell = ({
     `number`,
     `object`,
     `array`,
+    `eval`,
   ]
 
   const save = async (e) => {
@@ -181,6 +182,7 @@ const EditableCell = ({
                         : false
                     }
                     value={dataTypeItem}
+                    title={{eval: '使用 js 代码执行结果'}[dataTypeItem] || dataTypeItem}
                   >
                     {dataTypeItem}
                   </Option>

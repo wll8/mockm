@@ -879,9 +879,20 @@ function business() { // 与业务相关性较大的函数
       let res = {}
       list.forEach(item => {
         let example = item.example ? String(item.example) : ``
-
-        // 处理含有 @mock 方法或为正则的 example
-        if(mockMethods.some(item => example.includes(item)) === false) { // 如果不包含 @mock 方法则进行类型转换
+        if(item.type === `eval`) { // 使用代码执行结果
+          try {
+            const { NodeVM } = require(`vm2`)
+            const vm = new NodeVM({
+              sandbox: { // 给 vm 使用的变量
+                Mock,
+              }
+            })
+            example = vm.run(`module.exports = ${example}`, `vm.js`) || ``;
+          } catch (err) {
+            console.log(`err`, err)
+          }
+          // 处理含有 @mock 方法或为正则的 example
+        } else if(mockMethods.some(item => example.includes(item)) === false) { // 如果不包含 @mock 方法则进行类型转换
           // todo 不应该直接使用 includes 判断, 例如可以是 `@inc` 或 `@inc c` 但不能是 `@incc`
           // 根据 type 转换 example 值的类型
           if(strReMatch(example)) { // 猜测为正则
