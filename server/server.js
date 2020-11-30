@@ -65,7 +65,7 @@ new Promise(async () => {
   const {
     middlewares,
     middlewaresObj,
-  } = middleware.getJsonServerMiddlewares()
+  } = middleware.getJsonServerMiddlewares({config})
 
   const {
     parseApi: {
