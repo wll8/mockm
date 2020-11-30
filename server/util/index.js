@@ -463,7 +463,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function middleware() { // express 中间件
     const compression = require('compression') // 压缩 http 响应
 
-    function httpLog() { // 设置 http 请求日志中间件
+    function httpLog({config}) { // 设置 http 请求日志中间件
       const morgan = require('morgan')
       const toolObj = tool()
       const {print} = require('./log.js')
@@ -477,14 +477,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           5: `red`,
         }
         const statusCode = String(res.statusCode)
+        const len = res.getHeader(`Content-Length`)
         const str = [
-          toolObj.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date),
+          toolObj.time.dateFormat(`hh:mm:ss`, new Date),
           toolObj.httpClient.getClientIp(req),
-          req.method,
-          req.url,
+          res.getHeader(config.apiInHeader),
           `${statusCode} ${res.statusMessage}`,
           `${tokens['response-time'](req, res)} ms`,
-          `${res.getHeader(`Content-Length`)} byte`,
+          len ? `${len} byte` : '',
         ].join(` `)
         // 使用原生 nodejs 打印日志
         print(colors[colorTable[statusCode[0]]](str)) // 根据状态码的第一位获取颜色函数
@@ -492,13 +492,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-    function getJsonServerMiddlewares() { // 获取 jsonServer 中的中间件
+    function getJsonServerMiddlewares({config}) { // 获取 jsonServer 中的中间件
       // 利用 jsonServer 已有的中间件, 而不用额外的安装
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
 
       const jsonServer = require('json-server')
       const middlewares = jsonServer.defaults({bodyParser: true, logger: false}) // 可以直接使用的所有中间件数组
-      middlewares.push(httpLog())
+      middlewares.push(httpLog({config}))
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
         // 使用 jsonServer 里面的中间件, 以保持一致:
         // compression, corsMiddleware, serveStatic, logger, jsonParser, urlencodedParser
