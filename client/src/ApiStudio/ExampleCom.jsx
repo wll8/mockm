@@ -145,9 +145,15 @@ function ExampleCom(props) {
     }
     if(state.useDataType === `custom`) { // 如果以 result 为值, 则先根据 content-type 校验
       sendData.custom = state.custom
+      if(!state.custom) {
+        err = `请输入自定义内容`
+      }
     }
     if(state.useDataType === `history`) { // 如果以 result 为值, 则先根据 content-type 校验
       sendData.history = state.history
+      if(!state.history) {
+        err = `请输入请求ID`
+      }
     }
     if(err) {
       message.error(err)
