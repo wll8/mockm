@@ -62,7 +62,12 @@ function ExampleCom(props) {
   })
 
   function initState () {
-    return props.example || {}
+    const example = props.example || {}
+    const headers = objOrLine(example.headers || {})
+    return {
+      ...example,
+      headers,
+    }
   }
 
   function exampleReSet() {
@@ -119,6 +124,7 @@ function ExampleCom(props) {
   }
 
   function sendExampleComData() {
+    let err // 校验错误, 如果有录入错误则不进行提交
     let sendData = {
       ...props.example,
       useDataType: state.useDataType,
@@ -126,6 +132,16 @@ function ExampleCom(props) {
     if(state.useDataType === `table`) {
       sendData.rule = state.rule
       sendData.type = state.type
+      sendData.headers = objOrLine(state.headers)
+      Object.keys(sendData.headers).some(key => {
+        const val = sendData.headers[key]
+        if(key.toLowerCase() === `content-type` && val.toLowerCase().trim() !== `application/json`) {
+          err = `table 模式下仅允许 content-type 值为 application/json`
+        } else if(escape(key).includes(`%u`)){
+          err = `${key} 不能含有非英文字符`
+        }
+        return err
+      })
     }
     if(state.useDataType === `custom`) { // 如果以 result 为值, 则先根据 content-type 校验
       sendData.custom = state.custom
@@ -133,7 +149,11 @@ function ExampleCom(props) {
     if(state.useDataType === `history`) { // 如果以 result 为值, 则先根据 content-type 校验
       sendData.history = state.history
     }
-    props.upLoad(sendData)
+    if(err) {
+      message.error(err)
+    } else {
+      props.upLoad(sendData)
+    }
   }
 
   function getApiIdDetails() {
@@ -246,6 +266,13 @@ function ExampleCom(props) {
             disabled
             value={state.tableToStrData}
             autoSize={{ minRows: 6, maxRows: 12 }}
+          />
+          <p />
+          <Input.TextArea
+            placeholder={`响应头, 每行一个键值对:\nkey: val`}
+            value={state.headers}
+            onChange={val => onChange(val, `headers`)}
+            autoSize={{ minRows: 2, maxRows: 6 }}
           />
         </>
       ),
