@@ -965,9 +965,11 @@ function business() { // 与业务相关性较大的函数
         ...acc,
         [cur.key]: (req, res, next) => {
           const {example = {}, table = []} = cur.responses[`200`]
-          const {useDataType = `table`, custom, history, rule, type} = example
+          const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
           if(useDataType === `table`) { // 使用表格中的数据
             try {
+              const { setHeader } = clientInjection({config})
+              setHeader(res, headers) // 设置自定义 header
               let data
               const listToDataRes = listToData(table, {rule, type})
               data = listToDataRes.data
