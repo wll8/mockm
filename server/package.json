@@ -47,7 +47,27 @@
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "engines": {
+    "node": ">=12"
+  },
+  "os" : ["win32", "darwin", "linux" ],
+  "homepage": "https://hongqiye.com/doc/mockm/",
+  "keywords": [
+    "JSON",
+    "server",
+    "fake",
+    "REST",
+    "API",
+    "prototyping",
+    "mock",
+    "mocking",
+    "test",
+    "testing",
+    "rest",
+    "data",
+    "dummy",
+    "sandbox"
+  ],
+  "author": "xw",
+  "license": "MIT"
 }
