@@ -1,5 +1,6 @@
 # 待完成
 ## 功能
+- [ ] feat: webApi 支持批处理, 自动翻译, 类型转换, 数据生成
 - [ ] feat: 分离常用功能例如API文档创建器到浏览器插件, 例如 FeHelper https://github.com/zxlie/FeHelper
 - [x] feat: 从 web 页面创建模拟接口及文档
 - [x] feat: 在请求详情页面添加 `应用响应`, 快速应用到 apiWeb 的自定义返回值
