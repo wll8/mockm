@@ -17,6 +17,6 @@
 ```
 
 可以修改文件的存储路径:
-- [config.dataDir](../config/选项.md#config-datadir) -- mm 数据保存目录
-- [config.dbJsonPath](../config/选项.md#config-dbjsonpath) -- Restful 数据存储文件
-- [config.apiWeb](../config/选项.md#config-apiweb) -- web 界面上创建的 api 数据
+- [config.dataDir](../config/option.md#config-datadir) -- mm 数据保存目录
+- [config.dbJsonPath](../config/option.md#config-dbjsonpath) -- Restful 数据存储文件
+- [config.apiWeb](../config/option.md#config-apiweb) -- web 界面上创建的 api 数据

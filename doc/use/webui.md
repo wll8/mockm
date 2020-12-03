@@ -38,7 +38,7 @@ api | 请求地址
 
 获取当前页面截图, 作为简单的 `留证` .
 
-如果你只需要别人能远程访问, 可使用[远程选项](../config/选项.md#config-remote).
+如果你只需要别人能远程访问, 可使用[远程选项](../config/option.md#config-remote).
 
 - **swagger**
 ![swagger](~@doc/image/mockm_swagger_2020-11-10-11-32-18.png)
@@ -113,7 +113,7 @@ res | 响应体中 body 的内容长度
 
 如果还没有真实的接口, 可以通过此功能创建便于前后端参考的 `接口|文档` , 它描述了请求的地址, 方法, 参数的位置, 类型, 响应, 并且可以生成供前端调用的接口.
 
-这里创建的接口称为 webApi 接口, 与 [config.api](../config/选项.md#config-api) 中编写的接口进行合并, 重复时会被后者覆盖.
+这里创建的接口称为 webApi 接口, 与 [config.api](../config/option.md#config-api) 中编写的接口进行合并, 重复时会被后者覆盖.
 
 mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应数据, 支持 mockjs 语法.
 ::: details 转换规则
@@ -154,7 +154,7 @@ mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应
 
 你可使用 js 编写该接口的逻辑, 例如响应数据根据请求的不同而不同.
 
-与 [config.api](../config/选项.md#config-api) 的编写方式对应, 由于需要考虑安全性, web 界面上不支持直接使用某些方法, 例如 fs 模块. 作为函数使用的时候, 为了方便提供了 `tool` 全局变量.
+与 [config.api](../config/option.md#config-api) 的编写方式对应, 由于需要考虑安全性, web 界面上不支持直接使用某些方法, 例如 fs 模块. 作为函数使用的时候, 为了方便提供了 `tool` 全局变量.
 
 - tool 这是一个全局对象
   - libObj - 函数接收到的工具, 例如 mockjs, axios

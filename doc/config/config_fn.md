@@ -1,5 +1,5 @@
 # config 作为函数
-当 [配置](./配置文件.md#js) 为函数的时候, 会向函数传入一个 util 对象:.
+当 [配置](./config_file.md#js) 为函数的时候, 会向函数传入一个 util 对象:.
 util 目前包含以下内容:
 
 ## util.libObj 第三方库
