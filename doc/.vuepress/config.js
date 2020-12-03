@@ -64,7 +64,7 @@ module.exports = {
     // search: false,
     sidebarDepth: 2,
     nav: [
-      { text: '版本 v1.1.0', link: '/' },
+      { text: '版本 v1.1.3', link: '/' },
       { text: '配置项', link: '/config/选项' },
       // {
       //   text: '源码',
