@@ -45,7 +45,7 @@ api | 请求地址
 
 配置 openApi 后, 会自动查找 api 对应的 swagger 视图供使用. 例如 `Try it out` 进行请求调试, 查看 module 定义.
 
-请求时, 会自动添加最新 token, 因为着你不需要手动登录就能调试接口.
+请求时, 会自动添加最新 token, 意味着你不需要手动登录就能调试接口.
 
 - **history**
 ![history](~@doc/image/mockm_history_2020-11-10-11-33-26.png)
@@ -133,7 +133,7 @@ mockm 会根据填写的 `字段名, 示例值, 类型` 生成对应的响应数
 与 [config.api](../config/选项.md#config-api) 的编写方式对应, 由于需要考虑安全性, web 界面上不支持直接使用某些方法, 例如 fs 模块. 作为函数使用的时候, 为了方便提供了 `tool` 全局变量.
 
 - tool 这是一个全局对象
-  - libObj 函数接收到的工具, 例如 mockjs, axios
+  - libObj - 函数接收到的工具, 例如 mockjs, axios
   - wrapApiData - config.js 数据统一处理函数
   - listToData - 可转换 table 为数据的函数
   - cur - 当前接口信息
