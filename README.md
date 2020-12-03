@@ -1,13 +1,12 @@
 # mockm
 一款便于使用, 功能灵活的接口工具.
+<p align="center">
+  <a href="https://www.npmjs.com/package/qs-cli"><img src="https://img.shields.io/npm/v/mockm.svg?sanitize=true" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/qs-cli"><img src="https://img.shields.io/npm/l/mockm.svg?sanitize=true" alt="License"></a>
+<p>
 
 ## 安装和使用
-``` sh
-npm i -g mockm
-mm proxy=http://example.com/
-```
-
-详情参考文档: https://www.hongqiye.com/doc/mockm
+请参考文档: https://www.hongqiye.com/doc/mockm
 
 ## 模块
 本工具分为几个模块, 分别对应以下目录.
