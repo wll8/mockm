@@ -1,8 +1,8 @@
 # mockm
 一款便于使用, 功能灵活的接口工具.
 <p align="center">
-  <a href="https://www.npmjs.com/package/qs-cli"><img src="https://img.shields.io/npm/v/mockm.svg?sanitize=true" alt="Version"></a>
-  <a href="https://www.npmjs.com/package/qs-cli"><img src="https://img.shields.io/npm/l/mockm.svg?sanitize=true" alt="License"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm.svg?sanitize=true" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm.svg?sanitize=true" alt="License"></a>
 <p>
 
 ## 安装和使用
