@@ -66,14 +66,14 @@ module.exports = {
     nav: [
       { text: '版本 v1.1.3', link: '/' },
       { text: '配置项', link: '/config/option.md' },
-      // {
-      //   text: '源码',
-      //   link: 'https://github.com/wll8/mockm',
-      //   items: [
-      //     { text: 'github', link: 'https://github.com/wll8/mockm' },
-      //     { text: 'gitee', link: 'https://gitee.com/projects/new' }
-      //   ]
-      // }
+      {
+        text: '源码',
+        link: 'https://github.com/wll8/mockm',
+        items: [
+          { text: 'github', link: 'https://github.com/wll8/mockm' },
+          // { text: 'gitee', link: 'https://gitee.com/projects/new' }
+        ]
+      }
     ],
     sidebar: [
       {
@@ -138,7 +138,7 @@ module.exports = {
         ]
       },
       {
-        title: `参数配置`,
+        title: `选项`,
         collapsable: false,
         children: [
           {
@@ -188,8 +188,8 @@ module.exports = {
       },
       {
         title: `开发`,
-        hide: true,
         collapsable: false,
+        description : `关于 mockm 的开发信息`,
         children: [
           {
             title: `更新日志`,
@@ -197,26 +197,26 @@ module.exports = {
             description : `时间表, 功能更新, bug修复`,
             path: `/dev/change_log.md`,
           },
-          {
-            title: `待完成`,
-            collapsable: false,
-            description : `要完成的, 进行中的, 受阻碍的, 期待获得帮助`,
-            path: `/dev/todo.md`,
-          },
-          {
-            title: `贡献表`,
-            collapsable: false,
-            description : `记录除自己以外的贡献者`,
-            path: `/dev/contribution.md`,
-          },
-          {
-            title: `实现`,
-            collapsable: false,
-            description : `讲解项目结构, 运作方式, 注意点, 用于帮助他人参考或贡献`,
-            path: `/dev/realize.md`,
-          },
+          // {
+          //   title: `待完成`,
+          //   collapsable: false,
+          //   description : `要完成的, 进行中的, 受阻碍的, 期待获得帮助`,
+          //   path: `/dev/todo.md`,
+          // },
+          // {
+          //   title: `贡献表`,
+          //   collapsable: false,
+          //   description : `记录除自己以外的贡献者`,
+          //   path: `/dev/contribution.md`,
+          // },
+          // {
+          //   title: `实现`,
+          //   collapsable: false,
+          //   description : `讲解项目结构, 运作方式, 注意点, 用于帮助他人参考或贡献`,
+          //   path: `/dev/realize.md`,
+          // },
         ]
       },
-    ].filter(item => item.hide !== true)
+    ],
   }
 }
