@@ -6,6 +6,53 @@ const libObj = {
 }
 
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
+  function npm() { // npm 相关
+    /**
+    * 从 npmjs 检查依赖版本
+    * @param {*} name 要检查更新的依赖名称
+    * @param {object} param1 参数
+    * @param {string} param1.version 指定版本
+    * @param {array} param1.packagePath 指定路径
+    */
+    async function checkUpdate(name, {version, packagePath} = {}) {
+      const hasFile = toolObj.file.hasFile
+      function getLocalVersion(name) { // 从本地获取版本号
+        packagePath = packagePath || require.main.paths.concat(`${require(`path`).parse(process.execPath).dir}/node_modules`) // 全局安装目录
+          .find(path => hasFile(`${path}/${name}/package.json`))
+        if(packagePath) {
+          return require(`${packagePath}/${name}/package.json`).version // 从 package 中获取版本
+        }
+      }
+      function getServerVersion(name) { // 从 npmjs 中获取版本号
+        return new Promise((resolve, reject) => {
+          const https = require('https');
+          https.get(`https://registry.npmjs.org/${name}`, res => {
+              let data = ''
+              res.on('data', chunk => {
+                data += chunk
+              })
+              res.on('end', () => {
+                const latest = (JSON.parse(data)[`dist-tags`] || {}).latest // 获取最新版本
+                resolve(latest)
+              })
+          }).on(`error`, (err) => {
+            throw new Error(err.message)
+          })
+        })
+      }
+      const getLocalVersionRes = version || getLocalVersion(name)
+      const getServerVersionRes = await getServerVersion(name)
+      return {
+        local: getLocalVersionRes,
+        server: getServerVersionRes,
+      }
+    }
+
+    return {
+      checkUpdate,
+    }
+  }
+
   function control() { // 流程控制
     /**
     * 以 Promise 方式等待条件成立
@@ -709,6 +756,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      npm,
       deepMergeObject,
       flatObj,
       deepGet,
@@ -829,6 +877,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   return {
+    npm: npm(),
     control: control(),
     cache: cache(),
     generate: generate(),

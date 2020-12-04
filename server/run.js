@@ -32,6 +32,14 @@ nodemon({
   watch,
 })
 
+Boolean(cliArg[`--no-update`]) === false && new Promise( async () => { // 检查更新
+  const {name, version} = require(`./package.json`)
+  const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
+  if(local !== server) {
+    const msg = `\n已发布新版本 ${server}\n您当前版本为 ${local}\n查看更新特性 https://hongqiye.com/doc/mockm?update=${local},${server}\n`
+    console.log(cli.colors.yellowBright(msg))
+  }
+})
 new Promise(async () => {
   const {
     showLocalInfo,
