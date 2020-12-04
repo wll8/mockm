@@ -22,6 +22,7 @@ mm proxy=http://www.httpbin.org/
 - v 输出版本号
 - config 指定配置文件地址.
 - watch 指定一些目录或文件, 当它们被修改时自动重载 mm, 多个使用逗号分隔.
+- --no-update 禁用更新检查
 
 ::: tip
 命令行上传入 config 却没有给出具体值时(`mm config`), 如果当前目录不存在配置文件, 会以默认参数生成 `mm.config.js` 作为模板供你使用. 然后按你的需求修改此文件即可.
