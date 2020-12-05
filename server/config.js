@@ -95,6 +95,7 @@ function defaultConfigFn(util) { // 默认配置
     api: {},
     resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
     resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
+    watch: [],
   }
 }
 
@@ -136,6 +137,11 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     : config.remote === true
       ? {}
       : config.remote,
+  watch: isType(config.watch, `string`)
+      ? [config.watch]
+      : isType(config.watch, `array`)
+        ? config.watch
+        : [],
 
   // 约定下划线开关的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
   _proxyTargetInfo, // 解析 proxy[`/`] 的内容
