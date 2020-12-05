@@ -77,18 +77,18 @@ module.exports = {
     ],
     sidebar: [
       {
-        title: `为什么需要它?`,
+        title: `它致力解决什么问题?`,
         collapsable: false,
         description : `解决了什么问题?`,
         children: [
           {
-            title: `项目开始`,
+            title: `页面开发前的问题`,
             collapsable: false,
-            description : `项目开始前的问题`,
+            description : `页面开发前的问题`,
             path: `/process/start.md`,
           },
           {
-            title: `联调过程`,
+            title: `联调过程中的问题`,
             collapsable: false,
             description : `联调过程中的问题`,
             path: `/process/process.md`,
@@ -100,28 +100,16 @@ module.exports = {
         collapsable: false,
         children: [
           {
-            title: `安装`,
-            collapsable: false,
-            description : `各种安装方式, 可能遇到的问题`,
-            path: `/use/install.md`,
-          },
-          {
-            title: `运行`,
-            collapsable: false,
-            description : `运行以及问题`,
-            path: `/use/run.md`,
-          },
-          {
-            title: `预览`,
-            collapsable: false,
-            description : `请求一个接口, 查看请求头, 及调试页面`,
-            path: `/use/preview.md`,
-          },
-          {
-            title: `上手尝试`,
+            title: `安装和使用`,
             collapsable: false,
             description : `创建配置, 添加接口`,
             path: `/use/try.md`,
+          },
+          {
+            title: `示例`,
+            collapsable: false,
+            description : `放置一些常用示例`,
+            path: `/use/example.md`,
           },
           {
             title: `web 界面`,
@@ -158,12 +146,6 @@ module.exports = {
             collapsable: false,
             description : `各个配置项讲解`,
             path: `/config/option.md`,
-          },
-          {
-            title: `综合示例`,
-            collapsable: false,
-            description : `一些业务示例`,
-            path: `/config/example.md`,
           },
         ]
       },
