@@ -109,11 +109,20 @@ const config = {
   ...cliArg,
 }
 
-config.proxy = { // 合并 proxy 对象
-  ...defaultArg.proxy,
-  ...fileArg.proxy,
-  ...cliArg.proxy,
-}
+config.proxy = [ // 合并 proxy 对象
+  defaultArg.proxy,
+  fileArg.proxy,
+  cliArg.proxy,
+].reduce((acc, cur) => {
+  return {
+    ...acc,
+    ...(
+      isType(cur) === `string` // string 时转为对象
+        ? {'/': cur}
+        : cur
+    )
+  }
+}, {})
 
 const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
