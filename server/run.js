@@ -9,12 +9,9 @@
 
 const path = require(`path`)
 const { toolObj, business } = require(`./util/index.js`)
+const package = require(`${__dirname}/package.json`)
 const cli = toolObj.cli
 const cliArg = cli.parseArgv()
-if(cliArg.v) {
-  console.log(require(`${__dirname}/package.json`).version)
-  process.exit()
-}
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
 const {
@@ -31,8 +28,12 @@ nodemon({
   watch: [configFile],
 })
 
+{ // 显示应用信息
+  console.log(`${package.name} v${package.version}`)
+}
+
 Boolean(cliArg[`--no-update`]) === false && new Promise( async () => { // 检查更新
-  const {name, version} = require(`./package.json`)
+  const {name, version} = package
   const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
   if(local !== server) {
     const msg = `\n已发布新版本 ${server}\n您当前版本为 ${local}\n查看更新特性 https://hongqiye.com/doc/mockm?update=${local},${server}\n`
