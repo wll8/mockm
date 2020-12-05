@@ -21,7 +21,6 @@ mm proxy=http://www.httpbin.org/
 命令行有一些额外的参数来实现配置文件之外的功能:
 - v 输出版本号
 - config 指定配置文件地址.
-- watch 指定一些目录或文件, 当它们被修改时自动重载 mm, 多个使用逗号分隔.
 - --no-update 禁用更新检查
 
 ::: tip
