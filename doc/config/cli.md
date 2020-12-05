@@ -6,13 +6,16 @@
 
 示例:
 ``` sh
-mm proxy=http://www.httpbin.org/
+mm proxy=https://example.com/
 ```
 
-对应配置 config.proxy:
-``` json
-{
-  "proxy": "http://www.httpbin.org/"
+上面的参数对应的选项是 [config.proxy](../config/option.md#config-proxy):
+
+与下列配置文件的效果是一样的:
+
+``` js
+module.exports = {
+  proxy: `https://example.com/`,
 }
 ```
 
