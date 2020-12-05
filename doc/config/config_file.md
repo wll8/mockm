@@ -1,5 +1,5 @@
 # 配置文件
-mockm 支持 js 类型的配置文件.
+启动 mockm 时, 如果当前目录不存在 mm.config.js 配置文件, 则以默认配置启动.
 
 **mm.config.js**
 ``` js

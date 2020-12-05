@@ -114,7 +114,7 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 ::: details 默认
 ```js
 proxy: {
-  '/': `http://www.httpbin.org/`,
+  '/': `https://example.com/`,
 },
 ```
 
@@ -285,7 +285,7 @@ undefined
 
 ```js {3}
 proxy: {
-  '/': `http://www.httpbin.org/`,
+  '/': `https://example.com/`,
   '/get': `https://www.httpbin.org/ip`,
 },
 ```
