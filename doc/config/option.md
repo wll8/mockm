@@ -429,3 +429,9 @@ function wrapApiData({data, code}) { // 包裹 api 的返回值
 默认: `({req, res: { statusCode: code }, data}) => wrapApiData({code, data})`
 
 由 config.db 生成的接口的最后一个拦截器, 可以用来构建项目所需的数据结构.
+
+## config.watch
+类型: string | array[string]
+默认: []
+
+指定一些目录或文件路径, 当它们被修改时自动重载服务. 支持绝对路径和相对于配置文件的路径.

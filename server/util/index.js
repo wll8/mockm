@@ -238,19 +238,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }, {})
     }
 
-    function getWatchArg({cliArgWatch, configFile}) { // 传入 watch 参数与 configFile 合并, 多个 watch 值用逗号分隔
-      if(typeof(cliArgWatch) === `undefined`) {
-        return [configFile]
-      } else if(typeof(cliArgWatch) !== `string`) {
-        console.log(`watch 参数错误: ${cliArgWatch}, 不能为 true|false, 或文件名不能包含逗号(,)`)
-        process.exit()
-      } else {
-        let watch = cliArgWatch.split(`,`)
-        watch = [configFile, ...watch]
-        return watch
-      }
-    }
-
     /**
      * 从 curl 命令中解析 request 库的 options 参数
      * @param {string} cmd // curl/bash 命令
@@ -265,7 +252,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
     return {
       spawn,
-      getWatchArg,
       parseArgv,
       getOptions,
       colors: colors(),
@@ -1199,6 +1185,17 @@ function business() { // 与业务相关性较大的函数
       }
       fileStore(config._httpHistory)
       fileStore(config.apiWeb)
+
+      { // 监听自定义目录更改后重启服务
+        const nodemon = require(`nodemon`)
+        toolObj.type.isEmpty(config.watch) === false && nodemon({
+          exec: `node -e 0`, // 由于必须存在 exec 参数, 所以放置一条啥也不干的命令
+          watch: config.watch,
+        }).on('restart', () => {
+          reStartServer(config.config)
+        })
+      }
+
       { // 初始化 store 中的内容
         const osIp = config.osIp
         const store = fileStore(config._store, {
