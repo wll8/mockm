@@ -8,7 +8,7 @@
  */
 
 const path = require(`path`)
-const { toolObj, business } = require(`./util/index.js`)
+const { toolObj, business } = require(`${__dirname}/util/index.js`)
 const package = require(`${__dirname}/package.json`)
 const cli = toolObj.cli
 const cliArg = cli.parseArgv()
@@ -29,15 +29,21 @@ nodemon({
 })
 
 { // 显示应用信息
-  console.log(`${package.name} v${package.version}`)
+  const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
+    .replace(new RegExp(`(>> mockm v)(.{${package.version.length}})`), `$1${package.version}`)
+  console.log(logText)
 }
 
 Boolean(cliArg[`--no-update`]) === false && new Promise( async () => { // 检查更新
   const {name, version} = package
   const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
   if(local !== server) {
-    const msg = `\n已发布新版本 ${server}\n您当前版本为 ${local}\n查看更新特性 https://hongqiye.com/doc/mockm?update=${local},${server}\n`
-    console.log(cli.colors.yellowBright(msg))
+    const msg = toolObj.string.removeLeft(`
+      已发布新版本 ${server}
+      您当前版本为 ${local}
+      查看更新特性 https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
+    `)
+    console.log(cli.colors.yellow(msg))
   }
 })
 new Promise(async () => {
