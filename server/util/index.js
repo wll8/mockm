@@ -1501,13 +1501,19 @@ function business() { // 与业务相关性较大的函数
           createHttpHistory(arg)
           return false
         } else {
+          let isSave = false
+          function saveHistory(ev) {
+            if(isSave === false) { // 没有保存过才进行保存
+              const buffer = Buffer.concat(data)
+              createHttpHistory({...arg, buffer})
+              isSave = true
+            }
+          }
           res.on('data', function(chunk) {
             data.push(chunk)
           })
-          req.on('close', function() {
-            const buffer = Buffer.concat(data)
-            createHttpHistory({...arg, buffer})
-          })
+          req.on('close', () => saveHistory(`req close`))
+          res.on('close', () => saveHistory(`res close`))
         }
       }
     }
