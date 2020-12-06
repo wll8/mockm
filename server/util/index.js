@@ -862,7 +862,20 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
   }
 
+  function string() { // 字符串处理
+    function removeLeft(str) {
+      const lines = str.split('\n')
+      const minSpaceNum = lines.filter(item => item.trim()).map(item => item.match(/(^\s+)/)[0].length).sort((a, b) => a - b)[0]
+      const newStr = lines.map(item => item.slice(minSpaceNum)).join('\n').trim()
+      return newStr
+    }
+    return {
+      removeLeft,
+    }
+  }
+
   return {
+    string: string(),
     npm: npm(),
     control: control(),
     cache: cache(),
@@ -1704,12 +1717,13 @@ function business() { // 与业务相关性较大的函数
      * @param {*} param0
      */
     function showLocalInfo({store, config}) {
-      console.log(`
-本地服务信息:
-port: ${`http://${config.osIp}:${config.port}/`}
-replayPort: ${`http://${config.osIp}:${config.replayPort}/`}
-testPort: ${`http://${config.osIp}:${config.testPort}/`}
+      const msg = tool().string.removeLeft(`
+        本地服务信息:
+        port: ${`http://${config.osIp}:${config.port}/`}
+        replayPort: ${`http://${config.osIp}:${config.replayPort}/`}
+        testPort: ${`http://${config.osIp}:${config.testPort}/`}
       `)
+      console.log(msg)
     }
 
     /**
@@ -1735,12 +1749,13 @@ testPort: ${`http://${config.osIp}:${config.testPort}/`}
         store.set(`note.remote.${item.name}`, urlList[index])
       })
       console.log(`远程服务加载完成.`)
-      console.log(`
-远程服务信息:
-port: ${store.get(`note.remote.port`) || ``}
-replayPort: ${store.get(`note.remote.replayPort`) || ``}
-testPort: ${store.get(`note.remote.testPort`) || ``}
+      const msg = tool().string.removeLeft(`
+        远程服务信息:
+        port: ${store.get(`note.remote.port`) || ``}
+        replayPort: ${store.get(`note.remote.replayPort`) || ``}
+        testPort: ${store.get(`note.remote.testPort`) || ``}
       `)
+      console.log(msg)
     }
 
     return {
