@@ -1,5 +1,13 @@
 # 待完成
 ## 功能
+- [ ] fix: node v10.12.0 以下不支持 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
+- [x] fix: node v10.12.0 没有执行 req close, node v12.18.3 执行了. 参考: 
+  - https://github.com/nodejs/node/commit/f22c7c10ca0c8c7a10057de71bc423bf8b633b88
+  - https://github.com/nodejs/node/issues/31394
+  - https://github.com/nodejs/node/issues/21063
+  - https://github.com/nodejs/node/pull/20611
+  - https://nodejs.org/api/http.html
+  - https://github.com/jshttp/on-finished
 - [ ] feat: webApi 支持批处理, 自动翻译, 类型转换, 数据生成
 - [ ] feat: 分离常用功能例如API文档创建器到浏览器插件, 例如 FeHelper https://github.com/zxlie/FeHelper
 - [x] feat: 从 web 页面创建模拟接口及文档

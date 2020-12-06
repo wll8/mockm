@@ -2,6 +2,7 @@ const gulp = require(`gulp`)
 // const rename = require(`gulp-rename`)
 const del = require(`del`)
 const uglify = require(`gulp-uglify-es`).default
+const babel = require('gulp-babel')
 
 gulp.task(`clear`, () => { // 复制 server 中的文件, 例如 package.json
   return del([`../dist/**`, `!../dist`], { force: true }) // 清除目录
@@ -48,6 +49,28 @@ gulp.task(`uglify`, () => {
     '!../server/node_modules/**',
     '!../server/example.config.js', // 示例配置, 不进行压缩
   ])
+    .pipe(babel({
+      "presets": [
+        [
+          '@babel/preset-env',
+          {
+            "useBuiltIns": "usage", // usage 为按需加载 polyfill
+            "corejs": 3,
+            "targets": {
+              "node": `10.12.0`
+            },
+          },
+        ],
+      ],
+      "plugins": [
+        [
+          "@babel/plugin-transform-runtime",
+          {
+            "corejs": 3
+          }
+        ]
+      ]
+    }))
     .pipe(uglify())
     .pipe(gulp.dest(`../dist/package`))
 })

@@ -60,8 +60,7 @@ mm port=8800 replayPort=8801  replayPort=8802
 - testPort=9002
 
 **node 版本过低**
-mockm 支持 node 8.x 以上的版本, 请更新 node 版本.
-
+mockm 支持 node v10.12.0 以上的版本, 请更新 node 版本.
 
 **无法访问接口**
 - json 语法错误
