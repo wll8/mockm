@@ -9,7 +9,7 @@
 
 const path = require(`path`)
 const { toolObj, business } = require(`${__dirname}/util/index.js`)
-const package = require(`${__dirname}/package.json`)
+const packageJson = require(`${__dirname}/package.json`)
 const cli = toolObj.cli
 const cliArg = cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
@@ -30,12 +30,12 @@ nodemon({
 
 { // 显示应用信息
   const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
-    .replace(new RegExp(`(>> mockm v)(.{${package.version.length}})`), `$1${package.version}`)
+    .replace(new RegExp(`(>> mockm v)(.{${packageJson.version.length}})`), `$1${packageJson.version}`)
   console.log(logText)
 }
 
 Boolean(cliArg[`--no-update`]) === false && new Promise( async () => { // 检查更新
-  const {name, version} = package
+  const {name, version} = packageJson
   const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
   if(local !== server) {
     const msg = toolObj.string.removeLeft(`
