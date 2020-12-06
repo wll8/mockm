@@ -64,7 +64,7 @@ module.exports = {
     // search: false,
     sidebarDepth: 2,
     nav: [
-      { text: '版本 v1.1.6', link: '/' },
+      { text: '版本 v1.1.8', link: '/' },
       { text: '配置项', link: '/config/option.md' },
       {
         text: '源码',
@@ -82,7 +82,7 @@ module.exports = {
         description : `解决了什么问题?`,
         children: [
           {
-            title: `页面开发前的问题`,
+            title: `开发页面时的问题`,
             collapsable: false,
             description : `页面开发前的问题`,
             path: `/process/start.md`,

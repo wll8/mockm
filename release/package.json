@@ -7,10 +7,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@babel/plugin-transform-runtime": "^7.12.1",
+    "@babel/preset-env": "^7.12.7",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
     "gulp-uglify-es": "^2.0.0",
     "shelljs": "^0.8.4",
-    "shx": "^0.3.3"
+    "shx": "^0.3.3",
+    "tar": "^6.0.5"
   }
 }
