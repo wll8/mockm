@@ -56,7 +56,7 @@ module.exports = {
       }
     ]
   ],
-  title: `mockm`,
+  title: `mockm - 致力于前后端接口联调`,
   description : `极简, 灵活, 强大的 api 神器, 开箱即用.`,
   themeConfig : {
     lastUpdated: '最后更新时间',
@@ -64,7 +64,7 @@ module.exports = {
     // search: false,
     sidebarDepth: 2,
     nav: [
-      { text: '版本 v1.1.8', link: '/' },
+      { text: '版本 v1.1.10', link: '/' },
       { text: '配置项', link: '/config/option.md' },
       {
         text: '源码',
