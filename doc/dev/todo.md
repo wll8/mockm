@@ -1,13 +1,7 @@
 # 待完成
 ## 功能
-- [ ] fix: node v10.12.0 以下不支持 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
-- [x] fix: node v10.12.0 没有执行 req close, node v12.18.3 执行了. 参考: 
-  - https://github.com/nodejs/node/commit/f22c7c10ca0c8c7a10057de71bc423bf8b633b88
-  - https://github.com/nodejs/node/issues/31394
-  - https://github.com/nodejs/node/issues/21063
-  - https://github.com/nodejs/node/pull/20611
-  - https://nodejs.org/api/http.html
-  - https://github.com/jshttp/on-finished
+- [ ] feat: 支持 node v10.12.0 以下的版本, 需注意 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
+- [x] feat: 从 cdn 下载 ngrok 程序
 - [ ] feat: webApi 支持批处理, 自动翻译, 类型转换, 数据生成
 - [ ] feat: 分离常用功能例如API文档创建器到浏览器插件, 例如 FeHelper https://github.com/zxlie/FeHelper
 - [x] feat: 从 web 页面创建模拟接口及文档
@@ -32,7 +26,7 @@
     - https://github.com/JSONPath-Plus/JSONPath
 - [ ] feat: config 中应该也把获取 db 的方法按 util 给出, 为了方便使用 db 自定义 api
 - [ ] feat: config.route 应支持不同的动词转发
-- [ ] feat: config.api 的 key 需支持简写, 即可以不写 method, 不写时表示 get
+- [x] feat: config.api 的 key 需支持简写, 即可以不写 method, 不写时表示所有 method
 - [ ] feat: 在当前接口中搜索请求信息
   - 搜索范围: req, res, 搜索 `c`
   - api 历史 1
@@ -48,6 +42,13 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [x] fix: node v10.12.0 没有触发 req 的 close 事件, node v12.18.3 执行了. 导致某些情况没有保存请求记录到 json 文件中, 参考: 
+  - https://github.com/nodejs/node/commit/f22c7c10ca0c8c7a10057de71bc423bf8b633b88
+  - https://github.com/nodejs/node/issues/31394
+  - https://github.com/nodejs/node/issues/21063
+  - https://github.com/nodejs/node/pull/20611
+  - https://nodejs.org/api/http.html
+  - https://github.com/jshttp/on-finished
 - [x] fix: 页面上创建的 webApi 接口包含点符号时, 无法使用, 因为点符号会被处理为键的层级
 - [x] fix: 初始化项目, 第一次请求接口时, x-test-api 值为 `http://127.0.0.1:9005/#/history,/get/name`, id 丢失, 便记录列表中有显示.
 - [ ] fix: 当没有配置文件时, 在 node14.2 中启动时出现警告 `Warning: Accessing non-existent property 'proxy' of module exports inside circular dependency`
