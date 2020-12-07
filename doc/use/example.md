@@ -45,14 +45,13 @@ module.exports = {
 ## 如何从接口获取请求信息
 当我们需要根据接口传入的值来返回不同的内容时, 也是很容易:
 
-``` js {7-9}
+``` js
 module.exports = {
-  proxy: `https://example.com/`, // 替换为后台的 api 地址, 如果没有可不填
-  api: { // 编写自己的 api
-    '/my/api': {
-      msg: `我的 api`
-    },
+  api: {
     '/my/value' (req, res) {
+      // req.params 是 url 上的路径参数
+      // req.query 是 url 上的查询参数
+      // req.body 是请求体中的参数
       res.json({desc: `你传入的值`, data: req.query})
     },
   },
@@ -70,23 +69,11 @@ module.exports = {
 }
 ```
 
-从 req 中, 可以获取请求信息, 例如 req.query 是 url 上的参数, req.body 是 body 中的内容.
-也可以从请求中获取文件、路径参数等.
-
 ## 如何快速生成 Restful API
 假设我要写一个博客文章的列表, 并且要实现添加文章, 查询文章, 分页, 模糊搜索, 删除, 修改等各种功能的接口. 那么只需添加以下内容:
 
-``` js {11-19}
+``` js
 module.exports = {
-  proxy: `https://example.com/`, // 替换为后台的 api 地址, 如果没有可不填
-  api: { // 编写自己的 api
-    '/my/api': {
-      msg: `我的 api`
-    },
-    '/my/value' (req, res) {
-      res.json({desc: `你传入的值`, data: req.query})
-    },
-  },
   db: {
     'blogs': [
       {
@@ -231,23 +218,7 @@ GET /books?q=张三 -- 精确全文匹配
 ``` js
 module.exports = util => {
   return {
-    proxy: `https://example.com/`, // 替换为后台的 api 地址, 如果没有可不填
-    api: { // 编写自己的 api
-      '/my/api': {
-        msg: `我的 api`
-      },
-      '/my/value' (req, res) {
-        res.json({desc: `你传入的值`, data: req.query})
-      },
-    },
     db: {
-      'blogs': [
-        {
-          id: 1,
-          content: `mockm 是一款便于使用, 功能灵活的接口工具. 看起来不错~`,
-          title: `认识 mockm 的第一天`,
-        },
-      ],
       'users': util.libObj.mockjs.mock({
         'data|15-23': [ // 随机生成 15 至 23 条数据
           {
@@ -311,6 +282,71 @@ module.exports = {
 
 更多操作方式请参考 [config.proxy](../config/option.md#config-proxy)
 
+## 如何延迟后端接口的响应时间
+示例延迟 http://192.168.1.18:8080/api/user 这个接口的响应时间为 5 秒之后:
+
+``` js
+module.exports = {
+  proxy: {
+    '/': `http://192.168.1.18:8080`,
+    '/api/user': {
+        mid (req, res, next) {
+          setTimeout(next, 5000)
+        },
+    },
+  },
+}
+```
+## 如何创建一个下载文件的接口
+实现一个文件下载接口 http://127.0.0.1:9000/file, 发送某文件给客户端.
+
+``` js
+module.exports = {
+  api: {
+    '/file' (req, res, next) {
+      res.sendFile(`这里写要下载的文件路径`)
+    },
+  },
+}
+```
+
+## 如何接收客户端上传的文件
+实现一个 post 方法的文件上传接口 http://127.0.0.1:9000/file/upload, 文件上传后保存到临时目录, 并返回文件信息.
+
+``` js
+module.exports = util => {
+  const {
+    toolObj,
+  } = util
+  return {
+    api: {
+      async 'post /file/upload' (req, res, next) {
+        const multiparty = await toolObj.generate.initPackge(`multiparty`)
+        const form = new multiparty.Form()
+        form.parse(req, (err, fields = [], files) => {
+          const data = {fields, files, err}
+          res.json(data) // 保存上传的文件并返回文件信息
+        })
+      },
+    }
+  }
+}
+```
+
+## 如何实现动态的接口路径参数
+实现一个接口 http://127.0.0.1:9000/status/code, 其中 code 的位置是一个动态参数, 并返回接收到的 code.
+
+``` js
+module.exports = {
+  api: {
+    '/status/:code' (req, res, next) {
+      const {params, query, body} = req
+      res.json({statusCode: params.code})
+    },
+  },
+}
+```
+
 ## 如何向后端展示接口参数
 > 告别截图, 告别一问一答, 告别参数太多无法复制
 
@@ -325,12 +361,18 @@ module.exports = {
 - 方法3
 如果你使用 chrome 开发工具, 可以在 Network 中找到请求的接口在 Response Headers 中找到 x-test-api.
 
-## 如何在微信公众号上使用自己的接口
-> 不需要自己配置服务器, 配置 ngrok 就能远程使用自己的接口, 拥有 HTTPS 和域名
+## 如何远程使用接口
+把 [config.remote](../config/option.md#config-remote) 设置为 true 就能拥有域名的和 https 证书的公网接口, 能够在微信公众号上使用, 或者发给其他人远程使用..
 
-把 [config.remote](../config/option.md#config-remote) 设置为 true 即可.
+在控制台会显示 `远程服务信息`, x-test-api 和接口都会生成对应的远程访问链接.
 
-在控制台会显示 `远程服务信息`, x-test-api 和接口都会生成对应的远程访问链接, 在公众号上使用需要的远程地址即可.
+## 如何恢复出错的接口
+如果某个接口之前是好的, 但是由于某些问题现在坏了, 后端又没来得及修复, 可是前端现在有页面依赖这个接口, 怎么办?
+
+在 http://127.0.0.1:9000 选择对应接口的请求历史, 点击 fixed 即可.
+
+## 如何在后端关闭时不影响页面
+页面要展示的内容来源于数据, 如果后端服务器出现问题, 所有接口无法使用, 这时候修改请求地址为 http://127.0.0.1:9001 即可让页面使用之前服务器返回的数据.
 
 ## 如何使用多个主机不同的接口
 如果某个项目需要用到两个接口, 例如分别在 `192.168.1.13:8098` 和 `192.168.1.13:8099`, 启动多个 mm 实例即可.
