@@ -36,12 +36,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
                 resolve(latest)
               })
           }).on(`error`, (err) => {
-            throw new Error(err.message)
+            reject(err.message)
           })
         })
       }
       const getLocalVersionRes = version || getLocalVersion(name)
-      const getServerVersionRes = await getServerVersion(name)
+      const getServerVersionRes = await getServerVersion(name).catch(err => console.log(err))
       return {
         local: getLocalVersionRes,
         server: getServerVersionRes,
@@ -107,9 +107,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     /**
      * 如果某个依赖不存在, 则安装它
      * @param {*} packge 依赖名称
-     * @param {*} version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
+     * @param {object} param1 配置
+     * @param {string} param1.version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
+     * @param {boolean} param1.getRequire 是否安装完成后进行 require
+     * @param {object} param1.env 安装时的环境变量
+     * @param {string} param1.msg 依赖不存在时提示的消息
      */
-    async function initPackge(packge, {version, getRequire = true, env = {}} = {}) {
+    async function initPackge(packge, {version, getRequire = true, env = {}, msg} = {}) {
       try {
         const path = require(`path`)
         const mainPath = path.join(__dirname, '../') // 主程序目录
@@ -119,9 +123,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const hasPackge = toolObj.file.hasFile(packgePath)
         const {MOCKM_REGISTRY = `https://registry.npm.taobao.org/`} = process.env
         if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
+          msg && console.log(msg)
+          // todo 修改为 npm i 某些依赖会无法安装
+          const installEr = {cnpm: `npm`}[packge] || `cnpm`
           await cli().spawn(
-            `npx`, `cnpm i ${packge}@${version} --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
-            {cwd: mainPath, env: {...env}}
+            `npx`, `${installEr} i ${packge}@${version} --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
+            {cwd: mainPath, env: {NPM_CONFIG_REGISTRY: env.MOCKM_REGISTRY, ...env}}
           )
         }
         return getRequire ? require(packge) : undefined
@@ -866,8 +873,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function string() { // 字符串处理
     function removeLeft(str) {
       const lines = str.split('\n')
-      const minSpaceNum = lines.filter(item => item.trim()).map(item => item.match(/(^\s+)/)[0].length).sort((a, b) => a - b)[0]
-      const newStr = lines.map(item => item.slice(minSpaceNum)).join('\n').trim()
+      // 获取应该删除的空白符数量
+      const minSpaceNum = lines.filter(item => item.trim())
+        .map(item => item.match(/(^\s+)?/)[0].length)
+        .sort((a, b) => a - b)[0]
+      // 删除空白符
+      const newStr = lines
+        .map(item => item.slice(minSpaceNum))
+        .join('\n')
       return newStr
     }
     return {
@@ -1732,7 +1745,7 @@ function business() { // 与业务相关性较大的函数
         replayPort: ${`http://${config.osIp}:${config.replayPort}/`}
         testPort: ${`http://${config.osIp}:${config.testPort}/`}
       `)
-      console.log(msg)
+      console.log(toolObj.cli.colors.green(msg))
     }
 
     /**
@@ -1764,7 +1777,7 @@ function business() { // 与业务相关性较大的函数
         replayPort: ${store.get(`note.remote.replayPort`) || ``}
         testPort: ${store.get(`note.remote.testPort`) || ``}
       `)
-      console.log(msg)
+      console.log(toolObj.cli.colors.green(msg))
     }
 
     return {
