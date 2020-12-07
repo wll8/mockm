@@ -109,7 +109,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {*} packge 依赖名称
      * @param {*} version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
      */
-    async function initPackge(packge, {version, getRequire = true} = {}) {
+    async function initPackge(packge, {version, getRequire = true, env = {}} = {}) {
       try {
         const path = require(`path`)
         const mainPath = path.join(__dirname, '../') // 主程序目录
@@ -117,10 +117,11 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         version = version || packageJson.pluginDependencies[packge]
         const packgePath =  `${mainPath}/node_modules/${packge}`
         const hasPackge = toolObj.file.hasFile(packgePath)
+        const {MOCKM_REGISTRY = `https://registry.npm.taobao.org/`} = process.env
         if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
           await cli().spawn(
-            `npx`, `cnpm i ${packge}@${version} --no-save`.split(/\s+/),
-            {cwd: mainPath}
+            `npx`, `cnpm i ${packge}@${version} --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
+            {cwd: mainPath, env: {...env}}
           )
         }
         return getRequire ? require(packge) : undefined
@@ -1652,7 +1653,9 @@ function business() { // 与业务相关性较大的函数
      * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
      */
     async function runNgrok({serverList}) {
-      await toolObj.generate.initPackge(`ngrok`, {getRequire: false})
+      await toolObj.generate.initPackge(`ngrok`, {getRequire: false, env: {
+        NGROK_CDN_URL: `https://cdn.jsdelivr.net/gh/wll8/static@1.0.2/bin.equinox.io/`
+      }})
       const path = require(`path`)
       const mainPath = path.join(__dirname, '../') // 主程序目录
       const yaml = await toolObj.generate.initPackge(`yaml`)
