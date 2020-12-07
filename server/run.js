@@ -23,30 +23,37 @@ cliArg.config = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
 const os = require(`os`)
 const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) // 此文件用于 run.js 与 server.js 共享变量
-nodemon({
-  exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
-  watch: [configFile],
-})
 
-{ // 显示应用信息
+new Promise(async () => { // 显示程序信息, 例如版本号, logo
   const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
     .replace(new RegExp(`(>> mockm v)(.{${packageJson.version.length}})`), `$1${packageJson.version}`)
   console.log(logText)
-}
+})
 
-Boolean(cliArg[`--no-update`]) === false && new Promise( async () => { // 检查更新
-  const {name, version} = packageJson
-  const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
-  if(local !== server) {
-    const msg = toolObj.string.removeLeft(`
-      已发布新版本 ${server}
-      您当前版本为 ${local}
-      查看更新特性 https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
-    `)
-    console.log(cli.colors.yellow(msg))
+new Promise( async () => { // 检查更新
+  if(Boolean(cliArg[`--no-update`]) === false) {
+    const {name, version} = packageJson
+    const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
+    if(local !== server) {
+      const msg = toolObj.string.removeLeft(`
+        已发布新版本 ${server}
+        您当前版本为 ${local}
+        查看更新特性 https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
+      `)
+      console.log(cli.colors.yellow(msg))
+    }
   }
 })
-new Promise(async () => {
+
+new Promise(async () => { // 启动 server.js
+  await toolObj.generate.initPackge(`cnpm`, {getRequire: false, msg: `正在初始化CNPM...`})
+  nodemon({
+    exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
+    watch: [configFile],
+  })
+})
+
+new Promise(async () => { // 检查服务启动是否成功, 服务成功后才能映射到远程
   const {
     showLocalInfo,
     remoteServer,
