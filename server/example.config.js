@@ -17,7 +17,7 @@ module.exports = util => {
     replayProxyFind (item) { // 自定义请求重放时的逻辑
       const bodyPath = item.data.res.bodyPath
       if(bodyPath && bodyPath.match(/\.json$/)) {
-        bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
+        const bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
         const body = require(bodyPathCwd)
         return body.status === 200 || body.status === `200`
       } else {
