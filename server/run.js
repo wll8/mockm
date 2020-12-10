@@ -46,14 +46,10 @@ new Promise( async () => { // 检查更新
 })
 
 new Promise(async () => { // 启动 server.js
-  await toolObj.generate.initPackge(`cnpm`, {getRequire: false, msg: `正在初始化CNPM...`})
   nodemon({
     exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
     watch: [configFile],
   })
-})
-
-new Promise(async () => { // 检查服务启动是否成功, 服务成功后才能映射到远程
   const {
     showLocalInfo,
     remoteServer,
