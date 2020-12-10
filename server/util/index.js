@@ -8,6 +8,43 @@ const libObj = {
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
   function npm() { // npm 相关
     /**
+     * 获取本地 package 版本号
+     * @param {string} name packageName
+     * @param {object} param1 选项
+     * @param {array} param1.packagePath 指定路径
+     */
+    function getLocalVersion(name, {packagePath} = {}) { // 从本地获取版本号
+      const hasFile = toolObj.file.hasFile
+      packagePath = packagePath || require.main.paths.concat(`${require(`path`).parse(process.execPath).dir}/node_modules`) // 全局安装目录
+        .find(path => hasFile(`${path}/${name}/package.json`))
+      if(packagePath) {
+        return require(`${packagePath}/${name}/package.json`).version // 从 package 中获取版本
+      }
+    }
+
+    /**
+     * 从 npmjs 中获取版本号
+     * @param {*} name packageName 名称
+     */
+    function getServerVersion(name) { // 从 npmjs 中获取版本号
+      return new Promise((resolve, reject) => {
+        const https = require('https');
+        https.get(`https://registry.npmjs.org/${name}`, res => {
+            let data = ''
+            res.on('data', chunk => {
+              data += chunk
+            })
+            res.on('end', () => {
+              const latest = (JSON.parse(data)[`dist-tags`] || {}).latest // 获取最新版本
+              resolve(latest)
+            })
+        }).on(`error`, (err) => {
+          reject(err.message)
+        })
+      })
+    }
+
+    /**
     * 从 npmjs 检查依赖版本
     * @param {*} name 要检查更新的依赖名称
     * @param {object} param1 参数
@@ -15,32 +52,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     * @param {array} param1.packagePath 指定路径
     */
     async function checkUpdate(name, {version, packagePath} = {}) {
-      const hasFile = toolObj.file.hasFile
-      function getLocalVersion(name) { // 从本地获取版本号
-        packagePath = packagePath || require.main.paths.concat(`${require(`path`).parse(process.execPath).dir}/node_modules`) // 全局安装目录
-          .find(path => hasFile(`${path}/${name}/package.json`))
-        if(packagePath) {
-          return require(`${packagePath}/${name}/package.json`).version // 从 package 中获取版本
-        }
-      }
-      function getServerVersion(name) { // 从 npmjs 中获取版本号
-        return new Promise((resolve, reject) => {
-          const https = require('https');
-          https.get(`https://registry.npmjs.org/${name}`, res => {
-              let data = ''
-              res.on('data', chunk => {
-                data += chunk
-              })
-              res.on('end', () => {
-                const latest = (JSON.parse(data)[`dist-tags`] || {}).latest // 获取最新版本
-                resolve(latest)
-              })
-          }).on(`error`, (err) => {
-            reject(err.message)
-          })
-        })
-      }
-      const getLocalVersionRes = version || getLocalVersion(name)
+      const getLocalVersionRes = version || getLocalVersion(name, {packagePath})
       const getServerVersionRes = await getServerVersion(name).catch(err => console.log(err))
       return {
         local: getLocalVersionRes,
@@ -49,6 +61,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      getLocalVersion,
+      getServerVersion,
       checkUpdate,
     }
   }
@@ -103,35 +117,54 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
   }
 
+  function hasPackage(name, cfg = {}) { // 是还存在某个包
+    const path = require(`path`)
+    const mainPath = cfg.mainPath || path.join(__dirname, '../') // 主程序目录
+    const packgePath =  `${mainPath}/node_modules/${name}`
+    const hasPackge = toolObj.file.hasFile(packgePath)
+    return hasPackge
+  }
+
+  function installPackage({cwd, env, packageName, version}) {
+    // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
+    const installEr = {cnpm: `npm`}[packageName] || `cnpm`
+    const {MOCKM_REGISTRY = `https://registry.npm.taobao.org/`} = process.env
+    return cli().spawn(
+      `npx`, `${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
+      {cwd, env: {NPM_CONFIG_REGISTRY: env.MOCKM_REGISTRY, ...env}}
+    )
+  }
+
   function generate() { // 生成器
     /**
      * 如果某个依赖不存在, 则安装它
-     * @param {*} packge 依赖名称
+     * @param {*} packageName 依赖名称
      * @param {object} param1 配置
      * @param {string} param1.version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
      * @param {boolean} param1.getRequire 是否安装完成后进行 require
      * @param {object} param1.env 安装时的环境变量
      * @param {string} param1.msg 依赖不存在时提示的消息
      */
-    async function initPackge(packge, {version, getRequire = true, env = {}, msg} = {}) {
+    async function initPackge(packageName, {version, getRequire = true, env = {}, msg} = {}) {
       try {
         const path = require(`path`)
         const mainPath = path.join(__dirname, '../') // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || packageJson.pluginDependencies[packge]
-        const packgePath =  `${mainPath}/node_modules/${packge}`
-        const hasPackge = toolObj.file.hasFile(packgePath)
-        const {MOCKM_REGISTRY = `https://registry.npm.taobao.org/`} = process.env
-        if(hasPackge === false) { // 如果 ngrok 不存在, 则安装它
+        version = version || packageJson.pluginDependencies[packageName]
+        const hasPackageRes = hasPackage(packageName)
+        if(hasPackageRes === false) { // 如果 ngrok 不存在, 则安装它
+          const cnpmVersion = npm().getLocalVersion(`cnpm`)
+          if(cnpmVersion === undefined) { // 如果 cnpm 不存在则先安装 cnpm
+            console.log(`正在初始化CNPM...`)
+            await installPackage({cwd: mainPath, env, packageName: `cnpm`, version: `6.1.1` })
+          }
           msg && console.log(msg)
-          // todo 修改为 npm i 某些依赖会无法安装
-          const installEr = {cnpm: `npm`}[packge] || `cnpm`
-          await cli().spawn(
-            `npx`, `${installEr} i ${packge}@${version} --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
-            {cwd: mainPath, env: {NPM_CONFIG_REGISTRY: env.MOCKM_REGISTRY, ...env}}
-          )
+          await installPackage({cwd: mainPath, env, packageName, version })
         }
-        return getRequire ? require(packge) : undefined
+        if(getRequire) {
+          cache().delRequireCache(packageName)
+          return require(packageName)
+        }
       } catch (err) {
         console.log(`err`, err)
       }
@@ -251,11 +284,20 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {string} cmd // curl/bash 命令
      */
     async function getOptions(cmd) {
-      var options = {} // 注意: options 的内容从 eval(optionStr) 中得到
       const curlconverter = await toolObj.generate.initPackge(`curlconverter`)
-      const requestStr = curlconverter.toNode(cmd)
-      const optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
-      eval(optionStr)
+      const requestStr = curlconverter.toNodeRequest(cmd)
+      let optionStr = requestStr.match(/^var request = require[\s\S].*;([\s\S]*)^function callback([\s\S]*)/m)[1] // 只取出 options 相关的代码
+      let options = {}
+      try {
+        const { NodeVM } = require(`vm2`)
+        const vm = new NodeVM()
+        options = vm.run(`${optionStr}\nmodule.exports = options`, `vm.js`) || ``
+        // 避免 node v10.12.0 出现 options.uri is a required argument
+        options.url = options.url || options.uri
+        options.uri = options.url || options.uri
+      } catch (err) {
+        console.log(`err`, err)
+      }
       return options
     }
     return {
