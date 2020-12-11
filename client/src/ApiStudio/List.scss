@@ -6,5 +6,13 @@
     .ant-table-cell {
       word-break: break-all;
     }
+    .operation {
+      &>* {
+        vertical-align: middle;
+      }
+    }
+    .apiType:not(.apiWeb) {
+      display: none;
+    }
   }
 }

@@ -493,7 +493,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function file() { // 文件相关
-    function fileStore(storePath, initValue = {}) { // 存取需要持久化存储的数据
+    function fileStore(storePath, initValue) { // 存取需要持久化存储的数据
       const fs = require(`fs`)
       const {
         o2s,
@@ -501,7 +501,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         deepGet,
       } = obj()
       if(isFileEmpty(storePath)) {
-        fs.writeFileSync(storePath, o2s(initValue))
+        fs.writeFileSync(storePath, o2s(initValue || {}))
+      } else if(initValue) { // 避免后期添加的键由于存在文件而没有正常初始化
+        const store = JSON.parse(fs.readFileSync(storePath, `utf-8`))
+        fs.writeFileSync(storePath, o2s({...initValue, ...store}))
       }
       let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
       return {
@@ -1055,80 +1058,88 @@ function business() { // 与业务相关性较大的函数
   }
 
   function apiWebHandle({config}) { // 处理 webApi 为 api
-    const webApi = require(config.apiWeb).paths || {}
-    const pathList = Object.keys(webApi).map(path => {
-      return Object.keys(webApi[path]).map(method => ({
+    const apiWebStore = toolObj.file.fileStore(config.apiWeb)
+    const paths = apiWebStore.get(`paths`)
+    const disableApiList = apiWebStore.get(`disable`)
+    const pathList = Object.keys(paths).map(path => {
+      return Object.keys(paths[path]).map(method => ({
         key: `${method} ${path}`,
         path,
         method,
-        ...webApi[path][method],
+        ...paths[path][method],
       }))
     }).flat()
     const apiObj = pathList.reduce((acc, cur, curIndex) => {
+      const fn = (req, res, next) => {
+        const {example = {}, table = []} = cur.responses[`200`]
+        const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
+        if(useDataType === `table`) { // 使用表格中的数据
+          try {
+            const { setHeader } = clientInjection({config})
+            setHeader(res, headers) // 设置自定义 header
+            let data
+            const listToDataRes = listToData(table, {rule, type})
+            data = listToDataRes.data
+            // 根据 apiWebWrap 处理数据
+            if(config.apiWebWrap === true) {
+              data = wrapApiData({data, code: 200})
+            } else if(typeof(config.apiWebWrap) === `function`) {
+              data = config.apiWebWrap({data, code: 200})
+            }
+            res.json(data)
+          } catch (error) {
+            res.status(500).json({msg: `转换错误: ${error.message}`})
+          }
+        }
+        if (useDataType === `custom`) { // 自定义逻辑
+          try {
+            const { NodeVM } = require(`vm2`);
+            const vm = new NodeVM({
+              sandbox: { // 给 vm 使用的变量
+                tool: {
+                  libObj,
+                  wrapApiData,
+                  listToData,
+                  cur,
+                },
+              }
+            });
+            const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``;
+            const codeType = typeof(code)
+            if([`function`].includes(codeType)) { // 如果是函数则运行函数
+              code(req, res, next)
+            } else { // 函数之外的类型则当作 json 返回
+              res.json(code)
+            }
+          } catch (err) {
+            console.log(`err`, err)
+            // 处理客户端代码出现问题, 代码错误或出现不允许的权限
+            res.status(403).json({
+              msg: err.message
+            })
+          }
+        }
+        if (useDataType === `history`) { // 使用历史记录
+          toolObj.middleware.replayHistoryMiddleware({
+            id: history,
+            config,
+          })(req, res, next)
+        }
+      }
+      fn.type = `apiWeb`
+      fn.description = cur.description
+      fn.disable = disableApiList.includes(`/`)  // 如果含有根结点, 则表示全部禁用
+        ? true
+        : disableApiList.includes(cur.key)
       return {
         ...acc,
-        [cur.key]: (req, res, next) => {
-          const {example = {}, table = []} = cur.responses[`200`]
-          const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
-          if(useDataType === `table`) { // 使用表格中的数据
-            try {
-              const { setHeader } = clientInjection({config})
-              setHeader(res, headers) // 设置自定义 header
-              let data
-              const listToDataRes = listToData(table, {rule, type})
-              data = listToDataRes.data
-              // 根据 apiWebWrap 处理数据
-              if(config.apiWebWrap === true) {
-                data = wrapApiData({data, code: 200})
-              } else if(typeof(config.apiWebWrap) === `function`) {
-                data = config.apiWebWrap({data, code: 200})
-              }
-              res.json(data)
-            } catch (error) {
-              res.status(500).json({msg: `转换错误: ${error.message}`})
-            }
-          }
-          if (useDataType === `custom`) { // 自定义逻辑
-            try {
-              const { NodeVM } = require(`vm2`);
-              const vm = new NodeVM({
-                sandbox: { // 给 vm 使用的变量
-                  tool: {
-                    libObj,
-                    wrapApiData,
-                    listToData,
-                    cur,
-                  },
-                }
-              });
-              const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``;
-              const codeType = typeof(code)
-              if([`function`].includes(codeType)) { // 如果是函数则运行函数
-                code(req, res, next)
-              } else { // 函数之外的类型则当作 json 返回
-                res.json(code)
-              }
-            } catch (err) {
-              console.log(`err`, err)
-              // 处理客户端代码出现问题, 代码错误或出现不允许的权限
-              res.status(403).json({
-                msg: err.message
-              })
-            }
-          }
-          if (useDataType === `history`) { // 使用历史记录
-            toolObj.middleware.replayHistoryMiddleware({
-              id: history,
-              config,
-            })(req, res, next)
-          }
-        },
+        [cur.key]: fn,
       }
     }, {})
     return apiObj
   }
 
-  function customApi({api, db}) {
+  function customApi({api, db, config}) {
     /**
     * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
     */
@@ -1152,7 +1163,10 @@ function business() { // 与业务相关性较大的函数
         return serverRouterList.some(item => {
           // 当方法不同时才去匹配 url
           if(((item.method === `all`) || (item.method === method))) {
-            return item.re.exec(pathname)
+            return (
+              item.re.exec(pathname) // 如果匹配到自定义的 api 则走自定义 api
+              && Boolean(item.action.disable) === false // 如果自定义 api 为禁用状态, 则走真实服务器
+            )
           } else {
             return false
           }
@@ -1162,6 +1176,46 @@ function business() { // 与业务相关性较大的函数
         serverRouterList,
         noProxyTest,
       }
+    }
+
+    function parseDbApi() {
+      const isType = toolObj.type.isType
+      let apiList = []
+      Object.keys(db).forEach(key => {
+        const val = db[key]
+        if (isType(val, `object`)) {
+          ;`get post put patch`.split(` `).forEach(method => {
+            apiList.push({
+              method,
+              path: `/${key}`,
+            })
+          })
+        }
+        if (isType(val, `array`)) {
+          ;`get post`.split(` `).forEach(method => {
+            apiList.push({
+              method,
+              path: `/${key}`,
+              type: `db`,
+            })
+          })
+          ;`get put patch delete`.split(` `).forEach(method => {
+            apiList.push({
+              method,
+              path: `/${key}/:id`,
+              type: `db`,
+            })
+          })
+          return apiList
+        }
+      })
+      apiList = apiList.concat(Object.keys(config.route).map(key => {
+        return {
+          path: key,
+          type: `route`,
+        }
+      }))
+      return apiList
     }
 
     function getDataRouter({method, pathname}) {
@@ -1191,6 +1245,7 @@ function business() { // 与业务相关性较大的函数
 
     return {
       parseApi: parseApi(),
+      parseDbApi: parseDbApi(),
       getDataRouter,
     }
 
@@ -1253,7 +1308,10 @@ function business() { // 与业务相关性较大的函数
         fs.mkdirSync(config.dataDir, {recursive: true})
       }
       fileStore(config._httpHistory)
-      fileStore(config.apiWeb)
+      fileStore(config.apiWeb, {
+        paths: {},
+        disable: [],
+      })
 
       { // 监听自定义目录更改后重启服务
         const nodemon = require(`nodemon`)

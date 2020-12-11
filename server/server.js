@@ -73,7 +73,8 @@ new Promise(async () => {
       serverRouterList,
     },
     getDataRouter,
-  } = customApi({api, db})
+    parseDbApi,
+  } = customApi({api, db, config})
 
   const HTTPHISTORY = require(config._httpHistory) // 请求历史
   let TOKEN = ''
@@ -125,6 +126,9 @@ new Promise(async () => {
         ...userConfig,
       }
     }
+
+    const apiWebStore = toolObj.file.fileStore(config.apiWeb)
+    const disableApiList = apiWebStore.get(`disable`)
 
     return {
       serverProxy() {
@@ -414,9 +418,23 @@ new Promise(async () => {
             },
             studio() {
               let path = req.query.path
-              const store = toolObj.file.fileStore(config.apiWeb)
-              const sendData = store.get(path ? [`paths`, path] : `paths`)
-              res.json(sendData)
+              const apiWeb = apiWebStore.get(path ? [`paths`, path] : `paths`) || {}
+              if(path) { // 获取单条
+                res.json(apiWeb)
+              } else { // 获取列表
+                let sendData = []
+                serverRouterList.forEach(item => { // 来自 config.apiWeb 和 config.api
+                  sendData.push({
+                    path: item.router,
+                    method: item.method,
+                    type: item.action.type || `api`,
+                    description: item.action.description,
+                    disable: item.action.disable,
+                  })
+                })
+                sendData = sendData.concat(parseDbApi) // 来自 config.db
+                res.json({api: sendData, disable: disableApiList})
+              }
             },
           }
           if (actionFnObj[action]) {
@@ -433,9 +451,8 @@ new Promise(async () => {
           const actionFnObj = {
             studio() {
               const {setPath, data} = req.body
-              const store = toolObj.file.fileStore(config.apiWeb)
-              const oldVal = store.get(setPath)
-              store.set(setPath, {...oldVal, ...data})
+              const oldVal = apiWebStore.get(setPath)
+              apiWebStore.set(setPath, {...oldVal, ...data})
               res.json({msg: `ok`})
               reStartServer(config.config)
             },
@@ -459,10 +476,21 @@ new Promise(async () => {
             },
             removeApi() {
               const {setPath} = req.body
-              const store = toolObj.file.fileStore(config.apiWeb)
-              store.set(setPath, undefined)
+              apiWebStore.set(setPath, undefined)
               res.json({msg: `ok`})
               reStartServer(config.config)
+            },
+            changeWebApiStatus() {
+              const {api} = req.body
+              const findIndexRes = disableApiList.findIndex(item => item === api)
+              if(findIndexRes >= 0) {
+                disableApiList.splice(findIndexRes, 1)
+              } else {
+                disableApiList.push(api)
+              }
+              apiWebStore.set(`disable`, disableApiList)
+              reStartServer(config.config)
+              res.json({msg: `ok`})
             },
           }
           if (actionFnObj[action]) {
