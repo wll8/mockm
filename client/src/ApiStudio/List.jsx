@@ -4,6 +4,7 @@ import utils from '../utils.jsx'
 import common from '../common.jsx'
 import './List.scss'
 import * as querystring from 'qs'
+import * as icons from '@ant-design/icons'
 
 const $ = window.$
 const HotKey = window.HotKey
@@ -38,6 +39,8 @@ const ApiList = (() => {
     BackTop,
     message,
     Spin,
+    Switch,
+    Divider,
   } = antd
 
   const { Panel } = Collapse;
@@ -45,8 +48,10 @@ const ApiList = (() => {
 
   function Com(props) {
     const [state, setState] = useState({
+      loading: false,
       apiListData: {
         results: [],
+        disable: [],
       },
     })
 
@@ -61,9 +66,11 @@ const ApiList = (() => {
             method: record.method,
           }, { encode: false })
           return (
-            <a href={`#/apiStudio/edit?${url}`}>
-              {record.path}
-            </a>
+            record.type === `apiWeb` ?
+              <a href={`#/apiStudio/edit?${url}`}>
+                {record.path}
+              </a>
+              : record.path
           )
         }
       },
@@ -71,48 +78,75 @@ const ApiList = (() => {
         title: 'method',
         width: 60,
         dataIndex: 'method',
+        render: record => record || `--`,
       },
       {
-        title: 'des',
+        title: 'description',
         width: 200,
         dataIndex: 'description',
       },
       {
-        title: ( // 表头操作
-          <div>
-            <Button
-              title="在当前结点下面添加字段"
-              size="small"
-              onClick={() => window.location.href = "#/apiStudio/edit" }
-            >
-              +
-            </Button>
-          </div>
-        ),
+        title: 'type',
         width: 80,
-        render: (...record) => {
-          record = record[1]
-          const fn = () => {
-            const setPath = [`paths`, record.path, record.method]
-            http.post(`${cfg.baseURL}/api/removeApi/`, {setPath}).then(res => {
+        dataIndex: 'type',
+      },
+      {
+        title: (record) => { // 表头操作
+          const disableFn = (val) => {
+            setState(preState => ({...deepSet(preState, `loading`, true)}))
+            http.post(`${cfg.baseURL}/api/changeWebApiStatus/`, {api: `/`, val}).then(res => {
+              setState(preState => ({...deepSet(preState, `loading`, false)}))
               getApiList()
             })
           }
           return (
-            <div>
+            <div className="title operation">
+              <icons.PlusOutlined onClick={() => window.location.href = "#/apiStudio/edit" } />
+              <Divider type="vertical" />
+              <Switch
+                size="small"
+                loading={state.loading}
+                checked={state.apiListData.disable.includes(`/`) === false}
+                onChange={disableFn}
+              />
+            </div>
+          )
+        },
+        width: 80,
+        render: (...record) => {
+          const {type, path, method} = record[1]
+          const api = `${method} ${path}`
+          const deleteFn = () => {
+            const setPath = [`paths`, path, method]
+            http.post(`${cfg.baseURL}/api/removeApi/`, {setPath}).then(res => {
+              getApiList()
+            })
+          }
+          const disableFn = (val) => {
+            setState(preState => ({...deepSet(preState, `loading`, true)}))
+            http.post(`${cfg.baseURL}/api/changeWebApiStatus/`, {api: api, val}).then(res => {
+              setState(preState => ({...deepSet(preState, `loading`, false)}))
+              getApiList()
+            })
+          }
+          return (
+            <div className={`${type} apiType operation`}>
               <Popconfirm
                 title="确定删除此API?"
-                onConfirm={fn}
+                onConfirm={deleteFn}
                 okText="是"
                 cancelText="否"
               >
-                <Button
-                  title="删除此API"
-                  size="small"
-                >
-                  -
-                </Button>
+                <icons.MinusOutlined />
               </Popconfirm>
+              <Divider type="vertical" />
+              <Switch
+                size="small"
+                loading={state.loading}
+                disabled={state.apiListData.disable.includes(`/`)}
+                checked={state.apiListData.disable.includes(api) === false}
+                onChange={disableFn}
+              />
             </div>
           )
         },
@@ -127,16 +161,11 @@ const ApiList = (() => {
 
     function getApiList (params = {}) {
       http.get(`${cfg.baseURL}/api/studio/`, {params}).then(res => {
-        const list = Object.keys(res).map(path => {
-          return Object.keys(res[path]).map(method => ({
-            key: `${method} ${path}`,
-            path,
-            method,
-            ...res[path][method],
-          }))
-        }).flat()
+        const list = res.api.map((item, index) => ({index, ...item}))
+        const disable = res.disable
         setState(preState => ({...deepSet(preState, `apiListData`, {
           results: list,
+          disable,
         })}))
       })
     }
@@ -145,7 +174,7 @@ const ApiList = (() => {
         <Table
           bordered
           size="small"
-          rowKey="key"
+          rowKey="index"
           pagination={false}
           columns={columnsApiList}
           dataSource={state.apiListData.results}

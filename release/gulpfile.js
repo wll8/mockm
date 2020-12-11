@@ -71,7 +71,7 @@ gulp.task(`uglify`, () => {
         ]
       ]
     }))
-    .pipe(uglify())
+    // .pipe(uglify())
     .pipe(gulp.dest(`../dist/package`))
 })
 
