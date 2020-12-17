@@ -68,7 +68,7 @@ function defaultConfigFn(util) { // 默认配置
     replayProxyFind (item) {
       const bodyPath = item.data.res.bodyPath
       if(bodyPath && bodyPath.match(/\.json$/)) {
-        bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
+        const bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
         const body = require(bodyPathCwd)
         return body.status === 200 || body.status === `200`
       } else {
