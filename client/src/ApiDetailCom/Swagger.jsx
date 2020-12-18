@@ -38,12 +38,21 @@ function Swagger(props) {
     spec: {}, // oepnApi 对象
     swagger: false, // 是否显示 swagger 文档
     pathInSwagger: false, // 显示 swagger 按钮
+    swaggerLoading: false, // swagger 是否正在加载
     serverConfig: {}, // 服务器配置
   })
 
   useEffect(() => { // 判断是否有 swagger, 如果有则显示 swagger 按钮
     try {
-      let {method, path} = props
+      let {
+        headers: {
+          authorization,
+        },
+        line: {
+          method,
+          path,
+        },
+      } = props.httpData.data.req.lineHeaders
       let {paths, basePath} = state.spec
       method = method.toLowerCase()
       // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
@@ -54,6 +63,7 @@ function Swagger(props) {
         return swgPath.match(re)
       })
       setState(preState => ({...deepSet(preState, `pathInSwagger`, res)}))
+      setState(preState => ({...deepSet(preState, `authorization`, authorization)}))
     } catch (error) {
       console.log(`error`, error)
       setState(preState => ({...deepSet(preState, `pathInSwagger`, false)}))
@@ -80,7 +90,7 @@ function Swagger(props) {
     return res
   }
 
-  function initSwagger({serverConfig, store}) {
+  function initSwagger({serverConfig, store, cb}) {
     // 添加 swagger-ui.css
     $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui.css">`))
     $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
@@ -109,7 +119,7 @@ function Swagger(props) {
         ],
         requestInterceptor (req) {
           // 如果原 url 存在 auth (需要 auth), 则使用新 token 替换它, 否则不要添加, 避免添加不必要的东西引起错误
-          let authorization = props.authorization
+          let authorization = state.authorization
           if(authorization) {
             req.headers.Authorization = authorization
           }
@@ -129,6 +139,7 @@ function Swagger(props) {
           }
           const protocol = window.location.protocol.replace(`:`, ``) // 协议跟随当前页面
           window.swaggerUi.setSpec({host, protocol, schemes: [protocol]})
+          cb()
         }
       })
     }, true)
@@ -141,7 +152,12 @@ function Swagger(props) {
     ]).then(([config, store]) => {
       setState(preState => ({...deepSet(preState, `serverConfig`, config)}))
       const {openApi} = config
-      openApi && initSwagger({serverConfig: config, store})
+      if(openApi) {
+        setState(preState => ({...deepSet(preState, `swaggerLoading`, true)}))
+        initSwagger({serverConfig: config, store, cb: () => {
+          setState(preState => ({...deepSet(preState, `swaggerLoading`, false)}))
+        }})
+      }
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reactLocation]);
@@ -164,7 +180,12 @@ function Swagger(props) {
       hideDoc()
     } else {
       // 滚动 swagger 视图到相同的 api 位置
-      let {method, path} = props
+      let {
+        line: {
+          method,
+          path,
+        },
+      } = props.httpData.data.req.lineHeaders
       method = method.toLowerCase()
       // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
       const basePath = $(`.swagger-ui .info .base-url`).text().match(/(\/.*) ]/)[1] // 其实就是 json 中的 basePath, 只是不想再请求并解析这个 json 文件, 所以直接在 dom 中获取
@@ -206,7 +227,16 @@ function Swagger(props) {
   }
 
   return (
-    <Button onClick={swagger} size="small" type={state.swagger ? `primary` : `default`} className="swagger" style={{display: state.pathInSwagger ? undefined : `none`}}>swagger</Button>
+    <Button
+      loading={state.swaggerLoading}
+      onClick={swagger}
+      size="small"
+      type={state.swagger ? `primary` : `default`}
+      className="swagger"
+      disabled={!state.pathInSwagger}
+    >
+      swagger
+    </Button>
   )
 }
 
