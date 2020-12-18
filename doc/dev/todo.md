@@ -1,5 +1,6 @@
 # 待完成
 ## 功能
+- [ ] feat: 支持在 config.api 中按条件再回到 config.proxy
 - [ ] feat: 支持 node v10.12.0 以下的版本, 需注意 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
 - [x] feat: 从 cdn 下载 ngrok 程序
 - [ ] feat: webApi 支持批处理, 自动翻译, 类型转换, 数据生成
@@ -42,6 +43,9 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix: server/config.js 中 ReferenceError: bodyPathCwd is not defined
+- [ ] fix: 当 http body json 的内容较大, 例如 6M 时, 在页面上无法查看详情, 导致浏览器内存不足页崩溃
+- [ ] fix: 发送文件时, header 中没有 x-test-api
 - [x] fix: node v10.12.0 没有触发 req 的 close 事件, node v12.18.3 执行了. 导致某些情况没有保存请求记录到 json 文件中, 参考: 
   - https://github.com/nodejs/node/commit/f22c7c10ca0c8c7a10057de71bc423bf8b633b88
   - https://github.com/nodejs/node/issues/31394

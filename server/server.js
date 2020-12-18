@@ -400,7 +400,16 @@ new Promise(async () => {
               getFilePath({reqOrRes: `res`, id: actionArg0})
             },
             getHttpData() {
-              res.send(getHistory({history: HTTPHISTORY, fullApi, id: actionArg0}).data)
+              const historyRes = getHistory({history: HTTPHISTORY, fullApi, id: actionArg0})
+              const {method, path} = historyRes.data.req.lineHeaders.line
+              const webApi = (apiWebStore.get([`paths`, path]) || {})[method]
+              if(webApi) {
+                webApi.disable = apiWebStore.get(`disable`).includes(historyRes.fullApi)
+              }
+              res.send({
+                webApi,
+                historyRes,
+              })
             },
             getApiResponseById() {
               middleware.replayHistoryMiddleware({

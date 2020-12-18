@@ -8,7 +8,7 @@ import ReqRes from './ReqRes.jsx'
 import Capture from './ApiDetailCom/Capture.jsx'
 import Replay from './ApiDetailCom/Replay.jsx'
 import Swagger from './ApiDetailCom/Swagger.jsx'
-import FixedResponse from './ApiDetailCom/FixedResponse.jsx'
+import WebApi from './ApiDetailCom/WebApi.jsx'
 import ApiHistory from './ApiDetailCom/ApiHistory.jsx'
 import './ApiDetail.scss'
 
@@ -104,9 +104,10 @@ const ApiDetail = (() => {
       console.log(`method, api`, method, api)
       const fullApi = window.decodeURIComponent(`${method} ${api}`)
       console.log(`fullApi`, fullApi, state.parseHashData)
-      http.get(`${cfg.baseURL}/api/getHttpData/${method}${api}`).then(data => {
+      http.get(`${cfg.baseURL}/api/getHttpData/${method}${api}`).then(({webApi, historyRes: { data }}) => {
         const [, apiId = undefined] = window.location.hash.match(/#\/history,(\w+)/) || []
         const newData = {
+          webApi,
           method,
           api,
           api0: `${method}${api}`,
@@ -187,16 +188,9 @@ const ApiDetail = (() => {
         <div className="options">
           <Replay method={state.httpData.method} api={state.httpData.api} />
           <Capture cb={captureCb} captureImg={state.captureImg} />
-          {
-            state?.httpData?.data?.req?.lineHeaders?.line
-              &&  <Swagger
-                    authorization={state.httpData.data.req.lineHeaders.headers.authorization}
-                    method={state.httpData.data.req.lineHeaders.line.method}
-                    path={state.httpData.data.req.lineHeaders.line.path}
-                  />
-          }
+          <Swagger httpData={state.httpData} />
           <ApiHistory apiId={state.httpData.apiId} api0={state.httpData.api0} />
-          <FixedResponse httpData={state.httpData} />
+          <WebApi httpData={state.httpData} />
           <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
             {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
           </div>
