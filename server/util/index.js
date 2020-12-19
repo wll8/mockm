@@ -916,6 +916,40 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function string() { // 字符串处理
+
+    /**
+    * 获取字符串的 md5
+    * @param {*} str 字符串
+    */
+    function getMd5(str) {
+      const crypto = require('crypto')
+      const md5 = crypto.createHash('md5')
+      return md5.update(str).digest('hex')
+    }
+
+    /**
+    * 驼峰转下划线
+    * @param {*} str
+    */
+    function toLine(str) {
+      str = str.replace(str[0],str[0].toLowerCase())
+      return str.replace(/([A-Z])/g, `_$1`).toLowerCase();
+    }
+
+    /**
+    * 转换字符为小驼峰, 支持 `空格 - _`
+    * @param {string} str 要处理的字符
+    */
+    function toLittleHump(str) {
+      str = toLine(str) // 先转一下, 避免本来是驼峰转换后不是驼峰了
+      let arr = str.split(' ').join('-').split('-').join('_').split('_')
+      for (let i = 1; i < arr.length; i++) {
+        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].substring(1)
+      }
+      arr[0] = arr[0].toLowerCase() // 此行为小驼峰
+      return arr.join('')
+    }
+
     function removeLeft(str) {
       const lines = str.split('\n')
       // 获取应该删除的空白符数量
@@ -929,11 +963,96 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return newStr
     }
     return {
+      getMd5,
+      toLittleHump,
+      toLine,
       removeLeft,
     }
   }
 
+  function array() { // 数组处理
+    /**
+    * 转换数组为树形结构
+    * @param {array} data 包含 id, pid 的数组
+    * @param {function} childrenFn  // 如果有 children 时, 可以接收 parent
+    */
+    function toTree(data, childrenFn = () => {}) {
+      let result = [];
+      if (!Array.isArray(data)) {
+        return result;
+      }
+      data.forEach((item) => {
+        delete item.children;
+      });
+      let map = {};
+      data.forEach((item) => {
+        map[item.id] = item;
+      });
+      data.forEach((item) => {
+        let parent = map[item.pid];
+        if (parent) {
+          childrenFn && childrenFn(parent);
+          (parent.children || (parent.children = [])).push(item);
+        } else {
+          result.push(item);
+        }
+      });
+      return result;
+    }
+
+
+    /**
+    * 根据字段值中的 - 标志转为树形结构
+      ``` js
+      const arr = `
+      A
+      -A.1
+      B
+      -B.1
+      -B.2
+      --B.2.1
+      --B.2.2
+      C
+      D
+      E
+        `.trim().split(`\n`).filter(item => item.trim()).map(item => ({key: item}))
+      console.log(`res`, arrToTree(arr, {key: `key`, tag: `-`}))
+      ```
+    * @param {array} arr 数组
+    * @param {object} param1
+    * @param {string} param1.key 对应的 key
+    * @param {string} param1.tag 对应的 tag
+    */
+    function arrToTree(arr, {key = `key`, tag = `-`} = {}) {
+      let pid = undefined // pid
+      let oldTag = undefined // 标志
+      const res = arr.map((item, index) => {
+        let [, newTag, res] = item[key].match(new RegExp(`^(${tag}*)(.*)`))
+        if(newTag === ``) { // 不存标志时 pid 为 root
+          pid = `root`
+        } else if(newTag !== oldTag) { // 存在标志但标志标志不同, 则更新 pid
+          pid = index - 1
+        }
+        oldTag = newTag
+        return {
+          ...item,
+          [key]: res, // 删除 tag 标志的结果
+          id: index,
+          pid,
+        }
+      })
+      return toTree(res, parent => {parent.type = `object`})
+    }
+
+    return {
+      arrToTree,
+      toTree,
+    }
+
+  }
+
   return {
+    array: array(),
     string: string(),
     npm: npm(),
     control: control(),

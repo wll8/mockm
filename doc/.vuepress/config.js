@@ -64,7 +64,7 @@ module.exports = {
     // search: false,
     sidebarDepth: 2,
     nav: [
-      { text: '版本 v1.1.14', link: '/' },
+      { text: '版本 v1.1.15', link: '/' },
       { text: '配置项', link: '/config/option.md' },
       {
         text: '源码',

@@ -483,6 +483,20 @@ new Promise(async () => {
               const listToDataRes = listToData(table, {rule, type})
               res.json(listToDataRes.data)
             },
+            async translate() {
+              const {text, appid, key, type = `tree`} = req.body
+              const { batchTextEnglish } = require(`./util/translate`)
+              batchTextEnglish({
+                text,
+                appid,
+                key,
+                type,
+              }).then(data => {
+                res.json(data)
+              }).catch(err => {
+                res.json({err: err.message})
+              })
+            },
             removeApi() {
               const {setPath} = req.body
               apiWebStore.set(setPath, undefined)
