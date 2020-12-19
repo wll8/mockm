@@ -372,7 +372,28 @@ function docLink(text, link) {
   return <a rel="noopener noreferrer" target="_blank" href={`https://www.hongqiye.com/doc/mockm${link}`}>{text}</a>
 }
 
+/**
+ * 简单实现双向绑定
+ * @param {event} ev event 对象 value 值
+ * @param {string} stateKey 要映射到 state key
+ * @param {object} param2 参数
+ * @param {*} param2.state 传入 state
+ * @param {*} param2.setState 传入 setState
+ */
+function onChange(ev, stateKey, {state, setState}) {
+  let value = ev
+  if(typeof(ev.persist) === `function`) { // 绑定 event 形式的 value
+    ev.persist()
+    value = ev.target.value
+  }
+  const oldValue = deepGet(state, stateKey)
+  if(JSON.stringify(oldValue) !== JSON.stringify(value)) {
+    setState(preState => ({...deepSet(preState, stateKey, value)}))
+  }
+}
+
 export default  {
+  onChange,
   docLink,
   deepCopy,
   tree2Array,

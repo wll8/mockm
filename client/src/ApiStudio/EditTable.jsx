@@ -1,5 +1,7 @@
 import './EditTable.scss'
 import utils from '../utils.jsx'
+import Translate from './Translate.jsx'
+
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Table,
@@ -215,6 +217,7 @@ function EditableTable (props) {
     useRef,
   } = React
 
+  const childRef = useRef()
   const [state, setState] = useState({
     dataSource: setListVal({
       arr: JSON.parse(JSON.stringify(props.dataSource || [{key: guid()}])),
@@ -244,22 +247,68 @@ function EditableTable (props) {
     });
   };
 
-  const handleAdd = (record) => {
+  let clickTimeId = null // 用于处理单击双击冲突
+  const handleBatchAdd = (record) => { // 从文本批量添加
+    clearTimeout(clickTimeId)
+    childRef.current.show(record)
+  }
+
+  const translateOnOk = ({data: dataList, enclosure: record}) => { // 获取处理结果
+    dataList = setListVal({
+      arr: JSON.parse(JSON.stringify(dataList)),
+      key: `key`,
+      val: guid,
+      childrenKey: `children`,
+    })
+    function filterDouble(list) {
+      const dataSourceNameList = list.map(item => item.name)
+      const doubleList = []
+      const newDataList = dataList.filter(item => {
+        if(dataSourceNameList.includes(item.name)) {
+          doubleList.push(item.name)
+          return false
+        } else {
+          return true
+        }
+      }).map(item => ({...item, key: guid()}))
+      if(dataList.length !== newDataList.length) {
+        message.warn(`已跳过相同的字段: ${doubleList.join(`, `)}`)
+      }
+      return newDataList
+    }
     if(record) {
-      record.children = [...(record.children || []), {key: guid()}]
+      const oldList = (record.children || [])
+      record.children = [...oldList, ...filterDouble(oldList)]
       let searchRes = search(state.dataSource, `key`, record.key)
       searchRes = searchRes.slice(0, -2)
       handleSave(record) // 刷新数据上的展开图标
     } else {
-      let { dataSource = [] } = state;
-      const key = guid()
-      const newData = {
-        key,
-      };
+      let { dataSource = [] } = state
       setState({
-        dataSource: [...dataSource, newData],
+        dataSource: [...dataSource, ...filterDouble(dataSource)],
       });
     }
+  }
+
+  const handleAdd = (record) => {
+    clearTimeout(clickTimeId)
+    clickTimeId = setTimeout( () => {
+      if(record) {
+        record.children = [...(record.children || []), {key: guid()}]
+        let searchRes = search(state.dataSource, `key`, record.key)
+        searchRes = searchRes.slice(0, -2)
+        handleSave(record) // 刷新数据上的展开图标
+      } else {
+        let { dataSource = [] } = state;
+        const key = guid()
+        const newData = {
+          key,
+        };
+        setState({
+          dataSource: [...dataSource, newData],
+        });
+      }
+    }, 250)
   };
 
   const handleDeleteAll = () => {
@@ -319,6 +368,7 @@ function EditableTable (props) {
             title="在根结点下面添加字段"
             size="small"
             onClick={() => handleAdd()}
+            onDoubleClick={() => handleBatchAdd()}
           >
             +
           </Button>
@@ -351,6 +401,7 @@ function EditableTable (props) {
                     title="在当前结点下面添加字段"
                     size="small"
                     onClick={() => handleAdd(record)}
+                    onDoubleClick={() => handleBatchAdd(record)}
                   >
                     +
                   </Button>
@@ -382,6 +433,7 @@ function EditableTable (props) {
   });
   return (
     <div>
+      <Translate cRef={childRef} onOk={translateOnOk} />
       <Table
         {...props}
         pagination={false}
