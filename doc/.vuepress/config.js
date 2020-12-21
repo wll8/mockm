@@ -66,12 +66,13 @@ module.exports = {
     nav: [
       { text: '版本 v1.1.15', link: '/' },
       { text: '配置项', link: '/config/option.md' },
+      { text: 'mockjs', link: 'http://wll8.gitee.io/mockjs-examples/' },
       {
         text: '源码',
         link: 'https://github.com/wll8/mockm',
         items: [
           { text: 'github', link: 'https://github.com/wll8/mockm' },
-          // { text: 'gitee', link: 'https://gitee.com/projects/new' }
+          { text: 'gitee', link: 'https://gitee.com/wll8/mockm' }
         ]
       }
     ],
