@@ -3,6 +3,9 @@
 
 ## 2020年12月
 
+#### v1.1.16
+- fix: [#9 某些时候颜色打印出错](https://github.com/wll8/mockm/issues/9)
+
 #### v1.1.15
 - feat: 支持从文本转换
   - 在 webApi 界面双击 table 中的加号使用
