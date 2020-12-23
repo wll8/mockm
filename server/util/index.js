@@ -232,9 +232,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       Object.keys(util.inspect.colors).forEach((color) => {
         returnValue[color] = (text) => colorize(color, text)
       })
+
+      const colorTable = new Proxy(returnValue, {
+        get (obj, prop) {
+          // 在没有对应的具名颜色函数时, 返回空函数作为兼容处理
+          const res = obj[prop] ? obj[prop] : (arg => arg)
+          return res
+        }
+      })
+
       // 取消下行注释, 查看所有的颜色和名字:
       // Object.keys(returnValue).forEach((color) => console.log(returnValue[color](color)))
-      return returnValue
+      return colorTable
     }
 
     /**
