@@ -3,6 +3,10 @@
 
 ## 2020年12月
 
+#### v1.1.17
+- fix: 使用 spawn 方法的 env 参数时合并 process.env, 避免在某些系统出现问题
+- feat: 支持 MOCKM_REGISTRY 或 NPM_CONFIG_REGISTRY 环境变量指定按需安装依赖时的镜像地址
+
 #### v1.1.16
 - fix: [#9 某些时候颜色打印出错](https://github.com/wll8/mockm/issues/9)
 
