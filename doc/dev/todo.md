@@ -1,5 +1,14 @@
 # 待完成
 ## 功能
+- [ ] feat: 支持 ws 示例
+- [ ] feat: 添加崩溃重启功能
+- [ ] feat: 支持配置静态文件目录, 可配置多个
+- [ ] feat: 优化mock生成规则
+  - [ ] author @cname
+  - [ ] describe @cparagraph
+  - [ ] limit$(ed) @natural
+  - [ ] address @address - 注意此地址规则无效
+- [ ] feat: 向 config.api 暴露所有能暴露的 util
 - [ ] feat: 支持在 config.api 中按条件再回到 config.proxy
 - [ ] feat: 支持 node v10.12.0 以下的版本, 需注意 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
 - [x] feat: 从 cdn 下载 ngrok 程序
@@ -43,6 +52,11 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix: 从请求详情中点击编辑 webApi 时, 不应该携带 query 参数
+- [ ] fix: 应该把有道翻译放在最后面, 因为它的翻译结果不精简. 例如 `名称` 不应该被翻译为 `The name of the` , 而应该翻译为 `name`.
+- [ ] fix: weApi 接口删除需要刷新才能看到已删除
+- [ ] fix: 中文 api 路径会有问题
+- [ ] fix: post 值为空时 或 res.send({}) 时报错
 - [ ] fix: server/config.js 中 ReferenceError: bodyPathCwd is not defined
 - [ ] fix: 当 http body json 的内容较大, 例如 6M 时, 在页面上无法查看详情, 导致浏览器内存不足页崩溃
 - [ ] fix: 发送文件时, header 中没有 x-test-api
