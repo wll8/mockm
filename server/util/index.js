@@ -128,10 +128,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function installPackage({cwd, env, packageName, version}) {
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
     const installEr = {cnpm: `npm`}[packageName] || `cnpm`
-    const {MOCKM_REGISTRY = `https://registry.npm.taobao.org/`} = process.env
+    let {MOCKM_REGISTRY, NPM_CONFIG_REGISTRY} = process.env
+    MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
     return cli().spawn(
       `npx`, `${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
-      {cwd, env: {NPM_CONFIG_REGISTRY: env.MOCKM_REGISTRY, ...env}}
+      {
+        cwd,
+        env: {
+          NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
+          ...process.env,
+          ...env,
+        }
+      }
     )
   }
 
