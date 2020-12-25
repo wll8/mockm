@@ -43,6 +43,7 @@ const ApiList = (() => {
 
   function Com(props) {
     const [state, setState] = useState({
+      loading: false,
       defaultPageSize: 100,
       defaultPageIndex: 1,
       defaultSort: `date`,
@@ -124,14 +125,17 @@ const ApiList = (() => {
       _page: state.defaultPageIndex,
       _limit: state.defaultPageSize,
       }) {
+      setState(preState => ({...preState, loading: true}))
       http.get(`${cfg.baseURL}/api/getApiList/`, {params}).then(res => {
         res.results = res.results.map((item, key) => ({...item, key}))
         setState(preState => ({...deepSet(preState, `apiListData`, res)}))
+      }).finally(() => {
+        setState(preState => ({...preState, loading: false}))
       })
     }
     return (
       <div className="ApiList">
-        <Table size="small" rowKey="key" pagination={{
+        <Table loading={state.loading} size="small" rowKey="key" pagination={{
           defaultPageSize: state.defaultPageSize,
           total: state.apiListData.count,
           showSizeChanger: true,
