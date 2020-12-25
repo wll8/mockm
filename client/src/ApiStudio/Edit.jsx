@@ -164,7 +164,7 @@ function Edit() {
     const searchParams = new URL(window.location.href.replace(`#`, ``)).searchParams
     const [state, setState] = useState({ // 默认值
       showDrawer: ``,
-      queryPath: searchParams.get(`path`).replace(/(.?)(\?.*)/, `$1`), // url 上的 path 参数
+      queryPath: (searchParams.get(`path`) || ``).replace(/(.?)(\?.*)/, `$1`), // url 上的 path 参数
       apiOk: false, // api 是否请求结束
       hand: { // 标识各个 tab 所在位置
         method: searchParams.get(`method`) || `get`, // api 方法
