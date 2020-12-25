@@ -8,7 +8,7 @@
   - [ ] describe @cparagraph
   - [ ] limit$(ed) @natural
   - [ ] address @address - 注意此地址规则无效
-- [ ] feat: 向 config.api 暴露所有能暴露的 util
+- [x] feat: 向 config 暴露所有 util
 - [ ] feat: 支持在 config.api 中按条件再回到 config.proxy
 - [ ] feat: 支持 node v10.12.0 以下的版本, 需注意 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
 - [x] feat: 从 cdn 下载 ngrok 程序
@@ -57,7 +57,6 @@
 - [x] fix: weApi 接口删除后不应该需要刷新才能看到已删除
 - [ ] fix: 中文 api 路径会有问题
 - [ ] fix: post 值为空时 或 res.send({}) 时报错
-- [ ] fix: server/config.js 中 ReferenceError: bodyPathCwd is not defined
 - [ ] fix: 当 http body json 的内容较大, 例如 6M 时, 在页面上无法查看详情, 导致浏览器内存不足页崩溃
 - [ ] fix: 发送文件时, header 中没有 x-test-api
 - [x] fix: node v10.12.0 没有触发 req 的 close 事件, node v12.18.3 执行了. 导致某些情况没有保存请求记录到 json 文件中, 参考: 
