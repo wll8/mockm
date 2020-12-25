@@ -54,7 +54,7 @@
 ## 缺陷
 - [x] fix: 从请求详情中点击编辑 webApi 时, 不应该携带 query 参数
 - [x] fix: 应该把有道翻译放在最后面, 因为它的翻译结果不精简. 例如 `名称` 不应该被翻译为 `The name of the` , 而应该翻译为 `name`.
-- [ ] fix: weApi 接口删除需要刷新才能看到已删除
+- [x] fix: weApi 接口删除后不应该需要刷新才能看到已删除
 - [ ] fix: 中文 api 路径会有问题
 - [ ] fix: post 值为空时 或 res.send({}) 时报错
 - [ ] fix: server/config.js 中 ReferenceError: bodyPathCwd is not defined
