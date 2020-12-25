@@ -366,6 +366,25 @@ module.exports = {
 
 在控制台会显示 `远程服务信息`, x-test-api 和接口都会生成对应的远程访问链接.
 
+## 如何接入微信消息推送
+当 remote 设置为 true 后会获得一个远程地址, 将其带上接口 `/msg` 填入 `URL(服务器地址)` 中, token 填写例如 `123`, 数据格式推荐 `JSON`. 保存后即可验证通过, 所有微信小程序的消息都会通过 `/msg` 这个接口收到.
+
+``` js
+module.exports = {
+  remote: true,
+  api: {
+    '/msg' (req, res) {
+      const token = `123` // 这里填写 Token(令牌)
+      const crypto = require(`crypto`)
+      const { signature, timestamp, nonce, echostr, } = req.query
+      const sha = crypto.createHash('sha1').update([token, timestamp, nonce].sort().join('')).digest('hex')
+      sha === signature ? res.send(echostr) : res.json({ msg: `验证失败` })
+      console.log(req.query, req.body)
+    },
+  },
+}
+```
+
 ## 如何恢复出错的接口
 如果某个接口之前是好的, 但是由于某些问题现在坏了, 后端又没来得及修复, 可是前端现在有页面依赖这个接口, 怎么办?
 

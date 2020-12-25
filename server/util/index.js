@@ -1089,7 +1089,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 }
 
-function business() { // 与业务相关性较大的函数
+function business() { // 与业务相关性的函数
   /**
    * 通过重新保存文件的方式触发 nodemon 的文件监听, 然后让服务重启
    */
