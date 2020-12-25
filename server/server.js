@@ -427,11 +427,22 @@ new Promise(async () => {
             },
             studio() {
               let path = req.query.path
+              const apiWebStore = toolObj.file.fileStore(config.apiWeb)
               const apiWeb = apiWebStore.get(path ? [`paths`, path] : `paths`) || {}
               if(path) { // 获取单条
                 res.json(apiWeb)
               } else { // 获取列表
                 let sendData = []
+                const disableApiList = apiWebStore.get(`disable`)
+                const {
+                  api,
+                  db,
+                } = init({config}) // 重新运行初始化方法, 以读取最新的 db 和 webApi 文件
+                const {
+                  parseApi: {
+                    serverRouterList,
+                  },
+                } = customApi({api, db, config})
                 serverRouterList.forEach(item => { // 来自 config.apiWeb 和 config.api
                   sendData.push({
                     path: item.router,
