@@ -34,6 +34,7 @@ function FixedResponse({httpData}) {
   const [state, setState] = useState({ // 默认值
     replayDone: true, // 是否重放结束
   });
+  const path = new URL(`http://127.0.0.1${httpData.api}`).pathname
 
   const {
     useHistory,
@@ -43,7 +44,6 @@ function FixedResponse({httpData}) {
 
   function fn() {
     setState(preState => ({...preState, replayDone: false}))
-    const path = new URL(`http://127.0.0.1${httpData.api}`).pathname
     const method = httpData.method
     const apiId = httpData.apiId
     http.patch(`${cfg.baseURL}/api/studio/`, {
@@ -77,7 +77,7 @@ function FixedResponse({httpData}) {
         })
       },
       detail() {
-        window.open(`#/apiStudio/edit?path=${httpData.api}&method=${httpData.method}`)
+        window.open(`#/apiStudio/edit?path=${path}&method=${httpData.method}`)
       },
     }[e.key]
     handle()
