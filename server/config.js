@@ -1,4 +1,5 @@
 const path = require(`path`)
+const exportsUtil = require(`./util/index.js`)
 const {
   libObj,
   business,
@@ -22,7 +23,7 @@ const {
       parseArgv,
     },
   },
-} = require(`./util/index.js`)
+} = exportsUtil
 const {
   wrapApiData,
 } = business()
@@ -99,7 +100,7 @@ function defaultConfigFn(util) { // 默认配置
   }
 }
 
-const exportsUtil = {toolObj, libObj} // 向 config 传送的方法
+
 libObj.midResJson = midResJson
 const defaultArg = defaultConfigFn(exportsUtil)
 const fileArg = fileArgFn(exportsUtil)
