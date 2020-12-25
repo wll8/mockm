@@ -56,7 +56,7 @@
 - [x] fix: 应该把有道翻译放在最后面, 因为它的翻译结果不精简. 例如 `名称` 不应该被翻译为 `The name of the` , 而应该翻译为 `name`.
 - [x] fix: weApi 接口删除后不应该需要刷新才能看到已删除
 - [ ] fix: 中文 api 路径会有问题
-- [ ] fix: post 值为空时 或 res.send({}) 时报错
+- [x] fix: res.send(undefined) 时报错
 - [ ] fix: 当 http body json 的内容较大, 例如 6M 时, 在页面上无法查看详情, 导致浏览器内存不足页崩溃
 - [ ] fix: 发送文件时, header 中没有 x-test-api
 - [x] fix: node v10.12.0 没有触发 req 的 close 事件, node v12.18.3 执行了. 导致某些情况没有保存请求记录到 json 文件中, 参考: 

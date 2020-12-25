@@ -187,7 +187,7 @@ new Promise(async () => {
           const cloneDeep = require('lodash.clonedeep')
           const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
           const oldSend = res.send
-          res.send = function(data) {
+          res.send = (data = ``) => {
             res.send = oldSend
             setHttpHistoryWrap({
               config,
