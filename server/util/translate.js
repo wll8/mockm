@@ -77,18 +77,11 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
           }).catch(err => reject(err))
         })
       }
-      // 翻译中文时, 把有道放在最前面, 因为有道响应速度最快
-      // 翻译英文时, 把有道放在最后面, 因为有道不能直接翻译驼峰式文本
-      const apiList = isChinese ? [
-        handleYouDao,
+      const apiList = [
         baidu,
         microsoft,
         google,
-      ] : [
-        baidu,
-        microsoft,
-        google,
-        handleYouDao,
+        handleYouDao, // 有道不能直接翻译驼峰式文本, 并且词语会被翻译为句子的形式
       ]
 
       let result = undefined
@@ -99,10 +92,6 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
           result = await apiList[index](str, translateFormat).catch(err => { errInfo = err })
         }
       }
-      // const result = await baidu(str, translateFormat).catch(err => { errInfo = err })
-      //   || await handleYouDao(str, translateFormat)
-      //   || await microsoft(str, translateFormat).catch(err => { errInfo = err })
-      //   || await google(str, translateFormat).catch(err => { errInfo = err })
       if (errInfo) {
         reject(errInfo)
       } else {
