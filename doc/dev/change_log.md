@@ -3,6 +3,9 @@
 
 ## 2020年12月
 
+#### v1.1.18
+- fix: 从请求详情中点击编辑 webApi 时, 不应该携带 query 参数
+
 #### v1.1.17
 - fix: 使用 spawn 方法的 env 参数时合并 process.env, 避免在某些系统出现问题
 - feat: 支持 MOCKM_REGISTRY 或 NPM_CONFIG_REGISTRY 环境变量指定按需安装依赖时的镜像地址
