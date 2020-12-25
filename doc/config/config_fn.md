@@ -106,3 +106,26 @@ util 目前包含以下内容:
 ### util.libObj.mime 文件类型识别
 - 参考: https://github.com/broofa/mime
 
+## util.toolObj 工具函数
+- array
+- string
+- npm
+- control
+- cache
+- generate
+- url
+- file
+- cli
+- hex
+- middleware
+- httpClient
+- fn
+- obj
+- os
+- type
+- time
+
+## util.business 与业务相关性的函数
+- wrapApiData - 包裹 api 的返回值
+- listToData - 把类似 schema 的列表转换为数据
+- strReMatch - 如果字符串是正则就返回正则, 否则返回 false
