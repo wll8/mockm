@@ -97,6 +97,7 @@ function defaultConfigFn(util) { // 默认配置
     resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
     resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
     watch: [],
+    clearHistory: false,
   }
 }
 

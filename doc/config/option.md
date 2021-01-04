@@ -435,3 +435,25 @@ function wrapApiData({data, code}) { // 包裹 api 的返回值
 默认: []
 
 指定一些目录或文件路径, 当它们被修改时自动重载服务. 支持绝对路径和相对于配置文件的路径.
+
+## config.clearHistory
+类型: boolean | object | function
+默认: false
+
+清理请求记录.
+
+- false 不启用
+- true 启用, 使用默认配置
+- object 启用并传入配置
+  - retentionTime 从多少分钟前的历史中选择要清除的项目
+    - 默认 `60 * 24 * 3`, 即 3 天前
+  - num 相同内容保留条数, 正数时保留新记录, 负数时保留旧记录
+    - 默认 `1`
+- function 自定义清理函数, 获取 history 列表, 返回要删除的 id 列表
+
+默认配置使用以下几个内容来判断内容相同.
+  - 请求 URL
+  - 请求方法,
+  - 状态码,
+  - 请求体 MD5,
+  - 响应体 MD5,

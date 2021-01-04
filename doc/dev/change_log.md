@@ -1,6 +1,10 @@
 # 更新日志
 本程序更新日志, 以月为目录, 模块为子目录来叙述.
 
+## 2021年01月
+#### v1.1.21
+- feat: 支持 [config.clearHistory](../config/option.md#config-clearhistory) 参数, 清除冗余记录
+
 ## 2020年12月
 #### v1.1.20
 - fix: 修复上个版本导致的不能创建 webApi
