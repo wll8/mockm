@@ -173,7 +173,7 @@ const ApiDetail = (() => {
       // Doc: () => `Doc`,
     }
 
-    return (
+    return state.httpData.data ? (
       <div className="ApiDetail">
         <div className="info">
           <div className="item api">
@@ -212,7 +212,7 @@ const ApiDetail = (() => {
           }
         </Tabs>
       </div>
-    )
+    ) : ``
   }
   return Com
 })()

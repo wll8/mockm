@@ -548,6 +548,28 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return fs.existsSync(filePath)
     }
 
+    function getMd5(path) { // 获取文件 md5
+      return new Promise((resolve, reject) => {
+        const fs = require('fs')
+        const crypto = require('crypto')
+        const md5sum = crypto.createHash('md5')
+        const stream = fs.createReadStream(path)
+        stream.on('data', (chunk) => {
+          md5sum.update(chunk)
+        })
+        stream.on('end', () => {
+          const md5 = md5sum.digest('hex').toUpperCase()
+          resolve(md5)
+        })
+      })
+    }
+
+    function getMd5Sync(path) { // 获取文件 md5
+      const fs = require('fs')
+      const buffer = fs.readFileSync(path)
+      return toolObj.string.getMd5(buffer)
+    }
+
     function isFileEmpty(file) { // 判断文件是否存或为空
       const fs = require(`fs`)
       return (
@@ -558,6 +580,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     return {
       fileStore,
+      getMd5,
+      getMd5Sync,
       isFileEmpty,
       hasFile,
     }
@@ -989,6 +1013,23 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function array() { // 数组处理
     /**
+     * 排序数组
+     * @param {array} arr 要排序的数组
+     * @param {object} param1
+     * @param {string} param1.key 要比较的 key
+     * @param {boolean} param1.asc 是否升序, 默认是
+     */
+    function sort(arr, {key, asc} = {}) {
+      asc = asc === undefined ? true : asc
+      arr.sort((a, b) => {
+        const val1 = key ? a[key] : a
+        const val2 = key ? b[key] : b
+        return asc ? val1 - val2 : val2 - val1
+      })
+      return arr
+    }
+
+    /**
     * 转换数组为树形结构
     * @param {array} data 包含 id, pid 的数组
     * @param {function} childrenFn  // 如果有 children 时, 可以接收 parent
@@ -1062,6 +1103,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      sort,
       arrToTree,
       toTree,
     }
@@ -1474,6 +1516,11 @@ function business() { // 与业务相关性的函数
           testPort: `http://${osIp}:${config.testPort}`,
         })
       }
+
+      { // 清理 history
+        config.clearHistory && business().historyHandle().clearHistory(config)
+      }
+
       fileStore(config._share, {config}).set(`config`, config)
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
@@ -1568,7 +1615,7 @@ function business() { // 与业务相关性的函数
      * @param {string} param0.api api - 可选
      * @return {array} 数组
      */
-    function getHistoryList({history, method: methodRef, api: apiRef} = {}) {
+    function getHistoryList({md5 = false, history, method: methodRef, api: apiRef} = {}) {
       const fs = require(`fs`)
       let list = getRawHistory({history})
       list = list.filter(item => item.data).map(({fullApi, id, data: {req, res}}) => {
@@ -1578,18 +1625,26 @@ function business() { // 与业务相关性的函数
             return false
           }
         }
-        const resBodySize = res.bodyPath ? fs.statSync(res.bodyPath).size : 0
-        const reqBodySize = req.bodyPath ? fs.statSync(req.bodyPath).size : 0
+        const reqBodyPath = req.bodyPath
+        const resBodyPath = res.bodyPath
+        const resBodySize = resBodyPath && toolObj.file.hasFile(resBodyPath) ? fs.statSync(resBodyPath).size : 0
+        const resBodyMd5 = resBodyPath && md5 && toolObj.file.hasFile(resBodyPath) ? toolObj.file.getMd5Sync(resBodyPath) : undefined
+        const reqBodySize = reqBodyPath && toolObj.file.hasFile(reqBodyPath) ? fs.statSync(reqBodyPath).size : 0
+        const reqBodyMd5 = reqBodyPath && md5 && toolObj.file.hasFile(reqBodyPath) ? toolObj.file.getMd5Sync(reqBodyPath) : undefined
         return {
           id,
           method,
           api: url,
-          // fullApi,
+          fullApi,
           statusCode: res.lineHeaders.line.statusCode,
           contentType: res.lineHeaders.headers[`content-type`],
-          extensionName: (res.bodyPath || '').replace(/(.*)(\.)/, ''),
+          extensionName: (resBodyPath || '').replace(/(.*)(\.)/, ''),
           resBodySize,
+          resBodyMd5,
+          resBodyPath,
           reqBodySize,
+          reqBodyMd5,
+          reqBodyPath,
           date: res.lineHeaders.headers.date,
         }
       }).filter(item => item)
@@ -1768,7 +1823,63 @@ function business() { // 与业务相关性的函数
       }
     }
 
+    function clearHistory(config) {
+      function getDelIdList(list, options = {}) {
+        options = {
+          retentionTime: 60 * 24 * 3,
+          num: 1,
+          ...options,
+        }
+
+        list = list.filter(item => { // 获取多少分钟之前的请求
+          return Date.now() - new Date(item.date).getTime() > options.retentionTime * 60 * 1000
+        } )
+        let obj = {} // 合并相同内容为对象
+        list = toolObj.array.sort(list, {key: `id`})
+        list.forEach(({id, resBodyMd5, reqBodyMd5, fullApi, statusCode}) => {
+          const tag = [fullApi, statusCode, resBodyMd5, reqBodyMd5].join(` | `)
+          obj[tag] = [id, ...obj[tag] || []]
+        })
+
+        let delIdList = [] // 获取要删除的 ID 列表
+        Object.keys(obj).forEach(key => {
+          if(options.num < 0) {
+            delIdList = delIdList.reverse()
+          }
+          delIdList = delIdList.concat(obj[key].slice(options.num))
+        })
+        return delIdList
+      }
+
+      const HTTPHISTORY = require(config._httpHistory) // 请求历史
+      let list = business().historyHandle().getHistoryList({history: HTTPHISTORY, md5: true})
+      const delIdList = {
+        function: config.clearHistory,
+        object: list => getDelIdList(list, config.clearHistory),
+        boolean: list => config.clearHistory ? getDelIdList(list) : [],
+        undefined: () => [],
+      }[toolObj.type.isType(config.clearHistory)](list)
+
+      // 删除文件
+      const fs = require(`fs`)
+      delIdList.forEach(id => {
+        let {reqBodyPath, resBodyPath, api} = list.find(item => item.id === id) || {}
+        const findIndex = id => HTTPHISTORY[api].findIndex(item => item.id === id)
+
+        // 删除 json 中的记录
+        const index = findIndex(id)
+        HTTPHISTORY[api].splice(index, 1)
+        if(findIndex(id) === -1) { // 如果删除成功则删除对应的文件
+          reqBodyPath && toolObj.file.hasFile(reqBodyPath) && fs.unlinkSync(reqBodyPath)
+          resBodyPath && toolObj.file.hasFile(resBodyPath) && fs.unlinkSync(resBodyPath)
+        }
+      })
+      fs.writeFileSync(config._httpHistory, toolObj.obj.o2s(HTTPHISTORY))
+      delIdList.length && console.log(`已清除请求记录`, delIdList)
+    }
+
     return {
+      clearHistory,
       setHttpHistoryWrap,
       createHttpHistory,
       createBodyPath,

@@ -27,7 +27,7 @@ const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) 
 new Promise(async () => { // 显示程序信息, 例如版本号, logo
   const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
     .replace(new RegExp(`(>> mockm v)(.{${packageJson.version.length}})`), `$1${packageJson.version}`)
-  console.log(logText)
+  process.argv.includes(`dev`) === false && console.log(logText)
 })
 
 new Promise( async () => { // 检查更新

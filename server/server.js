@@ -276,10 +276,14 @@ new Promise(async () => {
                 allowCors({res, req})
               }
               const path = require('path')
-              res.sendFile(path.resolve(httpData.bodyPath))
-            } catch (error) {
-              console.log('error', {api, error})
-              res.json('暂无请求数据')
+              if(toolObj.file.hasFile(httpData.bodyPath)) {
+                res.sendFile(path.resolve(httpData.bodyPath))
+              } else {
+                throw new Error(`不存在文件 ${httpData.bodyPath}`)
+              }
+            } catch (err) {
+              console.log('err', {api, err})
+              res.status(404).json({msg: err.message})
             }
           }
           const actionFnObj = {
@@ -401,15 +405,21 @@ new Promise(async () => {
             },
             getHttpData() {
               const historyRes = getHistory({history: HTTPHISTORY, fullApi, id: actionArg0})
-              const {method, path} = historyRes.data.req.lineHeaders.line
-              const webApi = (apiWebStore.get([`paths`, path]) || {})[method]
-              if(webApi) {
-                webApi.disable = apiWebStore.get(`disable`).includes(historyRes.fullApi)
+              if(historyRes.data) {
+                const {method, path} = historyRes.data.req.lineHeaders.line
+                const webApi = (apiWebStore.get([`paths`, path]) || {})[method]
+                if(webApi) {
+                  webApi.disable = apiWebStore.get(`disable`).includes(historyRes.fullApi)
+                }
+                res.send({
+                  webApi,
+                  historyRes,
+                })
+              } else {
+                res.status(404).send({
+                  msg: `记录不存在`,
+                })
               }
-              res.send({
-                webApi,
-                historyRes,
-              })
             },
             getApiResponseById() {
               middleware.replayHistoryMiddleware({

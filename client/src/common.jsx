@@ -1,7 +1,14 @@
 // 本文件用于全局方法配置
 import axios from 'axios'
+import React from 'react'
+import * as antd from 'antd'
 import * as icons from '@ant-design/icons'
 import './common.scss'
+
+const {
+  message,
+} = antd
+
 const common = {}
 
 common.IconFont = icons.createFromIconfontCN({
@@ -46,6 +53,8 @@ common.http.interceptors.response.use(
     }
   },
   error => {
+    const data = error.response.data
+    message.error(data.msg || String(error))
     return Promise.reject(error)
   }
 )
