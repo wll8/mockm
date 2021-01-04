@@ -9,8 +9,10 @@ common.IconFont = icons.createFromIconfontCN({
 });
 
 common.cfg = {
-  baseURL: window.location.origin,
-  // baseURL: `http://localhost:9005`,
+  baseURL: {
+    development: `http://localhost:9005`,
+    production: window.location.origin,
+  }[process.env.NODE_ENV],
 }
 
 common.http = axios.create({
