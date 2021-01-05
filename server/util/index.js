@@ -1618,7 +1618,7 @@ function business() { // 与业务相关性的函数
     function getHistoryList({md5 = false, history, method: methodRef, api: apiRef} = {}) {
       const fs = require(`fs`)
       let list = getRawHistory({history})
-      list = list.filter(item => item.data).map(({fullApi, id, data: {req, res}}) => {
+      list = list.filter(item => item.data).map(({path, fullApi, id, data: {req, res}}) => {
         const {method, url} = toolObj.url.fullApi2Obj(fullApi)
         if(methodRef && apiRef) {
           if(((method === methodRef) && (url === apiRef)) === false) { // 如果没有找到就返回, 找到才进入数据处理
@@ -1634,6 +1634,7 @@ function business() { // 与业务相关性的函数
         return {
           id,
           method,
+          path,
           api: url,
           fullApi,
           statusCode: res.lineHeaders.line.statusCode,
@@ -1839,14 +1840,14 @@ function business() { // 与业务相关性的函数
         list.forEach(({id, resBodyMd5, reqBodyMd5, fullApi, statusCode}) => {
           const tag = [fullApi, statusCode, resBodyMd5, reqBodyMd5].join(` | `)
           obj[tag] = [id, ...obj[tag] || []]
+          if(options.num < 0) {
+            obj[tag] = obj[tag].reverse()
+          }
         })
 
         let delIdList = [] // 获取要删除的 ID 列表
         Object.keys(obj).forEach(key => {
-          if(options.num < 0) {
-            delIdList = delIdList.reverse()
-          }
-          delIdList = delIdList.concat(obj[key].slice(options.num))
+          delIdList = delIdList.concat(obj[key].slice(Math.abs(options.num)))
         })
         return delIdList
       }
@@ -1863,12 +1864,11 @@ function business() { // 与业务相关性的函数
       // 删除文件
       const fs = require(`fs`)
       delIdList.forEach(id => {
-        let {reqBodyPath, resBodyPath, api} = list.find(item => item.id === id) || {}
-        const findIndex = id => HTTPHISTORY[api].findIndex(item => item.id === id)
-
+        let {reqBodyPath, resBodyPath, path} = list.find(item => item.id === id) || {}
+        const apiList = HTTPHISTORY[path] || []
+        const findIndex = id => apiList.findIndex(item => item.id === id)
         // 删除 json 中的记录
-        const index = findIndex(id)
-        HTTPHISTORY[api].splice(index, 1)
+        apiList.splice(findIndex(id), 1)
         if(findIndex(id) === -1) { // 如果删除成功则删除对应的文件
           reqBodyPath && toolObj.file.hasFile(reqBodyPath) && fs.unlinkSync(reqBodyPath)
           resBodyPath && toolObj.file.hasFile(resBodyPath) && fs.unlinkSync(resBodyPath)
@@ -1953,16 +1953,23 @@ function business() { // 与业务相关性的函数
   }
 
   function reqHandle({config}) { // 请求处理程序
-    function sendReq({token, getHistory, history, api, cb, apiId}) { // 发送请求
+    function sendReq({token, getHistory, history, api, res, apiId}) { // 发送请求
       const axios = require('axios')
       const fs = require(`fs`)
 
       // api httpHistory 中的 api
       // console.log(`httpHistory[api]`, httpHistory[api])
-      const httpDataReq = getHistory({history, fullApi: api, id: apiId}).data.req
+      const getHistoryData = getHistory({history, fullApi: api, id: apiId}).data
+      if(getHistoryData === undefined) {
+        res.status(404).send({
+          success: false,
+          msg: `不存在记录 ${api}`,
+        })
+        return false
+      }
+      const httpDataReq = getHistoryData.req
       const {line: {path, query, params}, headers} = httpDataReq.lineHeaders
       const [, method, url] = api.match(/(\w+)\s+(.*)/)
-      let resErr = {message: ``, config: {}}
       if(token && config.updateToken) { // 更新 TOKEN
         headers.authorization = token
       }
@@ -1975,29 +1982,27 @@ function business() { // 与业务相关性的函数
         headers,
         data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
         responseType: 'arraybuffer',
-      }).then(res => {
-        const {data, status, statusText, headers, config, request} = res
-        resErr = {
+      }).then(aRes => {
+        const {data, status, statusText, headers, config, request} = aRes
+        res.send({
           success: true,
-          message: `${status} ${statusText}`,
-          config: res.config,
-        }
+          msg: `${status} ${statusText}`,
+          config: aRes.config,
+        })
       }).catch(err => {
         console.log(`err`, `内部请求失败`, pathOrUrl)
-        let message = ``
+        let msg = ``
         if(err.response) {
           const {status, statusText} = err.response
-          message = `${status} ${statusText}`
+          msg = `${status} ${statusText}`
         } else {
-          message = err.toString()
+          msg = err.toString()
         }
-        resErr = {
+        res.send({
           success: false,
-          message,
+          msg,
           config: err.config,
-        }
-      }).finally(() => {
-        cb(resErr)
+        })
       })
     }
 
