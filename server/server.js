@@ -391,9 +391,7 @@ new Promise(async () => {
                 getHistory,
                 history: HTTPHISTORY,
                 api: fullApi,
-                cb: err => {
-                  res.json(err)
-                },
+                res,
                 apiId: actionArg0,
               })
             },

@@ -25,9 +25,7 @@ function Replay({method, api}) {
     setState(preState => ({...preState, replayDone: false}))
     http.get(`${cfg.baseURL}/api/replay/${method}${api}`).then(res => {
       setState(preState => ({...preState, replayDone: true}))
-      message.info(`重发请求成功 ${res.message}`)
-    }).catch(err => {
-      message.error(`重发失败 ${err}`)
+      message.info(`重发请求成功 ${res.msg}`)
     })
   }
 

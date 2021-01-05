@@ -58,8 +58,6 @@ function FixedResponse({httpData}) {
       setTimeout(() => {
         window.location.reload()
       }, 500)
-    }).catch(err => {
-      message.error(`重发失败 ${err}`)
     })
   }
 
