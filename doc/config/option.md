@@ -442,8 +442,9 @@ function wrapApiData({data, code}) { // 包裹 api 的返回值
 
 清理请求记录.
 
-- false 不启用
-- true 启用, 使用默认配置
+- boolean 是否启用
+  - false 不清理记录
+  - true 使用默认配置清理记录
 - object 启用并传入配置
   - retentionTime 从多少分钟前的历史中选择要清除的项目
     - 默认 `60 * 24 * 3`, 即 3 天前
