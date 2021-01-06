@@ -29,13 +29,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     function getServerVersion(name) { // 从 npmjs 中获取版本号
       return new Promise((resolve, reject) => {
         const https = require('https');
-        https.get(`https://registry.npmjs.org/${name}`, res => {
+        https.get(`https://registry.npmjs.org/-/package/${name}/dist-tags`, res => {
             let data = ''
             res.on('data', chunk => {
               data += chunk
             })
             res.on('end', () => {
-              const latest = (JSON.parse(data)[`dist-tags`] || {}).latest // 获取最新版本
+              const latest = JSON.parse(data || `{}`).latest // 获取最新版本
               resolve(latest)
             })
         }).on(`error`, (err) => {
