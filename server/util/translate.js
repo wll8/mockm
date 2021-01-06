@@ -64,7 +64,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
     return new Promise(async (resolve, reject) => {
       await toolObj.generate.initPackge(`translate-platforms`, {getRequire: false})
       const { google, microsoft, youdao, baidu } = require('translate-platforms')
-      let errInfo
+      let errInfo = []
       const handleYouDao = (...arg) => {
         // - [ ] fix: youdao 的翻译结果 text 和 word 顺序颠倒了: https://github.com/imlinhanchao/translate-platforms/issues/1
         return new Promise((resolve, reject) => {
@@ -86,13 +86,13 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
 
       let result = undefined
       for (let index = 0; index < apiList.length; index++) {
-        if(result) {
+        if(result !== undefined) {
           break
         } else {
-          result = await apiList[index](str, translateFormat).catch(err => { errInfo = err })
+          result = await apiList[index](str, translateFormat).catch(err => { errInfo.push(err) })
         }
       }
-      if (errInfo) {
+      if (result === undefined) {
         reject(errInfo)
       } else {
         const enArr = (isChinese ? result.text : result.word).split(`\n`)
@@ -112,6 +112,9 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
 
   async function baiduTranslate({ key, appid }) {
     return new Promise(async (resolve, reject) => {
+      if(Boolean((key && appid)) === false) {
+        return reject(`请添加百度翻译 key appid`)
+      }
       const axios = require('axios')
       const querystring = require('querystring')
 
@@ -148,10 +151,10 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
   }
 
   return new Promise(async (resolve, reject) => {
-    let errInfo
+    let errInfo = []
     let fnArr = [
-      () => translatePlatforms().catch(err => { errInfo = { key: `translatePlatforms`, err } }),
-      () => baiduTranslate({ key, appid }).catch(err => { errInfo = { key: `baiduTranslate`, err } }),
+      () => translatePlatforms().catch(err => { errInfo.push({ key: `translatePlatforms`, err }) }),
+      () => baiduTranslate({ key, appid }).catch(err => { errInfo.push({ key: `baiduTranslate`, err }) }),
     ]
     fnArr = (appid && key)
       ? fnArr.reverse() // 如果传了 key, 则优先使用需要 key 的方法
