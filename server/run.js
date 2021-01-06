@@ -47,7 +47,7 @@ new Promise( async () => { // 检查更新
 
 new Promise(async () => { // 启动 server.js
   nodemon({
-    exec: `node ${serverPath} ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
+    exec: `node "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
     watch: [configFile],
   })
   const {
