@@ -6,10 +6,14 @@
 :::
 
 ## 2021年01月
+#### v1.1.23
+- feat: 优化检测版本更新的速度
+- fix: 翻译程序出错后备用翻译程序需正常工作
+
 #### v1.1.22
-fix: 修复 config.clearHistory.num 传入负数出错的问题
-fix: 修复使用添加 query 参数的 api 导致的不能找到历史记录的问题
-feat: 优化客户端接口提示
+- fix: 修复 config.clearHistory.num 传入负数出错的问题
+- fix: 修复使用添加 query 参数的 api 导致的不能找到历史记录的问题
+- feat: 优化客户端接口提示
 
 #### v1.1.21
 - feat: 支持 [config.clearHistory](../config/option.md#config-clearhistory) 参数, 清除冗余记录
