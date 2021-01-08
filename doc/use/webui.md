@@ -105,6 +105,12 @@ res | 响应体中 body 的内容长度
 
 :::
 
+::: details FQA
+**有时候后台返回类似 json 的文字却`不支持预览`**
+对于文件类型的判断目前依赖响应头中的 `content-type` , 当类型为 json 时, 如果响应头的 content-type 是 `application/json` 则可以预览, 例如返回 json 时, 建议使用 `res.json` 而不是 `res.send` .
+
+:::
+
 ## 接口列表
 显示 mockm 中存在的接口, 仅允许 apiWeb 可以在界面上编辑.
 - 点击表头上的 `+` 按钮进入接口详情, 创建 webApi 接口
