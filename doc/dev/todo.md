@@ -5,6 +5,8 @@
 - [ ] feat: 添加崩溃重启功能
 - [ ] feat: 支持配置静态文件目录, 可配置多个
 - [ ] feat: 优化mock生成规则
+  - [ ] video|movie https://www.w3school.com.cn/i/movie.mp4
+  - [ ] cover @image
   - [ ] author @cname
   - [ ] describe @cparagraph
   - [ ] limit$(ed) @natural
