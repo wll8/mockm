@@ -188,6 +188,14 @@ new Promise(async () => {
           const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
           const oldSend = res.send
           res.send = (data = ``) => {
+            let buffer =  undefined
+            const dataType = toolObj.type.isType(data)
+            if([`object`, `array`].includes(dataType)) {
+              buffer = Buffer.from(toolObj.obj.o2s(data))
+            }
+            if([`string`].includes(dataType)) {
+              buffer = Buffer.from(data)
+            }
             res.send = oldSend
             setHttpHistoryWrap({
               config,
@@ -195,7 +203,7 @@ new Promise(async () => {
               req: {...req, body: reqBody},
               res,
               mock: true,
-              buffer: typeof(data) === `object` ? data : Buffer.from(data),
+              buffer,
             })
             return res.send(data)
           }
