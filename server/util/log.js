@@ -1,12 +1,12 @@
 require(`util`).inspect.defaultOptions.depth = null // console.log 展开对象
 
 const { inspect } = require('util')
-const util = require('./index.js')
+const tool = require('./tool.js')
 
 function print(...argList) { // 用于输出有用信息, 而不是调试信息
   const resList = []
   argList.map(item => {
-    const type = util.toolObj.type.isType(item)
+    const type = tool.type.isType(item)
     ;([
       ['undefined', ''],
       ['string', 'number', item],
@@ -38,7 +38,7 @@ function logHelper(isUse = true) { // 重写 console.log 方法, 打印时附带
       log(...arg)
       return undefined
     } else {
-      const dateFormat = util.toolObj.time.dateFormat
+      const dateFormat = tool.time.dateFormat
       log(dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date()))
       log(`> ${line}`)
       log(...arg)
