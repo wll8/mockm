@@ -7,7 +7,7 @@
 集模拟和调试功能于一身. 自动生成数据和增删查改一系列接口, 支持文件上传下载, 延迟, 自定义接口逻辑...
 
 ## 特性
-- 0 侵入, 无需修改项目中的任何代码即可投入使用
+- 支持 0 侵入, 无需修改项目中的任何代码即可投入使用
 - 快速生成接口和数据, 以及文档
 - 支持 Restful API
 - 以最方便的形式支持 api 拦截, 注入, 请求及响应修改
@@ -44,7 +44,7 @@ module.exports = {
 - 想了解更多功能请继续...
 
 ### 示例
-https://www.hongqiye.com/doc/mockm/use/example.html
+点击 [hongqiye.com/doc/mockm/use/example.html](https://www.hongqiye.com/doc/mockm/use/example.html) 查看常用示例.
 
 ## 部分功能截图
 **请求记录**

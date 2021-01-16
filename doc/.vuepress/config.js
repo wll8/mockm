@@ -68,14 +68,7 @@ module.exports = {
       { text: '配置项', link: '/config/option.md' },
       { text: 'mockjs', link: 'http://wll8.gitee.io/mockjs-examples/' },
       { text: 'QQ答疑群', link: 'https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi' },
-      {
-        text: '源码',
-        link: 'https://github.com/wll8/mockm',
-        items: [
-          { text: 'github', link: 'https://github.com/wll8/mockm' },
-          { text: 'gitee', link: 'https://gitee.com/wll8/mockm' }
-        ]
-      }
+      { text: 'github', link: 'https://github.com/wll8/mockm' },
     ],
     sidebar: [
       {
