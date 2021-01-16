@@ -1,6 +1,6 @@
 const util = require(`./index.js`)
 const {
-  toolObj,
+  tool,
 } = util
 
 /**
@@ -24,7 +24,7 @@ function batchTextEnglish({text, appid, key, type = `tree`}) {
 
       // 小驼峰列表
       const littleHumpResList = res.map((item, index) => {
-        const littleHump = toolObj.string.toLittleHump(item.en.replace(/^-*\s*/, ``)).match(/[a-zA-Z0-9]+/ig).join(``)
+        const littleHump = tool.string.toLittleHump(item.en.replace(/^-*\s*/, ``)).match(/[a-zA-Z0-9]+/ig).join(``)
         // 根据翻译结果返回 mock 模板
         const {mock, type} = ruleHandle({word: littleHump})
         return {
@@ -37,7 +37,7 @@ function batchTextEnglish({text, appid, key, type = `tree`}) {
       })
       if(type === `tree`) {
         // 转换为树形结构
-        const tree = toolObj.array.arrToTree(littleHumpResList, {key: `description`, tag: `-`})
+        const tree = tool.array.arrToTree(littleHumpResList, {key: `description`, tag: `-`})
         resove(tree)
       } else {
         resove(littleHumpResList)
@@ -62,7 +62,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
   const translateFormat = isChinese ? { from: `zh`, to: `en` } : { from: `en`, to: `zh` }
   async function translatePlatforms() {
     return new Promise(async (resolve, reject) => {
-      await toolObj.generate.initPackge(`translate-platforms`, {getRequire: false})
+      await tool.generate.initPackge(`translate-platforms`, {getRequire: false})
       const { google, microsoft, youdao, baidu } = require('translate-platforms')
       let errInfo = []
       const handleYouDao = (...arg) => {
@@ -125,7 +125,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
         salt: `Date.now()`,
       }
       const isChinese = escape(cfg.q.match(/(.+?)\s?/)[1]).includes(`%u`) // 查看第一个字符是不是中文
-      const md5 = toolObj.string.getMd5(`${cfg.appid}${cfg.q}${cfg.salt}${cfg.key}`)
+      const md5 = tool.string.getMd5(`${cfg.appid}${cfg.q}${cfg.salt}${cfg.key}`)
       const paramsObj = {
         ...translateFormat,
         q: cfg.q,
