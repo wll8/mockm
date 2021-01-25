@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.1.24-alpha.2",
+  "version": "1.1.24-alpha.3",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -25,7 +25,7 @@
     "lodash.orderby": "^4.6.0",
     "lodash.take": "^4.1.1",
     "mime": "^2.4.7",
-    "better-mock": "https://cdn.jsdelivr.net/gh/wll8/static@1.0.1/github.com/wll8/better-mock/releases/download/0.3.1/better-mock-0.3.1.tgz",
+    "better-mock": "https://cdn.jsdelivr.net/gh/wll8/static@1.0.3/github.com/wll8/better-mock/releases/download/0.3.2-alpha/better-mock-0.3.2-alpha.tgz",
     "vm2": "^3.9.2",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.1",

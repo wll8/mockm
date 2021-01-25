@@ -56,6 +56,7 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
 - [ ] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
 - [ ] fix: 在 linux 上不能检测到使用 nvm 的全局安装的 cnpm
 - [ ] fix: 如果检查新版本出错时, 不应提示更新 `已发布新版本 undefined...`
