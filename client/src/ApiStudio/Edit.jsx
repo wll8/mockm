@@ -9,6 +9,7 @@ import * as ReactRouterDOM from 'react-router-dom'
 import common from '../common.jsx'
 
 const {
+  queryParams,
   removeEmpty,
   getSelectionText,
   deepGet,
@@ -163,6 +164,7 @@ function Edit() {
 
     const searchParams = new URL(window.location.href.replace(`#`, ``)).searchParams
     const [state, setState] = useState({ // 默认值
+      exampleType: `res`, // 示例类型是请求还是响应
       showDrawer: ``,
       queryPath: (searchParams.get(`path`) || ``).replace(/(.?)(\?.*)/, `$1`), // url 上的 path 参数
       apiOk: false, // api 是否请求结束
@@ -191,11 +193,14 @@ function Edit() {
       // 所以可以利用 setState 方法来获取最新的 state
 
       setState(preState => {
-        const responses = preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses] || {}
+        const {table = [], example = {} } = {
+          res: preState.data?.[preState.hand.method]?.responses?.[preState.hand.responses] || {},
+          req: preState.data?.[preState.hand.method]?.parameters?.[preState.hand.parameters] || {},
+        }[preState.exampleType || `res`]
         const {
           rule = ``,
           type = `object`,
-        } = responses.example || {}
+        } = example || {}
         onChangeExampleCom({
           rule,
           type,
@@ -301,13 +306,16 @@ function Edit() {
       }
     }
 
-    function setDrawer(show) { // 设置 Drawer 的隐藏状态
-      setState(preState => ({...preState, showDrawer: show}))
+    function setDrawer(show, type) { // 设置 Drawer 的隐藏状态
+      setState(preState => ({...preState, showDrawer: show, exampleType: type}))
     }
 
     function onChangeExampleCom(data, myPreState) { // 当 ExampleCom 中的值改变时, 把值传入到 Edit
       const fn = preState => {
-        const setPath = `data.${preState.hand.method}.responses.${preState.hand.responses}.example`
+        const setPath = {
+          res: `data.${preState.hand.method}.responses.${preState.hand.responses}.example`,
+          req: `data.${preState.hand.method}.parameters.${preState.hand.parameters}.example`,
+        }[preState.exampleType || `res`]
         const oldValue = deepGet(preState, setPath)
         const res = {...deepSet(preState, setPath, {...oldValue, ...data})}
         Boolean(myPreState) === false && setTimeout(() => saveApiData(), 0)
@@ -316,7 +324,60 @@ function Edit() {
       myPreState ? fn(myPreState) : setState(fn)
     }
 
-    const {table = [], example = {}} = state.data?.[state.hand.method]?.responses?.[state.hand.responses] || {}
+    const {table = [], example = {} } = {
+      res: state.data?.[state.hand.method]?.responses?.[state.hand.responses] || {},
+      req: state.data?.[state.hand.method]?.parameters?.[state.hand.parameters] || {},
+    }[state.exampleType || `res`]
+
+    async function tryApi() { // 生成请求示例参数, 并携带参数打开 restc 链接
+      const reqData = state.data[state.hand.method].parameters
+      await Promise.all( // 把每种数据 table 格式转换为示例数据
+        Object.keys(reqData).map(key => {
+          const {table = [], example: {rule, type = `object`} = {}} = reqData[key]
+          return new Promise((resove, reject) => {
+            http.post(`${cfg.baseURL}/api/listToData/`, {
+              table,
+              rule,
+              type,
+            }).then(res => {
+              reqData[key].data = res
+              resove(res)
+            })
+          })
+        })
+      )
+      const {
+        query: {data: query = {}}  = {},
+        "form/body": {data: body = {}} = {},
+        header: {data: header = {}} = {},
+        path: {data: path = {}} = {},
+      } = reqData
+      const queryParametersArr = Object.keys(query).map(key => {
+        return {
+          enabled: true,
+          key,
+          value: query[key],
+        }
+      })
+      const headerArr = Object.keys(header).map(key => {
+        return {
+          enabled: true,
+          key,
+          value: header[key],
+        }
+      })
+      const data = {
+        method,
+        queryParameters: JSON.stringify(queryParametersArr),
+        body: JSON.stringify(body),
+        // path: JSON.stringify(path), // todo 完善 path 参数
+        headers: JSON.stringify(headerArr),
+        url: `http://${window.serverConfig.osIp}:${window.serverConfig.port}${state.path}`,
+      }
+      const restcLink = `${window.location.origin}/restc/index.html#!${(queryParams(data, false))}`
+      window.open(restcLink)
+    }
+
     return (
       <div className="ApiStudioEdit">
         {
@@ -354,6 +415,7 @@ function Edit() {
                     overlay={(
                       <Menu>
                         <Menu.Item disabled={Boolean(state.path) === false} onClick={saveApiData}>save</Menu.Item>
+                        <Menu.Item onClick={() => tryApi()}>try</Menu.Item>
                         <Menu.Item>record</Menu.Item>
                         <Menu.Item>swagger</Menu.Item>
                         <Menu.Item>capture</Menu.Item>
@@ -405,7 +467,7 @@ function Edit() {
                             <Dropdown
                               overlay={(
                                 <Menu>
-                                  <Menu.Item>example</Menu.Item>
+                                  <Menu.Item onClick={() => setDrawer(`ExampleCom`, `req`)}>example</Menu.Item>
                                   <Menu.Item>code</Menu.Item>
                                 </Menu>
                               )}
@@ -459,8 +521,7 @@ function Edit() {
                             <Dropdown
                               overlay={(
                                 <Menu>
-                                  <Menu.Item onClick={() => setDrawer(`ExampleCom`)}>example</Menu.Item>
-                                  <Menu.Item>header</Menu.Item>
+                                  <Menu.Item onClick={() => setDrawer(`ExampleCom`, `res`)}>example</Menu.Item>
                                 </Menu>
                               )}
                               trigger={['click']}
