@@ -8,12 +8,22 @@ import Breadcrumb from './Breadcrumb.jsx'
 import Restc from './Restc.jsx'
 import * as ApiStudio from './ApiStudio/index.jsx'
 import './HttpShow.scss'
+import common from './common.jsx'
+
+const {
+  http,
+  cfg,
+} = common
 
 const HttpShow = (() => {
   const {
     BackTop,
     ConfigProvider,
   } = antd
+
+  http.get(`${cfg.baseURL}/api/getConfig/`).then(res => {
+    window.serverConfig = res
+  })
 
   const {
     HashRouter,
