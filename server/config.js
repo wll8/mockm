@@ -1,10 +1,10 @@
 const path = require(`path`)
 const exportsUtil = require(`./util/index.js`)
 const {
-  libObj,
+  lib,
   business,
-  toolObj,
-  toolObj: {
+  tool,
+  tool: {
     httpClient: {
       midResJson,
     },
@@ -26,7 +26,7 @@ const {
 } = exportsUtil
 const {
   wrapApiData,
-} = business()
+} = business
 
 let cliArg = parseArgv()
 let fileArgFn = () => {}
@@ -55,8 +55,8 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 
 function defaultConfigFn(util) { // 默认配置
   const {
-    libObj: { fetch, midResJson, axios, mime, mockjs },
-    toolObj,
+    lib: { fetch, midResJson, axios, mime, mockjs },
+    tool,
   } = util
   return {
     disable: false,
@@ -102,7 +102,7 @@ function defaultConfigFn(util) { // 默认配置
 }
 
 
-libObj.midResJson = midResJson
+lib.midResJson = midResJson
 const defaultArg = defaultConfigFn(exportsUtil)
 const fileArg = fileArgFn(exportsUtil)
 const config = {
