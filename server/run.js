@@ -8,16 +8,16 @@
  */
 
 const path = require(`path`)
-const { toolObj, business } = require(`${__dirname}/util/index.js`)
+const { tool, business } = require(`${__dirname}/util/index.js`)
 const packageJson = require(`${__dirname}/package.json`)
-const cli = toolObj.cli
+const cli = tool.cli
 const cliArg = cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
 const {
   initHandle,
   plugin,
-} = business()
+} = business
 const configFile = initHandle().getConfigFile()
 cliArg.config = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
@@ -33,9 +33,9 @@ new Promise(async () => { // 显示程序信息, 例如版本号, logo
 new Promise( async () => { // 检查更新
   if(Boolean(cliArg[`--no-update`]) === false) {
     const {name, version} = packageJson
-    const {local, server} = await toolObj.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
+    const {local, server} = await tool.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
     if(local !== server) {
-      const msg = toolObj.string.removeLeft(`
+      const msg = tool.string.removeLeft(`
         已发布新版本 ${server}
         您当前版本为 ${local}
         查看更新特性 https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
@@ -54,13 +54,13 @@ new Promise(async () => { // 启动 server.js
     showLocalInfo,
     remoteServer,
   } = plugin()
-  toolObj.control.awaitTrue({ // 等待 sharePath 文件存在, 期望 config 已经存入
-    condition: () => toolObj.file.hasFile(sharePath),
+  tool.control.awaitTrue({ // 等待 sharePath 文件存在, 期望 config 已经存入
+    condition: () => tool.file.hasFile(sharePath),
     timeout: 60e3,
   }).then(() => {
-    const share = toolObj.file.fileStore(sharePath)
+    const share = tool.file.fileStore(sharePath)
     const config = share.get(`config`)
-    const store = toolObj.file.fileStore(config._store)
+    const store = tool.file.fileStore(config._store)
     store.set(`note.remote`, {})
     showLocalInfo({store, config})
     if(config.remote) { // 如果启用远程则进行相关功能处理
