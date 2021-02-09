@@ -296,7 +296,7 @@ function Edit() {
 
     function onChange(ev, stateKey) {
       let value = ev
-      if(typeof(ev.persist) === `function`) { // 绑定 event 形式的 value
+      if(ev && typeof(ev.persist) === `function`) { // 绑定 event 形式的 value
         ev.persist()
         value = ev.target.value
       }
@@ -330,7 +330,7 @@ function Edit() {
     }[state.exampleType || `res`]
 
     async function tryApi() { // 生成请求示例参数, 并携带参数打开 restc 链接
-      const reqData = state.data[state.hand.method].parameters
+      const reqData = state.data[state.hand.method].parameters || {}
       await Promise.all( // 把每种数据 table 格式转换为示例数据
         Object.keys(reqData).map(key => {
           const {table = [], example: {rule, type = `object`} = {}} = reqData[key]
