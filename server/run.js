@@ -34,7 +34,7 @@ new Promise( async () => { // 检查更新
   if(Boolean(cliArg[`--no-update`]) === false) {
     const {name, version} = packageJson
     const {local, server} = await tool.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
-    if(local !== server) {
+    if(server && (local !== server)) {
       const msg = tool.string.removeLeft(`
         已发布新版本 ${server}
         您当前版本为 ${local}
