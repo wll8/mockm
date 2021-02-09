@@ -23,6 +23,7 @@ const {
   getSelectionText,
   deepGet,
   deepSet,
+  removeEmpty,
 } = utils
 
 const EditableContext = React.createContext();
@@ -321,12 +322,15 @@ function EditableTable (props) {
     let searchRes = search(state.dataSource, `key`, row.key)
     if(row.name === undefined) {
       message.warn(`字段名必填`)
-      return false
     }
     searchRes = searchRes.slice(0, -1) // 去除最后一个值, 因为他是对象里面的 key, 我们需要的是对象
     // 查找是否已存在相同的字段名
     const hasDouble = deepGet([...state.dataSource], searchRes.slice(0, -1).join(`.`))
-      .some(item => (item.key !== row.key) && (item.name === row.name))
+      .some(item => (
+        (item.key !== row.key)
+        && item.name !== undefined) // 忽略批量编辑但没有先填写 name 值的情况
+        && (item.name === row.name)
+      )
     if(hasDouble) {
       message.warn(`当前层级已存在相同的字段名 ${row.name}`)
       return false
