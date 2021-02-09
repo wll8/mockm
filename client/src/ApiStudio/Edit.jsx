@@ -416,10 +416,10 @@ function Edit() {
                       <Menu>
                         <Menu.Item disabled={Boolean(state.path) === false} onClick={saveApiData}>save</Menu.Item>
                         <Menu.Item onClick={() => tryApi()}>try</Menu.Item>
-                        <Menu.Item>record</Menu.Item>
+                        {/* <Menu.Item>record</Menu.Item>
                         <Menu.Item>swagger</Menu.Item>
                         <Menu.Item>capture</Menu.Item>
-                        <Menu.Item danger>delete</Menu.Item>
+                        <Menu.Item danger>delete</Menu.Item> */}
                       </Menu>
                     )}
                     trigger={['click']}
@@ -467,8 +467,8 @@ function Edit() {
                             <Dropdown
                               overlay={(
                                 <Menu>
-                                  <Menu.Item onClick={() => setDrawer(`ExampleCom`, `req`)}>example</Menu.Item>
-                                  <Menu.Item>code</Menu.Item>
+                                  {/* <Menu.Item onClick={() => setDrawer(`ExampleCom`, `req`)}>example</Menu.Item> */}
+                                  {/* <Menu.Item>code</Menu.Item> */}
                                 </Menu>
                               )}
                               trigger={['click']}
