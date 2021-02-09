@@ -229,7 +229,7 @@ function EditableTable (props) {
 
   useEffect(() => {
     if(state.dataSource !== undefined) {
-      const res = removeKeys(state.dataSource, [`key`])
+      const res = removeEmpty(removeKeys(state.dataSource, [`key`]))
       props.dataOnChange(res)
     }
     // 注意:
