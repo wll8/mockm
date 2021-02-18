@@ -2,6 +2,53 @@ import React from 'react'
 
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
+
+function isType(data, type = undefined) { // 判断数据是否为 type, 或返回 type
+  const dataType = Object.prototype.toString.call(data).match(/\s(.+)]/)[1].toLowerCase()
+  return type ? (dataType === type.toLowerCase()) : dataType
+}
+
+/**
+ * 相对路径转绝对路径
+ * @param {*} url 相对 url
+ */
+function toAbsURL(url){
+  const a = document.createElement('a')
+  a.href = url
+  return a.href
+}
+
+/**
+ * 转换参数为 restc url
+ * @param {*} param0
+ */
+function getRestcLink({method, url, uri, path = {}, query = {}, header = {}, body = {}} = {}) {
+  const queryParametersArr = isType(query, `array`) ? query : Object.keys(query).map(key => {
+    return {
+      enabled: true,
+      key,
+      value: query[key],
+    }
+  })
+  const headerArr = isType(header, `array`) ? header : Object.keys(header).map(key => {
+    return {
+      enabled: true,
+      key,
+      value: header[key],
+    }
+  })
+  const data = {
+    method,
+    queryParameters: JSON.stringify(queryParametersArr),
+    body: JSON.stringify(body),
+    // path: JSON.stringify(path), // todo 完善 path 参数
+    headers: JSON.stringify(headerArr),
+    url: url || uri,
+  }
+  const restcLink = `${window.location.origin}/restc/index.html#!${(queryParams(data, false))}`
+  return restcLink
+}
+
 /**
  * 对象转url参数
  * @param {*} data,对象
@@ -450,6 +497,9 @@ function onChange(ev, stateKey, {state, setState}) {
 }
 
 export default  {
+  isType,
+  getRestcLink,
+  toAbsURL,
   queryParams,
   onChange,
   docLink,
