@@ -99,7 +99,7 @@ function BreadcrumbCom() {
                     <Menu>
                       <Menu.Item><a href="/#/">记录</a></Menu.Item>
                       <Menu.Item><a href="/#/apiStudio">接口</a></Menu.Item>
-                      <Menu.Item><a href="/#/restc">请求</a></Menu.Item>
+                      <Menu.Item><a href="/restc/#!method=POST">请求</a></Menu.Item>
                     </Menu>
                   }
                 >
