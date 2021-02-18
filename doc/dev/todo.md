@@ -2,6 +2,7 @@
 ## 功能
 - [ ] feat: webApi 接口列表支持多选删除, 禁用, 启用
 - [ ] feat: 支持 ws 示例
+  - https://github.com/aral/express-ws
 - [ ] feat: 当访问不存在的 test-api 时, 不应显示操作按钮, 并且提示记录不存在
 - [ ] feat: 添加崩溃重启功能
 - [ ] feat: 支持配置静态文件目录, 可配置多个
@@ -56,6 +57,8 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [x] fix: 添加 webApi 时不能自动生效
+  - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
 - [ ] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
 - [ ] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
 - [ ] fix: 在 linux 上不能检测到使用 nvm 的全局安装的 cnpm
