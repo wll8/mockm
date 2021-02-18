@@ -47,6 +47,7 @@ new Promise( async () => { // 检查更新
 
 new Promise(async () => { // 启动 server.js
   nodemon({
+    ignoreRoot: [], // 覆盖 ignore, 避免 .git node_modules 中的内容不能被监听, 例如未指定配置文件时是使用 node_modules 中的配置
     exec: `node "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
     watch: [configFile],
   })
