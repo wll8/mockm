@@ -3,6 +3,7 @@ import * as antd from 'antd'
 import * as ReactRouterDOM from 'react-router-dom'
 import utils from './utils.jsx'
 const {
+  getRestcLink,
   tree2Array,
 } = utils
 
@@ -99,7 +100,30 @@ function BreadcrumbCom() {
                     <Menu>
                       <Menu.Item><a href="/#/">记录</a></Menu.Item>
                       <Menu.Item><a href="/#/apiStudio">接口</a></Menu.Item>
-                      <Menu.Item><a href="/restc/#!method=POST">请求</a></Menu.Item>
+                      <Menu.Item onClick={() => {
+                        window.open(getRestcLink({
+                          method: `GET`,
+                          header: [
+                            {
+                              enabled: false,
+                              key: `X-Powered-By`,
+                              value: `mockm`,
+                            },
+                            {
+                              enabled: true,
+                              key: `Authorization`,
+                              value: `test`,
+                            },
+                          ],
+                          query: {
+                            _sort: `id`,
+                            _order: `desc`,
+                            _page: 1,
+                            _limit: 10,
+                          },
+                          url: `http://${window.serverConfig.osIp}:${window.serverConfig.testPort}/api/getApiList/`,
+                        }))
+                      }}>请求</Menu.Item>
                     </Menu>
                   }
                 >

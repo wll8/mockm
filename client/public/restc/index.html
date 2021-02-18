@@ -880,7 +880,7 @@
       }
       get isBodyVisible() { return this.bodyEditor.element.style.display !== 'none'; }
       init() {
-        let { method, queryParameters, body, headers = [], uri, url} = QueryString.parse(location.hash.replace(/^#!?/, ''));
+        let { method, queryParameters = [], body, headers = [], uri, url} = QueryString.parse(location.hash.replace(/^#!?/, ''));
         uri = uri || url || `${location.protocol}//${location.host}${location.pathname}`
         try { headers = JSON.parse(headers); } catch (error) { /* ignore */ }
         try { queryParameters = JSON.parse(queryParameters); } catch (error) { /* ignore */ }

@@ -9,6 +9,7 @@ import * as ReactRouterDOM from 'react-router-dom'
 import common from '../common.jsx'
 
 const {
+  getRestcLink,
   queryParams,
   removeEmpty,
   getSelectionText,
@@ -347,35 +348,20 @@ function Edit() {
         })
       )
       const {
-        query: {data: query = {}}  = {},
-        "form/body": {data: body = {}} = {},
-        header: {data: header = {}} = {},
-        path: {data: path = {}} = {},
+        query: {data: query}  = {},
+        "form/body": {data: body} = {},
+        header: {data: header} = {},
+        path: {data: path} = {},
       } = reqData
-      const queryParametersArr = Object.keys(query).map(key => {
-        return {
-          enabled: true,
-          key,
-          value: query[key],
-        }
-      })
-      const headerArr = Object.keys(header).map(key => {
-        return {
-          enabled: true,
-          key,
-          value: header[key],
-        }
-      })
       const data = {
         method,
-        queryParameters: JSON.stringify(queryParametersArr),
-        body: JSON.stringify(body),
-        // path: JSON.stringify(path), // todo 完善 path 参数
-        headers: JSON.stringify(headerArr),
+        query,
+        body,
+        path,
+        header,
         url: `http://${window.serverConfig.osIp}:${window.serverConfig.port}${state.path}`,
       }
-      const restcLink = `${window.location.origin}/restc/index.html#!${(queryParams(data, false))}`
-      window.open(restcLink)
+      window.open(getRestcLink(data))
     }
 
     return (
