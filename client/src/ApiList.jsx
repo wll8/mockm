@@ -56,6 +56,18 @@ const ApiList = (() => {
 
     const columnsApiList = [
       {
+        title: 'api',
+        sorter: true,
+        ellipsis: true,
+        render: record => {
+          return (
+            <a href={`#/history,${record.id}/${record.method}${record.api}`}>
+              {record.api}
+            </a>
+          )
+        }
+      },
+      {
         title: 'id',
         width: 80,
         dataIndex: 'id',
@@ -78,18 +90,6 @@ const ApiList = (() => {
         width: 120,
         dataIndex: 'method',
         sorter: true,
-      },
-      {
-        title: 'api',
-        sorter: true,
-        ellipsis: true,
-        render: record => {
-          return (
-            <a href={`#/history,${record.id}/${record.method}${record.api}`}>
-              {record.api}
-            </a>
-          )
-        }
       },
       {
         title: 'date',
@@ -135,7 +135,7 @@ const ApiList = (() => {
     }
     return (
       <div className="ApiList">
-        <Table loading={state.loading} size="small" rowKey="key" pagination={{
+        <Table scroll={{x: 800}} loading={state.loading} size="small" rowKey="key" pagination={{
           defaultPageSize: state.defaultPageSize,
           total: state.apiListData.count,
           showSizeChanger: true,
