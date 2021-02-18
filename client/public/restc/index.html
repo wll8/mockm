@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>restc</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://shadow.elemecdn.com/gh/highlightjs/cdn-release@9.8.0/build/styles/default.min.css">
   <link rel="stylesheet" href="https://shadow.elemecdn.com/gh/codemirror/CodeMirror@5.19.0/lib/codemirror.css"></script>
   <link rel="stylesheet" href="https://shadow.elemecdn.com/gh/codemirror/CodeMirror@5.19.0/theme/material.css"></script>
@@ -483,7 +484,8 @@
             color: #dbdfeb;
             background: #3f4555;
             font: inherit;
-            width: 100px;
+            min-width: 40px;
+            max-width: 100px;
             height: 40px;
             border: 0 none;
             border-radius: 8px;
@@ -939,7 +941,7 @@
     class Main extends Jinkela {
       get template() {
         return `
-          <div>
+          <div class="gMain">
             <section>
               <jkl-result-view ref="resultView"></jkl-result-view>
             </section>
@@ -1025,6 +1027,30 @@
           html {
             height: 100%;
             overflow: hidden;
+          }
+          @media screen and (max-width: 750px) {
+            html {
+              overflow: scroll;
+            }
+            html body .gMain {
+              display: flex;
+              flex-wrap: wrap;
+            }
+            html body .gMain > section,
+            html body .gMain > aside {
+              width: 100%;
+              position: initial;
+            }
+            html body .gMain > section {
+              order: 2;
+            }
+            html body .gMain > aside {
+              order: 1;
+            }
+            html body .gMain > aside > form {
+              overflow: hidden;
+              padding: 20px;
+            }
           }
           body {
             margin: 0;
