@@ -60,11 +60,11 @@ function serverTest({
     } else {
       path = path === `/` ? `/index.html` : path // 访问 / 时默认返回 index.html
       const filePath = require(`path`).resolve(__dirname, `./page/${path}`)
-      res.sendFile(filePath, err => {
-        if (err) {
-          res.status(404).send({msg: `文件未找到: ${path}`})
-        }
-      })
+      if(tool.file.hasFile(filePath)) {
+        return res.sendFile(filePath)
+      } else {
+        return res.status(404).send({msg: `文件未找到: ${path}`})
+      }
     }
   })
 
