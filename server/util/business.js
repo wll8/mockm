@@ -210,8 +210,8 @@ function business() { // 与业务相关性的函数
               ws.on('message', (msg) => ws.send(strData))
             }
           } else {
-          val = (req, res, next) => res.json(backVal)
-        }
+            val = (req, res, next) => res.json(backVal)
+          }
         }
         const re = pathToRegexp(url)
         serverRouterList.push({method, router: url, action: val, re})
@@ -954,8 +954,8 @@ function business() { // 与业务相关性的函数
           timeout: 30e3,
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
-              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch(err => {
-                console.log(`err`, err)
+              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch((err = {}) => {
+                console.log(`err`, err.message)
                 resolve(false)
               })
               if(res) {
