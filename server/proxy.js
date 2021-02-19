@@ -1,6 +1,6 @@
 const util = require(`./util/index.js`)
 
-function serverProxy({
+async function serverProxy({
   api,
   db,
   HTTPHISTORY,
@@ -119,9 +119,13 @@ function serverProxy({
 
   // 前端自行添加的测试 api
   server.use(apiRootInjection)
-  serverRouterList.forEach(({method, router, action}) => {
+  for (let index = 0; index < serverRouterList.length; index++) {
+    const {method, router, action} = serverRouterList[index]
+    if(method === `ws`) {
+      (await tool.generate.initPackge(`express-ws`))(server)
+    }
     server[method](router, action)
-  })
+  }
 
   server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 

@@ -199,19 +199,33 @@ function business() { // 与业务相关性的函数
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = tool.url.fullApi2Obj(key)
+        method = method.toLowerCase()
         let val = api[key]
         if(typeof(val) === `object`) { // 如果配置的值是对象, 那么直接把对象作为返回值, 注意, 读取一个文件也是对象
           const backVal = val
+          if(method === `ws`) {
+            val = (ws, req) => {
+              const strData = JSON.stringify(backVal)
+              ws.send(strData)
+              ws.on('message', (msg) => ws.send(strData))
+            }
+          } else {
           val = (req, res, next) => res.json(backVal)
         }
-        method = method.toLowerCase()
+        }
         const re = pathToRegexp(url)
         serverRouterList.push({method, router: url, action: val, re})
       })
       function noProxyTest({method, pathname}) {
         // return true 时不走真实服务器, 而是走自定义 api
         return serverRouterList.some(item => {
-          // 当方法不同时才去匹配 url
+          if (((item.method === `ws` ) && (method === `get` ))) { // ws 连接时, 实际上得到的 method 是 get, 并且 pathname + .websocket
+            return (
+              item.re.exec(pathname.replace(/\/\.websocket$/, ''))
+              && Boolean(item.action.disable) === false
+            )
+          }
+          // 当方法相同时才去匹配 url
           if(((item.method === `all`) || (item.method === method))) {
             return (
               item.re.exec(pathname) // 如果匹配到自定义的 api 则走自定义 api

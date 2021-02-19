@@ -310,6 +310,39 @@ module.exports = {
 }
 ```
 
+## 如何创建 websocket 接口
+实现一个  websocket 接口 ws://127.0.0.1:9000/wsecho, 当连接成功时发送 `连接成功`, 并把客户端发送的信息再原样返回给客户端.
+
+``` js
+api: {
+  'ws /wsecho' (ws, req) {
+    ws.send(`连接成功`)
+    ws.on('message', (msg) => {
+      ws.send(msg)
+    })
+  }
+},
+```
+
+客户端连接代码, 可以直接打开浏览器 console 测试:
+
+``` js
+function startWs(wsLink){
+  window.ws = new WebSocket(wsLink)
+  ws.onopen = (evt) => { 
+    ws.send(`客户端发送的消息`)
+  }
+  ws.onmessage = (evt) => {
+    console.log( `服务器返回的消息`, evt.data)
+  }
+  ws.onclose = (evt) => { // 断线重连
+    setTimeout(() => startWs(wsLink), 1000)
+  }
+}
+startWs(`ws://127.0.0.1:9000/wsecho`)
+// ws.send(`发送新消息`)
+```
+
 ## 如何接收客户端上传的文件
 实现一个 post 方法的文件上传接口 http://127.0.0.1:9000/file/upload, 文件上传后保存到临时目录, 并返回文件信息.
 
