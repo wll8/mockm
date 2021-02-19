@@ -141,6 +141,12 @@ module.exports = util => {
           }).catch(err => console.log(`err`, err))
         },
         // fetch-snippet
+        'ws /wsecho' (ws, req) { // 创建 websocket API
+          ws.send(`连接成功`)
+          ws.on('message', (msg) => {
+            ws.send(msg)
+          })
+        },
       }
     },
     // 处理重放请求出错时会进入这个方法

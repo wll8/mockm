@@ -417,6 +417,29 @@ function wrapApiData({data, code}) { // 包裹 api 的返回值
 
 当与 config.proxy 中的路由冲突时, config.api 优先.
 
+对象的 key 为 api 路由, `请求方法 /路径`, 请求方法可省略, 示例:
+
+- `/api/1` 省略请求方法, 可以使用所有 http 方法访问接口, 例如 get post put patch delete head options trace.
+- `get /api/2` 指定语法方法, 例如只能使用 get 方法访问接口
+- `ws /api/3` 创建一个 websocket 接口
+
+value 可以是函数或 json, 为 json 时直接返回 json 数据.
+
+``` js
+api: {
+  // 当为基本数据类型时, 直接返回数据
+  'get /api/1': {msg: `ok`},
+  // http 接收的参数, 参考 example 中间件 http://expressjs.com/en/guide/using-middleware.html
+  'get /api/2' (req, res, next) {
+    res.send({msg: `ok`})
+  },
+  // websocket 接收的参数, 参考 https://github.com/websockets/ws
+  'ws /api/3' (ws, req) {
+    ws.on('message', (msg) => ws.send(msg))
+  }
+},
+```
+
 ## config.resHandleReplay
 类型: function
 默认: `({req, res}) => wrapApiData({code: 200, data: {}})`
