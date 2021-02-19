@@ -440,6 +440,11 @@ api: {
 },
 ```
 
+::: warning 注意
+不能同时存在 `websocket 链接` 和以此路径结尾 + `/.websocket` 的请求地址.
+例如存在 `ws /echo` 时, 不能存在 `get /echo/.websocket`.
+:::
+
 ## config.resHandleReplay
 类型: function
 默认: `({req, res}) => wrapApiData({code: 200, data: {}})`
