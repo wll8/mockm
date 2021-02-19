@@ -291,34 +291,16 @@ proxy: {
 ```
 
 ## config.remote
-类型: boolean | object
+类型: boolean
 默认: false
 注: 此修改需要重启才能生效.
 
 是否映射本地服务到公网.
 
-这里默认使用 ngrok 的免费服务. 值为 object 时是
+这里默认使用 ngrok 的免费服务. 值为
 
 - false 不启用.
 - true 启用.
-- object 启用并对每个服务进行配置.
-
-ngrok 配置参考: https://ngrok.com/docs#tunnel-definitions
-
-例:
-```js
-remote: {
-  authtoken: `******`, // 配置 ngrok 用户权限
-  tunnels: {
-    testPort: { proto: `http` }, // 配置 testPort 的映射方式
-    otherPort: { // 映射其他的外网服务, 你不必自己安装 ngrok 即可实现
-      addr: 8080
-    },
-  },
-}
-```
-
-- [ ] frp 支持正在规划中
 
 ## config.openApi
 类型: string | array | object
