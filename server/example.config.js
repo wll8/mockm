@@ -155,6 +155,9 @@ module.exports = util => {
     resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
     // 由 db 生成的接口的最后一个拦截器, 可以用来构建项目所需的数据结构
     resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
+    watch: [],
+    clearHistory: false,
+    guard: false,
   }
 }
 

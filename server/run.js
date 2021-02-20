@@ -7,6 +7,10 @@
  * 把 run.js 中收集的命令行参数, 以 base64 方式传入 server.js 中.
  */
 
+const {logHelper} = require(`${__dirname}/util/log.js`)
+process.argv.includes(`dev`) && logHelper()
+
+const fs = require(`fs`)
 const path = require(`path`)
 const { tool, business } = require(`${__dirname}/util/index.js`)
 const packageJson = require(`${__dirname}/package.json`)
@@ -18,6 +22,7 @@ const {
   initHandle,
   plugin,
 } = business
+let config = {}
 const configFile = initHandle().getConfigFile()
 cliArg.config = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
@@ -46,10 +51,52 @@ new Promise( async () => { // 检查更新
 })
 
 new Promise(async () => { // 启动 server.js
+  let log = ``
+  function restart() {
+    config.guard && setTimeout(() => {
+      nodemon.emit('restart')
+      console.log(`异常退出, 已重启服务`)
+      log = ``
+    }, 1000)
+  }
   nodemon({
     ignoreRoot: [], // 覆盖 ignore, 避免 .git node_modules 中的内容不能被监听, 例如未指定配置文件时是使用 node_modules 中的配置
     exec: `node "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
     watch: [configFile],
+    stdout: false,
+  })
+  .on('readable', function(arg) { // the `readable` event indicates that data is ready to pick up
+    // console.log(`readable`, arg)
+    this.stdout.pipe(process.stdout) // 把子进程的输出定向到本进入输出
+    // this.stderr.pipe(process.stderr)
+    this.stdout.on(`data`, data => {
+      log = String(data)
+    })
+  })
+  .on('start', (arg) => {
+    // console.log(`start`, arg)
+  })
+  .on('crash', (arg) => { // 子进程被退出时重启, 例如 kill
+    // console.log(`crash`, arg)
+    restart()
+  })
+  // https://github.com/remy/nodemon/blob/master/doc/events.md
+  .on(`exit`, (arg) => {
+    // console.log(`exit`, arg)
+    // arg null 异常退出, 例如语法错误, 端口占用, 运行错误
+    // arg SIGUSR2 正常退出, 例如修改文件
+    // arg undefined 用户退出, 例如 ctrl+c
+    if(log.match(/Error:/)) { // 检测到错误日志时重启
+      restart()
+      if(config.dataDir) { // 保存错误日志
+        fs.appendFileSync(`${config.dataDir}/log.err.txt`, `${
+          tool.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date())
+        }\n${log}\n`)
+      }
+    }
+  })
+  .on(`restart`, (arg) => {
+    // console.log(`restart`, arg)
   })
   const {
     showLocalInfo,
@@ -60,7 +107,7 @@ new Promise(async () => { // 启动 server.js
     timeout: 60e3,
   }).then(() => {
     const share = tool.file.fileStore(sharePath)
-    const config = share.get(`config`)
+    config = share.get(`config`)
     const store = tool.file.fileStore(config._store)
     store.set(`note.remote`, {})
     showLocalInfo({store, config})
