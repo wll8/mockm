@@ -469,3 +469,9 @@ api: {
   - 状态码,
   - 请求体 MD5,
   - 响应体 MD5,
+
+## config.guard
+类型: boolean
+默认: false
+
+当程序异常退出时, 是否自动重启.

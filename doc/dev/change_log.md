@@ -7,6 +7,10 @@
 :::
 
 ## 2021年02月
+#### v1.1.25-alpha.3
+- fix: 修正 cnpm 检测问题
+- feat: 支持意外退出时自动重启, 配置项 [config.guard](../config/option.md#config-guard)
+
 #### v1.1.25-alpha.2
 - fix: 使用默认配置文件时, webApi 修改后不会自动更新
 - feat: 扩展 config.api 支持的基本数据类型
