@@ -7,6 +7,17 @@
 :::
 
 ## 2021年02月
+#### v1.1.25-alpha.2
+- fix: 使用默认配置文件时, webApi 修改后不会自动更新
+- feat: 扩展 config.api 支持的基本数据类型
+- feat: config.api 支持 WebSocket
+- feat: 支持 WebSocket 代理
+- feat: 简化 remote 开启时的错误日志
+
+#### v1.1.25-alpha.1
+- feat: 在默认 restc 页添加 query header body 参数
+- fix: 尝试修复偶然性错误 `Cannot set headers after they are sent to the client`
+
 #### v1.1.24
 - feat: 支持从 webApi 编写界面上使用示例请求参数进行调试, 功能位置: `action => try`
 - feat: 放宽对字段名必填的校验, 以更好的支持快速编辑字段描述
