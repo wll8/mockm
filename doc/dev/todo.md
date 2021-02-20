@@ -59,9 +59,10 @@
 ## 缺陷
 - [x] fix: 添加 webApi 时不能自动生效
   - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
-- [ ] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
+- [x] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
+  - 这是由于初始化 cnpm 时是使用 npm 来安装的, npm 安装时会对原来 cnpm 安装的依赖冲突.
 - [ ] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
-- [ ] fix: 在 linux 上不能检测到使用 nvm 的全局安装的 cnpm
+- [x] fix: 不能检测到使用 nvm 的全局安装的 cnpm
 - [x] fix: 如果检查新版本出错时, 不应提示更新 `已发布新版本 undefined...`
 - [x] fix: 从请求详情中点击编辑 webApi 时, 不应该携带 query 参数
 - [x] fix: 应该把有道翻译放在最后面, 因为它的翻译结果不精简. 例如 `名称` 不应该被翻译为 `The name of the` , 而应该翻译为 `name`.
