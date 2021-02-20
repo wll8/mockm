@@ -8,8 +8,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      */
     function getLocalVersion(name, {packagePath} = {}) { // 从本地获取版本号
       const hasFile = tool().file.hasFile
-      packagePath = packagePath || require.main.paths.concat(`${require(`path`).parse(process.execPath).dir}/node_modules`) // 全局安装目录
-        .find(path => hasFile(`${path}/${name}/package.json`))
+      const pathList = [
+        ...require.main.paths,
+        `${require(`path`).parse(process.execPath).dir}/node_modules`,
+        `${require(`path`).parse(process.execPath).dir}/../lib/node_modules`,
+      ]
+      packagePath = packagePath || pathList.find(path => hasFile(`${path}/${name}/package.json`))
       if(packagePath) {
         return require(`${packagePath}/${name}/package.json`).version // 从 package 中获取版本
       }
@@ -120,11 +124,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function installPackage({cwd, env, packageName, version}) {
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
-    const installEr = {cnpm: `npm`}[packageName] || `cnpm`
+    // const installEr = {cnpm: `npm`}[packageName] || `cnpm`
+    const installEr = `cnpm`
     let {MOCKM_REGISTRY, NPM_CONFIG_REGISTRY} = process.env
     MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
+    // --no-save 不保存依赖名称到 package.json 中
+    const cmd = `npx ${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`
+    console.log(cmd)
     return cli().spawn(
-      `npx`, `${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`.split(/\s+/),
+      `npx`, cmd.split(/\s+/),
       {
         cwd,
         env: {
