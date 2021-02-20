@@ -157,6 +157,7 @@ async function serverProxy({
   function getProxyConfig (userConfig = {}) {
     const rootTarget = config.proxy.find(item => (item.context === `/`)).options.target
     const defaultConfig = {
+      ws: true,
       target: rootTarget,
       changeOrigin: true,
       onProxyReq: (proxyReq, req, res) => {
