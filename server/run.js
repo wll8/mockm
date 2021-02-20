@@ -68,7 +68,7 @@ new Promise(async () => { // 启动 server.js
   .on('readable', function(arg) { // the `readable` event indicates that data is ready to pick up
     // console.log(`readable`, arg)
     this.stdout.pipe(process.stdout) // 把子进程的输出定向到本进入输出
-    // this.stderr.pipe(process.stderr)
+    this.stderr.pipe(process.stderr) // 错误输出, 例如按需安装依赖时无权限
     this.stdout.on(`data`, data => {
       log = String(data)
     })
