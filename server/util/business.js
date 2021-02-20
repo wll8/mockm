@@ -201,7 +201,7 @@ function business() { // 与业务相关性的函数
         let {method, url} = tool.url.fullApi2Obj(key)
         method = method.toLowerCase()
         let val = api[key]
-        if(typeof(val) === `object`) { // 如果配置的值是对象, 那么直接把对象作为返回值, 注意, 读取一个文件也是对象
+        if(typeof(val) !== `function`) { // 如果配置的值是对象, 那么直接把对象作为返回值, 注意, 读取一个文件也是对象
           const backVal = val
           if(method === `ws`) {
             val = (ws, req) => {
