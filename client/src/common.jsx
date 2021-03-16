@@ -53,6 +53,9 @@ common.http.interceptors.response.use(
     }
   },
   error => {
+    if(error.response === undefined) {
+      return Promise.reject(error)
+    }
     const data = error.response.data
     message.error(data.msg || String(error))
     return Promise.reject(error)
