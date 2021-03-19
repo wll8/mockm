@@ -275,6 +275,7 @@ function ExampleCom(props) {
           />
           <p />
           <Input.TextArea
+            disabled={propsExampleCom.method === 'ws'}
             placeholder={`响应头, 每行一个键值对:\nkey: val`}
             value={state.headers}
             onChange={val => onChange(val, `headers`)}
@@ -291,7 +292,7 @@ function ExampleCom(props) {
         <Select style={{width: `100%`}} onChange={ev => onChange(ev, `useDataType`)} value={state.useDataType}>
           <Option value="table">{showTitle(`表格`, `使用表格生成数据`)}</Option>
           <Option value="custom">{showTitle(`自定义`, `以编程方式处理接口`)}</Option>
-          <Option value="history">{showTitle(`请求历史`, `使用已有请求记录的响应`)}</Option>
+          <Option disabled={propsExampleCom.method === 'ws'} value="history">{showTitle(`请求历史`, `使用已有请求记录的响应`)}</Option>
         </Select>
         <p />
         {useDataTypeToCom()}

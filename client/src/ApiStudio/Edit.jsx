@@ -130,6 +130,7 @@ function Edit() {
       `head`,
       `options`,
       `trace`,
+      `ws`,
     ]
     const parametersList = [ // 参数列表
       `query`,
@@ -374,6 +375,7 @@ function Edit() {
             visible={state.showDrawer}
           >
             {state.showDrawer === `ExampleCom` && example && table && <ExampleCom
+              method={state.hand.method}
               upLoad={onChangeExampleCom}
               close={() => setDrawer(``)}
               table={table}
