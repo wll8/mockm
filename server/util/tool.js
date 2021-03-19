@@ -122,7 +122,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     return hasPackge
   }
 
-  function installPackage({cwd, env, packageName, version}) {
+  async function installPackage({cwd, env, packageName, version, attempt = 3}) {
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
     // const installEr = {cnpm: `npm`}[packageName] || `cnpm`
     const installEr = `cnpm`
@@ -130,18 +130,30 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
     // --no-save 不保存依赖名称到 package.json 中
     const cmd = `npx ${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`
+    console.log(`正在初始化 ${packageName}...`)
     console.log(cmd)
-    return cli().spawn(
-      `npx`, cmd.split(/\s+/),
-      {
-        cwd,
-        env: {
-          NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
-          ...process.env,
-          ...env,
+    let attemptNum = attempt // 重试次数
+    do {
+      await cli().spawn(
+        `npx`, cmd.split(/\s+/),
+        {
+          detached: true,
+          cwd,
+          env: {
+            NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
+            ...process.env,
+            ...env,
+          }
         }
+      )
+      if(attemptNum < attempt) {
+        console.log(`重试次数 ${attempt - attemptNum}/${attempt - 1}`)
       }
-    )
+      attemptNum = attemptNum - 1
+    } while (hasPackage(packageName) === false && attemptNum > 0);
+    const hasPackageRes = hasPackage(packageName)
+    console.error(`初始化 ${packageName} ${hasPackageRes ? `成功`: `失败`}`)
+    return hasPackageRes
   }
 
   function generate() { // 生成器
@@ -161,10 +173,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const packageJson =  require(`${mainPath}/package.json`)
         version = version || packageJson.pluginDependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
-        if(hasPackageRes === false) { // 如果 ngrok 不存在, 则安装它
+        if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           const cnpmVersion = npm().getLocalVersion(`cnpm`)
           if(cnpmVersion === undefined) { // 如果 cnpm 不存在则先安装 cnpm
-            console.log(`正在初始化CNPM...`)
             await installPackage({cwd: mainPath, env, packageName: `cnpm`, version: `6.1.1` })
           }
           msg && console.log(msg)
