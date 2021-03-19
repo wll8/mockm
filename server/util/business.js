@@ -119,7 +119,7 @@ function business() { // 与业务相关性的函数
       }))
     }).flat()
     const apiObj = pathList.reduce((acc, cur, curIndex) => {
-      const fn = (req, res, next) => {
+      let fn = (req, res, next) => {
         const {example = {}, table = []} = cur.responses[`200`]
         const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
         if(useDataType === `table`) { // 使用表格中的数据
@@ -174,6 +174,55 @@ function business() { // 与业务相关性的函数
             config,
             business: business(),
           })(req, res, next)
+        }
+      }
+      if(cur.method === `ws`) { // 如果是 websocket 方法则更换函数模版
+        fn = (ws, req) => {
+          const sendData = (data) => {
+            const strData = JSON.stringify(data)
+            ws.send(strData)
+            ws.on('message', (msg) => {
+              ws.send(strData)
+            })
+          }
+          const {example = {}, table = []} = cur.responses[`200`]
+          const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
+          if(useDataType === `table`) { // 使用表格中的数据
+            try {
+              let data
+              const listToDataRes = listToData(table, {rule, type})
+              data = listToDataRes.data
+              sendData(data)
+            } catch (error) {
+              sendData({msg: `转换错误: ${error.message}`})
+            }
+          }
+          if (useDataType === `custom`) { // 自定义逻辑
+            try {
+              const { NodeVM } = require(`vm2`);
+              const vm = new NodeVM({
+                sandbox: { // 给 vm 使用的变量
+                  tool: {
+                    libObj: lib,
+                    wrapApiData,
+                    listToData,
+                    cur,
+                  },
+                }
+              });
+              const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``;
+              const codeType = typeof(code)
+              if([`function`].includes(codeType)) { // 如果是函数则运行函数
+                code(ws, req)
+              } else { // 函数之外的类型则当作 json 返回
+                sendData(code)
+              }
+            } catch (err) {
+              console.log(`err`, err)
+              // 处理客户端代码出现问题, 代码错误或出现不允许的权限
+              sendData({msg: err.message})
+            }
+          }
         }
       }
       fn.type = `apiWeb`
