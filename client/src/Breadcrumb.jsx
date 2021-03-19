@@ -100,30 +100,35 @@ function BreadcrumbCom() {
                     <Menu>
                       <Menu.Item><a href="/#/">记录</a></Menu.Item>
                       <Menu.Item><a href="/#/apiStudio">接口</a></Menu.Item>
-                      <Menu.Item onClick={() => {
-                        window.open(getRestcLink({
-                          method: `GET`,
-                          header: [
-                            {
-                              enabled: false,
-                              key: `X-Powered-By`,
-                              value: `mockm`,
+                      <Menu.SubMenu title="工具">
+                        <Menu.Item onClick={() => {
+                          window.open(getRestcLink({
+                            method: `GET`,
+                            header: [
+                              {
+                                enabled: false,
+                                key: `X-Powered-By`,
+                                value: `mockm`,
+                              },
+                              {
+                                enabled: true,
+                                key: `Authorization`,
+                                value: `test`,
+                              },
+                            ],
+                            query: {
+                              _sort: `id`,
+                              _order: `desc`,
+                              _page: 1,
+                              _limit: 10,
                             },
-                            {
-                              enabled: true,
-                              key: `Authorization`,
-                              value: `test`,
-                            },
-                          ],
-                          query: {
-                            _sort: `id`,
-                            _order: `desc`,
-                            _page: 1,
-                            _limit: 10,
-                          },
-                          url: `http://${window.serverConfig.osIp}:${window.serverConfig.testPort}/api/getApiList/`,
-                        }))
-                      }}>请求</Menu.Item>
+                            url: `http://${window.serverConfig.osIp}:${window.serverConfig.testPort}/api/getApiList/`,
+                          }))
+                        }}>请求</Menu.Item>
+                        <Menu.Item><a target="_blank" rel="noreferrer" href="https://hongqiye.com/doc/mockm/?from=mockm">文档</a></Menu.Item>
+                        <Menu.Item><a target="_blank" rel="noreferrer" href="http://wll8.gitee.io/mockjs-examples/?from=mockm">mockjs</a></Menu.Item>
+                      </Menu.SubMenu>
+                      <Menu.Item><a target="_blank" rel="noreferrer" href="https://github.com/wll8/mockm?from=mockm">github</a></Menu.Item>
                     </Menu>
                   }
                 >
