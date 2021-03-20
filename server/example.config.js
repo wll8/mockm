@@ -4,7 +4,7 @@
 
 module.exports = util => {
   const {
-    libObj: { fetch, midResJson, axios, mime, mockjs },
+    libObj: { midResJson, axios, mime, mockjs },
     toolObj,
   } = util
   return {
@@ -123,7 +123,8 @@ module.exports = util => {
         },
         // curl-snippet
         // fetch-snippet
-        'get /fetch' (req, res, next) { // 运行 fetch 方法并获取执行结果
+        async 'get /fetch' (req, res, next) { // 运行 fetch 方法并获取执行结果
+          const fetch = await toolObj.generate.initPackge(`node-fetch`)
           // 示例 fetch 方法
           const fetchRes = fetch("http://www.httpbin.org/ip", {
             "headers": {
