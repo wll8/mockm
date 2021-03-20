@@ -255,18 +255,10 @@ function Edit() {
           return false
         }
         setState(preState => {
-          const method = preState.hand?.method
-          const parameters = Object.keys(data[method]?.parameters || {})[0] || preState.hand?.parameters
-          const responses = Object.keys(data[method]?.responses || {})[0] || preState.hand?.responses
           return {
             ...preState,
             data,
             path,
-            hand: {
-              method,
-              parameters,
-              responses,
-            },
           }
         })
       }).finally(() => {
@@ -308,7 +300,7 @@ function Edit() {
       }
     }
 
-    function setDrawer(show, type) { // 设置 Drawer 的隐藏状态
+    function setDrawer(show, type = `res`) { // 设置 Drawer 的隐藏状态
       setState(preState => ({...preState, showDrawer: show, exampleType: type}))
     }
 
@@ -375,7 +367,8 @@ function Edit() {
             visible={state.showDrawer}
           >
             {state.showDrawer === `ExampleCom` && example && table && <ExampleCom
-              method={state.hand.method}
+              type={state.exampleType}
+              hand={state.hand}
               upLoad={onChangeExampleCom}
               close={() => setDrawer(``)}
               table={table}
@@ -455,7 +448,7 @@ function Edit() {
                             <Dropdown
                               overlay={(
                                 <Menu>
-                                  {/* <Menu.Item onClick={() => setDrawer(`ExampleCom`, `req`)}>example</Menu.Item> */}
+                                  <Menu.Item onClick={() => setDrawer(`ExampleCom`, `req`)}>example</Menu.Item>
                                   {/* <Menu.Item>code</Menu.Item> */}
                                 </Menu>
                               )}
