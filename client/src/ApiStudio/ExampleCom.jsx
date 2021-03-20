@@ -249,8 +249,9 @@ function ExampleCom(props) {
       table: (
         <>
           <Input
+            disabled={propsExampleCom.type === `req`}
             addonBefore={
-              <Select onChange={ev => onChange(ev, `type`)} value={state.type}>
+              <Select disabled={propsExampleCom.type === `req`} onChange={ev => onChange(ev, `type`)} value={state.type}>
                 <Option value="object">{showTitle(`object`, `以对象形式生成数据`)}</Option>
                 <Option value="array">{showTitle(`array`, `以数组形式生成数据`)}</Option>
               </Select>
@@ -275,7 +276,7 @@ function ExampleCom(props) {
           />
           <p />
           <Input.TextArea
-            disabled={propsExampleCom.method === 'ws'}
+            disabled={propsExampleCom.hand.method === 'ws' || propsExampleCom.type === `req` }
             placeholder={`响应头, 每行一个键值对:\nkey: val`}
             value={state.headers}
             onChange={val => onChange(val, `headers`)}
@@ -289,7 +290,7 @@ function ExampleCom(props) {
   return (
     <Space direction="vertical" className="ExampleCom" style={{width: `100%`}}>
       <Card size="small" title="数据源">
-        <Select style={{width: `100%`}} onChange={ev => onChange(ev, `useDataType`)} value={state.useDataType}>
+        <Select disabled={propsExampleCom.type === `req`} style={{width: `100%`}} onChange={ev => onChange(ev, `useDataType`)} value={state.useDataType}>
           <Option value="table">{showTitle(`表格`, `使用表格生成数据`)}</Option>
           <Option value="custom">{showTitle(`自定义`, `以编程方式处理接口`)}</Option>
           <Option disabled={propsExampleCom.method === 'ws'} value="history">{showTitle(`请求历史`, `使用已有请求记录的响应`)}</Option>
@@ -298,7 +299,7 @@ function ExampleCom(props) {
         {useDataTypeToCom()}
       </Card>
       <p />
-      <BtnList />
+      {propsExampleCom.type === `res` && <BtnList />}
     </Space>
   )
 }
