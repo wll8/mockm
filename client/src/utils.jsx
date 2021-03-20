@@ -41,9 +41,8 @@ function getRestcLink({method, url, uri, path = {}, query = {}, header = {}, bod
     method,
     queryParameters: JSON.stringify(queryParametersArr),
     body: JSON.stringify(body),
-    // path: JSON.stringify(path), // todo 完善 path 参数
     headers: JSON.stringify(headerArr),
-    url: url || uri,
+    url: setPathVal(url || uri, path),
   }
   const restcLink = `${window.location.origin}/restc/index.html#!${(queryParams(data, false))}`
   return restcLink
@@ -496,7 +495,31 @@ function onChange(ev, stateKey, {state, setState}) {
   }
 }
 
+/**
+ * 设置 path 中的参数
+ * @param {string} path 链接
+ * @param {object} obj 链接中的数据
+ * @return {string} 替换后的链接
+ */
+function setPathVal(path, obj) {
+  let origin = ``
+  try {
+    origin = (new URL(path)).origin
+    path = path.replace(origin, ``)
+  } catch (error) {
+    console.log(`error`, error)
+  }
+  ;([...path.matchAll(/:(.+?)\b/g)]).forEach(([raw, key]) => { // 处理 /:id/
+    path = path.replace(raw, obj[key])
+  })
+  ;([...path.matchAll(/{+(.+?)}+/g)]).forEach(([raw, key]) => { // 处理 /{id}/
+    path = path.replace(raw, obj[key])
+  })
+  return origin + path
+}
+
 export default  {
+  setPathVal,
   isType,
   getRestcLink,
   toAbsURL,
