@@ -28,13 +28,13 @@
     "better-mock": "https://cdn.jsdelivr.net/gh/wll8/static@1.0.3/github.com/wll8/better-mock/releases/download/0.3.2-alpha/better-mock-0.3.2-alpha.tgz",
     "vm2": "^3.9.2",
     "morgan": "^1.10.0",
-    "node-fetch": "^2.6.1",
     "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.6",
     "path-to-regexp": "0.1.7"
   },
   "devDependencies": {},
   "pluginDependencies": {
+    "node-fetch": "2.6.1",
     "express-ws": "4.0.0",
     "translate-platforms": "0.0.7",
     "curlconverter": "3.12.0",

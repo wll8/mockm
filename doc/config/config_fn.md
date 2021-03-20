@@ -98,8 +98,6 @@ util 目前包含以下内容:
   - increment
 :::
 
-### util.libObj.fetch 请求库
-- 参考: https://github.com/bitinn/node-fetch
 ### util.libObj.axios 请求库
 - 参考: https://github.com/axios/axios
 
