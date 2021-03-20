@@ -7,9 +7,16 @@
 :::
 
 ## 2021年03月
+#### v1.1.25-alpha.5
+不兼容的更新, 此版本 `node-fetch` 库更改为按需安装, 参考 [util.run.fetch](../config/config_api_fn.md#util-run-fetch).
+
+- feat: 生成 restc 请求链接时自动填充 path 参数
+- feat: 支持查看入参示例
+- feat: 不默认安装依赖 node-fetch
+
 #### v1.1.25-alpha.4
-- feat: 支持从 web 页面上创建 websocket 接口
-- feat: 按需安装依赖时成功时显示反馈, 错误时可重试
+- feat: 支持从 web 页面上创建 WebSocket 接口
+- feat: 按需安装依赖成功时显示反馈, 错误时可重试
 
 ## 2021年02月
 #### v1.1.25-alpha.3
