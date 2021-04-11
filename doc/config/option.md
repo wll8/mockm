@@ -475,3 +475,14 @@ api: {
 默认: false
 
 当程序异常退出时, 是否自动重启.
+
+## config.backOpenApi
+类型: boolean | number
+默认: 10
+
+每隔多少分钟检测一下 openApi, 保存更新记录到 `${config.dataDir}/openApiHistory` 目录中.
+
+- boolean 是否启用
+  - false 禁用
+  - true 使用默认配置
+-  number 启用并设置检测的分钟数

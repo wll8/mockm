@@ -560,6 +560,121 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return fs.existsSync(filePath)
     }
 
+    /**
+     * 获取文件 md5 - 同步版
+     * @param {*} pathOrBuffer 文件路径或 buffer
+     * @param {*} type 如果是文件路径时, type 为 path
+     * @returns
+     */
+    function getFileMd5(pathOrBuffer, type) {
+      const fs = require(`fs`)
+      const buffer = type === `path` ? fs.readFileSync(pathOrBuffer) : pathOrBuffer
+      const crypto = require('crypto');
+      const md5 = crypto.createHash('md5').update(buffer).digest('hex')
+      return md5
+    }
+
+    /**
+     * 获取远程 url 的
+     * @param {string} url http url
+     * @returns {object} {data, ext} binary 和后缀名
+     */
+    function getFile(url) {
+      return new Promise((resolve, reject) => {
+        const http = require(url.replace(/(:\/\/.*)/, ``).trim()) // 获取 http 或 https
+        http.get(url, res => {
+          const { statusCode } = res
+          if (statusCode !== 200) {
+            reject(statusCode)
+          }
+          let data = ''
+          res.setEncoding('binary')
+          res.on('data', (chunk) => {
+            data += chunk
+          });
+          res.on('end', () => {
+            const mime = require('mime')
+            const ext = mime.getExtension(res.headers[`content-type`]) || ``
+            resolve({
+              data,
+              ext,
+            })
+          })
+        }).on('error', (e) => {
+          reject(e.message)
+        });
+      })
+    }
+
+    /**
+     * 根据 url 获取文件的存储路径以及文件名, 避免特殊字符
+     * @param {string} url http 地址
+     * @returns {object} {pathname, fileName}
+     */
+    function getFilePath(url) {
+      const filenamify = require('filenamify')
+      const {
+        pathname,
+        origin,
+      } = new URL(url)
+      const fileName = filenamify(
+        url.replace(origin + pathname, ``),
+        { maxLength: 255, replacement: '_' }
+      )
+      return {
+        pathname,
+        fileName,
+      }
+    }
+
+    /**
+     * 备份一个 http url 对应的文件
+     * @param {string} baseDir 要备份于什么目录之下
+     * @param {string} fileUrl 文件 url
+     */
+    async function backUrl(baseDir = __dirname, fileUrl) {
+      const { data: fileData, ext: fileExt } = (await getFile(fileUrl).catch(err => {
+        console.log(err)
+      })) || {}
+      if(fileData === undefined) {
+        return false
+      }
+      const {
+        pathname,
+        fileName,
+      } = getFilePath(fileUrl)
+      const fs = require('fs')
+      const dir = `${baseDir}/${pathname}`
+      fs.mkdirSync(dir, { recursive: true })
+      const maxTime = fs.readdirSync(dir).filter(item => { // 获取所有备份的文件
+        return item.match(/_\d{13}_back/)
+      }).map(item => { // 获取所有时间戳
+        return Number(item.match(/(\d{13})/)[1])
+      }).sort().reverse()[0] // 获取最大的那个时间戳
+      if (maxTime) {
+        const oldMd5 = getFileMd5(fs.readFileSync(`${dir}/${fileName}_${maxTime}_back.${fileExt}`))
+        const tempFile = `${dir}/temp`
+        saveFile(tempFile, fileData)
+        const newMd5 = getFileMd5(fs.readFileSync(tempFile))
+        fs.unlinkSync(tempFile)
+        if (oldMd5 !== newMd5) {
+          saveFile(`${dir}/${fileName}_${Date.now()}_back.${fileExt}`, fileData)
+        }
+      } else {
+        saveFile(`${dir}/${fileName}_${Date.now()}_back.${fileExt}`, fileData)
+      }
+    }
+
+    /**
+     * 保存文件
+     * @param {string} filePath 文件的路径
+     * @param {binary} bin 二进制内容
+     */
+    function saveFile(filePath, bin) {
+      const fs = require('fs')
+      fs.writeFileSync(filePath, bin, { encoding: 'binary' })
+    }
+
     function getMd5(path) { // 获取文件 md5
       return new Promise((resolve, reject) => {
         const fs = require('fs')
@@ -591,6 +706,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      backUrl,
       fileStore,
       getMd5,
       getMd5Sync,
