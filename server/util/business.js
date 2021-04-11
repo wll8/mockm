@@ -456,6 +456,19 @@ function business() { // 与业务相关性的函数
         config.clearHistory && business().historyHandle().clearHistory(config)
       }
 
+      { // 定时备份 openApi
+        const openApiList = Boolean(config.openApi && config.backOpenApi) === false ? [] : {
+          string: () => [config.openApi],
+          array: () => config.openApi,
+          object: () => Object.values(config.openApi),
+        }[tool.type.isType(config.openApi)]()
+        setInterval(() => {
+          openApiList.forEach(item => {
+            tool.file.backUrl(config._openApiHistoryDir, item)
+          })
+        }, config.backOpenApi * 60 * 1000)
+      }
+
       fileStore(config._share, {config}).set(`config`, config)
       const db = getDb({config})
       const { setHeader, allowCors } = clientInjection({config})
