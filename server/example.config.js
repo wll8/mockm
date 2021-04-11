@@ -151,14 +151,13 @@ module.exports = util => {
       }
     },
     // 处理重放请求出错时会进入这个方法
-    // 对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能)
-    // 所以这里直接告诉前面接口正常(200ok), 并返回前约定的接口数据结构, 让前端页面可以尽量正常运行
     resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
     // 由 db 生成的接口的最后一个拦截器, 可以用来构建项目所需的数据结构
     resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
-    watch: [],
-    clearHistory: false,
-    guard: false,
+    watch: [], // 指定一些目录或文件路径, 当它们被修改时自动重载服务. 支持绝对路径和相对于配置文件的路径.
+    clearHistory: false, // 启动时清理冗余的请求记录
+    guard: false, // 当程序异常退出时, 是否自动重启
+    backOpenApi: 10, // 每隔多少分钟检测 openApi 更新记录
   }
 }
 

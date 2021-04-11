@@ -434,6 +434,9 @@ api: {
 
 处理重放请求出错时会进入这个方法.
 
+::: tip
+对于没有记录 res 的请求, 返回 404 可能会导致前端页面频繁提示错误(如果有做这个功能), 所以这里直接告诉前面接口正常(200ok), 并返回前约定的接口数据结构, 让前端页面可以尽量正常运行.
+:::
 
 ## config.resHandleJsonApi
 类型: function
@@ -451,7 +454,7 @@ api: {
 类型: boolean | object | function
 默认: false
 
-清理请求记录.
+启动时清理冗余的请求记录.
 
 - boolean 是否启用
   - false 不清理记录
@@ -480,7 +483,7 @@ api: {
 类型: boolean | number
 默认: 10
 
-每隔多少分钟检测一下 openApi, 保存更新记录到 `${config.dataDir}/openApiHistory` 目录中.
+每隔多少分钟检测 openApi 更新记录, 保存到 `${config.dataDir}/openApiHistory` 目录中.
 
 - boolean 是否启用
   - false 禁用
