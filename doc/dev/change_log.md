@@ -6,6 +6,10 @@
 - 使用 `npm i -g mockm@版本号` 例如 `mockm@1.1.3` 回退到指定版本.
 :::
 
+## 2021年04月
+#### v1.1.25-alpha.6
+- feat: 添加 config.backOpenApi, 用于定时备份 openApi
+
 ## 2021年03月
 #### v1.1.25-alpha.5
 不兼容的更新, 此版本 `node-fetch` 库更改为按需安装, 参考 [util.run.fetch](../config/config_api_fn.md#util-run-fetch).
