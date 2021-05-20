@@ -6,6 +6,16 @@
 - 使用 `npm i -g mockm@版本号` 例如 `mockm@1.1.3` 回退到指定版本.
 :::
 
+## 2021年05月
+#### v1.1.25-alpha.7
+feat: 添加 node 版本校验
+fix: 转换错误: req.getHeaders is not a function
+
+这是由于 node 在 v15.1 之后把 headers 相关的方法放到了 prototype 中, 造成了 mockm 参数传送错误导致.
+
+参考:
+- [node修改源码](https://github.com/nodejs/node/commit/b6b7a3b86a#diff-91659c35a59a70aaf7db1c7cec1fcbcd5b78b33f9b37f9babfb140d099229446R104)
+- [node官方文档中的修改日志](https://nodejs.org/docs/latest-v15.x/api/http.html#http_message_headers)
 ## 2021年04月
 #### v1.1.25-alpha.6
 - feat: 添加 config.backOpenApi, 用于定时备份 openApi
