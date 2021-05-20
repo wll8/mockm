@@ -92,7 +92,7 @@ async function serverProxy({
   })
   server.use((req, res, next) => { // 保存自定义接口的请求历史
     const cloneDeep = require('lodash.clonedeep')
-    const reqBody = cloneDeep(req.body) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
+    const newReq = cloneDeep(req) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
     const oldSend = res.send
     res.send = (data = ``) => {
       let buffer =  undefined
@@ -107,7 +107,7 @@ async function serverProxy({
       setHttpHistoryWrap({
         config,
         history: HTTPHISTORY,
-        req: {...req, body: reqBody},
+        req: newReq,
         res,
         mock: true,
         buffer,
