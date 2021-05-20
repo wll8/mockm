@@ -23,7 +23,11 @@ const {
   plugin,
 } = business
 let config = {}
-const configFile = initHandle().getConfigFile()
+const {
+  getConfigFile,
+  checkEnv,
+} = initHandle()
+const configFile = getConfigFile()
 cliArg.config = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
 const os = require(`os`)
@@ -33,6 +37,13 @@ new Promise(async () => { // 显示程序信息, 例如版本号, logo
   const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
     .replace(new RegExp(`(>> mockm v)(.{${packageJson.version.length}})`), `$1${packageJson.version}`)
   process.argv.includes(`dev`) === false && console.log(logText)
+})
+
+new Promise(async () => { // 检查运行环境
+  if(checkEnv() === false) {
+    console.log(cli.colors.red(`node 版本应大于 v10.12.0`))
+    process.exit()
+  }
 })
 
 new Promise( async () => { // 检查更新
@@ -116,7 +127,7 @@ new Promise(async () => { // 启动 server.js
     }
   }).catch(err => {
     console.log(`err`, err)
-    console.log(`启动超时, 请检查配置是否有误`)
+    console.log(`启动超时, 请检查环境或配置是否有误`)
     process.exit()
   })
 })
