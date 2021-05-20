@@ -365,6 +365,12 @@ function business() { // 与业务相关性的函数
   }
 
   function initHandle() { // 初始化处理程序
+    /**
+     * 检查运行环境是否兼容
+     */
+    function checkEnv () {
+      return lib.compareVersions.compare(process.version, `10.12.0`, `>=`)
+    }
 
     function getConfigFile() {
       const path = require(`path`)
@@ -528,6 +534,7 @@ function business() { // 与业务相关性的函数
     }
 
     return {
+      checkEnv,
       wrapApiData,
       getConfigFile,
       init,
