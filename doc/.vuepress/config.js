@@ -118,6 +118,12 @@ module.exports = {
             description : `生成在系统上的文件及目录`,
             path: `/use/outfile.md`,
           },
+          {
+            title: `最佳实践`,
+            collapsable: false,
+            description : `推荐使用经验`,
+            path: `/use/experience.md`,
+          },
         ]
       },
       {
