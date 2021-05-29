@@ -616,7 +616,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     /**
      * 根据 url 获取文件的存储路径以及文件名, 避免特殊字符
      * @param {string} url http 地址
-     * @returns {object} {pathname, fileName}
+     * @returns {object} {pathname, fileName} pathname 可以看成是 query 参数生成的名字
      */
     function getFilePath(url) {
       const filenamify = require('filenamify')
@@ -653,22 +653,27 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const fs = require('fs')
       const dir = `${baseDir}/${pathname}`
       fs.mkdirSync(dir, { recursive: true })
-      const maxTime = fs.readdirSync(dir).filter(item => { // 获取所有备份的文件
-        return item.match(/_\d{13}_back/)
-      }).map(item => { // 获取所有时间戳
-        return Number(item.match(/(\d{13})/)[1])
-      }).sort().reverse()[0] // 获取最大的那个时间戳
-      if (maxTime) {
-        const oldMd5 = getFileMd5(fs.readFileSync(`${dir}/${fileName}_${maxTime}_back.${fileExt}`))
+      const getMax = fs.readdirSync(dir).filter(item => { // 获取所有备份的文件
+        return item.match(/.{19}/)
+      }).reduce((acc, fileName) => {
+        const curTime = Number(fileName.replace(/\D/g, ``))
+        return {
+          maxTime: acc.maxTime < curTime ? curTime : acc.maxTime,
+          fileName: acc.maxTime < curTime ? fileName : acc.fileName,
+        }
+      }, {maxTime: 0, fileName: ``})
+      const newName = time().dateFormat(`YYYY-MM-DD hh-mm-ss`, new Date())
+      if (getMax.maxTime) {
+        const oldMd5 = getFileMd5(fs.readFileSync(`${dir}/${getMax.fileName}`))
         const tempFile = `${dir}/temp`
         saveFile(tempFile, fileData)
         const newMd5 = getFileMd5(fs.readFileSync(tempFile))
         fs.unlinkSync(tempFile)
         if (oldMd5 !== newMd5) {
-          saveFile(`${dir}/${fileName}_${Date.now()}_back.${fileExt}`, fileData)
+          saveFile(`${dir}/${fileName}_${newName}.${fileExt}`, fileData)
         }
       } else {
-        saveFile(`${dir}/${fileName}_${Date.now()}_back.${fileExt}`, fileData)
+        saveFile(`${dir}/${fileName}_${newName}.${fileExt}`, fileData)
       }
     }
 
