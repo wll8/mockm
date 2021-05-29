@@ -84,7 +84,7 @@ async function serverProxy({
     },
   ))
 
-  server.use(middlewares) // 添加中间件, 方便取值
+  server.use(middlewares) // 添加中间件, 方便取值 // todo 应删除未使用的中间件
   server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
     req.query.page && (req.query._page = req.query.page)
     req.query.pageSize && (req.query._limit = req.query.pageSize)

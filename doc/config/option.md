@@ -405,8 +405,9 @@ function wrapApiData({data, code}) { // 包裹 api 的返回值
 - `/api/1` 省略请求方法, 可以使用所有 http 方法访问接口, 例如 get post put patch delete head options trace.
 - `get /api/2` 指定语法方法, 例如只能使用 get 方法访问接口
 - `ws /api/3` 创建一个 websocket 接口
+- `use /api/4` 自定义一个中间件, 作用于任何 method 的任何子路由
 
-value 可以是函数或 json, 为 json 时直接返回 json 数据.
+非 use 时, value 可以是函数或 json, 为 json 时直接返回 json 数据.
 
 ``` js
 api: {
@@ -420,12 +421,15 @@ api: {
   'ws /api/3' (ws, req) {
     ws.on('message', (msg) => ws.send(msg))
   }
+  // 使用中间件实现静态资源访问, config.static 就是基于此方式实现的
+  'use /news/': require('serve-static')(`${__dirname}/public`),
 },
 ```
 
 ::: warning 注意
 不能同时存在 `websocket 链接` 和以此路径结尾 + `/.websocket` 的请求地址.
 例如存在 `ws /echo` 时, 不能存在 `get /echo/.websocket`.
+use 时由于是自定义中间件, 所以不会直接返回 json, 多个中间件用数组表示.
 :::
 
 ## config.resHandleReplay
@@ -489,3 +493,45 @@ api: {
   - false 禁用
   - true 使用默认配置
 -  number 启用并设置检测的分钟数
+
+## config.static
+类型: string | object | array
+默认: undefined
+
+配置静态文件访问地址, 优先级大于 proxy, 支持 histroy 模式.
+
+- string 可以是相对于运行目录的路径, 或绝对路径
+- object
+  - path: string 浏览器访问的 url 前缀, 默认 `/`
+  - fileDir: string 本地文件的位置. 可以是相对于运行目录的路径, 或绝对路径
+  - mode: string 配置访问模式, 可选 `histroy` 和 `hash(默认值)`
+  - option: object [模式的更多配置](https://github.com/bripkens/connect-history-api-fallback#options)
+- array[object] 使用多个配置
+
+::: details 示例
+
+``` js
+{
+  static: `public`, // 访问 http://127.0.0.1:9000/ 则表示访问 public 中的静态文件, 默认索引文件为 index.html
+  static: { // 访问 dist 目录下 history 模式的项目
+    fileDir: `dist`,
+    mode: `history`,
+  },
+  static: [ // 不同的路径访问不同的静态文件目录
+    {
+      path: `/web1`,
+      fileDir: `/public1`,
+    },
+    {
+      path: `/web2`,
+      fileDir: `/public2`,
+    },
+    {
+      path: `/web3`,
+      fileDir: `/public3`,
+      mode: `history`,
+    },
+  ],
+}
+```
+::: 

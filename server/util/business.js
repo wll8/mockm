@@ -106,6 +106,24 @@ function business() { // 与业务相关性的函数
     return re
   }
 
+  function staticHandle({config}) { // 处理 static 为 api, 实际上是转换为 use 中间件的形式
+    let obj = {}
+    config.static.map(item => {
+      obj[`use ${item.path}`] = [
+        async (req, res, next) => { // mode history
+          if(item.mode === `history`) {
+            await tool.generate.initPackge(`connect-history-api-fallback`)
+            require(`connect-history-api-fallback`)(item.option)(req, res, next)
+          } else {
+            next()
+          }
+        },
+        require('serve-static')(item.fileDir),
+      ]
+    })
+    return obj
+  }
+
   function apiWebHandle({config}) { // 处理 webApi 为 api
     const apiWebStore = tool.file.fileStore(config.apiWeb)
     const paths = apiWebStore.get(`paths`)
@@ -250,7 +268,19 @@ function business() { // 与业务相关性的函数
         let {method, url} = tool.url.fullApi2Obj(key)
         method = method.toLowerCase()
         let val = api[key]
-        if(typeof(val) !== `function`) { // 如果配置的值是对象, 那么直接把对象作为返回值, 注意, 读取一个文件也是对象
+        if(method === `use`) { // 自定义中间件时不使用自动返回 json 的规则
+          if([`function`, `array`].includes(tool.type.isType(val)) === false) { // use 支持单个和多个(数组)中间件
+            console.log(tool.cli.colors.red(`config.api 中的 use 模式下不允许使用 function|array 类型之外的数据 ${val}`))
+            val = (req, res, next) => next()
+          }
+        } else if([
+          `string`,
+          `number`,
+          `object`,
+          `array`,
+          `boolean`,
+          `null`,
+        ].includes(tool.type.isType(val))) { // 如果配置的值是 json 支持的数据类型, 则直接作为返回值, 注意, 读取一个文件也是对象
           const backVal = val
           if(method === `ws`) {
             val = (ws, req) => {
@@ -271,6 +301,12 @@ function business() { // 与业务相关性的函数
           if (((item.method === `ws` ) && (method === `get` ))) { // ws 连接时, 实际上得到的 method 是 get, 并且 pathname + .websocket
             return (
               item.re.exec(pathname.replace(/\/\.websocket$/, ''))
+              && Boolean(item.action.disable) === false
+            )
+          }
+          if(item.method === `use`) {  // 当为中间件模式时, 匹配其后的任意路径
+            return (
+              pathname.startsWith(item.router)
               && Boolean(item.action.disable) === false
             )
           }
@@ -517,6 +553,7 @@ function business() { // 与业务相关性的函数
         ...config.api({ // 向 config.api 暴露一些工具库
           run,
         }),
+        ...business().staticHandle({config}), // warn: use 放在后面其实是具有较低优先级
       }
       const apiRootInjection = api[`*`] || api[`/`] || function (req, res, next) {return next()} // 统一处理所有自定义的根级别拦截器
       // 移交给 apiRootInjection, 它表示所有【自定义api, config.api 和 config.db 产生的 api】前的拦截功能
@@ -1100,6 +1137,7 @@ function business() { // 与业务相关性的函数
     listToData,
     reStartServer,
     wrapApiData,
+    staticHandle,
     apiWebHandle,
     plugin,
     initHandle,
