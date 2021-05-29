@@ -7,12 +7,15 @@
 :::
 
 ## 2021年05月
-#### v1.1.25-alpha.8
-feat: 支持配置静态文件访问, 请参考 [config.static](../config/option.md#config-static)
+#### v1.1.25-alpha.9
+- feat: 支持配置静态文件访问, 请参考 [config.static](../config/option.md#config-static)
+- feat: 格式化 openApi 后再保存, 避免压缩的内容不易比较变更
+- feat: 提高 openApi 备份文件名的可读性
+- feat: 更新版本比较规则为比较大小, 而不是比较是否相同
 
 #### v1.1.25-alpha.7
-feat: 添加 node 版本校验
-fix: 转换错误: req.getHeaders is not a function
+- feat: 添加 node 版本校验
+- fix: 转换错误: req.getHeaders is not a function
 
 这是由于 node 在 v15.1 之后把 headers 相关的方法放到了 prototype 中, 造成了 mockm 参数传送错误导致.
 
