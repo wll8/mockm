@@ -13,6 +13,7 @@ process.argv.includes(`dev`) && logHelper()
 const fs = require(`fs`)
 const path = require(`path`)
 const { tool, business } = require(`${__dirname}/util/index.js`)
+const lib = require(`${__dirname}/util/lib.js`)
 const packageJson = require(`${__dirname}/package.json`)
 const cli = tool.cli
 const cliArg = cli.parseArgv()
@@ -50,7 +51,7 @@ new Promise( async () => { // 检查更新
   if(Boolean(cliArg[`--no-update`]) === false) {
     const {name, version} = packageJson
     const {local, server} = await tool.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
-    if(server && (local !== server)) {
+    if(server && lib.compareVersions.compare(local, server, `<`)) {
       const msg = tool.string.removeLeft(`
         已发布新版本 ${server}
         您当前版本为 ${local}
