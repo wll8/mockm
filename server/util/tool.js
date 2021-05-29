@@ -638,13 +638,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 备份一个 http url 对应的文件
      * @param {string} baseDir 要备份于什么目录之下
      * @param {string} fileUrl 文件 url
+     * @param {function} format 备份前格式化数据
      */
-    async function backUrl(baseDir = __dirname, fileUrl) {
-      const { data: fileData, ext: fileExt } = (await getFile(fileUrl).catch(err => {
+    async function backUrl(baseDir = __dirname, fileUrl, format) {
+       let { data: fileData, ext: fileExt } = (await getFile(fileUrl).catch(err => {
         console.log(err)
       })) || {}
       if(fileData === undefined) {
         return false
+      }
+      if(fileData && format) {
+        fileData = format(fileData)
       }
       const {
         pathname,
