@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.1.25-alpha.7",
+  "version": "1.1.25-alpha.8",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -34,6 +34,7 @@
   },
   "devDependencies": {},
   "pluginDependencies": {
+    "connect-history-api-fallback": "1.6.0",
     "node-fetch": "2.6.1",
     "express-ws": "4.0.0",
     "translate-platforms": "0.0.7",

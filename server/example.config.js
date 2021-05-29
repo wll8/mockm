@@ -158,6 +158,7 @@ module.exports = util => {
     clearHistory: false, // 启动时清理冗余的请求记录
     guard: false, // 当程序异常退出时, 是否自动重启
     backOpenApi: 10, // 每隔多少分钟检测 openApi 更新记录
+    static: [], // 配置静态文件
   }
 }
 

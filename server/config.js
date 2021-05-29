@@ -100,6 +100,7 @@ function defaultConfigFn(util) { // 默认配置
     clearHistory: false,
     guard: false,
     backOpenApi: 10,
+    static: undefined,
   }
 }
 
@@ -131,6 +132,34 @@ config.proxy = [ // 合并 proxy 对象
 const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
   ...config,
+  static: (() => {
+    const baseObj = {
+      path: `/`,
+      mode: `hash`,
+      option: {},
+    }
+    return config.static
+      ? (
+        isType(config.static, `string`)
+          ? [{
+            ...baseObj,
+            fileDir: handlePathArg(config.static),
+          }]
+          : isType(config.static, `object`)
+            ? [{
+              ...baseObj,
+              ...config.static,
+            }]
+            : isType(config.static, `array`)
+              ? config.static.map(item => ({
+                ...baseObj,
+                ...item,
+                fileDir: handlePathArg(item.fileDir),
+              }))
+              : []
+      )
+      : []
+  })(),
   apiInHeader:
     config.apiInHeader === true
     ? `x-test-api`
