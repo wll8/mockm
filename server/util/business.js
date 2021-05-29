@@ -506,7 +506,9 @@ function business() { // 与业务相关性的函数
         }[tool.type.isType(config.openApi)]()
         setInterval(() => {
           openApiList.forEach(item => {
-            tool.file.backUrl(config._openApiHistoryDir, item)
+            tool.file.backUrl(config._openApiHistoryDir, item, data => { // 格式化 openApi 后再保存, 避免压缩的内容不易比较变更
+              return JSON.stringify(JSON.parse(data), null, 2)
+            })
           })
         }, config.backOpenApi * 60 * 1000)
       }
