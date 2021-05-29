@@ -464,7 +464,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         method = `all`
       }
       if((url === undefined) || (url === `/`)) {
-        url = `*`
+        url = `/` // 注意不能是 *, 否则使用 use 时会出问题
+        /**
+          这可能与 https://github.com/expressjs/express/issues/2495 有关, 需要使用 / 或 {0,} 代替
+          * 和 / 不一样
+          假设有两个 use 中间件, 都使用了静态文件, 第一个 path 为 * , 第二个为 /test
+          * 的情况: /test/a.html 在第一个不存在时, 并不会进入 /test
+          / 的情况: 不存在时会进入 /test
+        */
       }
       const {path} = tool().httpClient.getClientUrlAndPath(url)
       return {path, method, url}
@@ -751,7 +758,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
 
       const jsonServer = require('json-server')
-      const middlewares = jsonServer.defaults({bodyParser: true, logger: false}) // 可以直接使用的所有中间件数组
+      const middlewares = jsonServer.defaults({bodyParser: true, logger: false, static: require(`path`).join(__dirname, '../public2')}) // 可以直接使用的所有中间件数组
       middlewares.push(httpLog({config}))
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
         // 使用 jsonServer 里面的中间件, 以保持一致:

@@ -7,6 +7,9 @@
 :::
 
 ## 2021年05月
+#### v1.1.25-alpha.8
+feat: 支持配置静态文件访问, 请参考 [config.static](../config/option.md#config-static)
+
 #### v1.1.25-alpha.7
 feat: 添加 node 版本校验
 fix: 转换错误: req.getHeaders is not a function
