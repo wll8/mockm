@@ -870,7 +870,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     function midResJson({res, proxyRes, key, val, cb = body => body}) {
       const modifyResponse = require('node-http-proxy-json')
       modifyResponse(res, proxyRes, body => {
-        body && key && obj().deepSet(body, key, val)
+        if([`array`, `object`].includes(type().isType(body))) {
+          key && obj().deepSet(body, key, val)
+        }
         return cb(body)
       })
     }
