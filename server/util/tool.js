@@ -449,7 +449,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           hostname: parentUrl.hostname,
           pathname: parentUrl.pathname.replace(/\/$/, '') + '/',
           origin: parentUrl.origin,
-          isIp: parentUrl.host.match(/\./g).length === 3,
+          isIp: (parentUrl.host.match(/\./g) || []).length === 3,
         }
         return res
       } catch (error) {
