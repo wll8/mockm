@@ -1,0 +1,77 @@
+{
+	"name": "接口伴侣",
+	"description": "让后端接口跨域，同时支持接口请求记录保存、查看，可以快速生成接口、文档、数据。",
+	"displayName": "接口伴侣",
+	"version": "0.0.1",
+	"publisher": "wll8",
+	"engines": {
+		"HBuilderX": "^2.7.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"main": "./extension",
+	"activationEvents": [
+		"onCommand:extension.mockmTool.apiStudio",
+		"onCommand:extension.mockmTool.reqHistory",
+		"onCommand:extension.mockmTool.mockmDoc",
+		"onCommand:extension.mockmTool.simplePostman",
+		"onCommand:extension.mockmTool.mockjsDoc"
+	],
+	"contributes": {
+		"commands": [
+			{
+				"command": "extension.mockmTool.apiStudio",
+				"title": "打开UI界面 - 接口编辑"
+			},
+			{
+				"command": "extension.mockmTool.reqHistory",
+				"title": "打开UI界面 - 请求记录"
+			},
+			{
+				"command": "extension.mockmTool.mockmDoc",
+				"title": "mockm 文档"
+			},
+			{
+				"command": "extension.mockmTool.simplePostman",
+				"title": "简易 postman"
+			},
+			{
+				"command": "extension.mockmTool.mockjsDoc",
+				"title": "mockjs 文档"
+			}
+		],
+		"menus": {
+			"editor/context": [
+				{
+					"command": "extension.mockmTool.apiStudio",
+					"group": "z_commands",
+					"when": "editorTextFocus"
+				},
+				{
+					"command": "extension.mockmTool.reqHistory",
+					"group": "z_commands",
+					"when": "editorTextFocus"
+				},
+				{
+					"command": "extension.mockmTool.simplePostman",
+					"group": "z_commands",
+					"when": "editorTextFocus"
+				},
+				{
+					"command": "extension.mockmTool.mockmDoc",
+					"group": "z_commands",
+					"when": "editorTextFocus"
+				},
+				{
+					"command": "extension.mockmTool.mockjsDoc",
+					"group": "z_commands",
+					"when": "editorTextFocus"
+				},
+				{
+					"group": "z_commands"
+				}
+			]
+		}
+	}
+}
