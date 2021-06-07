@@ -7,6 +7,11 @@
 :::
 
 ## 2021年05月
+#### v1.1.25-alpha.10
+- fix: config.proxy 无法代理到其他域
+- fix: proxy 值为 localhost 域时报错
+- fix: 避免修改不支持的 json 类型导致报错
+
 #### v1.1.25-alpha.9
 - feat: 支持配置静态文件访问, 请参考 [config.static](../config/option.md#config-static)
 - feat: 格式化 openApi 后再保存, 避免压缩的内容不易比较变更
