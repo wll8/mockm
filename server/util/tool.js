@@ -387,7 +387,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         if(optionsType === `string`) { // 转换字符串的 value 为对象
           options = {
             pathRewrite: { [`^${context}`]: options }, // 原样代理 /a 到 /a
-            target: proxy[`/`],
+            target: options.includes(`://`) // 如果要代理的目录地址已有主域
+              ? new URL(options).origin // 那么就代理到该主域上
+              : proxy[`/`], // 否则就代理到 / 设定的域上
           }
         }
         if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]

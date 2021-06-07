@@ -57,6 +57,20 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [x] fix: config.proxy 无法代理到其他域
+``` js
+// 正确 http://127.0.0.1:9000/api2/quickSearch == ok
+proxy: { 
+  '/': `http://192.168.1.2:9000/`,
+  '/api2': `http://192.168.1.2:9000/api/`,
+},
+
+// 错误 http://127.0.0.1:9000/api2/quickSearch == no
+proxy: { 
+  '/': `http://www.httpbin.org/`,
+  '/api2': `http://192.168.1.2:9000/api/`,
+},
+```
 - [x] fix: 添加 webApi 时不能自动生效
   - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
 - [x] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
