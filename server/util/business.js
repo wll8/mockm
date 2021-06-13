@@ -295,12 +295,13 @@ function business() { // 与业务相关性的函数
         const re = pathToRegexp(url)
         serverRouterList.push({method, router: url, action: val, re})
       })
-      function noProxyTest({method, pathname}) {
+      function noProxyTest({upgrade, method, pathname}) {
         // return true 时不走真实服务器, 而是走自定义 api
         return serverRouterList.some(item => {
           if (((item.method === `ws` ) && (method === `get` ))) { // ws 连接时, 实际上得到的 method 是 get, 并且 pathname + .websocket
             return (
-              item.re.exec(pathname.replace(/\/\.websocket$/, ''))
+              item.re.exec(pathname)
+              && upgrade.match(/websocket/i)
               && Boolean(item.action.disable) === false
             )
           }
