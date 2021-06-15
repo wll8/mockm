@@ -589,9 +589,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @returns {object} {data, ext} binary 和后缀名
      */
     function getFile(url) {
+      const [, tag = ``, username, password] = url.match(/:\/\/((.+):(.+)@)/) || []
+      url = url.replace(tag, ``)
       return new Promise((resolve, reject) => {
         const http = require(url.replace(/(:\/\/.*)/, ``).trim()) // 获取 http 或 https
-        http.get(url, res => {
+        http.get(url, {
+          auth: username ? `${username}:${password}` : undefined,
+        }, res => {
           const { statusCode } = res
           if (statusCode !== 200) {
             reject(statusCode)
