@@ -622,16 +622,16 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     /**
      * 根据 url 获取文件的存储路径以及文件名, 避免特殊字符
      * @param {string} url http 地址
-     * @returns {object} {pathname, fileName} pathname 可以看成是 query 参数生成的名字
+     * @returns {object} {pathname, fileName} fileName 是 query 参数生成的名字
      */
     function getFilePath(url) {
       const filenamify = require('filenamify')
       const {
         pathname,
-        origin,
+        search = ``,
       } = new URL(url)
       const fileName = filenamify(
-        url.replace(origin + pathname, ``),
+        search,
         { maxLength: 255, replacement: '_' }
       )
       return {
