@@ -663,18 +663,19 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const fs = require('fs')
       const dir = `${baseDir}/${pathname}`
       fs.mkdirSync(dir, { recursive: true })
-      const getMax = fs.readdirSync(dir).filter(item => { // 获取所有备份的文件
-        return item.match(/.{19}/)
-      }).reduce((acc, fileName) => {
-        const curTime = Number(fileName.replace(/\D/g, ``))
+      // 从符合备份文件名规则的所有文件中找到最新备份的那个文件名和时间, 获取文件的 md5 与请求的 md5 做比较
+      const getMax = fs.readdirSync(dir).reduce((acc, curFileName) => {
+        const re = new RegExp(`${fileName}_(\\d{4}-\\d{2}-\\d{2} \\d{2}-\\d{2}-\\d{2})\\.`)
+        const [, tag = ``] = curFileName.match(re) || []
+        const curTime = Number(tag.replace(/\D/g, ``))
         return {
           maxTime: acc.maxTime < curTime ? curTime : acc.maxTime,
-          fileName: acc.maxTime < curTime ? fileName : acc.fileName,
+          curFileName: acc.maxTime < curTime ? curFileName : acc.curFileName,
         }
-      }, {maxTime: 0, fileName: ``})
+      }, {maxTime: 0, curFileName: ``})
       const newName = time().dateFormat(`YYYY-MM-DD hh-mm-ss`, new Date())
       if (getMax.maxTime) {
-        const oldMd5 = getFileMd5(fs.readFileSync(`${dir}/${getMax.fileName}`))
+        const oldMd5 = getFileMd5(fs.readFileSync(`${dir}/${getMax.curFileName}`))
         const tempFile = `${dir}/temp`
         saveFile(tempFile, fileData)
         const newMd5 = getFileMd5(fs.readFileSync(tempFile))
