@@ -42,6 +42,25 @@ async function serverProxy({
   const jsonServer = require('json-server')
   const proxy = require('http-proxy-middleware').createProxyMiddleware
   const server = jsonServer.create()
+  const http = require('http');
+  const serverRef = http.createServer(server);
+  // https://github.com/expressjs/express/issues/2594#issuecomment-103265227
+  serverRef.on('upgrade', async (req, socket, upgradeHead) => {
+    const ws = await tool.generate.initPackge(`ws`)
+    const wss = new ws.Server({ noServer: true });
+    const res = new http.ServerResponse(req);
+    res.assignSocket(socket);
+    res.websocket = (cb) => {
+      let head = new Buffer.alloc(upgradeHead.length);
+      upgradeHead.copy(head);
+      wss.handleUpgrade(req, socket, head, (client) => {
+        wss.emit('connection'+req.url, client);
+        wss.emit('connection', client);
+        cb(client);
+      });
+    };
+    return server(req, res);
+  });
   server.use((req, res, next) => {
     next()
   })
@@ -67,11 +86,11 @@ async function serverProxy({
     }
   })
   server.use(proxy(
-    (pathname, {method}) => { // 返回 true 时进行转发, 真实服务器
+    (pathname, {method, headers: {upgrade = ``}}) => { // 返回 true 时进行转发, 真实服务器
       method = method.toLowerCase()
       if(
         (config.disable === false) // disable = false 才走自定义 api
-        && (config.hostMode || noProxyTest({method, pathname}) || getDataRouter({method, pathname, db}))
+        && (config.hostMode || noProxyTest({upgrade, method, pathname}) || getDataRouter({method, pathname, db}))
       ) {
         return false
       } else {
@@ -119,17 +138,39 @@ async function serverProxy({
 
   // 前端自行添加的测试 api
   server.use(apiRootInjection)
-  for (let index = 0; index < serverRouterList.length; index++) {
-    const {method, router, action} = serverRouterList[index]
-    if(method === `ws`) {
-      (await tool.generate.initPackge(`express-ws`))(server)
+  server.use(async (req, res, next) => {
+    const pathToRegexp = require('path-to-regexp')
+    for (let index = 0; index < serverRouterList.length; index++) {
+      const {method, router, action} = serverRouterList[index]
+      /**
+        HTTP 1.1 中 upgrade 头用来表示升级协议
+        https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Upgrade
+      */
+      const upgrade = req.headers.upgrade || ``
+      const reqMethod = upgrade.match(/websocket/i) ? `ws` : req.method.toLowerCase()
+      if(reqMethod === method && pathToRegexp(router).exec(req.path)) {
+        const handleFn = {
+          /**
+            // todo
+            - 在 v2.0 中会统一中间件风格 (req, res, next) => {}
+            - 这里是是为了修改为上个版本的形式 (ws, req) => {}
+            - 参考: https://github.com/HenningM/express-ws
+            - 参考: https://github.com/olalonde/express-websocket
+          */
+          ws: (req, res, next) => {
+            res.websocket( (ws) => {
+              action(ws, req)
+            })
+          },
+        }[method]
+        handleFn ? handleFn(req, res, next) : action(req, res, next)
+      }
     }
-    server[method](router, action)
-  }
+  })
 
   server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 
-  server.listen(config.port, () => {
+  serverRef.listen(config.port, () => {
     // console.log(`服务运行于: http://localhost:${config.port}/`)
   })
 
