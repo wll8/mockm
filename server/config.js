@@ -191,6 +191,14 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
   _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
   _openApiHistoryDir: handlePathArg(`${config.dataDir}/openApiHistory/`), // openApi 的更新历史的保存目录
+  _gitIgnore: { // 配置一些几乎总是需要忽略的文件
+    file: handlePathArg(`${config.dataDir}/.gitignore`),
+    content: `
+      *
+      !apiWeb.json
+      !.gitignore
+    `,
+  },
 }
 
 module.exports = handleConfig

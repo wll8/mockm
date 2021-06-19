@@ -483,6 +483,15 @@ function business() { // 与业务相关性的函数
         })
       }
 
+      { // 配置 httpData 目录中的 gitignore
+        tool.file.isFileEmpty(config._gitIgnore.file)
+        && fs.writeFile(
+          config._gitIgnore.file,
+          tool.string.removeLeft(config._gitIgnore.content).trim(),
+          () => {}
+        )
+      }
+
       { // 初始化 store 中的内容
         const osIp = config.osIp
         const store = fileStore(config._store, {
