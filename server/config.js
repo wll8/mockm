@@ -199,6 +199,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       !.gitignore
     `,
   },
+  _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
 }
 
 module.exports = handleConfig
