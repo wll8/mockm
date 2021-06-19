@@ -313,6 +313,8 @@ proxy: {
 - array api 与每项相比, 取匹配度最高的, 都不匹配时取第一条
 - object api 与对象的 key 作为正则进行匹配(`new RegExp(key, 'i').test(pathname)`), 都不匹配时取第一条
 
+支持 basic-auth 认证, 在 url 上携带用户名密码即可, 例如 http://name:passwd@httpbin.org/spec.json.
+
 ## config.cors
 类型: boolean
 默认: true
@@ -425,12 +427,6 @@ api: {
   'use /news/': require('serve-static')(`${__dirname}/public`),
 },
 ```
-
-::: warning 注意
-不能同时存在 `websocket 链接` 和以此路径结尾 + `/.websocket` 的请求地址.
-例如存在 `ws /echo` 时, 不能存在 `get /echo/.websocket`.
-use 时由于是自定义中间件, 所以不会直接返回 json, 多个中间件用数组表示.
-:::
 
 ## config.resHandleReplay
 类型: function

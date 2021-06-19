@@ -16,7 +16,7 @@ cnpm i -S mockm
 ``` json
 {
   "scripts": {
-    "mockm": "npx mockm"
+    "mockm": "./node_modules/.bin/mockm"
   }
 }
 ```
@@ -26,8 +26,6 @@ cnpm i -S mockm
 ``` sh
 npm run mockm
 ```
-
-这样的话如果别人安装了 mockm 的话会启动他安装的那份, 没有安装的话会自动安装. `npm run` 是为了命令规范统一.
 
 ## 添加 mockm 配置
 在项目中创建 `mm.config.js` 文件, 初始内容建议为:

@@ -7,6 +7,13 @@
 :::
 
 ## 2021年06月
+#### v1.1.25-alpha.11
+- feat: ws url 支持 path 参数
+- fix: 解决 `ws /echo` 和 `get /echo/.websocket` 不能同时存在的限制
+  - 此限制是 express-ws 所导致的
+- feat: openApi 支持 basic-auth 认证
+- feat: 通过 .gitignore 忽略一些文件, 避免产生不必要的关注
+
 #### v1.1.25-alpha.10
 - fix: config.proxy 无法代理到其他域
 - fix: proxy 值为 localhost 域时报错
