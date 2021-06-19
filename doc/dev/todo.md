@@ -1,11 +1,17 @@
 # 待完成
+
+## 文档
+- [ ] doc: 如何更新 replayPort 返回的数据?
+  - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 参考 https://github.com/YMFE/yapi 重新实现 webApi table 的开发, 以支持各种格式的数据
+- [ ] feat: webApi 支持从 json 数据解析为 table
 - [ ] feat: webApi 接口列表支持多选删除, 禁用, 启用
 - [ ] feat: 支持 ws 示例
   - https://github.com/aral/express-ws
-- [ ] feat: 当访问不存在的 test-api 时, 不应显示操作按钮, 并且提示记录不存在
-- [ ] feat: 添加崩溃重启功能
-- [ ] feat: 支持配置静态文件目录, 可配置多个
+- [x] feat: 当访问不存在的 test-api 时, 不应显示操作按钮, 并且提示记录不存在
+- [x] feat: 添加崩溃重启功能
+- [x] feat: 支持配置静态文件目录, 可配置多个
 - [ ] feat: 优化mock生成规则
   - [ ] video|movie https://www.w3school.com.cn/i/movie.mp4
   - [ ] cover @image
@@ -17,7 +23,7 @@
 - [ ] feat: 支持在 config.api 中按条件再回到 config.proxy
 - [ ] feat: 支持 node v10.12.0 以下的版本, 需注意 fs.mkdirSync 的 recursive 选项, babel 只能转换 js 标准 api
 - [x] feat: 从 cdn 下载 ngrok 程序
-- [ ] feat: webApi 支持批处理, 自动翻译, 类型转换, 数据生成
+- [x] feat: webApi 支持批处理, 自动翻译, 类型转换, 数据生成
 - [ ] feat: 分离常用功能例如API文档创建器到浏览器插件, 例如 FeHelper https://github.com/zxlie/FeHelper
 - [x] feat: 从 web 页面创建模拟接口及文档
 - [x] feat: 在请求详情页面添加 `应用响应`, 快速应用到 apiWeb 的自定义返回值
@@ -71,11 +77,12 @@ proxy: {
   '/api2': `http://192.168.1.2:9000/api/`,
 },
 ```
+- [ ] fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
 - [x] fix: 添加 webApi 时不能自动生效
   - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
 - [x] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
   - 这是由于初始化 cnpm 时是使用 npm 来安装的, npm 安装时会对原来 cnpm 安装的依赖冲突.
-- [ ] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
+- [X] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
 - [x] fix: 不能检测到使用 nvm 的全局安装的 cnpm
 - [x] fix: 如果检查新版本出错时, 不应提示更新 `已发布新版本 undefined...`
 - [x] fix: 从请求详情中点击编辑 webApi 时, 不应该携带 query 参数
@@ -94,8 +101,8 @@ proxy: {
   - https://github.com/jshttp/on-finished
 - [x] fix: 页面上创建的 webApi 接口包含点符号时, 无法使用, 因为点符号会被处理为键的层级
 - [x] fix: 初始化项目, 第一次请求接口时, x-test-api 值为 `http://127.0.0.1:9005/#/history,/get/name`, id 丢失, 便记录列表中有显示.
-- [ ] fix: 当没有配置文件时, 在 node14.2 中启动时出现警告 `Warning: Accessing non-existent property 'proxy' of module exports inside circular dependency`
-  - 这可能是由于默许的 config.js 中 base64deCode.config 的值也是 config.js 造成的循环 require
+- [x] fix: 当没有配置文件时, 在 node14.2 中启动时出现警告 `Warning: Accessing non-existent property 'proxy' of module exports inside circular dependency`
+  - 这可能是由于默认的 config.js 中 base64deCode.config 的值也是 config.js 造成的循环 require
 - [ ] fix: 使用重放接口时, 也应该能使用 config.proxy 和 config.api
 - [ ] fix: 当 config.api 中 `/all/method` 与 `get /all/method` 冲突时, 使用后者
 - [ ] fix: 实际获取的与实际记录的不一致, 修改 res.body 之后, 记录的 body 还是修改前的
@@ -103,3 +110,7 @@ proxy: {
 - [ ] fix: 请求 id 会有一定的概率重复, 复制的 id 可能会导致排序出错, 或需要 rowKey 的组件渲染出错
 - [x] fix: 代理整个网站时, 网站中的一些链接无法正常工作
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
+
+## 解决 mockjs 的问题
+### 前端API问题
+- 不能使用 fetch https://github.com/nuysoft/Mock/issues/430
