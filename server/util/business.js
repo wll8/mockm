@@ -433,9 +433,13 @@ function business() { // 与业务相关性的函数
     }
 
     function getOpenApi({openApi}) { // 使用服务器获取远程 openApi , 避免跨域
+      const [, tag = ``, username, password] = openApi.match(/:\/\/((.+):(.+)@)/) || []
+      openApi = openApi.replace(tag, ``)
       const axios = require('axios')
       return new Promise((resolve, reject) => {
-        axios.get(openApi, {}).then(res => {
+        axios.get(openApi, {
+          auth: username ? {username, password} : {},
+        }).then(res => {
           resolve(res.data)
         }).catch(err => {
           console.log(`err`, `openApi 获取失败`)
