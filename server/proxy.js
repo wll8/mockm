@@ -138,6 +138,37 @@ async function serverProxy({
 
   // 前端自行添加的测试 api
   server.use(apiRootInjection)
+
+  for (let index = 0; index < serverRouterList.length; index++) {
+    const {method, router, action} = serverRouterList[index]
+    /**
+      // todo
+      目前测试 `server.use` 下来不能动态添加, 暂时不知道是 serve.use 本身的原因还是 serve-static 这个中间件的原因,
+      例如以下代码没有按预期运行:
+      预期的结果是访问 :/web/file.js 可以访问到文件
+      实际表现为: 404, 虽然已经进入了此中间件.
+
+      server.use((req, res, next) => { // use(`*`, `/`) 也是不行的, 也不是 async 的问题
+        const action = require('serve-static')(`${__dirname}/public/`)
+        action(req, res, next)
+      })
+
+
+      但是, 如果先指定了 `/web/`, 再访问 `:/web/file` 是可以使用的, 符合预期结果.
+
+      server.use(`/web/`, (req, res, next) => {
+        const action = require('serve-static')(`${__dirname}/public/`)
+        action(req, res, next)
+      })
+
+      所以先使用启动程序就直接 use 的方案:
+    */
+    if(method === `use`) {
+      server[method](router, action)
+    }
+
+  }
+
   server.use(async (req, res, next) => {
     const pathToRegexp = require('path-to-regexp')
     for (let index = 0; index < serverRouterList.length; index++) {
