@@ -7,7 +7,7 @@
 :::
 
 ## 2021年06月
-#### v1.1.25-alpha.11
+#### v1.1.25-alpha.12
 - feat: ws url 支持 path 参数
 - fix: 解决 `ws /echo` 和 `get /echo/.websocket` 不能同时存在的限制
   - 此限制是 express-ws 所导致的
