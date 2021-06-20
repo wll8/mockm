@@ -304,7 +304,7 @@ module.exports = {
 module.exports = {
   api: {
     '/file' (req, res, next) {
-      res.sendFile(`这里写要下载的文件路径`)
+      res.download(`这里写要下载的文件路径`)
     },
   },
 }
