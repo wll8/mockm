@@ -3,10 +3,10 @@
     "doc:dev": "cd doc && npm start",
     "doc:build": "cd doc && npm run build",
     "build:client": "cd client && npm run build",
-    "build:server": "cd release && npx gulp",
+    "build:serve": "cd release && npx gulp",
     "push:doc": "cd release && npx gulp pushDoc",
-    "bit": "npm run build:client && npm run build:server && npm run it",
-    "bit:server": "npm run build:server && npm run it",
+    "bit": "npm run build:client && npm run build:serve && npm run it",
+    "bit:serve": "npm run build:serve && npm run it",
     "it": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx cnpm i --product && cd ../../ && node dist/package/run.js config",
     "test": "node dist/package/run.js config"
   },
