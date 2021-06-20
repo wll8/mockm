@@ -148,7 +148,7 @@ async function serverProxy({
       */
       const upgrade = req.headers.upgrade || ``
       const reqMethod = upgrade.match(/websocket/i) ? `ws` : req.method.toLowerCase()
-      if(reqMethod === method && pathToRegexp(router).exec(req.path)) {
+      if( [`all`, reqMethod].includes(method) && pathToRegexp(router).exec(req.path)) {
         const handleFn = {
           /**
             // todo
