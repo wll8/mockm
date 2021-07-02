@@ -492,6 +492,18 @@ function business() { // 与业务相关性的函数
         )
       }
 
+      { // 初始化错误日志保存文件
+        tool.file.isFileEmpty(config._errLog)
+        && fs.writeFile(
+          config._errLog,
+          tool.string.removeLeft(`
+          readme:
+            - 本文件用于存储 mockm 运行过程中捕获到的一些错误.
+          `).trim(),
+          () => {}
+        )
+      }
+
       { // 初始化 store 中的内容
         const osIp = config.osIp
         const store = fileStore(config._store, {
