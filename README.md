@@ -1,69 +1,105 @@
 # mockm
 <p align="center">
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm.svg?sanitize=true" alt="Version"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm.svg?sanitize=true" alt="License"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm" alt="License"></a>
 <p>
 
-集模拟和调试功能于一身. 自动生成数据和增删查改一系列接口, 支持文件上传下载, 延迟, 自定义接口逻辑...
+- [观看视频](https://hongqiye.com/doc/mockm/)
+- [查看文档](https://hongqiye.com/doc/mockm/)
 
-## 特性
-- 支持 0 侵入, 无需修改项目中的任何代码即可投入使用
-- 快速生成接口和数据, 以及文档
-- 支持 Restful API
-- 以最方便的形式支持 api 拦截, 注入, 请求及响应修改
-- 修改实时生效
-- 支持自动允许跨域
-- 自动带参调试, 无需登录
-- 自动根据接口查找文档和调试地址, 标识字段描述
-- 请求记录, 重放
-- 当提供接口的后端服务出现问题, 也可最大程度还原接口响应
-- 参数预校验, 助你分析接口联调的问题所在
-- 无需数据库支持
-- 根据接口生成业务代码
-- 跨平台, 支持 linux macos windows
-- 支持远程调试, 一个属性完成内网穿透
+优雅的解决前端开发过程中的各种接口问题，例如跨域、接口模拟、数据生成、请求记录和重放……
 
-## 使用
-1. **安装**: 命令行输入 `npm i -g mockm`
-2. **配置**: 创建文件 `mm.config.js` 并录入内容
+## 快速使用 quick start
+``` sh
+# 查看 node 版本, 目前 mockm 支持 node v10.12.0 以上版本
+node -v
+
+# 安装
+npm i -g mockm
+
+# 运行
+mockm
+
+# 浏览器打开 http://127.0.0.1:9005
+```
+
+mockm 可以读取运行目录下的文件 `mm.config.js` 作为配置, 以下是示例内容.
+
 ``` js
 module.exports = {
-  proxy: `https://example.com/`, // 替换为后端的接口地址, 如果没有可不填
-  api: { // 编写自己的接口
-    '/my/api': {
-      msg: `我的 api`
+  proxy: `https://httpbin.org/`, // 代理后端的接口, 如果没有可以不填
+
+  api: {  // 自己编写的接口
+
+    // 当为基本数据类型时, 直接返回数据, 这个接口返回 {"msg":"ok"}
+    '/api/1': {msg: `ok`},
+
+    // 也可以像 express 一样返回数据
+    '/api/2' (req, res) {
+      res.send({msg: `ok`})
     },
+
+    // 一个只能使用 post 方法访问的接口
+    'post /api/3': {msg: `ok`},
+
+    // 一个 websocket 接口, 会发送收到的消息
+    'ws /api/4' (ws, req) {
+      ws.on('message', (msg) => ws.send(msg))
+    }
+
+    // 一个下载文件的接口
+    '/file' (req, res) {
+      res.download(`文件路径`, `文件名`)
+    },
+
+    // 获取动态的接口路径的参数 code
+    '/status/:code' (req, res) {
+      res.json({statusCode: req.params.code})
+    },
+
+    //... 更多功能和示例请参考文档
   },
 }
 ```
-3. **启动**: 命令行输入 `mm`
+## 常用选项 options
+**remote**
+是否自动映射服务到外网.
 
-所有工作已经结束了, 并且你还创建了一个自己的 api, 拥有了后端接口允许跨域的功能, 接口记录功能和重放功能...
-- 浏览器访问 http://127.0.0.1:9000/my/api 查看效果.
-- 浏览器访问 http://127.0.0.1:9005/#/get/my/api 查看请求详情.
-- 想了解更多功能请继续...
+**guard**
+是否异常崩溃后自动重启.
 
-### 示例
-点击 [hongqiye.com/doc/mockm/use/example.html](https://www.hongqiye.com/doc/mockm/use/example.html) 查看常用示例.
+**watch**
+指定一些目录或文件路径, 当它们被修改时自动重载服务.
 
-## 部分功能截图
-**请求记录**
-可以从查看请求记录, 手机上也能使用, 不用担心浏览器关闭.
+**proxy**
+要代理的后端接口地址.
 
-![请求记录](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_api_list_2020-09-21_100140.png)
+**api**
+自定义接口, 支持完整的编程逻辑, 各种便捷写法, websocket, 或中间件.
 
-**请求详情**
-可以查看每个接口的请求详情, 包括请求参数, 响应参数.
+**static**
+配置静态文件目录, 支持 history 模式.
 
-![请求详情](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_history_2020-11-10-11-33-26.png)
+**db**
+自动生成 Restful api.
 
-**swagger**
-可以直接使用进行 swagger 调试, 不用再去找接口.
 
-![swagger](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_swagger_2020-11-10-11-32-18.png)
+更多选项请参考文档.
 
-**接口编辑**
-可以从界面上快速创建接口/文档, 同时生成数据.
+## 问题 Issues
+你可以先查阅文档, 如果还是不能解决, 请点击 [Issues](https://github.com/wll8/mockm/issues) 详细描述出现问题的步骤和期望. 
 
-![接口编辑](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
+如果你认为这可能是 mockm 的问题, 建议在描述中附加 `httpData/log.err.txt` 中的相关错误日志. 
+
+你也可以 [加入官方答疑QQ群62935222](https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi).
+
+## 贡献 Contribution
+mockm 还有很多不足, 如果愿意, 欢迎参与贡献.
+
+## 许可 License
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2017-present, xw
+
 
