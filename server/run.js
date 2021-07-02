@@ -35,9 +35,16 @@ const os = require(`os`)
 const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) // 此文件用于 run.js 与 server.js 共享变量
 
 new Promise(async () => { // 显示程序信息, 例如版本号, logo
+  const vTag = `>> mockm v`
   const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
-    .replace(new RegExp(`(>> mockm v)(.{${packageJson.version.length}})`), `$1${packageJson.version}`)
-  process.argv.includes(`dev`) === false && console.log(logText)
+  const versionLogo = logText.replace(new RegExp(`(${vTag})(.*)`), (match, $1, $2) => {
+    const vLength = packageJson.version.length
+    const vLine = vLength > $2.length // 如果版本号替换到版本标志后面
+      ? `${$1}${packageJson.version}` 
+      : match.replace(new RegExp(`(${vTag})(.{${vLength}})`), `$1${packageJson.version}`)
+    return vLine
+  })
+  process.argv.includes(`dev`) === false && console.log(versionLogo)
 })
 
 new Promise(async () => { // 检查运行环境
