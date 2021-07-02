@@ -86,7 +86,7 @@ new Promise(async () => { // 启动 server.js
   })
   .on('readable', function(arg) { // the `readable` event indicates that data is ready to pick up
     // console.log(`readable`, arg)
-    this.stdout.pipe(process.stdout) // 把子进程的输出定向到本进入输出
+    this.stdout.pipe(process.stdout) // 把子进程的输出定向到本进程输出
     this.stderr.pipe(process.stderr) // 错误输出, 例如按需安装依赖时无权限
     this.stdout.on(`data`, data => {
       log = String(data)
@@ -108,9 +108,24 @@ new Promise(async () => { // 启动 server.js
     if(log.match(/Error:/)) { // 检测到错误日志时重启
       restart()
       if(config.dataDir) { // 保存错误日志
-        fs.appendFileSync(`${config.dataDir}/log.err.txt`, `${
-          tool.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date())
-        }\n${log}\n`)
+        const os = require(`os`)
+        fs.writeFileSync(
+          config._errLog,
+          [
+            [
+              tool.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date()), // 当前时间
+              `mockm:${packageJson.version}`, // mockm 版本号
+              `node:${process.version}`, // node 版本号
+              `os:${os.type()} ${os.release()}`, // 操作系统和版本号
+              `arg:${process.argv.splice(2)}`, // 命令行参数
+              `lang:${process.env.LANG}`, // 终端语言环境
+            ].join(`, `), // 附件信息
+            `\n`,
+            log, // 调用栈
+            `\n`,
+            fs.readFileSync(config._errLog, `utf8`), // 旧 log
+          ].join(``),
+        )
       }
     }
   })

@@ -186,7 +186,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
         : [],
   backOpenApi: config.backOpenApi === true ? defaultArg.backOpenApi : config.backOpenApi,
 
-  // 约定下划线开关的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
+  // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
   _proxyTargetInfo, // 解析 proxy[`/`] 的内容
   _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
   _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
@@ -200,6 +200,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     `,
   },
   _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
+  _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
 }
 
 module.exports = handleConfig
