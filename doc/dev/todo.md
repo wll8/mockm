@@ -4,6 +4,8 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 支持关闭和开启 testPort 和 replayPort 功能, 因为某些服务可能不需要
+- [ ] feat: 支持禁用请求记录, 例如禁用所有, 禁用某个 url, 仅保存后xx条, 因为有些类似心跳的请求总是记录的意义不大
 - [ ] feat: 参考 https://github.com/YMFE/yapi 重新实现 webApi table 的开发, 以支持各种格式的数据
 - [ ] feat: webApi 支持从 json 数据解析为 table
 - [ ] feat: webApi 接口列表支持多选删除, 禁用, 启用
@@ -63,6 +65,7 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix: 奔溃自动重启后会丢失 cli 上传入的参数
 - [x] fix: config.proxy 无法代理到其他域
 ``` js
 // 正确 http://127.0.0.1:9000/api2/quickSearch == ok
@@ -110,6 +113,11 @@ proxy: {
 - [ ] fix: 请求 id 会有一定的概率重复, 复制的 id 可能会导致排序出错, 或需要 rowKey 的组件渲染出错
 - [x] fix: 代理整个网站时, 网站中的一些链接无法正常工作
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
+
+## 更新计划
+- 2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
+- 2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
+- 2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用
 
 ## 解决 mockjs 的问题
 ### 前端API问题
