@@ -65,6 +65,7 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix: 当前端参数为 form data 时, 请求头为 content-type: application/x-www-form-urlencoded, 请求体没有被记录和保存
 - [ ] fix: 奔溃自动重启后会丢失 cli 上传入的参数
 - [x] fix: config.proxy 无法代理到其他域
 ``` js
