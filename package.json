@@ -8,9 +8,23 @@
     "bit": "npm run build:client && npm run build:server && npm run it",
     "bit:server": "npm run build:server && npm run it",
     "it": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx cnpm i --product && cd ../../ && node dist/package/run.js config",
-    "test": "node dist/package/run.js config"
+    "test": "node dist/package/run.js config",
+    "prepare": "husky install"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.30.0",
+    "husky": "^7.0.1",
+    "lint-staged": "^11.0.0",
+    "prettier": "^2.3.2"
+  },
+  "lint-staged": {
+    "client/src/**/*.{js,jsx,ts,tsx,json}": [
+      "prettier --write",
+      "eslint",
+      "git add"
+    ]
   }
 }
