@@ -14,8 +14,4 @@
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
   "scss.validate": false,
-  "typescript.locale": "en",
-  "vetur.validation.template": false,
-  "vetur.validation.script": false,
-  "vetur.format.defaultFormatter.html": "prettier",
 }
