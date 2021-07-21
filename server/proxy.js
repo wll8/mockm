@@ -252,6 +252,8 @@ async function serverProxy({
         })
       },
       logLevel: `silent`,
+      // proxyTimeout: 60 * 1000,
+      // timeout: 60 * 1000,
     }
     // 为了默认注入一些功能, 例如历史记录功能, 需要把用户添加的函数与程序中的函数合并
     Object.keys(defaultConfig).forEach(key => {
