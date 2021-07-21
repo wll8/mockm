@@ -518,6 +518,7 @@ function setPathVal(path, obj) {
   return origin + path
 }
 
+// eslint-disable-next-line
 export default  {
   setPathVal,
   isType,

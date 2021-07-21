@@ -4,6 +4,8 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 支持自定义多个重放时要更新的 header
+  - 有些授权字段不一定是 authorization, 可能是其他的一个或多个字段, 这时候可以通过 config.updateHeader 来配置. 重发请求或者在 swagger 界面测试请求时, 都会更新指定的 header 后再发送请求.
 - [ ] feat: 支持关闭和开启 testPort 和 replayPort 功能, 因为某些服务可能不需要
 - [ ] feat: 支持禁用请求记录, 例如禁用所有, 禁用某个 url, 仅保存后xx条, 因为有些类似心跳的请求总是记录的意义不大
 - [ ] feat: 参考 https://github.com/YMFE/yapi 重新实现 webApi table 的开发, 以支持各种格式的数据
@@ -116,9 +118,9 @@ proxy: {
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
 
 ## 更新计划
-- 2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
-- 2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
-- 2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用
+- 1.2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
+- 1.2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
+- 1.2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用
 
 ## 解决 mockjs 的问题
 ### 前端API问题
