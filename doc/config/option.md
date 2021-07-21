@@ -311,9 +311,11 @@ proxy: {
 
 - string 直接使用一个 openApi
 - array api 与每项相比, 取匹配度最高的, 都不匹配时取第一条
-- object api 与对象的 key 作为正则进行匹配(`new RegExp(key, 'i').test(pathname)`), 都不匹配时取第一条
+- object api 与对象的 key 作为正则进行匹配(`new RegExp(key, 'i').test(pathname)`), 优先从 url 目录层级较多的开始比较, 都不匹配时取第一条
 
 支持 basic-auth 认证, 在 url 上携带用户名密码即可, 例如 http://name:passwd@httpbin.org/spec.json.
+
+当为 object 时, key 也作为 ui 界面上 swagger 调试地址的匹配. 例如某个服务有 openApi 地址, 在里面有一个 api 是 /user, 但是最终部署之后经过代理的请求接口实际是 /api/server/user, 这种情况下 key 的值就是 `/api/server`.
 
 ## config.cors
 类型: boolean

@@ -36,6 +36,7 @@ function Swagger(props) {
   const reactLocation = useLocation()
   const [state, setState] = useState({ // 默认值
     spec: {}, // oepnApi 对象
+    specPrefix: ``, // oepnApi 前缀
     swagger: false, // 是否显示 swagger 文档
     pathInSwagger: false, // 显示 swagger 按钮
     swaggerLoading: false, // swagger 是否正在加载
@@ -53,12 +54,13 @@ function Swagger(props) {
           path,
         },
       } = props.httpData.data.req.lineHeaders
-      let {paths, basePath} = state.spec
+      let {paths, basePath = ``} = state.spec
       method = method.toLowerCase()
       // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
       const re = new RegExp(`^(${basePath})(/.*)`)
       const swgPath = path.replace(re, '$2')
       const res = Object.keys(paths).some(path => {
+        path = `${state.specPrefix}${path}`
         let re = swgPathToReg(path)
         return swgPath.match(re)
       })
@@ -68,7 +70,7 @@ function Swagger(props) {
       console.log(`error`, error)
       setState(preState => ({...deepSet(preState, `pathInSwagger`, false)}))
     }
-  }, [state.spec, props])
+  }, [state.spec, state.specPrefix, props])
 
   useEffect(() => { // 退出此页面时销毁 swagger
     return hideDoc
@@ -100,10 +102,18 @@ function Swagger(props) {
     // https://github.com/swagger-api/swagger-ui/issues/5981
     const UrlMutatorPlugin = (system) => ({
       rootInjects: {
+        getSpec () {
+          return system.getState().toJSON().spec.json.oepnApiData
+        },
+        getSpecPrefix () {
+          return system.getState().toJSON().spec.json.openApiPrefix
+        },
         setSpec (data) {
-          const jsonSpec = system.getState().toJSON().spec.json
+          const jsonSpec = system.getState().toJSON().spec.json.oepnApiData
+          const specPrefix = system.getState().toJSON().spec.json.openApiPrefix
           const newSpec = {...jsonSpec, ...data}
           setState(preState => ({...deepSet(preState, `spec`, newSpec)}))
+          setState(preState => ({...deepSet(preState, `specPrefix`, specPrefix)}))
           return system.specActions.updateJsonSpec(newSpec)
         }
       }
@@ -131,14 +141,23 @@ function Swagger(props) {
           }
         },
         onComplete () {
+          const spec = window.swaggerUi.getSpec()
+          const specPrefix = window.swaggerUi.getSpecPrefix()
+          
           let host = ``
           if(serverConfig.remote === false) { // 本地模式
             host = `${window.location.hostname}:${serverConfig.port}`
           } else { // 公网模式
             host = new URL(store.note.remote.port).host
           }
+
+          const servers = (spec.servers || []).map(item => {
+            const newUrl = item.url.replace(new URL(item.url).host, host)
+            item.url = `${newUrl}${specPrefix}`
+            return item
+          })
           const protocol = window.location.protocol.replace(`:`, ``) // 协议跟随当前页面
-          window.swaggerUi.setSpec({host, protocol, schemes: [protocol]})
+          window.swaggerUi.setSpec({servers, host, protocol, schemes: [protocol]})
           cb()
         }
       })
@@ -188,7 +207,7 @@ function Swagger(props) {
       } = props.httpData.data.req.lineHeaders
       method = method.toLowerCase()
       // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
-      const basePath = $(`.swagger-ui .info .base-url`).text().match(/(\/.*) ]/)[1] // 其实就是 json 中的 basePath, 只是不想再请求并解析这个 json 文件, 所以直接在 dom 中获取
+      const basePath = state.spec.basePath
       const re = new RegExp(`^(${basePath})(/.*)`)
       const swgPath = path.replace(re, '$2')
       const $swaggerApiDom = $([...$(`.opblock-summary-${method} [data-path]`)].find(item => {

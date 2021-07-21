@@ -442,10 +442,25 @@ mm config=./8081.config.js
 mm config=./8082.config.js
 ```
 
-如果需要把两个接口合并为一个接口:
-``` sh
-# todo
+## 如何合并多个服务
+假设后端有多个服务, 每个服务是独立的, 有自己的 openApi 和接口. 但是上线之后是通过 nginx 统一代理为一个 /api 路径来给前端调用的. 可以参考以下配置实现此操作:
+
+``` js
+module.exports = {
+  proxy: {
+    '/': `http://www.httpbin.org/`,
+    '/api/serve1/': `http://192.168.1.18:8081/api/`,
+    '/api/serve2/': `http://192.168.1.18:8082/api/`,
+  },
+  openApi: {
+    '/': `http://httpbin.org/spec.json`,
+    '/api/serve1/': `http://192.168.1.18:8081/v3/api-docs`,
+    '/api/serve2/': `http://192.168.1.18:8082/v3/api-docs`,
+  },
+}
 ```
+
+现在我们只用请求 http://127.0.0.1:9000/ 一个服务, 根据 url 不同, 会自动转发到对应的其他服务. 另外, 虽然他们的 openApi 地址也不同, 但是我们也可以通过配置, 在查看请求记录时自动找到接口对应的 swagger 调试地址.
 
 ## 一份包含大多数选项的配置文件
 这是通过 `mm config` 生成的配置文件, 仅供参考, 包含了 mockm 的大部分选项及在各种业务场景下的示例, 不要被这么多配置吓到, 记住所有选项都可以不需要.
