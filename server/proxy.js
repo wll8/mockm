@@ -171,8 +171,8 @@ async function serverProxy({
 
   server.use(async (req, res, next) => {
     const pathToRegexp = require('path-to-regexp')
-    for (let index = 0; index < serverRouterList.length; index++) {
-      const {method, router, action} = serverRouterList[index]
+    const hasRouter = serverRouterList.some(item => {
+      const {method, router, action} = item
       /**
         HTTP 1.1 中 upgrade 头用来表示升级协议
         https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Upgrade
@@ -195,7 +195,13 @@ async function serverProxy({
           },
         }[method]
         handleFn ? handleFn(req, res, next) : action(req, res, next)
+        return true
+      } else {
+        return false
       }
+    })
+    if(hasRouter === false) { // 如果都没有找到则进入下一个中间件
+      next()
     }
   })
 
