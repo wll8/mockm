@@ -40,7 +40,7 @@ module.exports = util => {
             proxyReq.setHeader('x-added', 'req');
           },
           mid (req, res, next) { // 在进行代理之前添加中间件
-            setTimeout(next, 5000) // 延时
+            setTimeout(next, 2000) // 延时
           },
           onProxyRes (proxyRes, req, res) { // 拦截响应
             midResJson({proxyRes, res, key: `origin`, val: `127.0.0.1`}) // 修改 body
@@ -105,7 +105,7 @@ module.exports = util => {
         },
         'post /status/:code' (req, res, next) { // 获取 url 上的 params, query 以及 body 参数
           const {params, query, body} = req
-          res.status(params.code) .json({params, query, body})
+          res.status(params.code).json({params, query, body})
         },
         // curl-snippet
         'get /curl' (req, res, next) { // 运行 curl/bash 命令并获取执行结果
