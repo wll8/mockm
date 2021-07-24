@@ -76,16 +76,13 @@ new Promise(async () => {
     但是在没有此问题的设备中, 会导致两次重启, 因为没有问题的情况下, 进入 restart 事件回调时就表示重启成功了.
   */
   new Promise(() => {
-    let {res: checkChangeRestartRes} = tool.control.asyncTosync(tool.file.checkChangeRestart)()
-    if(checkChangeRestartRes === false) {
-      const store = tool.file.fileStore(config._store)
-      const restartId = store.get(`restartId`)
-      setInterval(() => {
-        const restartIdNew = store.get(`restartId`)
-        if(restartId !== restartIdNew) {
-          process.exit()
-        }
-      }, 1000);
-    }
+    const store = tool.file.fileStore(config._store)
+    const restartId = store.get(`restartId`)
+    setInterval(() => {
+      const restartIdNew = store.get(`restartId`)
+      if(restartId !== restartIdNew) {
+        process.exit()
+      }
+    }, 1000);
   })
 })
