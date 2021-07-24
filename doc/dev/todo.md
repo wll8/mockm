@@ -67,6 +67,12 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [x] fix: 某些设备修改 mm.config.js 文件并不会自动重载
+  - 更新到最新版本 nodemon@2.0.12 无效
+  - 使用 `legacyWatch: true` 参数无效
+  - 使用 `config.watch = ['mm.config.js']` 无效
+  - 使用 `nodemon -w mm.config.js --exec "fkill -f :9000 & mm"` 无效
+  - 最后发现是 nodemon 自身的功能问题, 参考 checkChangeRestart 函数
 - [x] fix: v1.1.25-alpha.12 版本的 config.db 功能失效, v1.1.25-alpha.10 可以正常使用
 - [x] fix: v1.1.25-alpha.12 版本的 path 功能失效, v1.1.25-alpha.10 可以正常使用
 - [ ] fix: 当前端参数为 form data 时, 请求头为 content-type: application/x-www-form-urlencoded, 请求体没有被记录和保存

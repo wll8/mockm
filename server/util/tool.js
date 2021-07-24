@@ -66,6 +66,62 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function control() { // 流程控制
     /**
+     * 同步执行异步函数, 入参和出参需要可序列化, 不会输出出参数之外的其他信息
+     * @param fn 要运行的函数
+     * @return {function} 接收原参数, 返回 {res, err}
+     */
+    function asyncTosync (fn) {
+      const {
+        createNewFile,
+        filesCreateOrRemove,
+      } = file()
+      
+      return (...args) => {
+        const { writeFileSync, readFileSync } = require(`fs`)
+        const fnStr = fn.toString()
+        const tempDir = (__dirname || require(`os`).tmpdir()).replace(/\\/g, `/`)
+        const fileObj = {
+          fnFile: createNewFile(tempDir, `fn.js`),
+          resFile: createNewFile(tempDir, `res.log`),
+          errFile: createNewFile(tempDir, `err.log`),
+        }
+        filesCreateOrRemove(fileObj, `create`)
+        let res = ``
+        let err = ``
+        try {
+          const argsString = args.map(arg => JSON.stringify(arg)).join(', ');
+          const codeString = `
+            const { writeFileSync } = require('fs')
+            const fn = ${fnStr}
+            new Promise(() => {
+              fn(${argsString})
+                .then((output = '') => {
+                  writeFileSync("${fileObj.resFile}", String(output), 'utf8')
+                })
+                .catch((error = '') => {
+                  writeFileSync("${fileObj.errFile}", String(error), 'utf8')
+                })
+                .finally(() => {
+                  process.exit()
+                })
+              }
+            )
+          `
+          writeFileSync(fileObj.fnFile, codeString, `utf8`)
+          require(`child_process`).execSync(`"${process.execPath}" ${fileObj.fnFile}`)
+          res = readFileSync(fileObj.resFile, `utf8`)
+          res = res ? JSON.parse(res) : undefined
+          err = readFileSync(fileObj.errFile, `utf8`)
+          err = err ? JSON.parse(err) : undefined
+        } catch (error) {
+          console.log(`error`, error)
+        }
+        filesCreateOrRemove(fileObj, `remove`)
+        return {res, err}
+      }
+    }
+    
+    /**
     * 以 Promise 方式等待条件成立
     * @param {*} condition 条件函数, 返回 true 时才陈立
     * @param {*} ms 检测条件的实时间隔毫秒
@@ -99,6 +155,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      asyncTosync,
       awaitTrue,
       sleep,
     }
@@ -531,6 +588,88 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function file() { // 文件相关
+    /**
+     * 创建或删除一组文件
+     * @param objOrArr {object|number} 要操作的内容
+     * @param action {stirng} 操作方式 create remove
+     */
+    function filesCreateOrRemove (objOrArr, action) {
+      const {writeFileSync, unlinkSync} = require('fs')
+      Object.keys(objOrArr).forEach(key => {
+        const name = objOrArr[key]
+        if (action === `create`) {
+          writeFileSync(name, ``, `utf8`)
+        }
+        if (action === `remove`) {
+          unlinkSync(name)
+        }
+      })
+    }
+
+    
+    
+    /**
+     * 根据 dirName 和 fileName 返回一个当前目录不存在的文件名
+     * @param dirName 目录
+     * @param fileName 名称
+     * @return {stirng} 例 `${dirName}/temp_${Date.now()}.${fileName}`
+     */
+    function createNewFile (dirName, fileName) {
+      const newFile = `${dirName}/temp_${Date.now()}.${fileName}`
+      return require(`fs`).existsSync(newFile) === true ? createNewFile(dirName, fileName) : newFile
+    }
+
+    /**
+     * 检查 nodmeon 是否可以修改文件后重启应用(某些设备可以检测到修改, 但应用并没有重启)
+     * @param {number} timeout 多少毫秒后超时返回 false, 默认 3000
+     * @returns {boolean}
+     */
+    function checkChangeRestart(timeout = 3000) {
+      return new Promise((resolve, reject) => {
+        const fs = require(`fs`)
+        const os = require(`os`)
+        const path = require(`path`)
+        const nodemon = require(`nodemon`)
+        const jsFile = path.normalize(`${os.tmpdir()}/${Date.now()}.js`)
+        const tag = Date.now()
+        const fnStr = ((arg) => {
+          console.log(arg)
+          setInterval(() => {}, 2 * 1000);
+        }).toString()
+
+        fs.writeFileSync(jsFile, `(${fnStr})('')`)
+        setTimeout(() => {
+          fs.writeFileSync(jsFile, `(${fnStr})(${tag})`)
+        }, 500);
+        
+        nodemon({
+          ignoreRoot: [],
+          exec: `node ${jsFile}`,
+          watch: [jsFile],
+          stdout: false,
+        })
+        .on('readable', function(arg) {
+          this.stdout.on(`data`, data => {
+            let log =String(data).trim()
+            if(log && log.includes(tag)) {
+              end(true)
+            }
+          })
+        })
+        
+        setTimeout(() => {
+          end(false)
+        }, timeout);
+
+        function end(isOk) {
+          resolve(isOk)
+          nodemon.emit(`quit`)
+          fs.existsSync(jsFile) && fs.unlinkSync(jsFile)
+        }
+
+      })
+    }
+    
     function fileStore(storePath, initValue) { // 存取需要持久化存储的数据
       const fs = require(`fs`)
       const {
@@ -729,6 +868,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      filesCreateOrRemove,
+      createNewFile,
+      checkChangeRestart,
       backUrl,
       fileStore,
       getMd5,

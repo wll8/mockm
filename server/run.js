@@ -70,6 +70,8 @@ new Promise( async () => { // 检查更新
 })
 
 new Promise(async () => { // 启动 server.js
+  let {res: checkChangeRestartRes} = tool.control.asyncTosync(tool.file.checkChangeRestart)()
+  
   let log = ``
   function restart() {
     config.guard && setTimeout(() => {
@@ -130,6 +132,10 @@ new Promise(async () => { // 启动 server.js
     }
   })
   .on(`restart`, (arg) => {
+    if(checkChangeRestartRes === false) {
+      const store = tool.file.fileStore(config._store)
+      store.set(`restartId`, String(Date.now()))
+    }
     // console.log(`restart`, arg)
   })
   const {
