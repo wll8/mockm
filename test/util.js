@@ -154,8 +154,8 @@ function startApp() {
   }
 
   const { spawn } = require('child_process');
-  // const cmdRef = spawn('node', [absPath(`../dist/package/run.js`), `config`]);
-  const cmdRef = spawn('node', [absPath(`../server/run.js`), `config`]);
+  const cmdRef = spawn('node', [absPath(`../dist/package/run.js`), `config`]);
+  // const cmdRef = spawn('node', [absPath(`../server/run.js`), `config`]);
   
   cmdRef.stdout.on('data', (data) => {
     console.log(String(data))
