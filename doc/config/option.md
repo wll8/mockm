@@ -111,14 +111,7 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 
 ## config.proxy
 类型: string | object
-::: details 默认
-```js
-proxy: {
-  '/': `https://example.com/`,
-},
-```
-
-:::
+默认: `http://www.httpbin.org/`
 
 
 代理到远程的目标域名，为对象时每个键是分别对应一个要自定义代理的路由.
@@ -294,14 +287,16 @@ proxy: {
 ## config.remote
 类型: boolean
 默认: false
-注: 此修改需要重启才能生效.
+是否启用外网映射.
 
-是否映射本地服务到公网.
+::: details 注意
+此修改需要重启才能生效, 由于此服务是使用 ngrok 的免费服务提供的, 无需注册和登录, 所以有一些 ngrok 给予的限制:
+- 随机生成外网 URL, 每次可使用8小时
+- 每分钟请求数不能超过 40 个
+- 较慢的网络速度
 
-这里默认使用 ngrok 的免费服务. 值为
-
-- false 不启用.
-- true 启用.
+虽然看起来有点苛刻, 但是对于免注册和登录来说已经很良心了, 对于常见 api 测试来说已经足够了.
+:::
 
 ## config.openApi
 类型: string | array | object
@@ -363,12 +358,86 @@ json 数据生成的保存位置.
 - object 直接作为数据使用
 - function 应返回一个对象
 
+::: details 示例
+随机生成带有 id, 用户, 阅读量, 作者等信息的 40 至 60 本书数据, 以及相关的增删查改接口. 不到 1分钟即可实现这些功能.
+
+``` js
+module.exports = util => {
+  return {
+    db: util.libObj.mockjs.mock({
+      'books|40-60': [
+        {
+          'id|+1': 1,
+          user: /\d\d/,
+          view: /\d\d\d\d/,
+          'type|1': [`js`, `css`, `html`],
+          'discount|1': [`0`, `1`],
+          author: {
+            'name|1': [`张三`, `李四`],
+          },
+          title: '@ctitle',
+        }
+      ],
+    }),
+  }
+}
+```
+
+所有的创建或修改都会像真实的后台接口把操作结果存储在数据库一样.
+
+- 基本操作
+GET    /books -- 获取所有
+POST   /books -- 增加一条
+GET    /books/1 -- 获取某条
+PUT    /books/1 -- 修改某条
+PATCH  /books/1 -- 部分修改某条
+DELETE /books/1 -- 删除某条
+
+- 过滤
+GET /books?discount=1&type=js -- 不同字段查询
+GET /books?id=1&id=2 -- 相同字段不同的值
+GET /books?author.name=张三 -- 使用点查询深层数据
+
+- 分页
+GET /books?_page=2 -- 分页
+GET /books?_page=2&_limit=5 -- 分页并指定每页数量
+
+- 排序
+GET /books?_sort=view&_order=asc -- 排序
+GET /books?_sort=user,view&_order=desc,asc -- 多字段排序
+
+- 截取
+GET /books?_start=2&_end=5 -- 截取 _start 到 _end 之间的内容
+GET /books?_start=20&_limit=10 -- 截取 _start 后面的 _limit 条内容
+
+- 运算
+GET /books?view_gte=3000&view_lte=7000 -- 范围  `_gte` `_lte`
+GET /books?id_ne=1 -- 排除 `_ne`
+GET /books?type_like=css|js -- 过滤器 `_like`, 支持正则
+
+- 全文检索
+GET /books?q=张三 -- 精确全文匹配
+
+:::
+
 ## config.route
 类型: object
 默认: {}
 
 路由映射, 作用于 config.api 及 config.db 产生的 api
+
+::: details 示例
+
+假设接口 `/books/1` 希望能通过 `/test/db/api/` 前缀访问, 配置如下:
+
+``` js
+{
+  '/test/db/api/*': '/$1', // /test/db/api/books/1 => /books/1
+}
+```
+
 参考 [json-server](https://github.com/typicode/json-server#add-custom-routes).
+::: 
 
 ## config.apiWeb
 类型: string
@@ -384,10 +453,11 @@ json 数据生成的保存位置.
 
 这是默认统一使用的包裹结构: wrapApiData
 ``` js
-function wrapApiData({data, code}) { // 包裹 api 的返回值
+function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
+  code = String(code)
   return {
     code,
-    success: Boolean(('' + code).match(/^[2]/)), // 如果状态码以2开头则为 true
+    success: Boolean(code.match(/^[2]/)), // 如果状态码以2开头则为 true
     data,
   }
 }
@@ -407,7 +477,7 @@ function wrapApiData({data, code}) { // 包裹 api 的返回值
 对象的 key 为 api 路由, `请求方法 /路径`, 请求方法可省略, 示例:
 
 - `/api/1` 省略请求方法, 可以使用所有 http 方法访问接口, 例如 get post put patch delete head options trace.
-- `get /api/2` 指定语法方法, 例如只能使用 get 方法访问接口
+- `get /api/2` 指定请求方法, 例如只能使用 get 方法访问接口
 - `ws /api/3` 创建一个 websocket 接口
 - `use /api/4` 自定义一个中间件, 作用于任何 method 的任何子路由
 

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "prestart": "npx shx cp ../README.md ./",
+    "// prestart": "npx shx cp ../README.md ./",
     "start": "vuepress dev .",
     "build": "vuepress build ."
   },
