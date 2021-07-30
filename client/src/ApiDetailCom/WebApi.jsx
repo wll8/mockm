@@ -30,7 +30,7 @@ const {
   UserOutlined,
 } = icons
 
-function FixedResponse({httpData}) {
+function FixedResponse({httpData, simpleInfo}) {
   const [state, setState] = useState({ // 默认值
     replayDone: true, // 是否重放结束
   });
@@ -42,7 +42,48 @@ function FixedResponse({httpData}) {
   } = ReactRouterDOM
   const history = useHistory()
 
-  function fn() {
+  function historyData() {
+    setState(preState => ({...preState, replayDone: false}))
+    const method = httpData.method
+    const apiId = httpData.apiId
+    const bodyText = httpData.data.res.bodyText
+    const headers = httpData.data.res.lineHeaders.headers
+    const extensionName = simpleInfo.extensionName
+
+    if(extensionName !== `json`) {
+      message.error(`暂不支持 ${extensionName} 格式的数据`)
+      return false
+    }
+    
+    const str = [
+      `(req, res) => {`,
+      `res.set(${JSON.stringify({
+        ...headers,
+
+        // 删除调试地址, 因为它在请求时会重新生成
+        [window.serverConfig.apiInHeader]: undefined,
+        [window.serverConfig.apiInHeader + `-remote`]: undefined,
+      }, null, 2)})`,
+      `res.json(${bodyText})`,
+      `}`,
+    ].join(`\n`)
+    console.log(str)
+    http.patch(`${cfg.baseURL}/api/studio/`, {
+      setPath: [`paths`, path, method, `responses`, 200, `example`],
+      data: {
+        useDataType: `custom`,
+        custom: str,
+      }
+    }
+    ).then(res => {
+      message.info(`设置成功`)
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+    })
+  }
+
+  function historyId() {
     setState(preState => ({...preState, replayDone: false}))
     const method = httpData.method
     const apiId = httpData.apiId
@@ -63,9 +104,8 @@ function FixedResponse({httpData}) {
 
   function handleMenuClick(e) {
     const handle = {
-      fixed() {
-        fn()
-      },
+      historyData,
+      historyId,
       switch() {
         http.post(`${cfg.baseURL}/api/changeWebApiStatus/`, {api: `${httpData.method} ${httpData.api}`}).then(res => {
           message.info(`操作成功`)
@@ -83,9 +123,10 @@ function FixedResponse({httpData}) {
 
   const menu = (
     <Menu onClick={handleMenuClick}>
-      <Menu.Item key="fixed">
-        {showTitle(`使用此记录`, `总是以这条记录的响应作为此接口的返回值, 这将自动创建或修改接口.`)}
-      </Menu.Item>
+      <Menu.SubMenu key="history" title={showTitle(`使用此记录`, `总是以这条记录的响应作为此接口的返回值, 这将自动创建或修改接口`)}>
+        <Menu.Item key="historyData">{showTitle(`使用数据`, `复制此记录的响应数据来创建接口`)}</Menu.Item>
+        <Menu.Item key="historyId">{showTitle(`使用ID`, `仅使用ID来响应 httpData/request 目录中对应的数据`)}</Menu.Item>
+      </Menu.SubMenu>
       <Menu.Item key="switch" disabled={!httpData.webApi}>
         {(httpData.webApi || {}).disable ? `启用` : `禁用`}
       </Menu.Item>

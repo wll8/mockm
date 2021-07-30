@@ -190,7 +190,7 @@ const ApiDetail = (() => {
           <Capture cb={captureCb} captureImg={state.captureImg} />
           <Swagger httpData={state.httpData} />
           <ApiHistory apiId={state.httpData.apiId} api0={state.httpData.api0} />
-          <WebApi httpData={state.httpData} />
+          <WebApi simpleInfo={state.simpleInfo} httpData={state.httpData} />
           <div className={`optionsPreViewRes ${state.captureImg && `show`}`}>
             {state.captureImg && <img className="captureImg" src={state.captureImg} alt="captureImg"/>}
           </div>
