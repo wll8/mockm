@@ -32,4 +32,4 @@ module.exports = {
 
 ## 环境变量
 ### MOCKM_REGISTRY
-指定按需安装依赖时的镜像地址, 默认 https://registry.npm.taobao.org/.
+MOCKM_REGISTRY 或 NPM_CONFIG_REGISTRY 可以指定按需安装依赖时的镜像地址, 默认 https://registry.npm.taobao.org/.
