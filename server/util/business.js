@@ -12,10 +12,11 @@ function business() { // 与业务相关性的函数
     fs.writeFileSync(filePath, str)
   }
 
-  function wrapApiData({data, code}) { // 包裹 api 的返回值
+  function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
+    code = String(code)
     return {
       code,
-      success: Boolean(('' + code).match(/^[2]/)), // 如果状态码以2开头则为 true
+      success: Boolean(code.match(/^[2]/)), // 如果状态码以2开头则为 true
       data,
     }
   }
