@@ -168,45 +168,6 @@ http post :9000/blogs?q=苦涩
 ```
 :::
 
-::: details 接口示例
-所有的创建或修改都会像真实的后台接口把操作结果存储在数据库一样.
-
-- 基本操作
-GET    /books -- 获取所有
-POST   /books -- 增加一条
-GET    /books/1 -- 获取某条
-PUT    /books/1 -- 修改某条
-PATCH  /books/1 -- 部分修改某条
-DELETE /books/1 -- 删除某条
-
-- 过滤
-GET /books?discount=1&type=js -- 不同字段查询
-GET /books?id=1&id=2 -- 相同字段不同的值
-GET /books?author.name=张三 -- 使用点查询深层数据
-
-- 分页
-GET /books?_page=2 -- 分页
-GET /books?_page=2&_limit=5 -- 分页并指定每页数量
-
-- 排序
-GET /books?_sort=view&_order=asc -- 排序
-GET /books?_sort=user,view&_order=desc,asc -- 多字段排序
-
-- 截取
-GET /books?_start=2&_end=5 -- 截取 _start 到 _end 之间的内容
-GET /books?_start=20&_limit=10 -- 截取 _start 后面的 _limit 条内容
-
-- 运算
-GET /books?view_gte=3000&view_lte=7000 -- 范围  `_gte` `_lte`
-GET /books?id_ne=1 -- 排除 `_ne`
-GET /books?type_like=css|js -- 过滤器 `_like`, 支持正则
-
-- 全文检索
-GET /books?q=张三 -- 精确全文匹配
-
-参考 [json-server](https://github.com/typicode/json-server).
-
-:::
 
 ## 如何生成逼真的数据
 [mockjs](http://mockjs.com/examples.html) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.

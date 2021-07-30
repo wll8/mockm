@@ -62,6 +62,9 @@ module.exports = {
   },
 }
 ```
+
+也可以[通过 UI 界面创建接口](https://hongqiye.com/doc/mockm/use/webui.html#%E6%8E%A5%E5%8F%A3%E7%BC%96%E8%BE%91).
+
 ## 常用选项 options
 **remote**
 是否自动映射服务到外网.
@@ -93,6 +96,12 @@ module.exports = {
 如果你认为这可能是 mockm 的问题, 建议在描述中附加 `httpData/log.err.txt` 中的相关错误日志. 
 
 你也可以 [加入官方答疑QQ群62935222](https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi).
+
+## 鸣谢
+mockm 的核心功能是由这些工具建立起来的, 感谢每一个开源作者的辛劳付出.
+- [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware)
+- [json-server](https://github.com/typicode/json-server)
+- [mockjs](https://github.com/nuysoft/Mock)
 
 ## 贡献 Contribution
 mockm 还有很多不足, 如果愿意, 欢迎参与贡献.
