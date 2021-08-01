@@ -7,6 +7,10 @@
 :::
 
 ## 2021年07月
+#### v1.1.25-alpha.14
+- feat: 给包裹 api 的返回值的函数设置 code 默认值
+- feat: 支持使用记录的响应数据来创建接口
+
 #### v1.1.25-alpha.13
 - fix: 修复 config.db 功能失效的问题
 - fix: 处理 config.api path 参数失效, 不能获取 req.params 的问题
