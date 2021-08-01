@@ -37,20 +37,20 @@
             - 接口模拟, 数据模拟, 跨域, 接口联调, 项目实战
           </aside>
           ---
-          
+
           ## 常见问题
           前端开发中关于接口和数据的常见问题。
           ![快看 那个学前端的上吊了](http://img.doutula.com/production/uploads/image/2018/03/05/20180305209209_JzKLWN.jpg)
 
           ---
-          
+
           ### 开发阶段
           - 没有接口文档, 更没有接口, 等则耽误自己的工期
           - 不等则联调时的字段命名, 数据结构区别很大
           - 没有数据, 造数据困难又不优雅
 
           ---
-          
+
           ### 联调阶段
           - 跨域, 改个响应头都不愿意
           - 接口出错, 参数沟通反反复复, 好好的前端工程师变成给后端测接口的打工人
@@ -59,12 +59,12 @@
           - 之前好好的接口突然出错, 影响工作
 
           ---
-          
+
           ## 跨域
-          ![跨域](https://upload-images.jianshu.io/upload_images/9487719-37852d7e52a95f8a.png)
-          
+          ![跨域](https://z3.ax1x.com/2021/08/01/Wzw3h4.png)
+
           ---
-          
+
 
           ### 方案
           - 常见方案
@@ -95,8 +95,8 @@
               - 简单且拥有配套的常用功能
           </aside>
           ---
-          
-          
+
+
           ### 使用方法
 
           ``` sh [1-2|4-5|7-8]
@@ -115,7 +115,7 @@
             - npm i -g mockm --registry=https://registry.npm.taobao.org
 
             - 简单的 nodejs 接口服务
-            
+
             ``` js
               const http = require('http');
               const server = http.createServer((req, res) => {
@@ -131,11 +131,11 @@
             ``` js
             await fetch('http://localhost:8000/api/test').then(res => res.text())
             ```
-            
+
           </aside>
 
           ---
-          
+
           ### 跨域原理
           跨域是指浏览器对不同域下面的资源访问限制。
 
@@ -146,11 +146,11 @@
           </aside>
 
           ---
-          
+
           ## 数据或接口模拟
 
           ---
-          
+
           ### 方案
           - 常见方案
             - 写死在代码中  <!-- .element: class="fragment" -->
@@ -201,9 +201,9 @@
               - 是完整的 ndoejs 实现, 所以可以支持复杂的接口逻辑和功能
               - 拥有配套的常用功能, 例如响应拦截和修改, 报文记录和重放, 外网映射
           </aside>
-          
+
           ---
-          
+
           ### 使用方法
           自带接口服务
 
@@ -220,26 +220,26 @@
             - 来自 httpbin
           </aside>
           ---
-          
+
           ### 使用方法
           通过配置文件自定义接口
 
           ``` js
           module.exports = {
-            api: { 
+            api: {
               // 当为基本数据类型时, 直接返回数据
               '/api/1': {msg: `ok`},
-          
+
               // 一个 websocket 接口, 会发送收到的消息
               'ws /api/4' (ws, req) {
                 ws.on('message', (msg) => ws.send(msg))
               }
-          
+
               // 一个下载文件的接口
               '/file' (req, res) {
                 res.download(`文件路径`, `文件名`)
               },
-          
+
               // 获取动态的接口路径的参数 code
               '/status/:code' (req, res) {
                 res.json({statusCode: req.params.code})
@@ -253,7 +253,7 @@
             - 可移值
           </aside>
           ---
-          
+
           ### 使用方法
           通过界面自定义接口
           ![通过界面自定义接口](https://z3.ax1x.com/2021/05/18/gfuHTU.gif) <!-- .element: width="600" height="400" -->
@@ -269,14 +269,14 @@
           </aside>
 
           ---
-          
+
           ## 接口联调
           - 参数沟通
           - 请求回放
           - 响应修改
           - 切换真实接口, 模拟接口
           - 服务重放模式
-          
+
           <aside class="notes" data-markdown>
             - 参数沟通
             - 请求回放
@@ -286,7 +286,7 @@
           </aside>
 
           ---
-          
+
           ## 项目实战
             - 初始化
             - 接口和数据模拟
