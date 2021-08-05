@@ -531,13 +531,15 @@ function business() { // 与业务相关性的函数
           array: () => config.openApi,
           object: () => Object.values(config.openApi),
         }[tool.type.isType(config.openApi)]()
-        setInterval(() => {
+        const backFn = () => {
           openApiList.forEach(item => {
             tool.file.backUrl(config._openApiHistoryDir, item, data => { // 格式化 openApi 后再保存, 避免压缩的内容不易比较变更
               return JSON.stringify(JSON.parse(data), null, 2)
             })
           })
-        }, config.backOpenApi * 60 * 1000)
+        }
+        backFn()
+        setInterval(backFn, config.backOpenApi * 60 * 1000)
       }
 
       fileStore(config._share, {config}).set(`config`, config)
