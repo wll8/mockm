@@ -7,6 +7,7 @@ import * as antd from 'antd'
 
 const $ = window.$
 const {
+  isIp4InPrivateNet,
   swgPathToReg,
   getAbsolutePosition,
   debounce,
@@ -143,10 +144,17 @@ function Swagger(props) {
         onComplete () {
           const spec = window.swaggerUi.getSpec()
           const specPrefix = window.swaggerUi.getSpecPrefix()
-          
+          const hostname = window.location.hostname
           let host = ``
-          if(serverConfig.remote === false) { // 本地模式
-            host = `${window.location.hostname}:${serverConfig.port}`
+           // 就算开启远程模式, 但访问的是链接地址是内网时, swagger try 的请求地址仍使用内网 url, 以增加访问速度
+          if(
+            (hostname === `localhost`) // 是本地域名
+            || (
+              hostname.split(``).every(str => str.match(/[0-9]|\./)) // 是IP
+              && (isIp4InPrivateNet(hostname) === false) // 不是公网IP
+            )
+          ) { // 本地模式
+            host = `${hostname}:${serverConfig.port}`
           } else { // 公网模式
             host = new URL(store.note.remote.port).host
           }
