@@ -13,6 +13,9 @@ function serverTest({
   const {
     middleware,
     httpClient,
+    file: {
+      getBackUrl,
+    },
     url: {
       parseRegPath,
     },
@@ -166,10 +169,22 @@ function serverTest({
             return config.openApi[openApiPrefix]
           },
         }[tool.type.isType(config.openApi)]()
+        openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
         getOpenApi({openApi}).then(oepnApiData => {
-          openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
           res.send({openApiPrefix, oepnApiData})
-        }).catch(err => console.log(`err`, err))
+        }).catch(async err => {
+          // 当 openApi 获取失败时, 尝试从历史记录中获取, 以期望总是可以查看接口文档
+          // header 中的 x-mockm-msg 值为 from history 表示是来自本地历史
+          const file = await getBackUrl(config._openApiHistoryDir, openApi)
+          if(file) {
+            res.setHeader(`x-mockm-msg`, `from history`)
+            res.send({openApiPrefix, oepnApiData: require(file)})
+          } else {
+            res.status(404)
+            res.send({msg: `获取 openApi 错误`, err})
+          }
+          console.log(`err`, err)
+        })
       },
       getApiListSse() {
         res.writeHead(200, {
