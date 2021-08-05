@@ -78,7 +78,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         createNewFile,
         filesCreateOrRemove,
       } = file()
-      
+
       return (...args) => {
         const { writeFileSync, readFileSync } = require(`fs`)
         const fnStr = fn.toString()
@@ -123,7 +123,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         return {res, err}
       }
     }
-    
+
     /**
     * 以 Promise 方式等待条件成立
     * @param {*} condition 条件函数, 返回 true 时才陈立
@@ -609,8 +609,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-    
-    
+
+
     /**
      * 根据 dirName 和 fileName 返回一个当前目录不存在的文件名
      * @param dirName 目录
@@ -644,7 +644,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         setTimeout(() => {
           fs.writeFileSync(jsFile, `(${fnStr})(${tag})`)
         }, 500);
-        
+
         nodemon({
           ignoreRoot: [],
           exec: `node ${jsFile}`,
@@ -659,7 +659,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
             }
           })
         })
-        
+
         setTimeout(() => {
           end(false)
         }, timeout);
@@ -672,7 +672,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
       })
     }
-    
+
     function fileStore(storePath, initValue) { // 存取需要持久化存储的数据
       const fs = require(`fs`)
       const {
@@ -831,6 +831,38 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     /**
+     * 获取 http url 备份文件
+     * @param {string} baseDir 备份于什么目录之下
+     * @param {string} fileUrl 文件 url
+     * @return {string} 最新的文件
+     */
+    async function getBackUrl(baseDir = __dirname, fileUrl) {
+      const {
+        pathname,
+        fileName,
+      } = getFilePath(fileUrl)
+      const fs = require('fs')
+      const dir = `${baseDir}/${pathname}`
+      if(hasFile(dir) === false) {
+        return undefined
+      }
+      const getMax = fs.readdirSync(dir).reduce((acc, curFileName) => {
+        const re = new RegExp(`${fileName}_(\\d{4}-\\d{2}-\\d{2} \\d{2}-\\d{2}-\\d{2})\\.`)
+        const [, tag = ``] = curFileName.match(re) || []
+        const curTime = Number(tag.replace(/\D/g, ``))
+        return {
+          maxTime: acc.maxTime < curTime ? curTime : acc.maxTime,
+          curFileName: acc.maxTime < curTime ? curFileName : acc.curFileName,
+        }
+      }, {maxTime: 0, curFileName: ``})
+      if (getMax.maxTime) {
+        return `${dir}/${getMax.curFileName}`
+      } else {
+        return undefined
+      }
+    }
+
+    /**
      * 保存文件
      * @param {string} filePath 文件的路径
      * @param {binary} bin 二进制内容
@@ -874,6 +906,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       filesCreateOrRemove,
       createNewFile,
       checkChangeRestart,
+      getBackUrl,
       backUrl,
       fileStore,
       getMd5,
