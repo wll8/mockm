@@ -9,6 +9,26 @@ function isType(data, type = undefined) { // 判断数据是否为 type, 或返�
 }
 
 /**
+ * 判断是否是公网IP
+ * https://stackoverflow.com/questions/13818064/check-if-an-ip-address-is-private
+ * @param {string} ip
+ * @returns boolean
+ */
+function isIp4InPrivateNet(ip) {
+  const ip4toNumber = str => str.split('.').reverse().reduce((a, v, i) => a + parseInt(v, 10) * Math.pow(256, i), 0);
+  const ip4RangeToNumbers = str => str.split('/').map(ip4toNumber);
+  const privateNets = [
+    '10.0.0.0/10.255.255.255', // single class A network
+    '172.16.0.0/172.31.255.255', // 16 contiguous class B network
+    '192.168.0.0/192.168.255.255', // 256 contiguous class C network
+    '169.254.0.0/169.254.255.255', // Link-local address also refered to as Automatic Private IP Addressing
+    '127.0.0.0/127.255.255.255' // localhost
+  ].map(ip4RangeToNumbers);
+  const ipNumber = ip4toNumber(ip);
+  return !!privateNets.find(([net, mask]) => net === ((ipNumber & mask) >>> 0));
+}
+
+/**
  * 相对路径转绝对路径
  * @param {*} url 相对 url
  */
@@ -520,6 +540,7 @@ function setPathVal(path, obj) {
 
 // eslint-disable-next-line
 export default  {
+  isIp4InPrivateNet,
   setPathVal,
   isType,
   getRestcLink,
