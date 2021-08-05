@@ -4,6 +4,9 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 支持在后端服务关闭时可以以文档形式浏览 openApi
+- [ ] feat: config.clearHistory 支持字符串 `all` 表示清除(清空 request, httpHistory.json)
+- [ ] feat: 当使用 remote 加载远程 url 时, 应使用`获取中...或进度比`来显示, 而不是输出 err log
 - [x] feat: 支持使用记录的响应数据来创建接口
   - 因为 id 引用的是 httpHistory 目录中的内容, 但此目录通常又不方便上传到版本控制系统, 所以把请求记录的值直接转换为 webApi, 可方便的多人共享或复用已有的数据.
 - [ ] feat: 支持自定义多个重放时要更新的 header
@@ -72,6 +75,8 @@
 - [ ] fix: 当 webApi 与 config.api 相同时, webApi 不应该优先
   - 违背了文档: `从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权`
   - 这似乎是某个版本之后导致的问题
+- [ ] fix: 当 config.proxy 与 config.api 相同时, proxy 不应该优先
+  - 违背了文档: `当与 config.proxy 中的路由冲突时, config.api 优先.`
 - [x] fix: 某些设备修改 mm.config.js 文件并不会自动重载
   - 更新到最新版本 nodemon@2.0.12 无效
   - 使用 `legacyWatch: true` 参数无效
