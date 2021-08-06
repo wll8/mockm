@@ -130,6 +130,9 @@ new Promise(async () => { // 启动 server.js
     }
   })
   .on(`restart`, (arg) => {
+    if(Boolean(config._store) === false) { // fix: 有时候重载后的 config 值为空 {}
+      return false
+    }
     const store = tool.file.fileStore(config._store)
     store.set(`restartId`, String(Date.now()))
     // console.log(`restart`, arg)
