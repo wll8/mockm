@@ -7,6 +7,7 @@ import ApiDetail from './ApiDetail.jsx'
 import Breadcrumb from './Breadcrumb.jsx'
 import Restc from './Restc.jsx'
 import * as ApiStudio from './ApiStudio/index.jsx'
+import OpenApiDoc from './OpenApiDoc/Index.jsx'
 import './HttpShow.scss'
 import common from './common.jsx'
 
@@ -48,6 +49,9 @@ const HttpShow = (() => {
           </Route>
           <Route cache path="/restc">
             <Restc />
+          </Route>
+          <Route cache path="/openApiDoc">
+            <OpenApiDoc />
           </Route>
           <Route cache path="/*">
             <ApiDetail />

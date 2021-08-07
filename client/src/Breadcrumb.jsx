@@ -43,6 +43,11 @@ function handleMenu(routePath) {
         path: `/restc/`,
       },
       {
+        id: `^/openApiDoc/?$`,
+        name: `openApiDoc`,
+        path: `/openApiDoc/`,
+      },
+      {
         id: `^/apiStudio/?$`,
         name: `接口`,
         path: `/apiStudio/`,
@@ -101,6 +106,9 @@ function BreadcrumbCom() {
                       <Menu.Item key="记录"><a href="/#/">记录</a></Menu.Item>
                       <Menu.Item key="接口"><a href="/#/apiStudio">接口</a></Menu.Item>
                       <Menu.SubMenu key="工具" title="工具">
+                        <Menu.Item key="openApiDoc" onClick={() => {
+                          window.open(`/#/openApiDoc`)
+                        }}>openApiDoc</Menu.Item>
                         <Menu.Item key="请求" onClick={() => {
                           window.open(getRestcLink({
                             method: `GET`,

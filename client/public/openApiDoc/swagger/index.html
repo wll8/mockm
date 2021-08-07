@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="redoc-container"></div>
+  <script src="//cdn.jsdelivr.net/npm/redoc@2.0.0-rc.55/bundles/redoc.standalone.min.js"> </script>
+  <script src="//cdn.jsdelivr.net/gh/wll8/redoc-try@1.3.4/dist/try.js"></script>
+  <script>
+    initTry({
+      openApi: `https://httpbin.org/spec.json`,
+    })
+  </script>
+</body>
+</html>
