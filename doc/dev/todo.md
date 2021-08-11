@@ -4,6 +4,19 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 支持在 config.package 参数用于更新依赖版本, 这利于在不更新 mockm 的情况使用新的依赖版本
+``` js
+package: {
+  ngrok: `latest`, // 始终安装 ngrok 的最新版本
+  ws: `7.4.6`, // 固定 ws 为 7.4.6 版本
+}
+```
+  - [ ] 需要研究如何将 json 依赖声明改为 npm install 的参数, 也可理解为如何把 install 参数保存到 package.json 对象中
+  - 以上配置将生成类似命令 `npm i ngrok@latest ws@7.4.6` 进行安装
+  - mockm 在启动时即更新依赖, 完毕后自动重载
+  - 与已安装的版本比较, 如果相同版本已存在则不触发安装
+  - 版本编写规则参考 https://www.npmjs.cn/files/package.json/#dependencies
+
 - [ ] feat: 支持在后端服务关闭时可以以文档形式浏览 openApi
 - [ ] feat: config.clearHistory 支持字符串 `all` 表示清除(清空 request, httpHistory.json)
 - [ ] feat: 当使用 remote 加载远程 url 时, 应使用`获取中...或进度比`来显示, 而不是输出 err log
@@ -72,6 +85,59 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix: 未注册的 ngrok 要求总是更新版本
+  - 处理方式: 移除 mockm 中固定的 ngrok cdn 地址
+
+## mockm remote 不能正常使用的解决方案
+
+原因是由于 ngrok 强制要求更新到最新版本。
+
+`mockm v1.1.25-alpha.15` 之前的版本可以在 mockm 的安装目录使用 npx ngrok update 更新版本来解决此问题。
+
+以下是参考命令:
+
+``` sh
+# 获取全局安装目录(假设你是全局安装的 mockm, 如果是局部安装的可以跳过此步)
+> npm root -g
+node_modules
+
+# 进入 mockm 的所在目录
+> cd node_modules/mockm
+
+# 更新 ngrok
+> npx ngrok update
+```
+
+## 详细原因分析
+错误现象:
+
+``` sh
+# 开启 remote 模式时一直输出以下信息, 远程服务信息为空
+> mm remote 
+err connect ECONNREFUSED 127.0.0.1:58725
+err connect ECONNREFUSED 127.0.0.1:58726
+err connect ECONNREFUSED 127.0.0.1:58727
+err connect ECONNREFUSED 127.0.0.1:58725
+
+远程服务信息:
+port: 
+replayPort: 
+testPort: 
+
+# 查看本地 ngrok 版本
+> ngrok -v
+ngrok version 2.3.35
+
+# 直接使用 ngrok 来启动外网服务, 得到具体的原因是未注册的用户必须保持更新 ngrok
+> ngrok http 80
+Your ngrok agent version "2.3.40" is no longer supported. Only the most recent version of the ngrok agent is supported without an account.
+Update to a newer version with `ngrok update` or by downloading from https://ngrok.com/download.
+Sign up for an account to avoid forced version upgrades: https://ngrok.com/signup.
+ERR_NGROK_120
+```
+
+
+
 - [ ] fix: 当 webApi 与 config.api 相同时, webApi 不应该优先
   - 违背了文档: `从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权`
   - 这似乎是某个版本之后导致的问题
@@ -139,6 +205,7 @@ proxy: {
 - 1.2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
 - 1.2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
 - 1.2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用
+- 1.2.x: 期望`仅有命令行可用的参数`都添加 `--` 前缀, 例如 `config` 改为 `--config`, 用这样的方式降低理解混淆
 
 ## 解决 mockjs 的问题
 ### 前端API问题
