@@ -1052,6 +1052,15 @@ function business() { // 与业务相关性的函数
       const spawn = tool.cli.spawn
       const fs = require(`fs`)
 
+      // ngrok 要求强制要求未注册用户使用最新版本
+      await spawn(
+        `npx`, `ngrok update`.split(/\s+/),
+        {
+          stdio: [0, `pipe`, 2],
+          cwd: mainPath,
+        }
+      )
+
       // 获取未占用的 tcp 端口, 用于 ngrok 的 web_addr, 会生成一个 api 供我们调用
       const portList = await Promise.all([4040, 4041, 4042].map(item => getPort(item) )).catch(err => console.log(`err`, err))
 
