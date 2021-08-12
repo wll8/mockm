@@ -197,7 +197,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       await cli().spawn(
         `npx`, cmd.split(/\s+/),
         {
-          detached: true,
+          detached: false, // 为 true 时拥有自己的窗口, 父进程退出后继续运行
           cwd,
           env: {
             NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
