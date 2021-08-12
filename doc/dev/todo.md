@@ -8,7 +8,7 @@
   - 弹窗原来是为了可以看到安装进度, 但是在安装次数过多时会造成过打扰
 - [ ] feat: 支持在后端服务关闭时可以以文档形式浏览 openApi
 - [ ] feat: config.clearHistory 支持字符串 `all` 表示清除(清空 request, httpHistory.json)
-- [ ] feat: 当使用 remote 加载远程 url 时, 应使用`获取中...或进度比`来显示, 而不是输出 err log
+- [x] feat: 当使用 remote 加载远程 url 时, 不应总是输出 err log, 避免认为程序错误
 - [x] feat: 支持使用记录的响应数据来创建接口
   - 因为 id 引用的是 httpHistory 目录中的内容, 但此目录通常又不方便上传到版本控制系统, 所以把请求记录的值直接转换为 webApi, 可方便的多人共享或复用已有的数据.
 - [ ] feat: 支持自定义多个重放时要更新的 header
