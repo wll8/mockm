@@ -389,7 +389,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }
       return options
     }
+
+    /**
+     * 以单行形式输出文本到终端
+     * @param {string} str 要输出的字符
+     */
+    function onlyLine(str) {
+      const columns = process.stdout.columns // 终端字符宽度
+      str = str.length > columns ? str : ` `.repeat(columns).replace(new RegExp(`.{${str.length}}`), str) // 以空格补齐整行终端, 避免其他字符侵入本行
+      process.stdout.write(`\r${str}`)
+    }
     return {
+      onlyLine,
       spawn,
       parseArgv,
       getOptions,

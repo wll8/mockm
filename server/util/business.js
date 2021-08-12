@@ -1101,7 +1101,7 @@ function business() { // 与业务相关性的函数
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
               const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch((err = {}) => {
-                console.log(`err`, err.message)
+                tool.cli.onlyLine(err.message)
                 resolve(false)
               })
               if(res) {
