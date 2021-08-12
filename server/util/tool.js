@@ -1210,7 +1210,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      */
     function clearProcess({hostname} = {}) {
       function killProcess(...arg) {
-        console.log(`err:`, ...arg)
+        arg[0] !== `SIGINT` && console.log(`err:`, ...arg) // ctrl+c 不需要显示 err
         hostname ? sysHost(`remove`, {hostname}).finally(process.exit) : process.exit()
       }
       process.on(`SIGTERM`, killProcess)
