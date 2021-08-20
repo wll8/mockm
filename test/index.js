@@ -62,6 +62,22 @@ with (util) {
           && httpData.data.origin === `127.0.0.1`
         )
       })
+      it(`/proxy/fn`, async () => {
+        const httpData = (await http.get(`http://127.0.0.1:9000/anything/proxy/fn`)).data
+        assert.ok(httpData === `getget`)
+      })
+      it(`/proxy/fn_fn`, async () => {
+        const httpData = (await http.get(`http://127.0.0.1:9000/anything/proxy/fn_fn`)).data
+        assert.ok(httpData === `get`)
+      })
+      it(`/proxy/fn_string`, async () => {
+        const httpData = (await http.get(`http://127.0.0.1:9000/anything/proxy/fn_string`)).data
+        assert.ok(httpData === `GET`)
+      })
+      it(`/proxy/string_fn`, async () => {
+        const httpData = (await http.get(`http://127.0.0.1:9000/anything/proxy/string_fn`)).data
+        assert.ok(httpData === `get`)
+      })
     })
 
     describe('config.dataDir', () => {
