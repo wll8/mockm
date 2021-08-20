@@ -8,7 +8,9 @@
     "bit": "npm run build:client && npm run build:serve && npm run it",
     "bit:serve": "npm run build:serve && npm run it",
     "it": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx cnpm i --product && cd ../../ && node dist/package/run.js config remote",
-    "test": "cd test && npm run test"
+    "test": "npm run test:dev",
+    "test:dev": "cd test && npm run test:dev",
+    "test:build": "cd test && npm run test:build"
   },
   "devDependencies": {
     "cross-env": "^7.0.3"
