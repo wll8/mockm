@@ -47,6 +47,28 @@ module.exports = util => {
             proxyRes.headers['x-added'] = 'res' // 修改 headers
           },
       },
+
+      // [fn] 使用函数处理内容
+      '/anything/proxy/fn':[({req, json}) => {
+        return (json.method + req.method).toLowerCase() // getget
+      }],
+
+      // [fn, fn] 函数1完成后, 传给函数2
+      '/anything/proxy/fn_fn':[({req, json}) => {
+        return json.method
+      }, ({req, json}) => {
+        return json.toLowerCase() // get
+      }],
+
+      // [fn, string] 函数处理后值, 通过路径再进入获取
+      '/anything/proxy/fn_string':[({req, json}) => {
+        return json
+      }, `method`], // GET
+
+      // [string, fn] 把路径对应的值取出来, 传给后面的函数
+      '/anything/proxy/string_fn':[`method`, ({req, json}) => {
+        return json.toLowerCase() // get
+      }],
     },
     remote: false, // false | object, 为 false 是不需要外网映射, 为 object 时是对每个服务端口的配置 `{testPort: { proto: `http` }}` , 参考 https://github.com/bubenshchykov/remote
     openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
