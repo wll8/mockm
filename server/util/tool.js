@@ -466,13 +466,48 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
           const [item1, item2] = options
           const item1Type = isType(item1)
+          const item2Type = isType(item2)
           const midResJson = httpClient().midResJson
           const deepMergeObject = obj().deepMergeObject
 
-          if(options.length <= 1) { // 只有0个或一个项, 直接替换 res
+          if((item1Type !== `function`) && (options.length <= 1)) { // 只有0个或一个项, 直接替换 res
             options = {
               onProxyRes (proxyRes, req, res) {
                 midResJson({proxyRes, res, cb: () => item1})
+              },
+            }
+          }
+          if((item1Type === `function`) && (options.length <= 1)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => item1({req, json})})
+              },
+            }
+          }
+          if((item1Type === `function`) && (item2Type === `function`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => {
+                  return item2({req, json: item1({req, json})})
+                }})
+              },
+            }
+          }
+          if((item1Type === `string`) && (item2Type === `function`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => {
+                  return item2({req, json: obj().deepGet(json, item1)})
+                }})
+              },
+            }
+          }
+          if((item1Type === `function`) && (item2Type === `string`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: json => {
+                  return obj().deepGet(item1({req, json}), item2)
+                }})
               },
             }
           }
