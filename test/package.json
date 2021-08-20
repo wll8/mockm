@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cd ../ && mocha -R mochawesome -t 0 --ignore test/util.js --reporter-options reportDir=test/res,reportFilename=index"
+    "test:dev": "cd ../ && cross-env testEnv=dev mocha -R mochawesome -t 0 --ignore test/util.js --reporter-options reportDir=test/res,reportFilename=index",
+    "test:build": "cd ../ && cross-env testEnv=build mocha -R mochawesome -t 0 --ignore test/util.js --reporter-options reportDir=test/res,reportFilename=index"
   },
   "keywords": [],
   "author": "",
