@@ -1061,7 +1061,7 @@ function business() { // 与业务相关性的函数
       await spawn(
         `npx`, `ngrok update`.split(/\s+/),
         {
-          stdio: [0, `pipe`, 2],
+          // stdio: [0, `pipe`, 2],
           cwd: mainPath,
         }
       )
