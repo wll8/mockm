@@ -929,7 +929,12 @@ function business() { // 与业务相关性的函数
         return false
       }
       res && setHeader(res, {
-        'access-control-allow-origin': req.headers.origin || `*`
+        'access-control-allow-headers': req.headers['access-control-allow-headers'],
+        'access-control-allow-methods': req.method,
+        'access-control-allow-credentials': `true`,
+        'access-control-allow-origin': req.headers.origin || `*`,
+        // 'access-control-max-age': undefined,
+        // 'access-control-expose-headers': undefined,
       })
       req && setHeader(req, { // 一些服务器会校验 req 中的 referer, host
         'referer': target,

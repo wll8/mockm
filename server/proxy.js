@@ -66,7 +66,7 @@ async function serverProxy({
   })
   middleware.reWriteRouter({app: server, routes: config.route})
   const router = jsonServer.router(config.dbJsonPath)
-  server.use(middlewaresObj.corsMiddleware)
+  server.use(middlewaresObj.corsMiddleware) // 当请求进入时即可允许跨域, 可能被后续 proxy 或中间件覆盖配置
   // disable = false 才走自定义 proxy
   config.disable === false && config.proxy.forEach(item => {
     if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
