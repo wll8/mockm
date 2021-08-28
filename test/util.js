@@ -148,7 +148,41 @@ function hasFile(filePath) { // 判断文件或目录是否存在
   return fs.existsSync(filePath)
 }
 
-function startApp() {
+/**
+ * 测试命令行输出
+ * @param {*} param0 
+ * @param {*} param0.cmd 要运行的命令
+ * @param {*} param0.timeout 超时毫秒, 默认 3000
+ * @param {*} param0.fn 传入输出的文本, 返回匹配结果, 直到匹配成功或超时为此
+ */
+function testCliText({cmd = str, timeout = 3000, fn = (str) => str, } = {}) {
+  console.log(`cmd:\n${cmd}`)
+  return new Promise((resolve, reject) => {
+    const { spawn } = require('child_process');
+    const [bin, ...arg] = cmd.split(/\s+/)
+    const cmdRef = spawn(bin, arg);
+    cmdRef.stdout.on('data', (data) => {
+      const str = String(data)
+      if(fn(str)) {
+        resolve(str)
+        cmdRef.kill()
+      }
+    });
+    cmdRef.stderr.on('data', (data) => {
+      const str = String(data)
+      if(fn(str)) {
+        resolve(str)
+        cmdRef.kill()
+      }
+    });
+    setTimeout(() => {
+      reject(false)
+      cmdRef.kill()
+    }, timeout);
+  })
+}
+
+function startApp({runPath, arg, run = true} = {}) {
   global.cmdRef = {
     out: ``,
   }
@@ -156,14 +190,18 @@ function startApp() {
   const { spawn } = require('child_process');
   const cfg = ({
     build: {
-      runPath: `../dist/package/run.js`,
-      arg: [`config`],
+      runPath: runPath || `../dist/package/run.js`,
+      arg: arg || [`--config`],
     },
     dev: {
-      runPath: `../server/run.js`,
-      arg: [],
+      runPath: runPath || `../server/run.js`,
+      arg: arg || [],
     },
   })[process.env.testEnv]
+
+  if(run === false) {
+    return cfg
+  }
   
   const cmdRef = spawn('node', [absPath(cfg.runPath), ...cfg.arg]);
   
@@ -180,6 +218,8 @@ function startApp() {
   cmdRef.on('close', (code) => {
     console.log(`child process exited with code ${code}`);
   });
+
+  return cfg
 }
 
 function allTestBefore() {
@@ -220,4 +260,5 @@ module.exports = {
   sleep,
   clearRequireCache,
   absPath,
+  testCliText,
 }
