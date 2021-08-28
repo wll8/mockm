@@ -169,5 +169,19 @@ with (util) {
     })
 
   })
+  describe('命令行', () => {
+    it(`配置端口号`, async () => {
+      const cfg = startApp({run: false})
+      const cmd = `node ${cfg.runPath.replace(`../`, `./`)} port=9100 testPort=9105 replayPort=9101`
+      const testCliTextRes = await testCliText({cmd, fn(str) {
+        return (
+          str.match(`:9100/`) 
+          && str.match(`:9105/`) 
+          && str.match(`:9101/`)
+        )
+      }}).catch(res => false)
+      assert.ok(testCliTextRes)
+    })
+  })
 
 }
