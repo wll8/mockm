@@ -19,6 +19,16 @@ const cli = tool.cli
 const cliArg = cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
 const nodemon = require(`nodemon`)
+
+{ // 尽早的, 无依赖的修改 cwd, 避免其他读取到旧值
+  const cwd = tool.url.handlePathArg(
+    typeof(cliArg[`--cwd`]) === `string` 
+      ? cliArg[`--cwd`] 
+      : process.cwd()
+  )
+  process.chdir(cwd)
+}
+
 const {
   initHandle,
   plugin,
