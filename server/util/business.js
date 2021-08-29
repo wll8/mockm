@@ -423,10 +423,9 @@ function business() { // 与业务相关性的函数
       return lib.compareVersions.compare(process.version, `10.12.0`, `>=`)
     }
 
-    function getConfigFile() {
+    function configFileFn({cliArg}) {
       const path = require(`path`)
       const fs = require(`fs`)
-      const cliArg = tool.cli.parseArgv()
       const cwdConfigPath = `${process.cwd()}/mm.config.js`
       const hasCwdConfig = tool.file.hasFile(cwdConfigPath)
       let res = `${__dirname}/../config.js` // 默认配置文件
@@ -626,7 +625,7 @@ function business() { // 与业务相关性的函数
     return {
       checkEnv,
       wrapApiData,
-      getConfigFile,
+      configFileFn,
       init,
       getOpenApi,
     }
