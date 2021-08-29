@@ -194,9 +194,12 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   _gitIgnore: { // 配置一些几乎总是需要忽略的文件
     file: handlePathArg(`${config.dataDir}/.gitignore`),
     content: `
-      *
-      !apiWeb.json
-      !.gitignore
+      openApiHistory/
+      request/
+      db.json
+      httpHistory.json
+      log.err.txt
+      store.json
     `,
   },
   _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
