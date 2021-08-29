@@ -47,6 +47,18 @@ function spawn(arr, option = {}) {
   })
 }
 
+/**
+ * 生成 mockm 的三个所需端口
+ */
+async function newMockmPort() {
+  const getPort = require(`get-port`)
+  return {
+    port: await getPort(),
+    testPort: await getPort(),
+    replayPort: await getPort(),
+  }
+}
+
 function requireUncached(filePath) { // 避免 require 使用缓存
   delete require.cache[require.resolve(filePath)]
   return require(filePath)
@@ -241,6 +253,7 @@ function http() {
 }
 
 module.exports = {
+  newMockmPort,
   hasFile,
   startApp,
   http: http(),

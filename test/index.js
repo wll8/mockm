@@ -192,6 +192,27 @@ with (util) {
       }}).catch(res => false)
       assert.ok(testCliTextRes)
     })
+    it(`--cwd`, async () => {
+      const fs = require(`fs`)
+      const tmpdir = `${require(`os`).tmpdir()}/${uuid()}` 
+      fs.mkdirSync(tmpdir)
+      const port = await newMockmPort()
+      const cfg = startApp({run: false})
+      const cmd = `node ${cfg.runPath.replace(`../`, `./`)} --config --cwd=${tmpdir} port=${port.port} testPort=${port.testPort} replayPort=${port.replayPort}`
+      const testCliTextRes = await testCliText({cmd, fn(str) {
+        return (
+          str.match(`:${port.port}/`) 
+          && str.match(`:${port.testPort}/`) 
+          && str.match(`:${port.replayPort}/`)
+        )
+      }}).catch(res => false)
+      const hasFileRes = (
+        hasFile(`${tmpdir}/mm.config.js`)
+        && hasFile(`${tmpdir}/httpData`)
+        && hasFile(`${tmpdir}/apiWeb.json`)
+      )
+      assert.ok(hasFileRes)
+    })
   })
 
 }
