@@ -399,8 +399,8 @@ mm dataDir=./httpData/8082/ port=8082 replayPort=8182  testPort=8282 proxy=http:
 
 如果要使用不同的配置, 那么启动 mm 时传入配置文件路径即可, 然后再从配置文件中编写不同的部分:
 ``` sh
-mm config=./8081.config.js
-mm config=./8082.config.js
+mm --config=./8081.config.js
+mm --config=./8082.config.js
 ```
 
 ## 如何合并多个服务
@@ -424,7 +424,7 @@ module.exports = {
 现在我们只用请求 http://127.0.0.1:9000/ 一个服务, 根据 url 不同, 会自动转发到对应的其他服务. 另外, 虽然他们的 openApi 地址也不同, 但是我们也可以通过配置, 在查看请求记录时自动找到接口对应的 swagger 调试地址.
 
 ## 一份包含大多数选项的配置文件
-这是通过 `mm config` 生成的配置文件, 仅供参考, 包含了 mockm 的大部分选项及在各种业务场景下的示例, 不要被这么多配置吓到, 记住所有选项都可以不需要.
+这是通过 `mm --config` 生成的配置文件, 仅供参考, 包含了 mockm 的大部分选项及在各种业务场景下的示例, 不要被这么多配置吓到, 记住所有选项都可以不需要.
 
 ::: details 点击查看
 @[code](@/../server/example.config.js)

@@ -29,7 +29,7 @@ const {
   checkEnv,
 } = initHandle()
 const configFile = getConfigFile()
-cliArg.config = configFile
+cliArg[`--config`] = configFile
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
 const os = require(`os`)
 const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) // 此文件用于 run.js 与 server.js 共享变量

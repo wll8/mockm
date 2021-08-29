@@ -1,4 +1,5 @@
 const lib = require(`./lib.js`)
+const { print } = require('./log.js')
 const tool = require(`./tool.js`)
 
 function business() { // 与业务相关性的函数
@@ -402,6 +403,18 @@ function business() { // 与业务相关性的函数
 
   }
 
+  /**
+   * 过时的 API 提示
+   * @param {*} param0 
+   * @param {*} param0.type api 类型: cli 命令行 option 选项
+   * @param {*} param0.no 旧API
+   * @param {*} param0.yew 新API
+   * @param {*} param0.v 被删除的版本
+   */
+  function oldAPI({type, no, yes, v}) {
+    type === `cli` && print(tool.cli.colors.red(`API更新: 请将命令行参数 ${no} 替换为 ${yes}, 在 v${v} 版本之后 ${no} 将停止使用!`))
+  }
+
   function initHandle() { // 初始化处理程序
     /**
      * 检查运行环境是否兼容
@@ -417,19 +430,28 @@ function business() { // 与业务相关性的函数
       const cwdConfigPath = `${process.cwd()}/mm.config.js`
       const hasCwdConfig = tool.file.hasFile(cwdConfigPath)
       let res = `${__dirname}/../config.js` // 默认配置文件
-      if((cliArg.config === true) && (hasCwdConfig === false)) { // 如果 config=true 并且当前目录没有配置时, 则生成示例配置并使用
+
+      cliArg[`config`] && (cliArg[`--config`] = cliArg[`config`]) && oldAPI({
+        type: `cli`,
+        no: `config`,
+        yes: `--config`,
+        v: `1.1.26`,
+      });
+      
+      
+      if((cliArg[`--config`] === true) && (hasCwdConfig === false)) { // 如果 config=true 并且当前目录没有配置时, 则生成示例配置并使用
         const example = fs.readFileSync( `${__dirname}/../example.config.js`, `utf8`)
         fs.writeFileSync(cwdConfigPath, example)
         res = cwdConfigPath
-      } else if((cliArg.config === true) && (hasCwdConfig === true)) { // 使用生成的示例配置
+      } else if((cliArg[`--config`] === true) && (hasCwdConfig === true)) { // 使用生成的示例配置
         res = cwdConfigPath
-      } else if(typeof(cliArg.config) === `string`) { // 命令行上指定的 config 文件
-        res = cliArg.config
+      } else if(typeof(cliArg[`--config`]) === `string`) { // 命令行上指定的 config 文件
+        res = cliArg[`--config`]
       } else if(tool.file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
         res = cwdConfigPath
       }
       res = path.normalize(res)
-      cliArg.config = res
+      cliArg[`--config`] = res
       return res
     }
 
