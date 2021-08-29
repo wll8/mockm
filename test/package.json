@@ -12,6 +12,7 @@
   "license": "ISC",
   "devDependencies": {
     "axios": "^0.21.1",
+    "get-port": "^5.1.1",
     "mocha": "^9.0.2",
     "mochawesome": "^6.2.2",
     "shelljs": "^0.8.4",
