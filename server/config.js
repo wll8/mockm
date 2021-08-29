@@ -32,8 +32,8 @@ let cliArg = parseArgv()
 let fileArgFn = () => {}
 if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
   const base64deCode = JSON.parse(Buffer.from(cliArg._base64, 'base64').toString())
-  if (base64deCode.config) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
-    const handlePathRes = handlePathArg(base64deCode.config)
+  if (base64deCode[`--config`]) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
+    const handlePathRes = handlePathArg(base64deCode[`--config`])
     // 避免 node v14 上 config 文件路径相同并访问了不存在的属性而出现循环引用警告
     const fileArg = handlePathRes === __filename ? {} : require(handlePathRes)
     if(typeof(fileArg) === `object`) {
@@ -47,7 +47,7 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
     ...base64deCode,
     ...cliArg,
     // 命令行参数 config = true 时, 视为使用程序预设的路径
-    config: cliArg.config === true ? base64deCode.config : (base64deCode.config || cliArg.config),
+    config: cliArg[`--config`] === true ? base64deCode[`--config`] : (base64deCode[`--config`] || cliArg[`--config`]),
     // 命令行参数 proxy 存在时, 转换为对象, 方便与文件中的 proxy 进行合并
     ...(typeof(cliArg.proxy) === `string` ? {proxy: {"/": cliArg.proxy}} : {}),
   }
