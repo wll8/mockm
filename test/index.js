@@ -170,6 +170,16 @@ with (util) {
 
   })
   describe('命令行', () => {
+    it(`配置文件`, async () => {
+      const cfg = startApp({run: false})
+      const cmd = `node ${cfg.runPath.replace(`../`, `./`)} --config=${uuid(`-`)}`
+      const testCliTextRes = await testCliText({cmd, fn(str) {
+        return (
+          str.match(`Error: Cannot find module`) 
+        )
+      }}).catch(res => false)
+      assert.ok(testCliTextRes)
+    })
     it(`配置端口号`, async () => {
       const cfg = startApp({run: false})
       const cmd = `node ${cfg.runPath.replace(`../`, `./`)} port=9100 testPort=9105 replayPort=9101`

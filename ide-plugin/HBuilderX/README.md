@@ -432,8 +432,8 @@ mm dataDir=./httpData/8082/ port=8082 replayPort=8182  testPort=8282 proxy=http:
 
 如果要使用不同的配置, 那么启动 mm 时传入配置文件路径即可, 然后再从配置文件中编写不同的部分:
 ``` sh
-mm config=./8081.config.js
-mm config=./8082.config.js
+mm --config=./8081.config.js
+mm --config=./8082.config.js
 ```
 
 ## 寄语
