@@ -7,6 +7,16 @@
 :::
 
 ## 2021年08月
+#### v1.1.25-alpha.16
+- feat: 支持生成适合于大多数项目的 mockm 配置
+- feat: 支持命令行参数 `--cwd` 设置程序的工作目录
+- feat: 更新初始化 httpData 时的 gitignore 文件
+  之前是先忽略所有文件再取反, 这可能导致用户在 httpData 目录下创建必要的新文件时, 由于没有手动修改 gitignore 而导致文件未进行版本控制
+- feat: 把命令行参数 `config` 替换为 `--config`
+- fix: 初始化 get-port 后很久才出来远程服务, 这看起来像卡住了
+- fix: 尝试处理 proxy 的 res 覆盖 headers 导致跨域失败
+- feat: config.proxy 快速修改 json response 支持使用函数来自定义逻辑
+
 #### v1.1.25-alpha.15
 - fix: ngrok 强制要求未注册用户使用最新版本
 - feat: 程序的 SIGINT 事件不应显示日志, 容易造成误解

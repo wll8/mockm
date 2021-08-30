@@ -140,6 +140,10 @@ proxy: {
 - [x] fix: 代理整个网站时, 网站中的一些链接无法正常工作
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
 
+## 重构
+- [ ] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
+  - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
+
 ## 更新计划
 - 1.2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
 - 1.2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
