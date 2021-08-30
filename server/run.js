@@ -35,9 +35,11 @@ const {
 } = business
 let config = {}
 const {
+  templateFn,
   configFileFn,
   checkEnv,
 } = initHandle()
+templateFn({cliArg, version: packageJson.version});
 const configFile = configFileFn({cliArg})
 const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
 const os = require(`os`)
@@ -92,6 +94,7 @@ new Promise(async () => { // 启动 server.js
     exec: `node "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
     watch: [configFile],
     stdout: false,
+    cwd: process.cwd(),
   })
   .on('readable', function(arg) { // the `readable` event indicates that data is ready to pick up
     // console.log(`readable`, arg)
