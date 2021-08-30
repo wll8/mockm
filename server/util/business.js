@@ -423,6 +423,62 @@ function business() { // 与业务相关性的函数
       return lib.compareVersions.compare(process.version, `10.12.0`, `>=`)
     }
 
+    function templateFn({cliArg, version}) {
+      if(cliArg[`--template`]) {
+        const path = require(`path`)
+        const cwd = process.cwd()
+        if(tool.file.hasFile(cwd) === false) {
+          require(`fs`).mkdirSync(cwd, { recursive: true })
+        }
+        const copyPath = path.normalize(`${cwd}/mm/`)
+        tool.file.copyFolderSync(path.normalize(`${__dirname}/../example/template/`), copyPath)
+
+        { // 创建 package.json 中的 scripts 和 devDependencies
+          const fs = require(`fs`)
+          const jsonPath = `${process.cwd()}/package.json`
+          const hasJson = tool.file.hasFile(jsonPath)
+          const scripts = `npx mockm --cwd=mm`
+          const devDependencies = version
+          
+          if(
+            hasJson 
+            && require(jsonPath).scripts.mm 
+            && require(jsonPath).devDependencies.mockm
+          ) {
+            // console.log(`无需修改`)
+          } else {
+            hasJson === false && fs.writeFileSync(jsonPath, tool.string.removeLeft(`
+            {
+              "scripts": {
+                "mm": "${scripts}"
+              },
+              "devDependencies": {
+                "mockm": "${devDependencies}"
+              }
+            }
+            `).trim())
+            let packageText = fs.readFileSync(jsonPath, `utf8`)
+            const packageJson = JSON.parse(packageText)
+        
+            packageJson.scripts = packageJson.scripts || {}
+            packageJson.devDependencies = packageJson.devDependencies || {}
+            packageJson.scripts.mm = packageJson.scripts.mm || scripts
+            packageJson.devDependencies.mockm = packageJson.devDependencies.mockm || devDependencies
+        
+            const split = (packageText.match(/[\t ]+/) || [`  `])[0] // 获取缩进风格
+            packageText = JSON.stringify(packageJson, null, split)
+            fs.writeFileSync(jsonPath, packageText)
+          }
+      
+        }
+        
+        process.chdir(copyPath)
+
+        print(`模板 ${copyPath} 已创建成功!`)
+        print(`使用命令 npm run mm`)
+      }
+    }
+
     function configFileFn({cliArg}) {
       const path = require(`path`)
       const fs = require(`fs`)
@@ -623,6 +679,7 @@ function business() { // 与业务相关性的函数
     }
 
     return {
+      templateFn,
       checkEnv,
       wrapApiData,
       configFileFn,

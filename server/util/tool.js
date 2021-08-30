@@ -638,6 +638,25 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function file() { // 文件相关
     /**
+     * 递归复制
+     * @param {*} from 
+     * @param {*} to 
+     */
+    function copyFolderSync(from, to) {
+      const fs = require(`fs`)
+      const path = require(`path`)
+
+      hasFile(to) === false && fs.mkdirSync(to);
+      fs.readdirSync(from).forEach(element => {
+        if (fs.lstatSync(path.join(from, element)).isFile()) {
+          hasFile(path.join(to, element)) === false && fs.copyFileSync(path.join(from, element), path.join(to, element))
+        } else {
+          copyFolderSync(path.join(from, element), path.join(to, element))
+        }
+      })
+    }
+    
+    /**
      * 创建或删除一组文件
      * @param objOrArr {object|number} 要操作的内容
      * @param action {stirng} 操作方式 create remove
@@ -949,6 +968,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      copyFolderSync,
       filesCreateOrRemove,
       createNewFile,
       checkChangeRestart,
