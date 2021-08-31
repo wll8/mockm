@@ -4,7 +4,7 @@ const del = require(`del`)
 const uglify = require(`gulp-uglify-es`).default
 const babel = require('gulp-babel')
 
-gulp.task(`clear`, () => { // 复制 server 中的文件, 例如 package.json
+gulp.task(`clear`, () => { // 清理发布目录
   return del([`../dist/**`, `!../dist`], { force: true }) // 清除目录
 })
 
@@ -42,7 +42,7 @@ gulp.task(`pushDoc`, (cb) => { // 发布文档
   cb()
 })
 
-gulp.task(`uglify`, () => {
+gulp.task(`uglify`, () => { // 代码压缩, 处理兼容性
   // uglify-es - https://github.com/mishoo/UglifyJS/tree/harmony
   // 示例配置, 不进行压缩 // todo 此行配置在 mac 上不生效! 所以需要在下面的 babel 配置中再次添加.
   const ignore = [
@@ -85,7 +85,7 @@ gulp.task(`uglify`, () => {
     .pipe(gulp.dest(`../dist/package`))
 })
 
-gulp.task(`tar`, () => {
+gulp.task(`tar`, () => { // 压缩相关文件为发布包 .tgz
   const tar = require(`tar`)
   const package = require(`../dist/package/package.json`)
   const filePath = `../dist/${package.name}-${package.version}.tgz`
