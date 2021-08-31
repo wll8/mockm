@@ -44,16 +44,21 @@ gulp.task(`pushDoc`, (cb) => { // 发布文档
 
 gulp.task(`uglify`, () => {
   // uglify-es - https://github.com/mishoo/UglifyJS/tree/harmony
-  return gulp.src([
-    `../server/**/*.js`,
+  // 示例配置, 不进行压缩 // todo 此行配置在 mac 上不生效! 所以需要在下面的 babel 配置中再次添加.
+  const ignore = [
     '!../server/httpData/**',
     '!../server/page/**',
     '!../server/node_modules/**',
-    '!../server/example.config.js', // 示例配置, 不进行压缩 // todo 此行配置在 mac 上不生效! 所以需要在下面的 babel 配置中再次添加.
+    '!../server/example/**',
+    '!../server/example.config.js',
+  ]
+  return gulp.src([
+    `../server/**/*.js`,
+    ...ignore,
   ])
     .pipe(babel({
       "ignore" : [
-        `../server/example.config.js`,
+        ...ignore,
       ],
       "presets": [
         [
