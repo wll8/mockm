@@ -7,12 +7,23 @@
       word-break: break-all;
     }
     .operation {
+      svg {
+        cursor: pointer;
+      }
       &>* {
         vertical-align: middle;
       }
     }
     .apiType:not(.apiWeb) {
-      display: none;
+      .btn {
+        &.delete,
+        &.switch {
+          pointer-events: none;
+          opacity: 0.5;
+          filter: alpha(opacity=50);
+          cursor: default;
+        }
+      }
     }
   }
 }
