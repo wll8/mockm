@@ -3,7 +3,7 @@
 
 ## 安装工具到项目中
 ``` sh
-cnpm i mockm -D
+npm i mockm -D
 ```
 
 运行上面的命令之后 mockm 会保存到 package.json 中, 这样初始化项目时就会自动安装.
