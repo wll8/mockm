@@ -1,4 +1,11 @@
-function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
+/**
+ * 包裹 api 的返回值
+ * @param {*} param0
+ * @param {object} param0.data - 原始数据
+ * @param {number|string} [param0.code=200] - http状态码
+ * @returns
+ */
+function wrapApiData({data, code = 200}) {
   code = String(code)
   return {
     code,

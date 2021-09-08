@@ -1,11 +1,11 @@
+const api = require(`./api/index.js`)
+const { wrapApiData } = require(`./util.js`)
+
 /**
  * 配置说明请参考文档: 
  * https://hongqiye.com/doc/mockm/config/option.html
+ * @type {import('mockm/@types/config').Config}
  */
-
-const api = require(`./api/index.js`)
-const {wrapApiData} = require(`./util.js`)
-
 module.exports = util => {
   return {
     guard: false,
@@ -19,7 +19,7 @@ module.exports = util => {
       '/anything/intercept': [`origin`, `127.0.0.1`],
     },
     api: {
-      ...api(util),
+      ...api(util).api,
       '/my/api': {
         msg: `我的 api`
       },
