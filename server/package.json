@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.1.25-alpha.16",
+  "version": "1.1.25-alpha.17",
   "description": "模拟接口服务器, 前后端无痛并行开发.",
   "main": "server.js",
   "bin": {
@@ -48,7 +48,8 @@
     "ngrok": "3.4.0"
   },
   "scripts": {
-    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" node run.js dev\"",
+    "dts": "npx shx mkdir -p ./node_modules/mockm & npx shx cp -r ./@types ./node_modules/mockm/",
+    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9000 & node run.js dev\"",
     "serve": "node run.js dev",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"

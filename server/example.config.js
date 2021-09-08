@@ -1,5 +1,6 @@
 /**
  * 文档: https://www.hongqiye.com/doc/mockm
+ * @type {import('mockm/@types/config').Config}
  */
 
 module.exports = util => {
@@ -8,13 +9,13 @@ module.exports = util => {
     toolObj,
   } = util
   return {
-    disable: false, // 是否禁用所有自定义 api, 直接通往目标服务器
-    osIp: `127.0.0.1`, // 调试IP
-    port: 9000, // 本地端口
-    testPort: 9005, // 调试端口
-    replayPort: 9001, // 重放地址, 使用重放地址进行请求时, 从已保存的请求历史中获取信息, 而不是从目标服务器获取
-    replayProxy: true, // 记录中不存在所需请求时, 是否转发请求到 proxy
-    replayProxyFind (item) { // 自定义请求重放时的逻辑
+    disable: false,
+    osIp: `127.0.0.1`,
+    port: 9000,
+    testPort: 9005,
+    replayPort: 9001,
+    replayProxy: true,
+    replayProxyFind (item) {
       const bodyPath = item.data.res.bodyPath
       if(bodyPath && bodyPath.match(/\.json$/)) {
         const bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
@@ -24,10 +25,10 @@ module.exports = util => {
         return false
       }
     },
-    hostMode: false, // host 模式
-    updateToken: true, // 从 req 中获取 token 然后替换到重发请求的 authorization 上
-    apiInHeader: true, // 在 header 中添加调试 api 地址, true: 是; false, 否; string: 以 string 为 header key
-    // proxy: 'http://httpbin.org/', // 后台服务器的的 api
+    hostMode: false,
+    updateToken: true,
+    apiInHeader: true,
+    // proxy: 'http://httpbin.org/',
     proxy: { // string | object
       '/': `http://www.httpbin.org/`,
       // '/get': [`origin`, `127.0.0.1`], // 快速修改 json 格式的 body
@@ -70,13 +71,13 @@ module.exports = util => {
         return json.toLowerCase() // get
       }],
     },
-    remote: false, // false | object, 为 false 是不需要外网映射, 为 object 时是对每个服务端口的配置 `{testPort: { proto: `http` }}` , 参考 https://github.com/bubenshchykov/remote
-    openApi: `http://httpbin.org/spec.json`, // 关联的 openApi 数据文件
-    cors: true, // 是否允许通过跨域
-    dataDir: './httpData/', // 数据保存目录
-    dbJsonPath: './httpData/db.json', // json 数据生成的保存位置, 默认为 dataDir 下的 db.json
-    dbCover: false, // 每次启动总是生成新的 db
-    db () { // 供 json-server 使用的 json 数据, function || object
+    remote: false,
+    openApi: `http://httpbin.org/spec.json`,
+    cors: true,
+    dataDir: './httpData/',
+    dbJsonPath: './httpData/db.json',
+    dbCover: false,
+    db () {
       const data = mockjs.mock({
         'books|40-60': [
           {
@@ -95,13 +96,11 @@ module.exports = util => {
       return data
     },
     route: {
-      // 路由映射, 作用于 config.api 及 config.db 产生的 api
-      // 参考: https://github.com/typicode/json-server#add-custom-routes
-      '/db/api/*': '/$1', // /api/a => /a
+      '/db/api/*': '/$1',
     },
-    apiWeb: './apiWeb.json', // 从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权
-    apiWebWrap: wrapApiData, // boolean | function({data, code}) 处理从 web 页面创建的接口数据
-    api (util) { // 自建 api, 可以是 function 或 object, 为 function 时, 可以获取提供的常用 util
+    apiWeb: './apiWeb.json',
+    apiWebWrap: wrapApiData,
+    api (util) {
       const { run } = util
       return { // api 拦截器
         '/' (req, res, next) { // 在所有自定义 api 之前添加中间件
@@ -120,8 +119,8 @@ module.exports = util => {
             res.json(data)
           })
         },
-        'get /ip': {res: `127.0.0.1`}, // 模拟原有接口
-        'get /name': {name: mockjs.mock(`@cname`)}, // 使用 mock 功能
+        'get /ip': {res: `127.0.0.1`},
+        'get /name': {name: mockjs.mock(`@cname`)},
         'get /file' (req, res, next) { // 发送文件
           res.sendFile(`${__dirname}/readme.md`)
         },
@@ -172,23 +171,21 @@ module.exports = util => {
         },
       }
     },
-    // 处理重放请求出错时会进入这个方法
     resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
-    // 由 db 生成的接口的最后一个拦截器, 可以用来构建项目所需的数据结构
     resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
-    watch: [], // 指定一些目录或文件路径, 当它们被修改时自动重载服务. 支持绝对路径和相对于配置文件的路径.
-    clearHistory: false, // 启动时清理冗余的请求记录
-    guard: false, // 当程序异常退出时, 是否自动重启
-    backOpenApi: 10, // 每隔多少分钟检测 openApi 更新记录
-    static: [], // 配置静态文件
+    watch: [],
+    clearHistory: false,
+    guard: false,
+    backOpenApi: 10,
+    static: [],
   }
 }
 
-function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
+function wrapApiData({data, code = 200}) {
   code = String(code)
   return {
     code,
-    success: Boolean(code.match(/^[2]/)), // 如果状态码以2开头则为 true
+    success: Boolean(code.match(/^[2]/)),
     data,
   }
 }
