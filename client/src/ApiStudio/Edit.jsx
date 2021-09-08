@@ -9,6 +9,7 @@ import * as ReactRouterDOM from 'react-router-dom'
 import common from '../common.jsx'
 
 const {
+  tryApi,
   getRestcLink,
   queryParams,
   removeEmpty,
@@ -323,40 +324,6 @@ function Edit() {
       req: state.data?.[state.hand.method]?.parameters?.[state.hand.parameters] || {},
     }[state.exampleType || `res`]
 
-    async function tryApi() { // 生成请求示例参数, 并携带参数打开 restc 链接
-      const reqData = state.data[state.hand.method].parameters || {}
-      await Promise.all( // 把每种数据 table 格式转换为示例数据
-        Object.keys(reqData).map(key => {
-          const {table = [], example: {rule, type = `object`} = {}} = reqData[key]
-          return new Promise((resove, reject) => {
-            http.post(`${cfg.baseURL}/api/listToData/`, {
-              table,
-              rule,
-              type,
-            }).then(res => {
-              reqData[key].data = res
-              resove(res)
-            })
-          })
-        })
-      )
-      const {
-        query: {data: query}  = {},
-        "form/body": {data: body} = {},
-        header: {data: header} = {},
-        path: {data: path} = {},
-      } = reqData
-      const data = {
-        method,
-        query,
-        body,
-        path,
-        header,
-        url: `http://${window.serverConfig.osIp}:${window.serverConfig.port}${state.path}`,
-      }
-      window.open(getRestcLink(data))
-    }
-
     return (
       <div className="ApiStudioEdit">
         {
@@ -396,7 +363,10 @@ function Edit() {
                     overlay={(
                       <Menu>
                         <Menu.Item key="save" disabled={Boolean(state.path) === false} onClick={saveApiData}>save</Menu.Item>
-                        <Menu.Item key="try" onClick={() => tryApi()}>try</Menu.Item>
+                        <Menu.Item key="try" onClick={() => tryApi({
+                          apiPath: state.path,
+                          method: state.hand.method,
+                        })}>try</Menu.Item>
                         {/* <Menu.Item>record</Menu.Item>
                         <Menu.Item>swagger</Menu.Item>
                         <Menu.Item>capture</Menu.Item>
