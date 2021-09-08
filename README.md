@@ -1,6 +1,6 @@
 # mockm
 <p align="center">
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Downloads"></a>
   <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm" alt="Version"></a>
   <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm" alt="License"></a>
 <p>
@@ -14,7 +14,7 @@
 mockm 是由纯 node/js 实现的, 这意味着:
   - 对前端极为友好;
   - 可以使用 nodejs 的所有生态工具;
-  - 不用担心浏览器兼容性;
+  - 不用担心浏览器兼容性, h5/小程序/app 都能用;
 
 它实际是一个后端接口服务, 模拟更为全面, 例如:
   - 能在浏览器控制台看到网络请求;
@@ -32,81 +32,17 @@ mockm 是由纯 node/js 实现的, 这意味着:
 node -v
 
 # 安装
-npm i -g mockm
+npm i -D mockm
 
-# 运行
-mockm
+# 创建并使用模板运行
+npx mockm --template 
 
 # 浏览器打开 http://127.0.0.1:9005
 ```
 
-mockm 可以读取运行目录下的文件 `mm.config.js` 作为配置, 以下是示例内容.
-
-``` js
-module.exports = {
-  proxy: `https://httpbin.org/`, // 代理后端的接口, 如果没有可以不填
-
-  api: {  // 自己编写的接口
-
-    // 当为基本数据类型时, 直接返回数据, 这个接口返回 {"msg":"ok"}
-    '/api/1': {msg: `ok`},
-
-    // 也可以像 express 一样返回数据
-    '/api/2' (req, res) {
-      res.send({msg: `ok`})
-    },
-
-    // 一个只能使用 post 方法访问的接口
-    'post /api/3': {msg: `ok`},
-
-    // 一个 websocket 接口, 会发送收到的消息
-    'ws /api/4' (ws, req) {
-      ws.on('message', (msg) => ws.send(msg))
-    }
-
-    // 一个下载文件的接口
-    '/file' (req, res) {
-      res.download(`文件路径`, `文件名`)
-    },
-
-    // 获取动态的接口路径的参数 code
-    '/status/:code' (req, res) {
-      res.json({statusCode: req.params.code})
-    },
-
-    //... 更多功能和示例请参考文档
-  },
-}
-```
-
-例如访问 `http://127.0.0.1:9000/api/1` 即可看到返回结果 `{"msg":"ok"}` .
+以上命令会生成常用配置, 修改 `mm.config.js` 尽情尝试吧.
 
 也可以[通过 UI 界面创建接口](https://hongqiye.com/doc/mockm/use/webui.html#%E6%8E%A5%E5%8F%A3%E7%BC%96%E8%BE%91).
-
-## 常用选项 options
-**remote**
-是否自动映射服务到外网.
-
-**guard**
-是否异常崩溃后自动重启.
-
-**watch**
-指定一些目录或文件路径, 当它们被修改时自动重载服务.
-
-**proxy**
-要代理的后端接口地址.
-
-**api**
-自定义接口, 支持完整的编程逻辑, 各种便捷写法, websocket, 或中间件.
-
-**static**
-配置静态文件目录, 支持 history 模式.
-
-**db**
-自动生成 Restful api.
-
-
-更多选项请参考文档.
 
 ## 区别 Difference
 
@@ -124,7 +60,7 @@ module.exports = {
 
 你也可以 [添加官方答疑QQ群62935222](https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi) 或作者微信 `mypastcn`.
 
-## 鸣谢
+## 鸣谢 Thanks
 mockm 的核心功能是由这些工具建立起来的, 感谢每一个开源作者的辛劳付出.
 - [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware)
 - [json-server](https://github.com/typicode/json-server)

@@ -1,8 +1,8 @@
 # 说明
 
-此目录是运行命令 `mm --template` 之后自动生成的适合于大多数项目的 mockm 初始化配置, 该命令做了以下事情:
+此目录是运行命令 `mm --template` 之后生成的 mockm 常用配置, 该命令做了以下事情:
 
-自动在运行目录的 package.json 的 scripts 中添加命令 `"mm": "cd mm && npx mockm"`, 如果没有 package.json 文件, 会自动创建.
+在运行目录的 package.json 的 scripts 中添加命令 `"mm": "npx mockm --cwd=mm"`, 如果没有 package.json 文件, 会自动创建.
 
 创建名为 mm 的目录, 文件说明如下, 如果存在则不覆盖:
 

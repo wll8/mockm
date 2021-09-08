@@ -7,7 +7,7 @@
 node -v
 
 # 安装
-cnpm i -g mockm
+npm i -g mockm
 
 # 运行
 mockm
@@ -21,7 +21,7 @@ mockm
 
 ``` js
 module.exports = {
-  // proxy: `https://example.com/`, // 代理后端的接口, 如果没有可不填
+  // proxy: `https://httpbin.org/`, // 代理后端的接口, 如果没有可不填
 
   api: {  // 自己编写的接口
 

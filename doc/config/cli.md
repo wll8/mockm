@@ -7,7 +7,7 @@
 
 示例:
 ``` sh
-mm proxy=https://example.com/
+mm proxy=https://httpbin.org/
 ```
 
 上面的参数对应的选项是 [config.proxy](../config/option.md#config-proxy):
@@ -16,7 +16,7 @@ mm proxy=https://example.com/
 
 ``` js
 module.exports = {
-  proxy: `https://example.com/`,
+  proxy: `https://httpbin.org/`,
 }
 ```
 
@@ -28,7 +28,7 @@ module.exports = {
 设置程序的工作目录, 默认为当前运行命令的目录, 支持相对路径和绝对路径.
 
 ### --template
-生成适合于大多数项目的 mockm 配置, 此操作在运行目录下做了以下几件事:
+生成常用 mockm 配置, 此操作在运行目录下做了以下几件事:
 - 在 package.json 中添加命令 `"mm": "npx mockm --cwd=mm"` 和自身版本的开发依赖
 - 创建名为 mm 的目录并在其中放置 mockm 配置文件
 

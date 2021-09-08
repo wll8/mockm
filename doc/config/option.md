@@ -281,7 +281,7 @@ undefined
 
 ```js {3}
 proxy: {
-  '/': `https://example.com/`,
+  '/': `https://httpbin.org/`,
   '/get': `https://www.httpbin.org/ip`,
 },
 ```
@@ -314,7 +314,7 @@ proxy: {
 类型: string | array | object
 默认: `http://httpbin.org/spec.json`
 
-关联的 openApi 数据文件, 支持 yaml/json 格式, 会自动根据当前的 api 匹配对应的 swagger 文档. 支持多个 api 源.
+关联的 openApi 数据文件, 支持 json 格式, 会自动根据当前的 api 匹配对应的 swagger 文档. 支持多个 api 源.
 
 - string 直接使用一个 openApi
 - array api 与每项相比, 取匹配度最高的, 都不匹配时取第一条
