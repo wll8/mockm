@@ -13,6 +13,7 @@ const {
   cfg,
 } = common
 const {
+  tryApi,
   getSelectionText,
   getMethodUrl,
   wordToUpperCase,
@@ -132,6 +133,7 @@ const ApiList = (() => {
           return (
             <div className={`${type} apiType operation`}>
               <Popconfirm
+                className="btn delete"
                 title="确定删除此API?"
                 onConfirm={deleteFn}
                 okText="是"
@@ -141,12 +143,18 @@ const ApiList = (() => {
               </Popconfirm>
               <Divider type="vertical" />
               <Switch
+                className="btn switch"
                 size="small"
                 loading={state.loading}
                 disabled={state.apiListData.disable.includes(`/`)}
                 checked={state.apiListData.disable.includes(api) === false}
                 onChange={disableFn}
               />
+              <Divider type="vertical" />
+              <icons.PlayCircleOutlined className="btn play" onClick={() => tryApi({
+                apiPath: path,
+                method: method,
+              })} />
             </div>
           )
         },

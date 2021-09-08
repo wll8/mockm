@@ -1,4 +1,9 @@
 import React from 'react'
+import common from './common.jsx'
+const {
+  http,
+  cfg,
+} = common
 
 // headers 不支持中文字符的 => Uncaught (in promise) TypeError: Failed to execute 'setRequestHeader' on 'XMLHttpRequest': Value is not a valid ByteString.
 
@@ -538,8 +543,52 @@ function setPathVal(path, obj) {
   return origin + path
 }
 
+/**
+ * 根据 api 生成请求示例参数, 并携带参数打开 restc 链接
+ * @param {*} param0 
+ * @param {string} param0.apiPath - api 的路径
+ * @param {string} param0.method - 请求方法
+ */
+async function tryApi({apiPath, method} = {}) {
+  const httpData = await http.get(`${cfg.baseURL}/api/studio/`, {params: {
+    path: apiPath
+  }})
+  const reqData = httpData?.[method]?.parameters || {}
+  await Promise.all( // 把每种数据 table 格式转换为示例数据
+    Object.keys(reqData).map(key => {
+      const {table = [], example: {rule, type = `object`} = {}} = reqData[key]
+      return new Promise((resove, reject) => {
+        http.post(`${cfg.baseURL}/api/listToData/`, {
+          table,
+          rule,
+          type,
+        }).then(res => {
+          reqData[key].data = res
+          resove(res)
+        })
+      })
+    })
+  )
+  const {
+    query: {data: query}  = {},
+    "form/body": {data: body} = {},
+    header: {data: header} = {},
+    path: {data: path} = {},
+  } = reqData
+  const data = {
+    method,
+    query,
+    body,
+    path,
+    header,
+    url: `http://${window.serverConfig.osIp}:${window.serverConfig.port}${apiPath}`,
+  }
+  window.open(getRestcLink(data))
+}
+
 // eslint-disable-next-line
 export default  {
+  tryApi,
   isIp4InPrivateNet,
   setPathVal,
   isType,
