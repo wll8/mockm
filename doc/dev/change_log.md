@@ -8,7 +8,7 @@
 
 ## 2021年08月
 #### v1.1.25-alpha.16
-- feat: 支持生成适合于大多数项目的 mockm 配置
+- feat: 支持命令行参数 `--template` 生成常用 mockm 配置
 - feat: 支持命令行参数 `--cwd` 设置程序的工作目录
 - feat: 更新初始化 httpData 时的 gitignore 文件
   之前是先忽略所有文件再取反, 这可能导致用户在 httpData 目录下创建必要的新文件时, 由于没有手动修改 gitignore 而导致文件未进行版本控制

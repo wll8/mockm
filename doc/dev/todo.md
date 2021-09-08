@@ -5,6 +5,7 @@
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
 - [x] feat: 添加配置文件自动提示功能
+- [ ] feat: mockjs 生成多条数据例如数组时, 应在函数中能知道当前是第几次调用, 或者添加 @index 表示当前索引
 - [x] feat: 把命令行参数 `config` 替换为 `--config`, 期望双横线开关的参数都代表是仅命令行可用的参数
 - [x] feat: config.proxy 支持函数, 自定义 response 修改过程, 返回响应值
 - [x] feat: 程序的 SIGINT 事件不应显示日志, 容易造成误解
@@ -146,6 +147,7 @@ proxy: {
   - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
 
 ## 更新计划
+- 1.2.x: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
 - 1.2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
 - 1.2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
 - 1.2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用

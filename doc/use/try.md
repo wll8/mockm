@@ -43,7 +43,7 @@ npm i -g mockm --registry=https://registry.npm.taobao.org
 
 你有几种选择:
 1. 提高用户权限, 重新安装
-2. 使用 `npm i -S mockm` 安装到局部, 再使用 `npx mm` 运行.
+2. 使用 `npm i -D mockm` 安装到局部, 再使用 `npx mm` 运行.
 
 **端口被占用**
 - 关闭占用端口的程序, 再重新运行命令.

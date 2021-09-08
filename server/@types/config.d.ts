@@ -164,7 +164,7 @@ interface ConfigObj {
   remote: boolean,
 
   /**
-   * 关联的 openApi 数据文件, 支持 yaml/json 格式, 会自动根据当前的 api 匹配对应的 swagger 文档. 支持多个 api 源.
+   * 关联的 openApi 数据文件, 支持 json 格式, 会自动根据当前的 api 匹配对应的 swagger 文档. 支持多个 api 源.
    * @default
    * `http://httpbin.org/spec.json`
    */
