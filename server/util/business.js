@@ -442,8 +442,8 @@ function business() { // 与业务相关性的函数
           
           if(
             hasJson 
-            && require(jsonPath).scripts.mm 
-            && require(jsonPath).devDependencies.mockm
+            && (require(jsonPath).scripts || {}).mm 
+            && (require(jsonPath).devDependencies || {}).mockm
           ) {
             // console.log(`无需修改`)
           } else {
