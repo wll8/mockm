@@ -1208,10 +1208,12 @@ function business() { // 与业务相关性的函数
      */
     function showLocalInfo({store, config}) {
       const msg = tool.string.removeLeft(`
+        当前配置:
+        ${config.config}
+      
         本地服务信息:
-        port: ${`http://${config.osIp}:${config.port}/`}
-        replayPort: ${`http://${config.osIp}:${config.replayPort}/`}
-        testPort: ${`http://${config.osIp}:${config.testPort}/`}
+        接口转发: ${`http://${config.osIp}:${config.port}/ => ${config._proxyTargetInfo.origin}`}
+        接口列表: ${`http://${config.osIp}:${config.testPort}/#/apiStudio/`}
       `)
       console.log(tool.cli.colors.green(msg))
     }
@@ -1241,9 +1243,8 @@ function business() { // 与业务相关性的函数
       console.log(`远程服务加载完成.`)
       const msg = tool.string.removeLeft(`
         远程服务信息:
-        port: ${store.get(`note.remote.port`) || ``}
-        replayPort: ${store.get(`note.remote.replayPort`) || ``}
-        testPort: ${store.get(`note.remote.testPort`) || ``}
+        接口转发: ${store.get(`note.remote.port`) || ``} => http://${config.osIp}:${config.port}/
+        接口列表: ${store.get(`note.remote.testPort`) || ``}/#/apiStudio/ => http://${config.osIp}:${config.testPort}/#/apiStudio/
       `)
       console.log(tool.cli.colors.green(msg))
     }
