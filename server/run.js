@@ -117,7 +117,7 @@ new Promise(async () => { // 启动 server.js
     // arg null 异常退出, 例如语法错误, 端口占用, 运行错误
     // arg SIGUSR2 正常退出, 例如修改文件
     // arg undefined 用户退出, 例如 ctrl+c
-    if(log.match(/Error:/)) { // 检测到错误日志时重启
+    if(log.match(/killProcess:/)) { // 检测到错误日志时重启
       restart()
       if(config.dataDir) { // 保存错误日志
         const os = require(`os`)
