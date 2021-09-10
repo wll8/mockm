@@ -51,7 +51,7 @@ gulp.task(`uglify`, () => { // 代码压缩, 处理兼容性
     '!../server/page/**',
     '!../server/node_modules/**',
     '!../server/example/**',
-    '!../server/example.config.js',
+    '!../server/example/full.mm.config.js',
   ]
   return gulp.src([
     `../server/**/*.js`,
