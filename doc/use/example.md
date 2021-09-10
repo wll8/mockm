@@ -427,5 +427,5 @@ module.exports = {
 这是通过 `mm --config` 生成的配置文件, 仅供参考, 包含了 mockm 的大部分选项及在各种业务场景下的示例, 不要被这么多配置吓到, 记住所有选项都可以不需要.
 
 ::: details 点击查看
-@[code](@/../server/example.config.js)
+@[code](@/../server/example/full.mm.config.js)
 :::
