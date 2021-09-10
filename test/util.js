@@ -14,7 +14,6 @@ process.on(`unhandledRejection`, killProcess)
 
 const fs = require('fs')
 const os = require('os')
-const assert = require('assert')
 const shelljs = require('shelljs')
 const isWin = os.type() === 'Windows_NT'
 const child_process = require('child_process')
@@ -106,7 +105,12 @@ async function newMockmPort() {
   }
 }
 
-function requireUncached(filePath) { // 避免 require 使用缓存
+/**
+ * 避免 require 使用缓存
+ * @param {*} filePath 
+ * @returns 
+ */
+function requireUncached(filePath) {
   delete require.cache[require.resolve(filePath)]
   return require(filePath)
 }
@@ -202,7 +206,12 @@ function asyncTosync (fn) {
   }
 }
 
-function hasFile(filePath) { // 判断文件或目录是否存在
+/**
+ * 判断文件或目录是否存在
+ * @param {*} filePath 
+ * @returns 
+ */
+function hasFile(filePath) {
   const fs = require(`fs`)
   return fs.existsSync(filePath)
 }
@@ -304,7 +313,6 @@ module.exports = {
   allTestAfter,
   allTestBefore,
   fs,
-  assert,
   shelljs,
   isWin,
   execSync,
