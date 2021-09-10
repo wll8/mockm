@@ -4,14 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:dev": "cd ../ && cross-env testEnv=dev mocha -R mochawesome -t 0 --ignore test/util.js --reporter-options reportDir=test/res,reportFilename=index",
-    "test:build": "cd ../ && cross-env testEnv=build mocha -R mochawesome -t 0 --ignore test/util.js --reporter-options reportDir=test/res,reportFilename=index"
+    "test:dev": "cross-env testEnv=dev mocha ./*.test.js --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index",
+    "test:build": "cross-env testEnv=build mocha ./*.test.js --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "axios": "^0.21.1",
+    "cross-env": "^7.0.3",
     "get-port": "^5.1.1",
     "mocha": "^9.0.2",
     "mochawesome": "^6.2.2",

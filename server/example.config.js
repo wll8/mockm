@@ -122,7 +122,7 @@ module.exports = util => {
         'get /ip': {res: `127.0.0.1`},
         'get /name': {name: mockjs.mock(`@cname`)},
         'get /file' (req, res, next) { // 发送文件
-          res.sendFile(`${__dirname}/readme.md`)
+          res.sendFile(__filename)
         },
         'post /status/:code' (req, res, next) { // 获取 url 上的 params, query 以及 body 参数
           const {params, query, body} = req
