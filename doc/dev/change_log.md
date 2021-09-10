@@ -6,6 +6,20 @@
 - 使用 `npm i -g mockm@版本号` 例如 `mockm@1.1.3` 回退到指定版本.
 :::
 
+## 2021年09月
+#### v1.1.25-alpha.17
+- test
+  - refactor: 去除 with 语法
+  - refactor: 重构测试脚本, 使其更易读
+- server
+  - feat: 更新启动时的输出信息
+  - feat: 更新崩溃信息检测方式, 增加崩溃重启概率
+  - fix: 避免初始化模板时 package.json 没有要处理的 key 时出现错误
+  - feat: 支持引用声明文件来实现自动提示功能
+  - feat: 更新了模板文件以支持自动提示
+- client
+  - feat: 在 api 列表页支持调试接口
+
 ## 2021年08月
 #### v1.1.25-alpha.16
 - feat: 支持命令行参数 `--template` 生成常用 mockm 配置
