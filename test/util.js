@@ -1,14 +1,17 @@
 process.env.LANG = 'en_US.UTF-8' // 统一语言环境, 以避免产生不同结果
-process.on('uncaughtException', err => {
-  console.log(err)
-  allTestAfter()
+function killProcess(...arg) {
+  console.log(`killProcess:`, ...arg)
+  if(arg[0] !== `SIGINT`) {
+    console.log('中途退出测试')
+    allTestAfter()
+  }
   process.exit()
-})
-process.on('SIGINT', err => {
-  console.log('中途退出测试')
-  allTestAfter()
-  process.exit()
-})
+}
+process.on(`SIGTERM`, killProcess)
+process.on(`SIGINT`, killProcess)
+process.on(`uncaughtException`, killProcess)
+process.on(`unhandledRejection`, killProcess)
+
 const fs = require('fs')
 const os = require('os')
 const assert = require('assert')
@@ -16,6 +19,50 @@ const shelljs = require('shelljs')
 const isWin = os.type() === 'Windows_NT'
 const child_process = require('child_process')
 const packgeAdmin = shelljs.which('cnpm') ? 'cnpm' : 'npm'
+
+/**
+ * 生成 mockm 的运行命令, 端口默认随机, 可以传入对象参数覆盖
+ */
+async function craeteMockmCmdInfo(arg = {}, runPath) {
+  const port = await newMockmPort()
+  const res = {
+    build: {
+      runPath: pkgPath(runPath || `../dist/package/run.js`),
+      arg: {
+        '--config': true,
+        '--cwd': getTempDir(),
+        port: port.port,
+        testPort: port.testPort,
+        replayPort: port.replayPort,
+        ...arg,
+      },
+    },
+    dev: {
+      runPath: pkgPath(runPath || `../server/run.js`),
+      arg: {
+        '--config': true,
+        '--cwd': getTempDir(),
+        port: port.port,
+        testPort: port.testPort,
+        replayPort: port.replayPort,
+        ...arg,
+      },
+    },
+  }[process.env.testEnv]
+  const argCmd = Object.entries(res.arg).reduce((acc, [key, val]) => {
+    return `${acc} ${key}=${val === undefined ? true : val}`
+  } , ``)
+  res.fullCmd = `node ${res.runPath} ${argCmd}`
+  res.argCmd = argCmd
+  res.arr = [res.runPath].concat(argCmd.split(/\s+/))
+  return res
+}
+
+function getTempDir() {
+  const dir = `${require(`os`).tmpdir()}/${uuid()}`.replace(/\\/g, `/`)
+  shelljs.mkdir(`-p`, dir)
+  return dir
+}
 
 function obj2str(obj) {
   return JSON.stringify(obj, null, 2)
@@ -78,7 +125,7 @@ function clearRequireCache() { // 清除 require 缓存, 使用场景: 当 requi
   Object.keys(require.cache).forEach(key => delete require.cache[key])
 }
 
-function absPath(file = '') { return require('path').resolve(__dirname, file) }
+function pkgPath(file = '') { return require('path').resolve(`${__dirname}`, file) }
 
 /**
  * 创建或删除一组文件
@@ -118,7 +165,7 @@ function asyncTosync (fn) {
   return (...args) => {
     const { writeFileSync, readFileSync } = require(`fs`)
     const fnStr = fn.toString()
-    const tempDir = (__dirname || require(`os`).tmpdir()).replace(/\\/g, `/`)
+    const tempDir = (__dirname || getTempDir()).replace(/\\/g, `/`)
     const fileObj = {
       fnFile: createNewFile(tempDir, `fn.js`),
       resFile: createNewFile(tempDir, `res.log`),
@@ -194,28 +241,20 @@ function testCliText({cmd = str, timeout = 3000, fn = (str) => str, } = {}) {
   })
 }
 
-function startApp({runPath, arg, run = true} = {}) {
+async function startApp({runPath, arg} = {}) {
   global.cmdRef = {
     out: ``,
   }
 
   const { spawn } = require('child_process');
-  const cfg = ({
-    build: {
-      runPath: runPath || `../dist/package/run.js`,
-      arg: arg || [`--config`],
-    },
-    dev: {
-      runPath: runPath || `../server/run.js`,
-      arg: arg || [],
-    },
-  })[process.env.testEnv]
-
-  if(run === false) {
-    return cfg
-  }
+  const craeteMockmCmdInfoRes = await craeteMockmCmdInfo({
+    port: 9000,
+    testPort: 9005,
+    replayPort: 9001,
+    ...arg,
+  }, runPath)
   
-  const cmdRef = spawn('node', [absPath(cfg.runPath), ...cfg.arg]);
+  const cmdRef = spawn('node', craeteMockmCmdInfoRes.arr);
   
   cmdRef.stdout.on('data', (data) => {
     console.log(String(data))
@@ -230,8 +269,8 @@ function startApp({runPath, arg, run = true} = {}) {
   cmdRef.on('close', (code) => {
     console.log(`child process exited with code ${code}`);
   });
-
-  return cfg
+  
+  return craeteMockmCmdInfoRes
 }
 
 function allTestBefore() {
@@ -253,6 +292,8 @@ function http() {
 }
 
 module.exports = {
+  craeteMockmCmdInfo,
+  getTempDir,
   newMockmPort,
   hasFile,
   startApp,
@@ -272,6 +313,6 @@ module.exports = {
   uuid,
   sleep,
   clearRequireCache,
-  absPath,
+  pkgPath,
   testCliText,
 }
