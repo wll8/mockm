@@ -143,7 +143,7 @@ proxy: {
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
 
 ## 重构
-- [ ] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
+- [x] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
   - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
 
 ## 更新计划
