@@ -1,3 +1,5 @@
+const {print} = require('./log.js')
+
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
   function npm() { // npm 相关
     /**
@@ -190,8 +192,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
     // --no-save 不保存依赖名称到 package.json 中
     const cmd = `npx ${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`
-    console.log(`正在初始化 ${packageName}...`)
-    console.log(cmd)
+    print(`initializing: ${packageName}...`)
+    print(cmd)
     let attemptNum = attempt // 重试次数
     do {
       await cli().spawn(
@@ -207,12 +209,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }
       )
       if(attemptNum < attempt) {
-        console.log(`重试次数 ${attempt - attemptNum}/${attempt - 1}`)
+        print(`number of retries: ${attempt - attemptNum}/${attempt - 1}`)
       }
       attemptNum = attemptNum - 1
     } while (hasPackage(packageName) === false && attemptNum > 0);
     const hasPackageRes = hasPackage(packageName)
-    console.error(`初始化 ${packageName} ${hasPackageRes ? `成功`: `失败`}`)
+    print(tool().cli.colors.red(`Initialize ${packageName} ${hasPackageRes ? `successfully`: `failed`}`))
     return hasPackageRes
   }
 
@@ -987,7 +989,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function httpLog({config}) { // 设置 http 请求日志中间件
       const morgan = require('morgan')
-      const {print} = require('./log.js')
       const colors = tool().cli.colors
       return morgan( (tokens, req, res) => {
         const colorTable = {
