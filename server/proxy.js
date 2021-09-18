@@ -256,7 +256,7 @@ async function serverProxy({
         TOKEN = req.get('Authorization') || TOKEN // 获取 token
       },
       onProxyRes: (proxyRes, req, res) => {
-        allowCors({res: proxyRes, req})
+        allowCors({res: proxyRes, req, proxyConfig: userConfig})
         setHttpHistoryWrap({
           config,
           history: HTTPHISTORY,
