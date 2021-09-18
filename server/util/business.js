@@ -1014,8 +1014,10 @@ function business() { // 与业务相关性的函数
         // 'access-control-max-age': undefined,
         // 'access-control-expose-headers': undefined,
       })
-      req && setHeader(req, { // 一些服务器会校验 req 中的 referer, host
-        'referer': target,
+      req && setHeader(req, { // 一些服务器会校验 req 中的 referer referrer origin host
+        'referer': target, // referer 实际上是 "referrer" 误拼写
+        'referrer': target,
+        'origin': target, // 不应包含任何路径信息
         'host': (new URL(target)).host
       })
     }
