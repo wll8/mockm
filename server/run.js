@@ -7,7 +7,7 @@
  * 把 run.js 中收集的命令行参数, 以 base64 方式传入 server.js 中.
  */
 
-const {logHelper} = require(`${__dirname}/util/log.js`)
+const {logHelper, print} = require(`${__dirname}/util/log.js`)
 process.argv.includes(`dev`) && logHelper()
 
 const fs = require(`fs`)
@@ -55,12 +55,12 @@ new Promise(async () => { // 显示程序信息, 例如版本号, logo
       : match.replace(new RegExp(`(${vTag})(.{${vLength}})`), `$1${packageJson.version}`)
     return vLine
   })
-  process.argv.includes(`dev`) === false && console.log(versionLogo)
+  process.argv.includes(`dev`) === false && print(versionLogo)
 })
 
 new Promise(async () => { // 检查运行环境
   if(checkEnv() === false) {
-    console.log(cli.colors.red(`node 版本应大于 v10.12.0`))
+    print(cli.colors.red(`node 版本应大于 v10.12.0`))
     process.exit()
   }
 })
@@ -68,14 +68,14 @@ new Promise(async () => { // 检查运行环境
 new Promise( async () => { // 检查更新
   if(Boolean(cliArg[`--no-update`]) === false) {
     const {name, version} = packageJson
-    const {local, server} = await tool.npm.checkUpdate(name, {version}).catch(err => console.log(`检查更新失败: ${err}`))
+    const {local, server} = await tool.npm.checkUpdate(name, {version}).catch(err => print(`Check for update failed: ${err}`))
     if(server && lib.compareVersions.compare(local, server, `<`)) {
       const msg = tool.string.removeLeft(`
-        已发布新版本 ${server}
-        您当前版本为 ${local}
-        查看更新特性 https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
+        New version has been released: ${server}
+        Your current version is:       ${local}
+        View updated features:         https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
       `)
-      console.log(cli.colors.yellow(msg))
+      print(cli.colors.yellow(msg))
     }
   }
 })
@@ -85,7 +85,7 @@ new Promise(async () => { // 启动 server.js
   function restart() {
     config.guard && setTimeout(() => {
       nodemon.emit('restart')
-      console.log(`异常退出, 已重启服务`)
+      print(`Abnormal exit, service has been restarted!`)
       log = ``
     }, 1000)
   }
@@ -167,7 +167,7 @@ new Promise(async () => { // 启动 server.js
     }
   }).catch(err => {
     console.log(`err`, err)
-    console.log(`启动超时, 请检查环境或配置是否有误`)
+    print(`Start timeout, please check whether the environment or configuration is wrong`)
     process.exit()
   })
 })
