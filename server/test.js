@@ -298,7 +298,7 @@ function serverTest({
     if (actionFnObj[action]) {
       actionFnObj[action](...actionArg)
     } else {
-      console.log(`无匹配方法`, {action, api, method})
+      print(`No matching method found`, {action, api, method})
       next()
     }
   })
@@ -318,7 +318,7 @@ function serverTest({
     if (actionFnObj[action]) {
       actionFnObj[action]()
     } else {
-      console.log(`无匹配方法`, {action})
+      print(`No matching method found`, {action})
       next()
     }
   })
@@ -368,7 +368,7 @@ function serverTest({
     if (actionFnObj[action]) {
       actionFnObj[action]()
     } else {
-      console.log(`无匹配方法`, {action})
+      print(`No matching method found`, {action})
       next()
     }
   })

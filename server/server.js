@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const {logHelper} = require('./util/log.js')
+const {logHelper, print} = require('./util/log.js')
 process.argv.includes(`dev`) && logHelper()
 const config = require(`./config.js`)
 const util = require(`./util/index.js`)
@@ -12,7 +12,7 @@ new Promise(async () => {
   } = util
   const portIsOkRes = await (tool.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(`err`, err))
   if(portIsOkRes.every(item => (item === true)) === false) {
-    console.log(`端口被占用:`, portIsOkRes)
+    print(`Port is occupied:`, portIsOkRes)
     process.exit()
   }
 

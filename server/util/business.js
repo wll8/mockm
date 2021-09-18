@@ -272,7 +272,7 @@ function business() { // 与业务相关性的函数
         let val = api[key]
         if(method === `use`) { // 自定义中间件时不使用自动返回 json 的规则
           if([`function`, `array`].includes(tool.type.isType(val)) === false) { // use 支持单个和多个(数组)中间件
-            console.log(tool.cli.colors.red(`config.api 中的 use 模式下不允许使用 function|array 类型之外的数据 ${val}`))
+            print(tool.cli.colors.red(`Data other than function|array type is not allowed in the use mode in config.api: ${val}`))
             val = (req, res, next) => next()
           }
         } else if([
@@ -520,7 +520,7 @@ function business() { // 与业务相关性的函数
         }).then(res => {
           resolve(res.data)
         }).catch(err => {
-          console.log(`err`, `openApi 获取失败`)
+          print(`err`, `Failed to get openApi`)
           reject(err.message)
         })
       })
@@ -977,7 +977,7 @@ function business() { // 与业务相关性的函数
         }
       })
       fs.writeFileSync(config._httpHistory, tool.obj.o2s(HTTPHISTORY))
-      delIdList.length && console.log(`已清除请求记录`, delIdList)
+      delIdList.length && print(`Record cleared`, delIdList)
     }
 
     return {
@@ -1097,7 +1097,7 @@ function business() { // 与业务相关性的函数
           config: aRes.config,
         })
       }).catch(err => {
-        console.log(`err`, `内部请求失败`, pathOrUrl)
+        print(`err`, `Internal request failed`, pathOrUrl)
         let msg = ``
         if(err.response) {
           const {status, statusText} = err.response
@@ -1208,14 +1208,14 @@ function business() { // 与业务相关性的函数
      */
     function showLocalInfo({store, config}) {
       const msg = tool.string.removeLeft(`
-        当前配置:
+        Current configuration file:
         ${config.config}
       
-        本地服务信息:
-        接口转发: ${`http://${config.osIp}:${config.port}/ => ${config._proxyTargetInfo.origin}`}
-        接口列表: ${`http://${config.osIp}:${config.testPort}/#/apiStudio/`}
+        Local service information:
+        Interface forwarding: ${`http://${config.osIp}:${config.port}/ => ${config._proxyTargetInfo.origin}`}
+        Interface list:       ${`http://${config.osIp}:${config.testPort}/#/apiStudio/`}
       `)
-      console.log(tool.cli.colors.green(msg))
+      print(tool.cli.colors.green(msg))
     }
 
     /**
@@ -1223,7 +1223,7 @@ function business() { // 与业务相关性的函数
      * @param {*} param0
      */
     async function remoteServer({store, config}) {
-      console.log(`远程服务加载中...`)
+      print(`Remote service loading...`)
       const serverList = [
         `port`,
         `replayPort`,
@@ -1240,13 +1240,13 @@ function business() { // 与业务相关性的函数
       serverList.forEach((item, index) => {
         store.set(`note.remote.${item.name}`, urlList[index])
       })
-      console.log(`远程服务加载完成.`)
+      print(`The remote service is loaded.`)
       const msg = tool.string.removeLeft(`
-        远程服务信息:
-        接口转发: ${store.get(`note.remote.port`) || ``} => http://${config.osIp}:${config.port}/
-        接口列表: ${store.get(`note.remote.testPort`) || ``}/#/apiStudio/ => http://${config.osIp}:${config.testPort}/#/apiStudio/
+        Remote service information:
+        Interface forwarding: ${store.get(`note.remote.port`) || ``} => http://${config.osIp}:${config.port}/
+        Interface list:       ${store.get(`note.remote.testPort`) || ``}/#/apiStudio/ => http://${config.osIp}:${config.testPort}/#/apiStudio/
       `)
-      console.log(tool.cli.colors.green(msg))
+      print(tool.cli.colors.green(msg))
     }
 
     return {
