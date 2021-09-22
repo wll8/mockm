@@ -83,6 +83,7 @@
     - 解析 json 配置为 ini
   
 ## 缺陷
+- [ ] fix:修正 拼写错误的 oepnApiData
 - [ ] fix: 当 webApi 与 config.api 相同时, webApi 不应该优先
   - 违背了文档: `从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权`
   - 这似乎是某个版本之后导致的问题
