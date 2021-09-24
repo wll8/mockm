@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const {logHelper, print} = require('./util/log.js')
-process.argv.includes(`dev`) && logHelper()
+process.argv.includes(`--log-line`) && logHelper()
 const config = require(`./config.js`)
 const util = require(`./util/index.js`)
 

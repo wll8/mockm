@@ -42,6 +42,9 @@ module.exports = {
 ### --no-update
 禁用更新检查.
 
+### --log-line
+显示 console.log 所在的行.
+
 ## 环境变量
 ### MOCKM_REGISTRY
 MOCKM_REGISTRY 或 NPM_CONFIG_REGISTRY 可以指定按需安装依赖时的镜像地址, 默认 https://registry.npm.taobao.org/.
