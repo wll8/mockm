@@ -29,6 +29,10 @@ const nodemon = require(`nodemon`)
   process.chdir(cwd)
 }
 
+{ // 仅查看版本号
+  cliArg[`--version`] && (print(packageJson.version) || process.exit());
+}
+
 const {
   initHandle,
   plugin,
