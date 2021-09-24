@@ -7,7 +7,6 @@
 - [x] fix: config.proxy 非 `/` 代理时, host 不应是 `/` 的代理
 - [ ] feat: 支持根据运行环境自动切换语言
 - [ ] feat: 支持生成纯前端可用的 mock 数据
-- [ ] feat: 接口 `:9005/api/getOpenApi/` 应变更为仅获取原样的 json, 而 `/getOpenApiWrap` 才是经过处理的
 - [x] feat: 添加配置文件自动提示功能
 - [ ] feat: mockjs 生成多条数据例如数组时, 应在函数中能知道当前是第几次调用, 或者添加 @index 表示当前索引
 - [x] feat: 把命令行参数 `config` 替换为 `--config`, 期望双横线开关的参数都代表是仅命令行可用的参数
@@ -147,6 +146,7 @@ proxy: {
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
 
 ## 重构
+- [x] refactor: 处理接口 `:9005/api/getOpenApi/` 的返回值, 更改为在原始 openApi.info 中添加 _openApiPrefix 作为接口前缀
 - [x] refactor: 修正拼写错误的 oepnApiData 为 openApiData
 - [x] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
   - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
