@@ -104,14 +104,14 @@ function Swagger(props) {
     const UrlMutatorPlugin = (system) => ({
       rootInjects: {
         getSpec () {
-          return system.getState().toJSON().spec.json.openApiData
+          return system.getState().toJSON().spec.json
         },
         getSpecPrefix () {
-          return system.getState().toJSON().spec.json.openApiPrefix
+          return system.getState().toJSON().spec.json.info._openApiPrefix || ``
         },
         setSpec (data) {
-          const jsonSpec = system.getState().toJSON().spec.json.openApiData
-          const specPrefix = system.getState().toJSON().spec.json.openApiPrefix
+          const jsonSpec = system.getState().toJSON().spec.json
+          const specPrefix = system.getState().toJSON().spec.json.info._openApiPrefix || ``
           const newSpec = {...jsonSpec, ...data}
           setState(preState => ({...deepSet(preState, `spec`, newSpec)}))
           setState(preState => ({...deepSet(preState, `specPrefix`, specPrefix)}))
