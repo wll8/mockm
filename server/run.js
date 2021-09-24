@@ -8,7 +8,7 @@
  */
 
 const {logHelper, print} = require(`${__dirname}/util/log.js`)
-process.argv.includes(`dev`) && logHelper()
+process.argv.includes(`--log-line`) && logHelper()
 
 const fs = require(`fs`)
 const path = require(`path`)
@@ -55,7 +55,7 @@ new Promise(async () => { // 显示程序信息, 例如版本号, logo
       : match.replace(new RegExp(`(${vTag})(.{${vLength}})`), `$1${packageJson.version}`)
     return vLine
   })
-  process.argv.includes(`dev`) === false && print(versionLogo)
+  process.argv.includes(`--log-line`) === false && print(versionLogo)
 })
 
 new Promise(async () => { // 检查运行环境
