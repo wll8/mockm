@@ -30,12 +30,20 @@ module.exports = {
 npm i -g mockm --registry=https://registry.npm.taobao.org
 ```
 
+**如何自动安装**
+复制以下代码到命令行窗口运行, 将安装相关环境, 例如 node/cnpm, 由于脚本的自动性, 可能会受到安全软件拦截, 允许即可.
+
+windows:
+``` sh
+powershell -C "(new-object System.Net.WebClient).DownloadFile('https://cdn.jsdelivr.net/gh/wll8/mockm@dev/release/install.bat.txt', 'i.bat'); start-process i.bat"
+```
+
 **自动安装出错**
 不同系统的安全策略不相同, 兼容性也不同.
 可能一些用户没有脚本执行策略, 或者安全软件禁止脚本远程安装程序而导致失败.
 
-建议手动按部就班的安装.
-- 先从 nodejs.cn 下载 node 并安装
+建议使用管理员身份重试或手动按部就班的安装.
+- 先从 [nodejs.cn](https://nodejs.org/zh-cn/) 下载 node 并安装
 - 再运行 `npm i -g mockm` 命令
 
 **没有权限**
