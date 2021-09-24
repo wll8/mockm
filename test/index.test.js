@@ -216,4 +216,16 @@ describe('命令行', () => {
     )
     assert.ok(hasFileRes)
   })
+  it(`--version`, async function () {
+    const {
+      fullCmd: cmd,
+      arg,
+    } = await util.craeteMockmCmdInfo({
+      '--version': true,
+    })
+    const version = require(util.pkgPath('../dist/package/package.json')).version
+    await util.testCliText({cmd, fn(str) {
+      return assert.equal(version, str.trim())
+    }}).catch(res => false)
+  })
 })
