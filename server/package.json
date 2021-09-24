@@ -49,8 +49,8 @@
   },
   "scripts": {
     "dts": "npx shx mkdir -p ./node_modules/mockm & npx shx cp -r ./@types ./node_modules/mockm/",
-    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9000 & node run.js dev\"",
-    "serve": "node run.js dev",
+    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9000 & node run.js --log-line\"",
+    "serve": "node run.js --log-line",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
