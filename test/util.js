@@ -26,7 +26,7 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
   const port = await newMockmPort()
   const res = {
     build: {
-      runPath: pkgPath(runPath || `../dist/package/run.js`),
+      runPath: pkgPath(runPath || `./run.js`),
       arg: {
         '--config': true,
         '--cwd': getTempDir(),
@@ -37,7 +37,7 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
       },
     },
     dev: {
-      runPath: pkgPath(runPath || `../server/run.js`),
+      runPath: pkgPath(runPath || `./run.js`),
       arg: {
         '--config': true,
         '--cwd': getTempDir(),
@@ -129,7 +129,14 @@ function clearRequireCache() { // 清除 require 缓存, 使用场景: 当 requi
   Object.keys(require.cache).forEach(key => delete require.cache[key])
 }
 
-function pkgPath(file = '') { return require('path').resolve(`${__dirname}`, file) }
+function pkgPath(file = '') {
+  const basePath = {
+    build: `${__dirname}/../dist/package/`,
+    dev: `${__dirname}/../server/`,
+  }[process.env.testEnv]
+  const res = require('path').resolve(`${basePath}`, file)
+  return res
+}
 
 /**
  * 创建或删除一组文件
