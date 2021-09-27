@@ -134,8 +134,12 @@ describe('基本功能', () => {
       assert.ok(httpData.origin)
     })
     it(`WebSocket 消息收发`, async () => {
-      const id = util.uuid()
       const WebSocket = require(`ws`)
+      {
+        new WebSocket('ws://localhost:9000/wsecho'); // 先让服务器知道要使用 ws
+        await util.sleep(10*1000) // 等待服务器初始化 ws 相关依赖
+      }
+      const id = util.uuid()
       const ws = new WebSocket('ws://localhost:9000/wsecho');
       const msgList = []
       ws.on('open', () => {
