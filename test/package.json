@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:dev": "cross-env testEnv=dev mocha ./*.test.js --exit --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index",
-    "test:build": "cross-env testEnv=build mocha ./*.test.js --exit --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index"
+    "test:dev": "cross-env testEnv=dev mocha ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index",
+    "test:build": "cross-env testEnv=build mocha ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index"
   },
   "keywords": [],
   "author": "",
