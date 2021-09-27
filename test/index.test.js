@@ -5,7 +5,7 @@ const assert = require('assert')
 describe('基本功能', () => {
   describe('显示版本号', () => {
     it(`获取版本号`, () => {
-      const version = require(util.pkgPath('../dist/package/package.json')).version
+      const version = require(util.pkgPath('./package.json')).version
       assert.ok(global.cmdRef.out.match(version))
     })
   })
@@ -227,7 +227,7 @@ describe('命令行', () => {
     } = await util.craeteMockmCmdInfo({
       '--version': true,
     })
-    const version = require(util.pkgPath('../dist/package/package.json')).version
+    const version = require(util.pkgPath('./package.json')).version
     await util.testCliText({cmd, fn(str) {
       return assert.equal(version, str.trim())
     }}).catch(res => false)
