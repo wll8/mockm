@@ -20,6 +20,57 @@ const child_process = require('child_process')
 const packgeAdmin = shelljs.which('cnpm') ? 'cnpm' : 'npm'
 
 /**
+ * 封装断言方法, 用于打印相关信息
+ * @param {*} val 
+ */
+function ok(val) {
+  const assert = require('assert')
+  console.log(`=>`, val)
+  assert.ok(val)
+}
+
+/**
+ * 运行 mockm
+ * @param {*} arg
+ */
+async function runMockm(fnArg) {
+  fnArg = typeof(fnArg) === `function` ? {okFn: fnArg} : fnArg
+  const {
+    runOk = true, // 是否等待运行完成
+    mockm = undefined, // mockm 参数
+    timeout = undefined, // 超时
+    okFn = () => {}, // 运行成功回调, 返回为真时不继续匹配终端输出
+  } = fnArg || {}
+  const {
+    fullCmd: cmd,
+    arg,
+  } = await craeteMockmCmdInfo(mockm)
+  return new Promise((resolve, reject) => {
+    testCliText({
+      cmd,
+      timeout,
+      async fn(str) {
+        if(
+          runOk
+          ? (
+            str.match(`:${arg.port}`) 
+            && str.match(`:${arg.testPort}`)
+          ) : true
+        ) {
+          let res = await okFn({str, arg, cmd})
+          res === undefined ? false : res
+          res && resolve(res)
+          return res
+        }
+      }
+    }).catch(res => {
+      console.log(`运行超时`)
+      resolve(false)
+    })
+  })
+}
+
+/**
  * 生成 mockm 的运行命令, 端口默认随机, 可以传入对象参数覆盖
  */
 async function craeteMockmCmdInfo(arg = {}, runPath) {
@@ -227,25 +278,25 @@ function hasFile(filePath) {
  * 测试命令行输出
  * @param {*} param0 
  * @param {*} param0.cmd 要运行的命令
- * @param {*} param0.timeout 超时毫秒, 默认 3000
- * @param {*} param0.fn 传入输出的文本, 返回匹配结果, 直到匹配成功或超时为此
+ * @param {*} param0.timeout 超时毫秒
+ * @param {*} param0.fn 传入输出的文本, 返回匹配结果, 直到为真或超时
  */
-function testCliText({cmd = str, timeout = 3000, fn = (str) => str, } = {}) {
+function testCliText({cmd = str, timeout = 10 * 1e3, fn = (str) => str, } = {}) {
   console.log(`cmd:\n${cmd}`)
   return new Promise((resolve, reject) => {
     const { spawn } = require('child_process');
     const [bin, ...arg] = cmd.split(/\s+/)
     const cmdRef = spawn(bin, arg);
-    cmdRef.stdout.on('data', (data) => {
+    cmdRef.stdout.on('data', async (data) => {
       const str = String(data)
-      if(fn(str)) {
+      if(await fn(str)) {
         resolve(str)
         cmdRef.kill()
       }
     });
-    cmdRef.stderr.on('data', (data) => {
+    cmdRef.stderr.on('data', async (data) => {
       const str = String(data)
-      if(fn(str)) {
+      if(await fn(str)) {
         resolve(str)
         cmdRef.kill()
       }
@@ -308,6 +359,8 @@ function http() {
 }
 
 module.exports = {
+  ok,
+  runMockm,
   craeteMockmCmdInfo,
   getTempDir,
   newMockmPort,
