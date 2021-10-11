@@ -1,26 +1,27 @@
 @echo off && chcp 936 && cls
+rem powershell -C "start-process install.bat"
 rem mode con cols=120 lines=30
-set installPath=%homepath%
-cd /d %installPath%
+set installPath=%userprofile%
 set packName=mockm
 title Automatically install %packName%
 set packCli=mm
 set packArg=--version
 set nodeV=v10.16.3
 set nodeName=node-%nodeV%-win-x86
-set nodePath=%cd%\%nodeName%
+set nodePath=%installPath%\%nodeName%
+set nodeZip=%nodePath%.zip
 set nodeExe="%nodePath%\node.exe"
 where node>nul 2>nul
 if %errorlevel%==0 (
   goto :yesNode
 ) else (
-  if exist "%nodeName%.zip" (cd .) else (
+  if exist "%nodeZip%" (cd .) else (
     echo Downloading nodejs, please be patient...
-    powershell -C "(new-object System.Net.WebClient).DownloadFile('https://npm.taobao.org/mirrors/node/%nodeV%/%nodeName%.zip', '%nodeName%.zip')"
+    powershell -C "(new-object System.Net.WebClient).DownloadFile('https://npm.taobao.org/mirrors/node/%nodeV%/%nodeName%.zip', '%nodeZip%')"
   )
   if exist "%nodePath%" (cd .) else  (
     echo Installing nodejs, please be patient...
-    call :unZipFile "%cd%\" "%nodePath%.zip"
+    call :unZipFile "%installPath%\" "%nodeZip%"
     setx path "%nodePath%\;%path%"
   )
   if exist %nodeExe% goto :install
@@ -39,12 +40,10 @@ exit /b
 exit /b
 
 :test
-  cd /d "%nodePath%"
   @echo on
   cmd /c "%packCli% %packArg%"
   @echo off
-  echo. && echo %packName% installation complete
-  del %0 && cmd /k "cd /d """%nodePath%""""
+  del %0 && cmd /k "echo. && echo %packName% installation complete"
 exit /b
 
 :install
