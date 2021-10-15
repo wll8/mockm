@@ -611,7 +611,7 @@ function business() { // 与业务相关性的函数
         const backFn = () => {
           openApiList.forEach(item => {
             tool.file.backUrl(config._openApiHistoryDir, item, data => { // 格式化 openApi 后再保存, 避免压缩的内容不易比较变更
-              return JSON.stringify(JSON.parse(data), null, 2)
+              return JSON.stringify(tool.obj.sortObj(JSON.parse(data)), null, 2) // 排序 obj, 因为 openApi 中的顺序不确定会导致变更过多
             })
           })
         }
