@@ -1174,6 +1174,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
+    function sortObj(obj, newObj = {}){
+      Object.keys(obj).sort().forEach(key=>{
+        if(typeof obj[key] === `object`){
+          newObj[key] = type().isType(obj[key], `array`) ? [] : {}
+          newObj[key] = sortObj(obj[key], newObj[key])
+        } else {
+          newObj[key] = obj[key]
+        }
+      });
+      return newObj
+    }
+    
     function flatObj(value, currentKey) { // 展开对象
       let result = {};
       Object.keys(value).forEach(key => {
@@ -1234,6 +1246,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      sortObj,
       npm,
       deepMergeObject,
       flatObj,
