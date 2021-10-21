@@ -6,6 +6,31 @@
 - 使用 `npm i -g mockm@版本号` 例如 `mockm@1.1.3` 回退到指定版本.
 :::
 
+## 2021年10月
+#### v1.1.25-alpha.18
+- server
+  - feat: 更改控制台输出为英文
+  - feat: 支持命令行参数 `--log-line` 显示 console.log 所在的行, 用于辅助调试.
+  - feat: 支持命令行参数 `--version` 仅查看版本号, 然后退出程序, 不启动服务.
+  - feat: [config.updateToken](../config/option.md#config-updatetoken) 参数支持更多配置
+  - refactor: 处理接口 `:9005/api/getOpenApi/` 的返回值
+  - fix: 处理 test.js 文件中的函数未声明错误 `ReferenceError: print is not defined`
+  - fix: config.proxy 非 `/` 代理时, host 不应是 `/` 的代理
+  - feat: 优化 openApi 历史文件的存储方式
+    更改为排序 openApi json 内容后再保存, 因为 openApi 中的顺序不确定会导致比较时产生过多不必要的变更
+
+- client
+  - refactor(client): 去除无用的 state.serverConfig
+
+- test
+  test: 添加用例重试
+  test: 优化测试用例, 处理依赖按需安装未完成导致的用例失败
+  refactor: 重构测试用例中的 pkgPath 函数
+  refactor: 重构测试脚本, 每个用例运行单独的命令行实例
+
+- chore: 添加 windows 一键安装脚本
+- refactor: 修正拼写错误的 oepnApiData 为 openApiData
+
 ## 2021年09月
 #### v1.1.25-alpha.17
 - test
