@@ -4,7 +4,6 @@ async function serverProxy({
   api,
   db,
   HTTPHISTORY,
-  TOKEN,
   apiRootInjection,
   config,
 }) {
@@ -16,6 +15,7 @@ async function serverProxy({
     middleware,
   } = tool
   const {
+    reqHandle,
     clientInjection,
     historyHandle,
     customApi,
@@ -170,6 +170,7 @@ async function serverProxy({
   }
 
   server.use(async (req, res, next) => {
+    reqHandle({config}).injectionReq({req, res, type: `get`})
     const pathToRegexp = require('path-to-regexp')
     const hasRouter = serverRouterList.some(item => {
       const {method, router, action} = item
@@ -253,7 +254,7 @@ async function serverProxy({
             // setHttpHistory(`${method} ${url}`, {req})
           }
         })
-        TOKEN = req.get('Authorization') || TOKEN // 获取 token
+        reqHandle({config}).injectionReq({req, res, type: `get`})
       },
       onProxyRes: (proxyRes, req, res) => {
         allowCors({res: proxyRes, req, proxyConfig: userConfig})
