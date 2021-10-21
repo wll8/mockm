@@ -5,9 +5,9 @@
     "build:client": "cd client && npm run build",
     "build:serve": "cd release && npx gulp",
     "push:doc": "cd release && npx gulp pushDoc",
-    "bit": "npm run build:client && npm run build:serve && npm run it",
+    "bit": "npm run build:client && npm run build:serve && npm run install && npm run test:build",
     "bit:serve": "npm run build:serve && npm run it",
-    "it": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx cnpm i --product && cd ../../ && node dist/package/run.js config remote",
+    "install": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx cnpm i --product",
     "test": "npm run test:dev",
     "test:dev": "cd test && npm run test:dev",
     "test:build": "cd test && npm run test:build"
