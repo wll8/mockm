@@ -41,7 +41,6 @@ function Swagger(props) {
     swagger: false, // 是否显示 swagger 文档
     pathInSwagger: false, // 显示 swagger 按钮
     swaggerLoading: false, // swagger 是否正在加载
-    serverConfig: {}, // 服务器配置
   })
 
   useEffect(() => { // 判断是否有 swagger, 如果有则显示 swagger 按钮
@@ -93,7 +92,7 @@ function Swagger(props) {
     return res
   }
 
-  function initSwagger({serverConfig, store, cb}) {
+  function initSwagger({store, cb}) {
     // 添加 swagger-ui.css
     $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui.css">`))
     $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
@@ -152,7 +151,7 @@ function Swagger(props) {
               && (isIp4InPrivateNet(hostname) === false) // 不是公网IP
             )
           ) { // 本地模式
-            host = `${hostname}:${serverConfig.port}`
+            host = `${hostname}:${window.serverConfig.port}`
           } else { // 公网模式
             host = new URL(store.note.remote.port).host
           }
@@ -172,14 +171,11 @@ function Swagger(props) {
 
   useEffect(() => {
     Promise.all([
-      http.get(`${cfg.baseURL}/api/getConfig/`),
       http.get(`${cfg.baseURL}/api/getStore/`),
-    ]).then(([config, store]) => {
-      setState(preState => ({...deepSet(preState, `serverConfig`, config)}))
-      const {openApi} = config
-      if(openApi) {
+    ]).then(([store]) => {
+      if(window.serverConfig.openApi) {
         setState(preState => ({...deepSet(preState, `swaggerLoading`, true)}))
-        initSwagger({serverConfig: config, store, cb: () => {
+        initSwagger({store, cb: () => {
           setState(preState => ({...deepSet(preState, `swaggerLoading`, false)}))
         }})
       }
