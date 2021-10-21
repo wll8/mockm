@@ -1,4 +1,5 @@
 const util = require(`./util/index.js`)
+const { print } = require('./util/log.js')
 
 function serverTest({
   HTTPHISTORY,
