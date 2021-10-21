@@ -21,6 +21,7 @@ const HttpShow = (() => {
     ConfigProvider,
   } = antd
 
+  window.serverConfig = {} // mockm 的 confg json
   http.get(`${cfg.baseURL}/api/getConfig/`).then(res => {
     window.serverConfig = res
   })
