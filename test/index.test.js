@@ -249,7 +249,7 @@ describe('基本功能', () => {
       }))
     })
   })
-  describe.only('config.updateToken', () => {
+  describe('config.updateToken', () => {
     it(`禁用 boolean/false`, async () => {
       util.ok(await util.runMockm({
         mockm: {

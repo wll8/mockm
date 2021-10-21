@@ -19,8 +19,11 @@
 - [x] feat: 当使用 remote 加载远程 url 时, 不应总是输出 err log, 避免认为程序错误
 - [x] feat: 支持使用记录的响应数据来创建接口
   - 因为 id 引用的是 httpHistory 目录中的内容, 但此目录通常又不方便上传到版本控制系统, 所以把请求记录的值直接转换为 webApi, 可方便的多人共享或复用已有的数据.
-- [ ] feat: 支持自定义多个重放时要更新的 header
-  - 有些授权字段不一定是 authorization, 可能是其他的一个或多个字段, 这时候可以通过 config.updateHeader 来配置. 重发请求或者在 swagger 界面测试请求时, 都会更新指定的 header 后再发送请求.
+- [x] feat: 支持自定义多个重放时要更新的 header
+  - 有些授权字段不一定是 authorization, 可能是其他的一个或多个字段, 这时候可以通过 config.updateToken 来配置. 重发请求或者在 swagger 界面测试请求时, 都会更新指定的 header 后再发送请求.
+- [ ] fix: 重载时 global.INJECTION_REQUEST 中的值不应丢失
+  - [ ] server 应该把值保存在文件中, 而不是变量中
+  - [ ] client 应在请求时获取 INJECTION_REQUEST, 而不是刷新页面才获取
 - [ ] feat: 支持关闭和开启 testPort 和 replayPort 功能, 因为某些服务可能不需要
 - [ ] feat: 支持禁用请求记录, 例如禁用所有, 禁用某个 url, 仅保存后xx条, 因为有些类似心跳的请求总是记录的意义不大
 - [ ] feat: 参考 https://github.com/YMFE/yapi 重新实现 webApi table 的开发, 以支持各种格式的数据
