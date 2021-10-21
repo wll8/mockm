@@ -160,6 +160,23 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       )
       : []
   })(),
+  updateToken: (() => {
+    const updateToken = config.updateToken
+    const fn = {
+      boolean: () => (updateToken ? {'req.headers.authorization': 'req.headers.authorization'} : undefined),
+      string: () => ({[`req.headers.${updateToken}`]: `req.headers.${updateToken}`}),
+      array: () => updateToken.reduce((acc, cur) => ({...acc, [`req.headers.${cur}`]: `req.headers.${cur}`}), {}),
+      object: () => Object.entries(updateToken).reduce((acc, [key, value]) => ({
+        ...acc,
+        [key]: isType(value, `string`) 
+          ? value
+          : isType(value, `function`)
+            ? value
+            : undefined
+      }), {}),
+    }[isType(updateToken)]
+    return fn ? fn() : undefined
+  })(),
   apiInHeader:
     config.apiInHeader === true
     ? `x-test-api`

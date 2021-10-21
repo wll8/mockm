@@ -46,19 +46,17 @@ new Promise(async () => {
   } = customApi({api, db, config})
 
   const HTTPHISTORY = require(config._httpHistory) // 请求历史
-  let TOKEN = ''
+  global.INJECTION_REQUEST = {} // 自动注入下次调试请求的数据
   require(`./proxy.js`)({
     api,
     db,
     HTTPHISTORY,
-    TOKEN,
     apiRootInjection,
     config,
   })
   require(`./test.js`)({
     HTTPHISTORY,
     config,
-    TOKEN,
     parseDbApi,
   })
   require(`./replay.js`)({

@@ -129,11 +129,9 @@ function Swagger(props) {
           UrlMutatorPlugin,
         ],
         requestInterceptor (req) {
-          // 如果原 url 存在 auth (需要 auth), 则使用新 token 替换它, 否则不要添加, 避免添加不必要的东西引起错误
-          let authorization = state.authorization
-          if(authorization) {
-            req.headers.Authorization = authorization
-          }
+          Object.entries(window.injectionRequest).forEach(([key, value]) => {
+            ;(value !== undefined) && deepSet({req}, key, value)
+          })
           return req
         },
         configs: {
