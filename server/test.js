@@ -3,7 +3,6 @@ const util = require(`./util/index.js`)
 function serverTest({
   HTTPHISTORY,
   config,
-  TOKEN,
   parseDbApi,
 }) {
   const {
@@ -225,7 +224,6 @@ function serverTest({
       },
       replay() {
         sendReq({
-          token: TOKEN,
           getHistory,
           history: HTTPHISTORY,
           api: fullApi,
@@ -267,6 +265,9 @@ function serverTest({
       },
       getConfig() {
         res.send(config)
+      },
+      getInjectionRequest() {
+        res.send(global.INJECTION_REQUEST)
       },
       getStore() {
         const str = require(`fs`).readFileSync(config._store, `utf8`)

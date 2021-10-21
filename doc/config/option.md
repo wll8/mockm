@@ -90,14 +90,49 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 :::
 
 ## config.updateToken
-类型: boolean | string
+类型: boolean | string | string[] | object
 默认: true
 
-是否自动从 req 中获取最新 token 然后替换到重发请求的 authorization 上.
+指定如何从上一个 http 请求获取数据到重放和调试时的 http 请求上.
 
-- false 不添加
-- true 自动添加
-- string 自定义 header 字段
+``` js
+/** 
+ * 不使用
+ */
+updateToken = false
+
+/**
+ * 相当于 `{'req.headers.authorization': 'req.headers.authorization'}`
+ */
+updateToken = true
+
+/**
+ * 相当于 `{'req.headers.auth': 'req.headers.auth'}`
+ */
+updateToken = `auth`
+
+/**
+ * 相当于
+ * ```
+ * {
+ *   'req.headers.auth': 'req.headers.auth',
+ *   'req.headers.auth2': 'req.headers.auth2',
+ * }
+ * ```
+ */
+updateToken = [`auth`, `auth2`] 
+
+/**
+ * 自定义每个 key/value 的对应关系, 目前仅支持 `req.headers.*` , value 可使用函数 `({req}) => [key, value]`
+ */
+updateToken = {
+  'req.headers.authorization': 'req.headers.authorization',
+  'req.headers.a': 'req.headers.b',
+  'req.headers.a2': ({req}) => { // 自定义设置的 key 和 value
+    return ['req.headers.b2', `123456`]
+  },
+}
+```
 
 ## config.apiInHeader
 类型: boolean | string

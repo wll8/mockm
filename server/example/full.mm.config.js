@@ -111,6 +111,15 @@ module.exports = util => {
         '* /all/method' (req, res, next) { // * 号代表处理此路径的所有方法
           res.json({msg: req.method, url: req.url})
         },
+        '* /test/:pathArg' (req, res, next) {
+          res.json({
+            method: req.method,
+            params: req.params,
+            query: req.query,
+            headers: req.headers,
+            body: req.body,
+          })
+        },
         async 'post /file/upload' (req, res, next) { // 获取客户端上传的文件
           const multiparty = await toolObj.generate.initPackge(`multiparty`)
           const form = new multiparty.Form()

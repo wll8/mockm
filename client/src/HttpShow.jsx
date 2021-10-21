@@ -24,6 +24,10 @@ const HttpShow = (() => {
   http.get(`${cfg.baseURL}/api/getConfig/`).then(res => {
     window.serverConfig = res
   })
+  window.injectionRequest = {} // 注入到发送测试请求时的数据
+  http.get(`${cfg.baseURL}/api/getInjectionRequest/`).then(res => {
+    window.injectionRequest = res
+  })
 
   const {
     HashRouter,

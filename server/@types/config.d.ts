@@ -121,11 +121,11 @@ interface ConfigObj {
   hostMode: boolean,
 
   /**
-   * 是否自动从 req 中获取最新 token 然后替换到重发请求的 authorization 上.
+   * 是否自动从上一个 http 请求获取数据到重放和调试时的 http 请求上
    * @default
    * true
    */
-  updateToken: boolean | string,
+  updateToken: boolean | string | string[] | object,
 
   /**
    * 是否在 header 中添加调试 api 地址.

@@ -1062,7 +1062,7 @@ function business() { // 与业务相关性的函数
   }
 
   function reqHandle({config}) { // 请求处理程序
-    function sendReq({token, getHistory, history, api, res, apiId}) { // 发送请求
+    function sendReq({getHistory, history, api, res, apiId}) { // 发送请求
       const axios = require('axios')
       const fs = require(`fs`)
 
@@ -1079,9 +1079,7 @@ function business() { // 与业务相关性的函数
       const httpDataReq = getHistoryData.req
       const {line: {path, query, params}, headers} = httpDataReq.lineHeaders
       const [, method, url] = api.match(/(\w+)\s+(.*)/)
-      if(token && config.updateToken) { // 更新 TOKEN
-        headers.authorization = token
-      }
+      reqHandle({config}).injectionReq({req: { headers }, res, type: `set`})
       const pathOrUrl = path || url
       axios({
         baseURL: `http://localhost:${config.port}`,
@@ -1115,7 +1113,41 @@ function business() { // 与业务相关性的函数
       })
     }
 
+    /**
+     * 从上一次请求中获取指定数据放入到测试请求中
+     * @param {*} param0 
+     */
+    function injectionReq(arg) {
+      if(Boolean(config.updateToken) === false) {
+        return undefined
+      }
+      const {req, res, type} = arg
+      if(type === `get`) {
+        new Promise(() => {
+          Object.entries(config.updateToken).forEach(([formKey, toKey]) => {
+            const fn = {
+              string: () => {
+                const value = tool.obj.deepGet(arg, formKey)
+                ;(value !== undefined) && (global.INJECTION_REQUEST[toKey] = value);
+              },
+              function: () => {
+                const [key, value] = toKey({req}) || []
+                ;(value !== undefined) && (global.INJECTION_REQUEST[key] = value);
+              },
+            }[tool.type.isType(toKey)]
+            fn && fn()
+          })
+        })
+      }
+      if(type === `set`) {
+        Object.entries(global.INJECTION_REQUEST).forEach(([key, value]) => {
+          tool.obj.deepSet(arg, key, value)
+        })
+      }
+    }
+
     return {
+      injectionReq,
       sendReq,
     }
 
