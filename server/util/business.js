@@ -156,8 +156,9 @@ function business() { // 与业务相关性的函数
               data = config.apiWebWrap({data, code: 200})
             }
             res.json(data)
-          } catch (error) {
-            res.status(500).json({msg: `转换错误: ${error.message}`})
+          } catch (err) {
+            print(err)
+            res.status(500).json({msg: String(err)})
           }
         }
         if (useDataType === `custom`) { // 自定义逻辑
@@ -213,8 +214,9 @@ function business() { // 与业务相关性的函数
               const listToDataRes = listToData(table, {rule, type})
               data = listToDataRes.data
               sendData(data)
-            } catch (error) {
-              sendData({msg: `转换错误: ${error.message}`})
+            } catch (err) {
+              print(err)
+              sendData({msg: String(err)})
             }
           }
           if (useDataType === `custom`) { // 自定义逻辑
