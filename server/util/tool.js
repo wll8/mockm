@@ -1138,11 +1138,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     function getClientIp (req) { // 获取客户端 IP
-      let ip = req.headers['x-forwarded-for'] || // 判断是否有反向代理 IP
+      const {deepGet} = obj()
+      let ip = deepGet(req, `headers.x-forwarded-for`, ``).split(',').pop().trim() || // 判断是否有反向代理 IP
         req.ip ||
-        req.connection.remoteAddress || // 判断 connection 的远程 IP
-        req.socket.remoteAddress || // 判断后端的 socket 的 IP
-        req.connection.socket.remoteAddress || ''
+        deepGet(req, `connection.remoteAddress`) || // 判断 connection 的远程 IP
+        deepGet(req, `socket.remoteAddress`) || // 判断后端的 socket 的 IP
+        deepGet(req, `connection.socket.remoteAddress`) || ''
       if (ip.includes(',')) {
         ip = ip.split(',')[0]
       }

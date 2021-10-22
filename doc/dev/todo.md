@@ -159,7 +159,14 @@ proxy: {
 - 1.2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
 - 1.2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
 - 1.2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用
-
+- 1.2.x: 引入破坏性的依赖更新
+  - [ ] filenamify@5.x 只支持 esm
+  - [x] axios 升级后发送的请求不再有 req.connection.socket
+  - [ ] node-fetch@3.x 只支持 esm
+  - [ ] ws@8.x 文本消息和关闭原因不再解码为字符串, 而是默认返回 Buffers. 另外, 8.2.x 支持 esm
+  - [ ] get-port@6.x 只支持 esm
+  - esm 升级说明: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+  - esm 工具 https://medium.com/web-on-the-edge/tomorrows-es-modules-today-c53d29ac448c
 ## 解决 mockjs 的问题
 ### 前端API问题
 - 不能使用 fetch https://github.com/nuysoft/Mock/issues/430

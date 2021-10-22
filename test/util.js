@@ -50,6 +50,7 @@ async function runMockm(fnArg) {
       cmd,
       timeout,
       async fn(str) {
+        console.log(`mockm>`, str)
         if(
           runOk
           ? (
