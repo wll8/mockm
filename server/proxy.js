@@ -1,4 +1,5 @@
 const util = require(`./util/index.js`)
+const { print } = require('./util/log.js')
 
 async function serverProxy({
   api,
@@ -191,7 +192,12 @@ async function serverProxy({
           */
           ws: (req, res, next) => {
             res.websocket( (ws) => {
-              action(ws, req)
+              try {
+                action(ws, req)
+              } catch (err) {
+                print(err)
+                res.status(500).send(String(err))
+              }
             })
           },
         }[method]
@@ -201,7 +207,12 @@ async function serverProxy({
             那么就需要我们自己去通过 config.api 中的 router 规则去解析得到 params
           */
           req.params = tool.url.parseRegPath(router, req.path)
-          action(req, res, next)
+          try {
+            action(req, res, next)
+          } catch (err) {
+            print(err)
+            res.status(500).send(String(err))
+          }
         })();
         return true
       } else {
