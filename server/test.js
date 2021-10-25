@@ -84,12 +84,12 @@ function serverTest({
       try {
         const httpData = getHistory({history: HTTPHISTORY, fullApi, id}).data[reqOrRes]
         if(reqOrRes === `res`) { // 模仿 res 中的响应头, 但是开启跨域
-          res.set(httpData.lineHeaders.headers)
+          const headers = httpData.lineHeaders.headers || require(require('path').resolve(httpData.lineHeaders.headPath))
+          res.set(headers)
           allowCors({res, req})
         }
-        const path = require('path')
         if(tool.file.hasFile(httpData.bodyPath)) {
-          res.sendFile(path.resolve(httpData.bodyPath))
+          res.sendFile(require('path').resolve(httpData.bodyPath))
         } else {
           throw new Error(`不存在文件 ${httpData.bodyPath}`)
         }
@@ -239,9 +239,13 @@ function serverTest({
         getFilePath({reqOrRes: `res`, id: actionArg0})
       },
       getHttpData() {
-        const historyRes = getHistory({history: HTTPHISTORY, fullApi, id: actionArg0})
+        const historyRes = JSON.parse(JSON.stringify(getHistory({history: HTTPHISTORY, fullApi, id: actionArg0})))
         if(historyRes.data) {
           const {method, path} = historyRes.data.req.lineHeaders.line
+          historyRes.data.req.lineHeaders.headers = historyRes.data.req.lineHeaders.headers || require(require(`path`).resolve(historyRes.data.req.lineHeaders.headPath))
+          historyRes.data.req.lineHeaders.headPath = undefined
+          historyRes.data.res.lineHeaders.headers = historyRes.data.res.lineHeaders.headers || require(require(`path`).resolve(historyRes.data.res.lineHeaders.headPath))
+          historyRes.data.res.lineHeaders.headPath = undefined
           const webApi = (apiWebStore.get([`paths`, path]) || {})[method]
           if(webApi) {
             webApi.disable = apiWebStore.get(`disable`).includes(historyRes.fullApi)

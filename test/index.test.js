@@ -350,43 +350,50 @@ describe('基本功能', () => {
   })
 
 })
-describe.only('性能', () => {
+describe.skip('性能', () => {
   describe('接口服务', () => {
     it(`存在较多历史时造成的影响情况`, async () => {
-      let repeat = 10 // 共测试多少次
-      let length = 200 // 每次并发数
-      let headersSize = 10e3 // header 体积
-      let index = 0
-      for(let repeatIndex=0; repeatIndex<repeat; repeatIndex++){
-        console.time()
-        await Promise.all(Array.from({length}).map((item, lengthIndex) => {
-          index = index + 1
-          return http({
-            method: `post`,
-            url: `http://127.0.0.1:9000/test/${index}`,
-            headers: {
-              repeatIndex,
-              lengthIndex,
-              index,
-              xxx: `x`.repeat(headersSize),
-            }, // 请求头
-            data: {
-              index,
-              data: Number(Math.random()).toFixed(50).repeat(2e3),
-            },
-          })
-        }))
-        console.timeEnd()
-      }
-      /**
-      repeat = 10; length = 200; headersSize = 10e3;
-      优化前
-      7.445s => 44.646s
-      8.648s => 41.989s
-      
-      优化后
-       */
-      util.ok(true)
+      util.ok(await util.runMockm({
+        timeout: 1e9,
+        okFn: async ({arg, str}) => {
+          let repeat = 10 // 共测试多少次
+          let length = 200 // 每次并发数
+          let headersSize = 10e3 // header 体积
+          let index = 0
+          for(let repeatIndex=0; repeatIndex<repeat; repeatIndex++){
+            console.time()
+            await Promise.all(Array.from({length}).map((item, lengthIndex) => {
+              index = index + 1
+              return http({
+                method: `post`,
+                url: `http://127.0.0.1:${arg.port}/test/${index}`,
+                headers: {
+                  repeatIndex,
+                  lengthIndex,
+                  index,
+                  xxx: `x`.repeat(headersSize),
+                }, // 请求头
+                data: {
+                  index,
+                  data: Number(Math.random()).toFixed(50).repeat(2e3),
+                },
+              })
+            }))
+            console.timeEnd()
+          }
+          return true
+          /**
+          repeat = 10; length = 200; headersSize = 10e3;
+          优化前
+          7.445s => 44.646s
+          8.648s => 41.989s
+          
+          优化后
+          9.493s => 11.239s
+          9.259s => 11.760s
+           */
+        },
+      }))
     })
   })
 })
