@@ -1041,7 +1041,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function replayHistoryMiddleware ({
       id,
-      HTTPHISTORY,
       config,
       business,
     } = {}) {
@@ -1060,8 +1059,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return (req, res, next) => { // 修改分页参数, 符合项目中的参数
         const method = req.method.toLowerCase()
         const fullApi = id ? undefined :`${method} ${req.originalUrl}`
-        HTTPHISTORY = HTTPHISTORY || require(config._httpHistory)
-        const history = getHistory({history: HTTPHISTORY, id, fullApi, find: list => {
+        const history = getHistory({id, fullApi, find: list => {
           const getStatus = (item) => {
             try {
               return item.data.res.lineHeaders.line.statusCode
