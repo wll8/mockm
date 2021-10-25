@@ -1083,7 +1083,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }}).data
         try {
           const lineHeaders = history.res.lineHeaders
-          const headers = lineHeaders.headers
+          const headers = lineHeaders.headers || require(require('path').resolve(lineHeaders.headPath))
           setHeader(res, {
             ...headers, // 还原 headers
             ...reSetApiInHeader({headers}), // 更新 testApi
