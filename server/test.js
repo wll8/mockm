@@ -2,7 +2,6 @@ const util = require(`./util/index.js`)
 const { print } = require('./util/log.js')
 
 function serverTest({
-  HTTPHISTORY,
   config,
   parseDbApi,
 }) {
@@ -82,7 +81,7 @@ function serverTest({
 
     function getFilePath({reqOrRes, id}) {
       try {
-        const httpData = getHistory({history: HTTPHISTORY, fullApi, id}).data[reqOrRes]
+        const httpData = getHistory({fullApi, id}).data[reqOrRes]
         if(reqOrRes === `res`) { // 模仿 res 中的响应头, 但是开启跨域
           const headers = httpData.lineHeaders.headers || require(require('path').resolve(httpData.lineHeaders.headPath))
           res.set(headers)
@@ -101,7 +100,7 @@ function serverTest({
     const actionFnObj = {
       getApiList() {
 
-        const list = getHistoryList({history: HTTPHISTORY})
+        const list = getHistoryList({})
         let {
           _sort = ``,
           _order = ``,
@@ -138,7 +137,7 @@ function serverTest({
         res.send(sendData)
       },
       getApiHistry(apiId) {
-        const list = getHistoryList({history: HTTPHISTORY, method, api})
+        const list = getHistoryList({method, api})
         res.send(list)
       },
       getOpenApi() {
@@ -211,7 +210,7 @@ function serverTest({
               return console.error(err);
             }
             if(stats.size !== oldSize) {
-              const str = JSON.stringify(getHistoryList({history: HTTPHISTORY}))
+              const str = JSON.stringify(getHistoryList({}))
               res.write(`data:${str}\n\n`)
               res.flush()
               oldSize = stats.size
@@ -226,7 +225,6 @@ function serverTest({
       replay() {
         sendReq({
           getHistory,
-          history: HTTPHISTORY,
           api: fullApi,
           res,
           apiId: actionArg0,
@@ -239,7 +237,7 @@ function serverTest({
         getFilePath({reqOrRes: `res`, id: actionArg0})
       },
       getHttpData() {
-        const historyRes = JSON.parse(JSON.stringify(getHistory({history: HTTPHISTORY, fullApi, id: actionArg0})))
+        const historyRes = JSON.parse(JSON.stringify(getHistory({fullApi, id: actionArg0})))
         if(historyRes.data) {
           const {method, path} = historyRes.data.req.lineHeaders.line
           historyRes.data.req.lineHeaders.headers = historyRes.data.req.lineHeaders.headers || require(require(`path`).resolve(historyRes.data.req.lineHeaders.headPath))

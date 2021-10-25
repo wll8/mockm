@@ -1,7 +1,6 @@
 const util = require(`./util/index.js`)
 
 function serverReplay({
-  HTTPHISTORY,
   noProxyTest,
   config,
 }) {
@@ -33,7 +32,7 @@ function serverReplay({
     (pathname, req) => {
       const method = req.method.toLowerCase()
       const fullApi = `${method} ${req.originalUrl}`
-      const history = getHistory({history: HTTPHISTORY, fullApi}).data
+      const history = getHistory({fullApi}).data
       if(history || config.hostMode) { // 当存在 history 则不进入代理
         return false
       } else if(noProxyTest({method, pathname}) === true) { // 当没有 history, 则使用 noProxy 规则
@@ -49,7 +48,6 @@ function serverReplay({
   ))
   serverReplay.use(middlewares)
   serverReplay.use(middleware.replayHistoryMiddleware({
-    HTTPHISTORY,
     config,
     business,
   }))

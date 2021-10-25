@@ -699,9 +699,9 @@ function business() { // 与业务相关性的函数
     /**
      * 获取原始 history
      * @param {object} param0 参数
-     * @param {object} param0.history require(config._httpHistory)
      */
-    function getRawHistory({history}) {
+    function getRawHistory({}) {
+      const history = global.HTTPHISTORY
       let list = []
       list = Object.keys(history).reduce((acc, cur) => {
         return acc.concat(history[cur])
@@ -712,15 +712,14 @@ function business() { // 与业务相关性的函数
     /**
      * 获取简要信息的 history 列表
      * @param {object} param0 参数对象
-     * @param {object} param0.history require(config._httpHistory)
      * @param {string} param0.method 方法 - 可选
      * @param {id} param0.method 方法 - 可选
      * @param {string} param0.api api - 可选
      * @return {array} 数组
      */
-    function getHistoryList({md5 = false, history, method: methodRef, api: apiRef} = {}) {
+    function getHistoryList({md5 = false, method: methodRef, api: apiRef} = {}) {
       const fs = require(`fs`)
-      let list = getRawHistory({history})
+      let list = getRawHistory({})
       list = list.filter(item => item.data).map(({path, fullApi, id, data: {req, res}}) => {
         const {method, url} = tool.url.fullApi2Obj(fullApi)
         if(methodRef && apiRef) {
@@ -759,12 +758,12 @@ function business() { // 与业务相关性的函数
     /**
      * 获取单条记录的 history
      * @param {object} param0 参数对象
-     * @param {object} param0.history require(config._httpHistory)
      * @param {string} param0.fullApi `method api` 可选
      * @param {function} param0.find 自定义筛选逻辑
      * @return {object} 为空时返回空对象
      */
-    function getHistory({history, fullApi, id, status, find}) { // 获取指定 fullApi/id 中的历史记录
+    function getHistory({fullApi, id, status, find}) { // 获取指定 fullApi/id 中的历史记录
+      const history = global.HTTPHISTORY
       if(fullApi === undefined && id) {
         return getRawHistory({history}).find(item => item.id === id) || {}
       }
@@ -824,7 +823,7 @@ function business() { // 与业务相关性的函数
       return bodyPath
     }
 
-    function createHttpHistory({config, history, dataDir, buffer, req, res}) {
+    function createHttpHistory({config, dataDir, buffer, req, res}) {
       const fs = require(`fs`)
       let {
         method,
@@ -891,23 +890,22 @@ function business() { // 与业务相关性的函数
       setHttpHistory({
         config,
         data: {path, fullApi, id: apiId, data: resDataObj},
-        history,
       })
     }
 
-    function setHttpHistory({config, data, history}) {
+    function setHttpHistory({config, data}) {
+      const history = global.HTTPHISTORY
       const fs = require(`fs`)
       const {path} = data
       history[path] = (history[path] || []).concat(data)
       fs.writeFileSync(config._httpHistory, tool.obj.o2s(history))
     }
 
-    function setHttpHistoryWrap({config, history, req, res, mock = false, buffer}) { // 从 req, res 记录 history
+    function setHttpHistoryWrap({config, req, res, mock = false, buffer}) { // 从 req, res 记录 history
       if(ignoreHttpHistory({config, req}) === false) {
         const data = [];
         const arg = {
           config,
-          history,
           buffer,
           req,
           res,
@@ -938,7 +936,7 @@ function business() { // 与业务相关性的函数
     function clearHistory(config) {
       function getDelIdList(list, options = {}) {
         options = {
-          retentionTime: 60 * 24 * 3,
+          retentionTime: 0.01,
           num: 1,
           ...options,
         }
@@ -963,8 +961,9 @@ function business() { // 与业务相关性的函数
         return delIdList
       }
 
-      const HTTPHISTORY = require(config._httpHistory) // 请求历史
-      let list = business().historyHandle().getHistoryList({history: HTTPHISTORY, md5: true})
+      global.HTTPHISTORY = require(config._httpHistory) // 请求历史
+      const HTTPHISTORY = global.HTTPHISTORY
+      let list = business().historyHandle().getHistoryList({md5: true})
       const delIdList = {
         function: config.clearHistory,
         object: list => getDelIdList(list, config.clearHistory),
@@ -1071,13 +1070,13 @@ function business() { // 与业务相关性的函数
   }
 
   function reqHandle({config}) { // 请求处理程序
-    function sendReq({getHistory, history, api, res, apiId}) { // 发送请求
+    function sendReq({getHistory, api, res, apiId}) { // 发送请求
       const axios = require('axios')
       const fs = require(`fs`)
 
       // api httpHistory 中的 api
       // console.log(`httpHistory[api]`, httpHistory[api])
-      const getHistoryData = getHistory({history, fullApi: api, id: apiId}).data
+      const getHistoryData = getHistory({fullApi: api, id: apiId}).data
       if(getHistoryData === undefined) {
         res.status(404).send({
           success: false,

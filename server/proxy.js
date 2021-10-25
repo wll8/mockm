@@ -4,7 +4,6 @@ const { print } = require('./util/log.js')
 async function serverProxy({
   api,
   db,
-  HTTPHISTORY,
   apiRootInjection,
   config,
 }) {
@@ -126,7 +125,6 @@ async function serverProxy({
       res.send = oldSend
       setHttpHistoryWrap({
         config,
-        history: HTTPHISTORY,
         req: newReq,
         res,
         mock: true,
@@ -271,7 +269,6 @@ async function serverProxy({
         allowCors({res: proxyRes, req, proxyConfig: userConfig})
         setHttpHistoryWrap({
           config,
-          history: HTTPHISTORY,
           req,
           res: proxyRes,
         })
