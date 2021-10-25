@@ -734,6 +734,7 @@ function business() { // 与业务相关性的函数
         const resBodyMd5 = resBodyPath && md5 && tool.file.hasFile(resBodyPath) ? tool.file.getMd5Sync(resBodyPath) : undefined
         const reqBodySize = reqBodyPath && tool.file.hasFile(reqBodyPath) ? fs.statSync(reqBodyPath).size : 0
         const reqBodyMd5 = reqBodyPath && md5 && tool.file.hasFile(reqBodyPath) ? tool.file.getMd5Sync(reqBodyPath) : undefined
+        const headers = res.lineHeaders.headers || require(require('path').resolve(res.lineHeaders.headPath))
         return {
           id,
           method,
@@ -741,7 +742,7 @@ function business() { // 与业务相关性的函数
           api: url,
           fullApi,
           statusCode: res.lineHeaders.line.statusCode,
-          contentType: res.lineHeaders.headers[`content-type`],
+          contentType: headers[`content-type`],
           extensionName: (resBodyPath || '').replace(/(.*)(\.)/, ''),
           resBodySize,
           resBodyMd5,
@@ -749,7 +750,7 @@ function business() { // 与业务相关性的函数
           reqBodySize,
           reqBodyMd5,
           reqBodyPath,
-          date: res.lineHeaders.headers.date,
+          date: headers.date,
         }
       }).filter(item => item)
       return list
@@ -786,12 +787,12 @@ function business() { // 与业务相关性的函数
       )
     }
 
-    function createBodyPath({config, req, headersObj, reqOrRes, apiId}) { // 根据 url 生成文件路径, reqOrRes: req, res
+    function createBodyPath({config, req, headersObj, reqOrRes, apiId, isHeader = false}) { // 根据 url 生成文件路径, reqOrRes: req, res
       const filenamify = require('filenamify')
       const fs = require(`fs`)
       const mime = require('mime')
       const headers = headersObj[reqOrRes]
-      const contentType = headers[`content-type`]
+      const contentType = isHeader ? `application/json;charset=utf-8` : headers[`content-type`]
       const extensionName = mime.getExtension(contentType) || ``
       const {url, path} = tool.httpClient.getClientUrlAndPath(req.originalUrl)
       let {
@@ -810,7 +811,7 @@ function business() { // 与业务相关性的函数
         shortUrl = shortUrl.slice(1, 100)
         const filePath = `${apiDir}/${
           filenamify(
-            `${shortUrl}_${method}_${apiId}_${reqOrRes}.${extensionName}`,
+            `${shortUrl}_${method}_${apiId}_${reqOrRes}${isHeader ? `_h` : ``}.${extensionName}`,
             {maxLength: 255, replacement: '_'}
           )
         }`
@@ -843,11 +844,15 @@ function business() { // 与业务相关性的函数
       function getBodyPath() {
         const arg = {config, req, headersObj, dataDir, apiId}
         return {
+          headersPathReq: createBodyPath({...arg ,reqOrRes: `req`, isHeader: true}),
+          headersPathRes: createBodyPath({...arg ,reqOrRes: `res`, isHeader: true}),
           bodyPathReq: tool.type.isEmpty(reqBody) === false ? createBodyPath({...arg ,reqOrRes: `req`}) : undefined,
           bodyPathRes: tool.type.isEmpty(buffer) === false ? createBodyPath({...arg ,reqOrRes: `res`}) : undefined,
         }
       }
-      const {bodyPathReq, bodyPathRes} = getBodyPath()
+      const {headersPathReq, headersPathRes, bodyPathReq, bodyPathRes} = getBodyPath()
+      fs.writeFileSync(headersPathReq, JSON.stringify(headersObj.req), {encoding: 'utf8'})
+      fs.writeFileSync(headersPathRes, JSON.stringify(headersObj.res), {encoding: 'utf8'})
       bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
       bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
       const resDataObj = {
@@ -861,7 +866,8 @@ function business() { // 与业务相关性的函数
               params: req.params,
               version: req.httpVersion,
             }),
-            headers: headersObj.req,
+            // headers: headersObj.req,
+            headPath: headersPathReq,
             // _header: proxyRes.req._header,
           },
           // body: null,
@@ -874,7 +880,8 @@ function business() { // 与业务相关性的函数
               statusMessage,
               version: res.httpVersion,
             },
-            headers: headersObj.res,
+            // headers: headersObj.res,
+            headPath: headersPathRes,
             // _header: res._header,
           },
           // body: null,
@@ -1079,7 +1086,8 @@ function business() { // 与业务相关性的函数
         return false
       }
       const httpDataReq = getHistoryData.req
-      const {line: {path, query, params}, headers} = httpDataReq.lineHeaders
+      let {line: {path, query, params}, headers} = httpDataReq.lineHeaders
+      headers = headers || require(require('path').resolve(httpDataReq.lineHeaders.headPath))
       const [, method, url] = api.match(/(\w+)\s+(.*)/)
       reqHandle({config}).injectionReq({req: { headers }, res, type: `set`})
       const pathOrUrl = path || url
@@ -1120,6 +1128,7 @@ function business() { // 与业务相关性的函数
      * @param {*} param0 
      */
     function injectionReq(arg) {
+      debugger
       if(Boolean(config.updateToken) === false) {
         return undefined
       }
