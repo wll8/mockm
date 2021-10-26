@@ -53,10 +53,11 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
   }
 }
 
-function defaultConfigFn(util) { // 默认配置
+/** @type {import('mockm/@types/config').Config} */
+const defaultConfigFn = (util) => { // 默认配置
   const {
-    lib: { fetch, midResJson, axios, mime, mockjs },
-    tool,
+    libObj: { fetch, midResJson, axios, mime, mockjs },
+    toolObj,
   } = util
   return {
     disable: false,
