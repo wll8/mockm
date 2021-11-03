@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const {logHelper, print} = require('./util/log.js')
+process.setMaxListeners(0) // 不限制监听数量
 process.argv.includes(`--log-line`) && logHelper()
 const config = require(`./config.js`)
 const util = require(`./util/index.js`)
