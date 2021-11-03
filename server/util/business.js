@@ -1127,7 +1127,6 @@ function business() { // 与业务相关性的函数
      * @param {*} param0 
      */
     function injectionReq(arg) {
-      debugger
       if(Boolean(config.updateToken) === false) {
         return undefined
       }
