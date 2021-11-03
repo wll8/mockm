@@ -214,7 +214,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       attemptNum = attemptNum - 1
     } while (hasPackage(packageName) === false && attemptNum > 0);
     const hasPackageRes = hasPackage(packageName)
-    print(tool().cli.colors.red(`Initialize ${packageName} ${hasPackageRes ? `successfully`: `failed`}`))
+    print(tool().cli.colors[[`red`, `green`][Number(hasPackageRes)]](`Initialize ${packageName} ${[`failed`, `successfully`][Number(hasPackageRes)]}`))
     return hasPackageRes
   }
 
