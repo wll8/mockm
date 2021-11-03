@@ -1,5 +1,6 @@
 const http = require(`axios`)
 const util = require('./util.js')
+const getPort = require(`get-port`)
 const assert = require('assert')
 
 describe('基本功能', () => {
@@ -451,6 +452,17 @@ describe('命令行', () => {
       okFn: async ({arg, str}) => {
         const version = require(util.pkgPath('./package.json')).version
         return version === str.trim()
+      }
+    }))
+  })
+  it(`--node-options`, async function () {
+    util.ok(await util.runMockm({
+      runOk: false,
+      mockm: {
+        '--node-options': `--inspect-brk="${await getPort()}"`,
+      },
+      okFn: async ({arg, str}) => {
+        return str.match(`ws://`)
       }
     }))
   })
