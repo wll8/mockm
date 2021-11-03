@@ -8,6 +8,7 @@
  */
 
 const {logHelper, print} = require(`${__dirname}/util/log.js`)
+process.argv = require(`./lib/cross-argv@1.0.1.js`)()
 process.argv.includes(`--log-line`) && logHelper()
 
 const fs = require(`fs`)
@@ -93,9 +94,10 @@ new Promise(async () => { // 启动 server.js
       log = ``
     }, 1000)
   }
+  const nodeArg = typeof(cliArg[`--node-options`]) === `string` ? cliArg[`--node-options`] : ``
   nodemon({
     ignoreRoot: [], // 覆盖 ignore, 避免 .git node_modules 中的内容不能被监听, 例如未指定配置文件时是使用 node_modules 中的配置
-    exec: `node "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
+    exec: `node ${nodeArg} "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
     watch: [configFile],
     stdout: false,
     cwd: process.cwd(),

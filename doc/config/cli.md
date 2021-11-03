@@ -52,6 +52,9 @@ module.exports = {
 ## --version
 仅查看版本号, 然后退出程序, 不启动服务.
 
+## --node-options
+指定 node 的运行参数, 例如 `--node-options="--inspect-brk"` 可以进入调试模式.
+
 ## 环境变量
 ### MOCKM_REGISTRY
 MOCKM_REGISTRY 或 NPM_CONFIG_REGISTRY 可以指定按需安装依赖时的镜像地址, 默认 https://registry.npm.taobao.org/.
