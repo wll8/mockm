@@ -44,7 +44,7 @@ async function serverProxy({
   const server = jsonServer.create()
   const http = require('http');
   const serverRef = http.createServer(server);
-  // https://github.com/expressjs/express/issues/2594#issuecomment-103265227
+  // 使用 upgrade 升级为 ws https://github.com/expressjs/express/issues/2594#issuecomment-103265227
   serverRef.on('upgrade', async (req, socket, upgradeHead) => {
     const ws = await tool.generate.initPackge(`ws`)
     const wss = new ws.Server({ noServer: true });
@@ -59,6 +59,10 @@ async function serverProxy({
         cb(client);
       });
     };
+    // 捕获错误 ECONNRESET 错误 https://github.com/http-party/node-http-proxy/issues/1286#issuecomment-437672954
+    socket.on('error', err => {
+      print(err)
+    });
     return server(req, res);
   });
   server.use((req, res, next) => {
