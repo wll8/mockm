@@ -356,6 +356,7 @@ function allTestAfter() {
 
 function http() {
   const axios = require(`axios`)
+  axios.defaults.timeout = 5 * 1000
   axios.interceptors.response.use((response) => {
     return response
   }, (error) => {
