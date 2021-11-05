@@ -15,7 +15,7 @@
 
 ## config.osIp
 类型: string
-默认: 内网网卡第一个 IP
+默认: 本地网卡第一个 IPv4 地址
 
 想绑定到 mm 程序的 IP, 会自动添加到 [调试链接](#config-apiinheader) 中.
 
