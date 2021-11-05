@@ -58,7 +58,12 @@ async function runMockm(fnArg) {
             && str.match(`:${arg.testPort}`)
           ) : true
         ) {
-          let res = await okFn({str, arg, cmd})
+          let res
+          try {
+            res = await okFn({str, arg, cmd})
+          } catch (error) {
+            console.log(`error`, error)
+          }
           res === undefined ? false : res
           res && resolve(res)
           return res
