@@ -354,6 +354,23 @@ function allTestAfter() {
   console.log('恢复用户配置')
 }
 
+/**
+ * @see https://github.com/scopsy/await-to-js
+ * @param { Promise } promise
+ * @param { Object= } errorExt - Additional Information you can pass to the err object
+ * @return { Promise }
+ */
+ function to(promise, errorExt) {
+  return promise
+      .then(function (data) { return [null, data]; })
+      .catch(function (err) {
+      if (errorExt) {
+          Object.assign(err, errorExt);
+      }
+      return [err, undefined];
+  });
+}
+
 function http() {
   const axios = require(`axios`)
   axios.defaults.timeout = 5 * 1000
@@ -366,6 +383,7 @@ function http() {
 }
 
 module.exports = {
+  to,
   ok,
   runMockm,
   craeteMockmCmdInfo,
