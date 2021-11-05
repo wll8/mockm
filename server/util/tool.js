@@ -1302,8 +1302,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const obj = require(`os`).networkInterfaces()
       const ipObj = Object.keys(obj).reduce((res, cur, index) => {
         return [...res, ...obj[cur]]
-      }, []).filter(item => !item.address.match(/(127.|:)/))[0] || {}
-      return ipObj.ip || `127.0.0.1`
+      }, []).filter(item => item.family === `IPv4`)[0] || {}
+      return ipObj.address || `127.0.0.1`
     }
     return {
       clearProcess,
