@@ -1,5 +1,5 @@
-const http = require(`axios`)
 const util = require('./util.js')
+const http = util.http
 const getPort = require(`get-port`)
 const assert = require('assert')
 
@@ -20,7 +20,7 @@ describe('基本功能', () => {
     it(`port`, async () => {
       util.ok(await util.runMockm(
         async ({arg, str}) => {
-          const httpData = (await http.get(`http://127.0.0.1:${arg.port}/`).catch(err => ({}))).data || ``
+          const httpData = (await http.get(`http://127.0.0.1:${arg.port}/`)).data || ``
           return httpData.match(`html`)
         }
       ))
@@ -28,7 +28,7 @@ describe('基本功能', () => {
     it(`replayPort`, async () => {
       util.ok(await util.runMockm(
         async ({arg, str}) => {
-          const httpData = (await http.get(`http://127.0.0.1:${arg.replayPort}/`).catch(err => ({}))).data || ``
+          const httpData = (await http.get(`http://127.0.0.1:${arg.replayPort}/`)).data || ``
           return httpData.match(`html`)
         }
       ))
@@ -36,7 +36,7 @@ describe('基本功能', () => {
     it(`testPort`, async () => {
       util.ok(await util.runMockm(
         async ({arg, str}) => {
-          const httpData = (await http.get(`http://127.0.0.1:${arg.testPort}/`).catch(err => ({}))).data || ``
+          const httpData = (await http.get(`http://127.0.0.1:${arg.testPort}/`)).data || ``
           return httpData.match(`html`)
         }
       ))
