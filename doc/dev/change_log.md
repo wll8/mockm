@@ -6,6 +6,23 @@
 - 使用 `npm i -g mockm@版本号` 例如 `mockm@1.1.3` 回退到指定版本.
 :::
 
+## 2021年11月
+#### v1.1.25
+- server
+  - feat: 升级依赖
+  - feat: 提高稳健性, 当自定义的 api 错误时不应导致服务崩溃
+  - feat: 将 httpHistory 中的 head 存储为文件以提升性能
+  - refactor: 把 history 放到 global 上, 避免各处传参
+  - refactor: 添加 config.js 的 d.ts 支持
+  - feat: 避免大于 10 个监听器时出现警告
+  - fix: 安装依赖成功时不应该显示为红色
+  - feat: 支持传入 node 运行参数
+  - fix: 捕获 ws 接口不存在时的错误
+  - fix: 应正确获取 IPv4 地址
+
+- client
+  - fix: 使用历史数据生成接口时应删除跨域标志
+
 ## 2021年10月
 #### v1.1.25-alpha.18
 - server
