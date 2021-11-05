@@ -57,13 +57,16 @@ function FixedResponse({httpData, simpleInfo}) {
     
     const str = [
       `(req, res) => {`,
-      `res.set(${JSON.stringify({
-        ...headers,
-
-        // 删除调试地址, 因为它在请求时会重新生成
-        [window.serverConfig.apiInHeader]: undefined,
-        [window.serverConfig.apiInHeader + `-remote`]: undefined,
-      }, null, 2)})`,
+      `res.set(${JSON.stringify(
+        Object.entries(headers).reduce((acc, [key, val]) => {
+          if(!(
+            key.match(/^access-control-allow-/i) // 删除跨域标志
+            || key.match(new RegExp(`^${window.serverConfig.apiInHeader}`)) // 删除调试地址
+          )){
+            acc[key] = val
+          }
+          return acc
+        }, {}), null, 2)})`,
       `res.json(${bodyText})`,
       `}`,
     ].join(`\n`)
