@@ -4,6 +4,7 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
 - [x] fix: 连接不存在的 ws api 2-3次会报错
 - [x] fix: config.proxy 非 `/` 代理时, host 不应是 `/` 的代理
 - [ ] feat: 支持根据运行环境自动切换语言
@@ -53,6 +54,8 @@
 - [x] refactor: 分离示例配置和默认配置
   - 目前的默认配置其实是函数很多解释参数作为的示例配置, 这样并不利于文档编写, 因为有些示例值并不适合用珩默认值.
 - [ ] feat: 各平台一键安装命令
+  - [x] window
+  - [ ] macos/linux
 - [ ] feat: 显示完整的 swagger , 方便浏览其他 api
 - [ ] feat: 标记数据是来自自定义 api 还是后台接口
 - [ ] feat: 思考如何解决记录的请求与实际发送的请求的混乱问题, 例如
@@ -102,19 +105,19 @@
 - [ ] fix: 当前端参数为 form data 时, 请求头为 content-type: application/x-www-form-urlencoded, 请求体没有被记录和保存
 - [ ] fix: 奔溃自动重启后会丢失 cli 上传入的参数
 - [x] fix: config.proxy 无法代理到其他域
-``` js
-// 正确 http://127.0.0.1:9000/api2/quickSearch == ok
-proxy: { 
-  '/': `http://192.168.1.2:9000/`,
-  '/api2': `http://192.168.1.2:9000/api/`,
-},
+  ``` js
+  // 正确 http://127.0.0.1:9000/api2/quickSearch == ok
+  proxy: { 
+    '/': `http://192.168.1.2:9000/`,
+    '/api2': `http://192.168.1.2:9000/api/`,
+  },
 
-// 错误 http://127.0.0.1:9000/api2/quickSearch == no
-proxy: { 
-  '/': `http://www.httpbin.org/`,
-  '/api2': `http://192.168.1.2:9000/api/`,
-},
-```
+  // 错误 http://127.0.0.1:9000/api2/quickSearch == no
+  proxy: { 
+    '/': `http://www.httpbin.org/`,
+    '/api2': `http://192.168.1.2:9000/api/`,
+  },
+  ```
 - [ ] fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
 - [x] fix: 添加 webApi 时不能自动生效
   - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
@@ -155,19 +158,31 @@ proxy: {
 - [x] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
   - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
 
-## 更新计划
-- 1.2.x: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
-- 1.2.x: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
-- 1.2.x: 期望 httpHistory 中仅保存 fullApi 和 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
-- 1.2.x: 期望更改 httpData 目录为 mmData, 因为 httpData 名字比较通用, 可能会被其他程序使用
-- 1.2.x: 引入破坏性的依赖更新
-  - [ ] filenamify@5.x 只支持 esm
-  - [x] axios 升级后发送的请求不再有 req.connection.socket
-  - [ ] node-fetch@3.x 只支持 esm
-  - [ ] ws@8.x 文本消息和关闭原因不再解码为字符串, 而是默认返回 Buffers. 另外, 8.2.x 支持 esm
-  - [ ] get-port@6.x 只支持 esm
-  - esm 升级说明: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
-  - esm 工具 https://medium.com/web-on-the-edge/tomorrows-es-modules-today-c53d29ac448c
+## 破坏性更新计划
+- 2.x
+  - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
+  - [ ] refactor: node 支持版本调整为 v12+
+  - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
+  - [ ] fix: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
+  - [ ] refactor: 期望 httpHistory 中仅保存 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
+  - [ ] refactor: 期望更改 httpData 目录为 mockm_data, 因为 httpData 名字比较通用, 可能会被其他程序使用
+  - [ ] feat: 依赖更新: ws@8.x 文本消息和关闭原因不再解码为字符串, 而是默认返回 Buffers. 另外, 8.2.x 支持 esm
+  - [ ] feat(server): 更改 openApi 的功能 - 破坏性修改
+    - 为了统一逻辑, 删除 array[string] 的 pathname 最高匹配度特性
+    - 支持的类型: string | array[string] | object | array[object] 
+    - string - 指定一个 openApi 地址
+    - array[string] - 根据顺序到每个 json 中匹配对应的 path 返回 json
+    - object - 配置后再进行匹配，例如上个版本的 key 作为此版本的 resPrefix
+    - object.url openApi - 文件地址
+    - object.resPrefix - 将前缀添加到 oepnApi 的 path 中
+    - object.reqPrefix - 将前缀添加到请求的 path 中
+    - array[object] - 参考 object
+## 备注
+- [ ] filenamify@5.x 只支持 esm
+- [ ] node-fetch@3.x 只支持 esm
+- [ ] get-port@6.x 只支持 esm
+- esm 升级说明: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+- esm 工具 https://medium.com/web-on-the-edge/tomorrows-es-modules-today-c53d29ac448c
 ## 解决 mockjs 的问题
 ### 前端API问题
 - 不能使用 fetch https://github.com/nuysoft/Mock/issues/430
