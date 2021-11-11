@@ -152,4 +152,8 @@ mockm 还有很多不足, 如果愿意, 欢迎参与贡献.
 
 Copyright (c) 2017-present, xw
 
+## 友情推荐
 
+| 项目        | 简介
+| ----------- | ----
+| [taroify](https://github.com/mallfoundry/taroify)      | Taroify 是移动端组件库 Vant 的 Taro 版本，两者基于相同的视觉规范，提供一致的 API 接口，助力开发者快速搭建小程序应用。
