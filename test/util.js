@@ -62,7 +62,7 @@ async function runMockm(fnArg) {
           try {
             res = await okFn({str, arg, cmd})
           } catch (error) {
-            console.log(`error`, error)
+            console.log(`error`, error.message)
           }
           res === undefined ? false : res
           res && resolve(res)
@@ -263,7 +263,7 @@ function asyncTosync (fn) {
       res = readFileSync(fileObj.resFile, `utf8`)
       err = readFileSync(fileObj.errFile, `utf8`)
     } catch (error) {
-      console.log(`error`, error)
+      console.log(`error`, error.message)
     }
     filesCreateOrRemove(fileObj, `remove`)
     return {res, err}
@@ -360,7 +360,7 @@ function allTestAfter() {
  * @param { Object= } errorExt - Additional Information you can pass to the err object
  * @return { Promise }
  */
- function to(promise, errorExt) {
+function to(promise, errorExt) {
   return promise
       .then(function (data) { return [null, data]; })
       .catch(function (err) {
