@@ -287,7 +287,7 @@ function hasFile(filePath) {
  * @param {*} param0.timeout 超时毫秒
  * @param {*} param0.fn 传入输出的文本, 返回匹配结果, 直到为真或超时
  */
-function testCliText({cmd = str, timeout = 10 * 1e3, fn = (str) => str, } = {}) {
+function testCliText({cmd = str, timeout = 30 * 1e3, fn = (str) => str, } = {}) {
   console.log(`cmd:\n${cmd}`)
   return new Promise((resolve, reject) => {
     const { spawn } = require('child_process');
