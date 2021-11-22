@@ -372,12 +372,48 @@ function to(promise, errorExt) {
 }
 
 function http() {
-  const axios = require(`axios`)
-  axios.defaults.timeout = 5 * 1000
-  axios.interceptors.response.use((response) => {
-    return response
-  }, (error) => {
-    return Promise.reject(error)
+  let axios = require(`axios`)
+  axios.defaults.timeout = 30 * 1e3
+  axios.defaults.retry = 3 // 重试次数
+  axios.defaults.retryDelay = 1000 // 重试延时
+  axios.defaults.shouldRetry = (error) => true // 重试条件，默认只要是错误都需要重试
+
+  axios.interceptors.response.use(undefined, (err) => {
+    const config = err.config
+
+    // 判断是否配置了重试
+    if(!config || !config.retry) return Promise.reject(err)
+    if(!config.shouldRetry || typeof config.shouldRetry != 'function') {
+      return Promise.reject(err)
+    }
+ 
+    // 判断是否满足重试条件
+    if(!config.shouldRetry(err)) {
+      return Promise.reject(err)
+    }
+ 
+    // 设置重置次数，默认为0
+    config.__retryCount = config.__retryCount || 0
+ 
+    // 判断是否超过了重试次数
+    if(config.__retryCount >= config.retry) {
+      return Promise.reject(err)
+    }
+ 
+    // 重试次数自增
+    config.__retryCount += 1
+ 
+    // 延时处理
+    const backoff = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve()
+      }, config.retryDelay || 1)
+    })
+ 
+    // 重新发起axios请求
+    return backoff.then(() => {
+      return axios(config)
+    })
   })
   return axios
 }
