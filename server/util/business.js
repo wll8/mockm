@@ -3,6 +3,31 @@ const { print } = require('./log.js')
 const tool = require(`./tool.js`)
 
 function business() { // 与业务相关性的函数
+  /**
+   * 保存日志
+   */
+  function saveLog({logStr, logPath}) {
+    const fs = require(`fs`)
+    const os = require(`os`)
+    const packageJson = require(`../package.json`)
+    fs.existsSync(logPath) && fs.writeFileSync(
+      logPath,
+      [
+        [
+          tool.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date()), // 当前时间
+          `mockm:${packageJson.version}`, // mockm 版本号
+          `node:${process.version}`, // node 版本号
+          `os:${os.type()} ${os.release()}`, // 操作系统和版本号
+          `arg:${process.argv.splice(2)}`, // 命令行参数
+          `lang:${process.env.LANG}`, // 终端语言环境
+        ].join(`, `), // 附件信息
+        `\n`,
+        logStr.trim(), // 调用栈
+        `\n\n`,
+        fs.readFileSync(logPath, `utf8`), // 旧 log
+      ].join(``),
+    )
+  }
 
   /**
    * 通过重新保存文件的方式触发 nodemon 的文件监听, 然后让服务重启
@@ -1301,6 +1326,7 @@ function business() { // 与业务相关性的函数
   }
 
   return {
+    saveLog,
     listToData,
     reStartServer,
     wrapApiData,

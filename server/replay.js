@@ -10,6 +10,7 @@ function serverReplay({
   } = util
   const {
     historyHandle,
+    saveLog,
   } = business
   const {
     middleware,
@@ -51,6 +52,12 @@ function serverReplay({
     config,
     business,
   }))
+
+  serverReplay.use((error, req, res, next) => {
+    saveLog({logStr: error.stack, logPath: config._errLog})
+    next(error)
+  })
+
   serverReplay.listen(config.replayPort, () => {
     // console.log(`服务器重放地址: http://localhost:${config.replayPort}/`)
   })
