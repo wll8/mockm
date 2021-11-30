@@ -1061,6 +1061,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const method = req.method.toLowerCase()
         const fullApi = id ? undefined :`${method} ${req.originalUrl}`
         const history = getHistory({id, fullApi, find: list => {
+          const getSize = (path) => {
+            const bodyPathCwd = require(`path`).join(process.cwd(), path)
+            return require(`fs`).readFileSync(bodyPathCwd).length
+          }
           const getStatus = (item) => {
             try {
               return item.data.res.lineHeaders.line.statusCode
@@ -1068,6 +1072,16 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
               console.log(`err`, err)
             }
           }
+          list.sort((item, item1) => {
+            try {
+              const size = getSize(item.data.res.bodyPath)
+              const size1 = getSize(item1.data.res.bodyPath)
+              return size1 - size
+            } catch (error) {
+              console.log(`error`, error)
+              return 0
+            }
+          })
           const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
           let getItemRes = undefined
           if(config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
