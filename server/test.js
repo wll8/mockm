@@ -20,6 +20,7 @@ function serverTest({
     },
   } = tool
   const {
+    saveLog,
     initHandle,
     reqHandle,
     clientInjection,
@@ -384,6 +385,11 @@ function serverTest({
       print(`No matching method found`, {action})
       next()
     }
+  })
+
+  serverTest.use((error, req, res, next) => {
+    saveLog({logStr: error.stack, logPath: config._errLog})
+    next(error)
   })
 
   serverTest.listen(config.testPort, () => {

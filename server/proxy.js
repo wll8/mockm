@@ -228,6 +228,11 @@ async function serverProxy({
 
   server.use(router) // 其他 use 需要在此行之前, 否则无法执行
 
+  server.use((error, req, res, next) => {
+    saveLog({logStr: error.stack, logPath: config._errLog})
+    next(error)
+  })
+
   serverRef.listen(config.port, () => {
     // console.log(`服务运行于: http://localhost:${config.port}/`)
   })
