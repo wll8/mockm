@@ -37,6 +37,7 @@ const nodemon = require(`nodemon`)
 const {
   initHandle,
   plugin,
+  saveLog,
 } = business
 let config = {}
 const {
@@ -125,26 +126,10 @@ new Promise(async () => { // 启动 server.js
     // arg undefined 用户退出, 例如 ctrl+c
     if(log.match(/killProcess:/)) { // 检测到错误日志时重启
       restart()
-      if(config.dataDir) { // 保存错误日志
-        const os = require(`os`)
-        fs.writeFileSync(
-          config._errLog,
-          [
-            [
-              tool.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date()), // 当前时间
-              `mockm:${packageJson.version}`, // mockm 版本号
-              `node:${process.version}`, // node 版本号
-              `os:${os.type()} ${os.release()}`, // 操作系统和版本号
-              `arg:${process.argv.splice(2)}`, // 命令行参数
-              `lang:${process.env.LANG}`, // 终端语言环境
-            ].join(`, `), // 附件信息
-            `\n`,
-            log, // 调用栈
-            `\n`,
-            fs.readFileSync(config._errLog, `utf8`), // 旧 log
-          ].join(``),
-        )
-      }
+      saveLog({
+        logStr: log,
+        logPath: config._errLog,
+      })
     }
   })
   .on(`restart`, (arg) => {
