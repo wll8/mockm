@@ -604,7 +604,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const pathToRegexp = require('path-to-regexp')
       const keys = []
       const re = pathToRegexp(rePath, keys)
-      const pathUrl = url
+      // 去除 url 中的 origin
+      const pathUrl = url.match(/^\//) ? url : url.replace((new URL(url)).origin, ``)
       const result = re.exec(pathUrl)
       const obj = keys.reduce((acc, cur, index) => {
         acc[cur.name] = result[index + 1]
