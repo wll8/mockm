@@ -80,11 +80,11 @@ async function serverProxy({
       // eslint-disable-next-line no-inner-declarations
       function midHandler(fn) {
         return (req, res, next) => {
-          const hasFind = serverRouterList.some(item => item.re.test(req.baseUrl))
+          const hasFind = serverRouterList.some(item => item.re.test(req.originalUrl))
           hasFind ? next() : fn(req, res, next)
         }
       }
-      const mid = proxy(item.context, getProxyConfig(item.options))
+      const mid = proxy([`${item.context}/**`], getProxyConfig(item.options))
       item.options.mid && server.use(item.context, midHandler(item.options.mid))
       server.use(item.context, midHandler(mid))
     }

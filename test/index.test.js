@@ -154,6 +154,19 @@ describe('基本功能', () => {
     })
   })
   describe('config.api', () => {
+    it(`config.api 覆盖 config.proxy`, async () => {
+      util.ok(await util.runMockm(
+        async ({arg, str}) => {
+          const id = util.uuid()
+          const res1 = (await http.get(`http://127.0.0.1:${arg.port}/anything/overrideProxy`)).data
+          const res2 = (await http.get(`http://127.0.0.1:${arg.port}/anything/${id}`)).data
+          return (
+            res1 === `ok`
+            && res2.url.match(id)
+          )
+        }
+      ))
+    })
     it(`* 号代表处理此路径的所有方法`, async () => {
       util.ok(await util.runMockm(
         async ({arg, str}) => {
