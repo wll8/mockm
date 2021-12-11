@@ -5,6 +5,22 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome",
+      "url": "https://translate.google.cn/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}",
+      "request": "attach",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "调试 run.js",
