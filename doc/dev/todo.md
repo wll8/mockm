@@ -92,7 +92,7 @@
 - [ ] fix: 当 webApi 与 config.api 相同时, webApi 不应该优先
   - 违背了文档: `从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权`
   - 这似乎是某个版本之后导致的问题
-- [ ] fix: 当 config.proxy 与 config.api 相同时, proxy 不应该优先
+- [x] fix: 当 config.proxy 与 config.api 相同时, proxy 不应该优先
   - 违背了文档: `当与 config.proxy 中的路由冲突时, config.api 优先.`
 - [x] fix: 某些设备修改 mm.config.js 文件并不会自动重载
   - 更新到最新版本 nodemon@2.0.12 无效
