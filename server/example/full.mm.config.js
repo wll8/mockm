@@ -129,6 +129,7 @@ module.exports = util => {
           })
         },
         'get /ip': {res: `127.0.0.1`},
+        '/anything/overrideProxy': `ok`,
         'get /name': {name: mockjs.mock(`@cname`)},
         'get /file' (req, res, next) { // 发送文件
           res.sendFile(__filename)
