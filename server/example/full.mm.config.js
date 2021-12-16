@@ -70,6 +70,10 @@ module.exports = util => {
       '/anything/proxy/string_fn':[`method`, ({req, json}) => {
         return json.toLowerCase() // get
       }],
+      '/any/proxy/test/byConfigAPICoverage': `/anything/proxy/test/byConfigAPICoverage`,
+      '/any/proxy/test/slashSuffix1/': `/anything/proxy/test/slashSuffix1/`,
+      '/any/proxy/test/slashSuffix2': `/anything/proxy/test/slashSuffix2`,
+      '/any/proxy/test/slashSuffix3': `/anything/proxy/test/slashSuffix3/`,
     },
     remote: false,
     openApi: `http://httpbin.org/spec.json`,
@@ -130,6 +134,7 @@ module.exports = util => {
         },
         'get /ip': {res: `127.0.0.1`},
         '/anything/overrideProxy': `ok`,
+        '/any/proxy/test/byConfigAPICoverage': `ok`,
         'get /name': {name: mockjs.mock(`@cname`)},
         'get /file' (req, res, next) { // 发送文件
           res.sendFile(__filename)

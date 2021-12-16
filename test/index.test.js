@@ -52,6 +52,20 @@ describe('基本功能', () => {
         }
       ))
     })
+    it(`是否包含后缀 / 的情况`, async () => {
+      util.ok(await util.runMockm(
+        async ({arg, str}) => {
+          const res1 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/slashSuffix1/1`)).data.url
+          const res2 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/slashSuffix2/2`)).data.url
+          const res3 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/slashSuffix3/3`)).data.url
+          return (
+            res1.match(`slashSuffix1`)
+            && res2.match(`slashSuffix2`)
+            && res3.match(`slashSuffix3`)
+          )
+        }
+      ))
+    })
     it(`在进行代理之前添加中间件 - 实现延时功能`, async () => {
       util.ok(await util.runMockm(
         async ({arg, str}) => {
@@ -154,18 +168,30 @@ describe('基本功能', () => {
     })
   })
   describe('config.api', () => {
-    it(`config.api 覆盖 config.proxy`, async () => {
-      util.ok(await util.runMockm(
-        async ({arg, str}) => {
-          const id = util.uuid()
-          const res1 = (await http.get(`http://127.0.0.1:${arg.port}/anything/overrideProxy`)).data
-          const res2 = (await http.get(`http://127.0.0.1:${arg.port}/anything/${id}`)).data
-          return (
-            res1 === `ok`
-            && res2.url.match(id)
-          )
-        }
-      ))
+    describe('config.api 覆盖 config.proxy', () => {
+      it(`某部分路径`, async () => {
+        util.ok(await util.runMockm(
+          async ({arg, str}) => {
+            const id = util.uuid()
+            const res1 = (await http.get(`http://127.0.0.1:${arg.port}/anything/overrideProxy`)).data
+            const res2 = (await http.get(`http://127.0.0.1:${arg.port}/anything/${id}`)).data
+            return (
+              res1 === `ok`
+              && res2.url.match(id)
+            )
+          }
+        ))
+      })
+      it(`全路径匹配`, async () => {
+        util.ok(await util.runMockm(
+          async ({arg, str}) => {
+            const res1 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/byConfigAPICoverage`)).data
+            return (
+              res1 === `ok`
+            )
+          }
+        ))
+      })
     })
     it(`* 号代表处理此路径的所有方法`, async () => {
       util.ok(await util.runMockm(

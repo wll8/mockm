@@ -84,7 +84,9 @@ async function serverProxy({
           hasFind ? next() : fn(req, res, next)
         }
       }
-      const mid = proxy([`${item.context}/**`], getProxyConfig(item.options))
+      // 把代理路径 `/any` 变成 `/any/**` 的形式, 这样才能实现排除功能
+      const key = `${item.context}${item.context.endsWith(`/`) ? '' : `/`}**`
+      const mid = proxy([key], getProxyConfig(item.options))
       item.options.mid && server.use(item.context, midHandler(item.options.mid))
       server.use(item.context, midHandler(mid))
     }
