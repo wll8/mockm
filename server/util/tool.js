@@ -831,12 +831,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     /**
      * 根据 url 获取文件的存储路径以及文件名, 避免特殊字符
-     * @param {string} url http 地址
+     * @param {string} obj.url http 地址
+     * @param {boolean} obj.isFull 是否使用完整路径
      * @returns {object} {pathname, fileName} fileName 是 query 参数生成的名字
      */
-    function getFilePath(url) {
+    function getFilePath({url, isFull = false}) {
       const filenamify = require('filenamify')
-      const {
+      let {
         pathname,
         search = ``,
       } = new URL(url)
@@ -844,6 +845,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         search,
         { maxLength: 255, replacement: '_' }
       )
+      if(isFull) {
+        pathname = filenamify(
+          url,
+          { maxLength: 255, replacement: '_' }
+        )
+      }
       return {
         pathname,
         fileName,
@@ -869,7 +876,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const {
         pathname,
         fileName,
-      } = getFilePath(fileUrl)
+      } = getFilePath({url: fileUrl, isFull: true})
       const fs = require('fs')
       const dir = `${baseDir}/${pathname}`
       fs.mkdirSync(dir, { recursive: true })
@@ -908,7 +915,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const {
         pathname,
         fileName,
-      } = getFilePath(fileUrl)
+      } = getFilePath({url: fileUrl})
       const fs = require('fs')
       const dir = `${baseDir}/${pathname}`
       if(hasFile(dir) === false) {
