@@ -630,11 +630,7 @@ function business() { // 与业务相关性的函数
       }
 
       { // 定时备份 openApi
-        const openApiList = Boolean(config.openApi && config.backOpenApi) === false ? [] : {
-          string: () => [config.openApi],
-          array: () => config.openApi,
-          object: () => Object.values(config.openApi),
-        }[tool.type.isType(config.openApi)]()
+        const openApiList = Boolean(config.backOpenApi) === false ? [] : config.openApi.map(item => item.spec)
         const backFn = () => {
           openApiList.forEach(item => {
             tool.file.backUrl(config._openApiHistoryDir, item, data => { // 格式化 openApi 后再保存, 避免压缩的内容不易比较变更

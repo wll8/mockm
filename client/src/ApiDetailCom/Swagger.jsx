@@ -106,11 +106,11 @@ function Swagger(props) {
           return system.getState().toJSON().spec.json
         },
         getSpecPrefix () {
-          return system.getState().toJSON().spec.json.info._openApiPrefix || ``
+          return system.getState().toJSON().spec.json.info._matchInfo.resPrefix || ``
         },
         setSpec (data) {
           const jsonSpec = system.getState().toJSON().spec.json
-          const specPrefix = system.getState().toJSON().spec.json.info._openApiPrefix || ``
+          const specPrefix = system.getState().toJSON().spec.json.info._matchInfo.resPrefix || ``
           const newSpec = {...jsonSpec, ...data}
           setState(preState => ({...deepSet(preState, `spec`, newSpec)}))
           setState(preState => ({...deepSet(preState, `specPrefix`, specPrefix)}))

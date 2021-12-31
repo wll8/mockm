@@ -437,6 +437,81 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return urlList[maxIndex]
     }
 
+    /**
+     * 在内容中根据 path 找出最适合的那个 json
+     * @param {*} param0.urlList url 列表
+     * @param {*} param0.pathname pathname
+     */
+    async function findLikePath({
+      api,
+      method,
+      config,
+    }) {
+      const arr = config.openApi
+      const isType = type().isType
+      
+      for (let index = 0; index < arr.length; index++) {
+        const item = arr[index]
+        const res = await hasInpath({api, method, ...item, config})
+        if(res || index === (arr.length - 1)) {
+          return res || {
+            ...arr[0],
+            hasMatch: false,
+            reqPrefix: ``,
+            resPrefix: ``,
+            api,
+            method,
+          }
+        }
+      }
+      
+      // 把 swagger 的 path /status/{codes} 转为正则 /status/.+?$
+      function swgPathToReg(path) {
+        return new RegExp(`^${path.replace(/\{.+?\}/g, '.+?')+`$`}`)
+      }
+
+      /**
+       * 在 openApi 中获取给定的 api
+       * @param {*} param0.spec openApi json 或 json 路径
+       * @param {*} param0.reqPrefix 请求前缀
+       * @param {*} param0.resPrefix 响应前缀
+       * @param {*} param0.api 请求地址
+       * @param {*} param0.method 请求方法
+       * @returns {*} 找到的那个 path 对象
+       */
+      async function hasInpath({spec, resPrefix = ``, reqPrefix = ``, api, method, config}) {
+        api = isType(reqPrefix, `string`) ? `${reqPrefix}${api}` : reqPrefix(api)
+        const path = new URL(`http://127.0.0.1${api}`).pathname
+        const openApiFile = await file().getBackUrl(config._openApiHistoryDir, spec)
+        const specJson = require(openApiFile)
+        let {paths, basePath = ``} = specJson
+        method = method ? method.toLowerCase() : undefined
+        // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
+        const re = new RegExp(`^(${basePath})(/.*)`)
+        const reqPath = path.replace(re, '$2')
+        
+        let res = undefined
+        Object.entries(paths).find(([resPath, val], index) => {
+          resPath = isType(resPrefix, `string`) ? `${resPrefix}${resPath}` : resPrefix(resPath)
+          const re = swgPathToReg(resPath)
+          const hasMatch = reqPath.match(re) && (method ? val[method] : true)
+          if(hasMatch) {
+            res = {
+              spec,
+              hasMatch: true,
+              reqPrefix: reqPrefix.toString(),
+              resPrefix: resPrefix.toString(),
+              api,
+              method,
+            }
+          }
+          return hasMatch
+        })
+        return res
+      }
+      
+    }
+
     function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
       const pathToRegexp = require('path-to-regexp')
       const isType = type().isType
@@ -629,6 +704,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      findLikePath,
       findLikeUrl,
       prepareProxy,
       parseProxyTarget,
@@ -915,7 +991,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const {
         pathname,
         fileName,
-      } = getFilePath({url: fileUrl})
+      } = getFilePath({url: fileUrl, isFull: true})
       const fs = require('fs')
       const dir = `${baseDir}/${pathname}`
       if(hasFile(dir) === false) {

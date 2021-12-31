@@ -202,6 +202,11 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
       : isType(config.watch, `array`)
         ? config.watch
         : [],
+  openApi: {
+    string: () => [{spec: config.openApi}],
+    array: () => config.openApi.map(item => (isType(item, `string`) ? {spec: item} : item)),
+    object: () => [config.openApi],
+  }[isType(config.openApi)](),
   backOpenApi: config.backOpenApi === true ? defaultArg.backOpenApi : config.backOpenApi,
 
   // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量

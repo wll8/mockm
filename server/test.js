@@ -141,39 +141,22 @@ function serverTest({
         const list = getHistoryList({method, api})
         res.send(list)
       },
-      getOpenApi() {
+      async getOpenApi() {
         const api = req.query.api
-        let openApiPrefix = `/` // openApi 的前缀
-        const openApi = {
-          string: () => config.openApi, // 字符串时, 直接返回
-          array: () => { // 数组时, 返回 pathname 匹配度最高的项
-            const pathname = new URL(`http://127.0.0.1${api}`).pathname
-            return tool.url.findLikeUrl({
-              urlList: config.openApi,
-              pathname,
-            })
-          },
-          object: () => { // 对象时, 以 `new RegExp(key, 'i').test(pathname)` 的形式匹配
-            const pathname = new URL(`http://127.0.0.1${api}`).pathname
-            let firstKey = ``
-            const key = Object.keys(config.openApi).sort((a, b) => { // 优先从 url 目录层级较多的开始比较
-              return b.split(`/`).length - a.split(`/`).length
-            }).find(key => {
-              if (firstKey === ``) { // 把第一个 key 保存起来, 当没有找到对应的 key 时则把它作为默认的 key
-                firstKey = key
-              }
-              const re = new RegExp(key, `i`)
-              return re.test(pathname)
-            })
-            openApiPrefix = key || firstKey
-            return config.openApi[openApiPrefix]
-          },
-        }[tool.type.isType(config.openApi)]()
-        openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
+        const method = req.query.method
+        // let openApiPrefix = `/` // openApi 的前缀
+        const matchInfo = (await tool.url.findLikePath({
+          api,
+          method,
+          config,
+        }))
+        const openApi = matchInfo.spec
+        // openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
         getOpenApi({openApi}).then(openApiData => {
           openApiData.info = {
             ...openApiData.info,
-            _openApiPrefix: openApiPrefix,
+            // _openApiPrefix: openApiPrefix,
+            _matchInfo: matchInfo,
           }
           res.send(openApiData)
         }).catch(async err => {
@@ -185,7 +168,8 @@ function serverTest({
             const openApiData = require(file)
             openApiData.info = {
               ...openApiData.info,
-              _openApiPrefix: openApiPrefix,
+              _matchInfo: matchInfo,
+              // _openApiPrefix: openApiPrefix,
             }
             res.send(openApiData)
           } else {
