@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const {logHelper, print} = require('./util/log.js')
+const {logHelper, print} = require(`./util/log.js`)
 process.setMaxListeners(0) // 不限制监听数量
 process.argv.includes(`--log-line`) && logHelper()
 const config = require(`./config.js`)
@@ -79,6 +79,6 @@ new Promise(async () => {
       if(restartId !== restartIdNew) {
         process.exit()
       }
-    }, 1000);
+    }, 1000)
   })
 })
