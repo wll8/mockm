@@ -1,6 +1,7 @@
 const lib = require(`./lib.js`)
 const { print } = require('./log.js')
 const tool = require(`./tool.js`)
+const http = require(`./http.js`)
 
 function business() { // 与业务相关性的函数
   /**
@@ -540,9 +541,8 @@ function business() { // 与业务相关性的函数
     function getOpenApi({openApi}) { // 使用服务器获取远程 openApi , 避免跨域
       const [, tag = ``, username, password] = openApi.match(/:\/\/((.+):(.+)@)/) || []
       openApi = openApi.replace(tag, ``)
-      const axios = require('axios')
       return new Promise((resolve, reject) => {
-        axios.get(openApi, {
+        http.get(openApi, {
           auth: username ? {username, password} : {},
         }).then(res => {
           resolve(res.data)
@@ -1096,7 +1096,6 @@ function business() { // 与业务相关性的函数
 
   function reqHandle({config}) { // 请求处理程序
     function sendReq({getHistory, api, res, apiId}) { // 发送请求
-      const axios = require('axios')
       const fs = require(`fs`)
 
       // api httpHistory 中的 api
@@ -1115,7 +1114,7 @@ function business() { // 与业务相关性的函数
       const [, method, url] = api.match(/(\w+)\s+(.*)/)
       reqHandle({config}).injectionReq({req: { headers }, res, type: `set`})
       const pathOrUrl = path || url
-      axios({
+      http({
         baseURL: `http://localhost:${config.port}`,
         method,
         url: pathOrUrl, // 注意不要 url 和 params 上都同时存在 query
@@ -1245,13 +1244,12 @@ function business() { // 与业务相关性的函数
 
       // 收集启动 nginx 之后的公网 url
       const urlList = []
-      const axios = require(`axios`)
       await Promise.all(portList.map((item, index) => {
         return tool.control.awaitTrue({
           timeout: 30e3,
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
-              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch((err = {}) => {
+              const res = await http.get(`http://localhost:${item}/api/tunnels`).catch((err = {}) => {
                 tool.cli.onlyLine(err.message)
                 resolve(false)
               })
