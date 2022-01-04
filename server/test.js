@@ -262,7 +262,6 @@ function serverTest({
       getApiResponseById() {
         middleware.replayHistoryMiddleware({
           id: actionArg0,
-          HTTPHISTORY,
           config,
           business,
         })(req, res, next)

@@ -725,7 +725,7 @@ function business() { // 与业务相关性的函数
      * 获取原始 history
      * @param {object} param0 参数
      */
-    function getRawHistory({}) {
+    function getRawHistory() {
       const history = global.HTTPHISTORY
       let list = []
       list = Object.keys(history).reduce((acc, cur) => {
