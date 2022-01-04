@@ -11,22 +11,23 @@ module.exports = {
   },
   ignorePatterns: [
     `page/`,
-    `lib/`
+    `lib/`,
   ],
   rules: {
     "no-var": `error`,
     "spaced-comment": `error`,
+    "comma-dangle": [`error`, `always-multiline`],
     "semi": [
       `error`,
-      `never`
+      `never`,
     ],
     "quotes": [
       `error`,
-      `backtick`
+      `backtick`,
     ],
     "no-unused-vars": `off`,
     "no-console": `off`,
     "no-debugger": `off`,
     "no-async-promise-executor": [`off`],
   },
-};
+}
