@@ -25,13 +25,13 @@ const nodemon = require(`nodemon`)
   const cwd = tool.url.handlePathArg(
     typeof(cliArg[`--cwd`]) === `string` 
       ? cliArg[`--cwd`] 
-      : process.cwd()
+      : process.cwd(),
   )
   process.chdir(cwd)
 }
 
 { // 仅查看版本号
-  cliArg[`--version`] && (print(packageJson.version) || process.exit());
+  cliArg[`--version`] && (print(packageJson.version) || process.exit())
 }
 
 const {
@@ -45,15 +45,15 @@ const {
   configFileFn,
   checkEnv,
 } = initHandle()
-templateFn({cliArg, version: packageJson.version});
+templateFn({cliArg, version: packageJson.version})
 const configFile = configFileFn({cliArg})
-const base64config = Buffer.from(JSON.stringify(cliArg)).toString('base64') // 以 base64 方式向 `node server.js` 传送命令行参数
+const base64config = Buffer.from(JSON.stringify(cliArg)).toString(`base64`) // 以 base64 方式向 `node server.js` 传送命令行参数
 const os = require(`os`)
 const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) // 此文件用于 run.js 与 server.js 共享变量
 
 new Promise(async () => { // 显示程序信息, 例如版本号, logo
   const vTag = `>> mockm v`
-  const logText = require('fs').readFileSync(`${__dirname}/util/logo.txt`, 'utf8')
+  const logText = require(`fs`).readFileSync(`${__dirname}/util/logo.txt`, `utf8`)
   const versionLogo = logText.replace(new RegExp(`(${vTag})(.*)`), (match, $1, $2) => {
     const vLength = packageJson.version.length
     const vLine = vLength > $2.length // 如果版本号替换到版本标志后面
@@ -90,7 +90,7 @@ new Promise(async () => { // 启动 server.js
   let log = ``
   function restart() {
     config.guard && setTimeout(() => {
-      nodemon.emit('restart')
+      nodemon.emit(`restart`)
       print(`Abnormal exit, service has been restarted!`)
       log = ``
     }, 1000)
@@ -103,7 +103,7 @@ new Promise(async () => { // 启动 server.js
     stdout: false,
     cwd: process.cwd(),
   })
-  .on('readable', function(arg) { // the `readable` event indicates that data is ready to pick up
+  .on(`readable`, function(arg) { // the `readable` event indicates that data is ready to pick up
     // console.log(`readable`, arg)
     this.stdout.pipe(process.stdout) // 把子进程的输出定向到本进程输出
     this.stderr.pipe(process.stderr) // 错误输出, 例如按需安装依赖时无权限
@@ -111,10 +111,10 @@ new Promise(async () => { // 启动 server.js
       log = String(data)
     })
   })
-  .on('start', (arg) => {
+  .on(`start`, (arg) => {
     // console.log(`start`, arg)
   })
-  .on('crash', (arg) => { // 子进程被退出时重启, 例如 kill
+  .on(`crash`, (arg) => { // 子进程被退出时重启, 例如 kill
     // console.log(`crash`, arg)
     restart()
   })

@@ -1,15 +1,15 @@
 require(`util`).inspect.defaultOptions.depth = null // console.log 展开对象
 
-const { inspect } = require('util')
+const { inspect } = require(`util`)
 
 function print(...argList) { // 用于输出有用信息, 而不是调试信息
   const resList = []
   argList.map(item => {
     const type = isType(item)
     ;([
-      ['undefined', ''],
-      ['string', 'number', item],
-      ['object', 'error', 'array', inspect(item || '', false, null, true)],
+      [`undefined`, ``],
+      [`string`, `number`, item],
+      [`object`, `error`, `array`, inspect(item || ``, false, null, true)],
     ]).forEach(item2 => item2.slice(0, -1).includes(type) && resList.push((item2.reverse())[0]))
   })
   console._log ? console._log(...resList) : console.log(...resList)
@@ -28,9 +28,9 @@ function logHelper(isUse = true) { // 重写 console.log 方法, 打印时附带
       Error.captureStackTrace(obj, getStackTrace)
       return obj.stack
     }
-    const stack = getStackTrace() || ''
+    const stack = getStackTrace() || ``
     const matchResult = stack.match(/\(.*?\)/g) || []
-    const line = (matchResult[1] || '()').match(/^\((.*)\)$/)[1]
+    const line = (matchResult[1] || `()`).match(/^\((.*)\)$/)[1]
     if( // 重写时忽略的调用栈路径
       line.match(/node_modules/)
     ) {
@@ -57,13 +57,13 @@ function dateFormat(fmt, date) {
     'D+': date.getDate().toString(),            // 日
     'h+': date.getHours().toString(),           // 时
     'm+': date.getMinutes().toString(),         // 分
-    's+': date.getSeconds().toString()          // 秒
+    's+': date.getSeconds().toString(),          // 秒
     // 有其他格式化字符需求可以继续添加，必须转化成字符串
   }
   for (let k in opt) {
     ret = new RegExp(`(${k})`).exec(fmt)
     if (ret) {
-      fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, '0')))
+      fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, `0`)))
     }
   }
   return fmt

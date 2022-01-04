@@ -31,7 +31,7 @@ const {
 let cliArg = parseArgv()
 let fileArgFn = () => {}
 if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
-  const base64deCode = JSON.parse(Buffer.from(cliArg._base64, 'base64').toString())
+  const base64deCode = JSON.parse(Buffer.from(cliArg._base64, `base64`).toString())
   if (base64deCode[`--config`]) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
     const handlePathRes = handlePathArg(base64deCode[`--config`])
     // 避免 node v14 上 config 文件路径相同并访问了不存在的属性而出现循环引用警告
@@ -87,7 +87,7 @@ const defaultConfigFn = (util) => { // 默认配置
     remote: false,
     openApi: `http://httpbin.org/spec.json`,
     cors: true,
-    dataDir: './httpData/',
+    dataDir: `./httpData/`,
     dbJsonPath: undefined,
     apiWeb: undefined,
     apiWebWrap: wrapApiData,
@@ -126,7 +126,7 @@ config.proxy = [ // 合并 proxy 对象
       isType(cur) === `string` // string 时转为对象
         ? {'/': cur}
         : cur
-    )
+    ),
   }
 }, {})
 
@@ -164,7 +164,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   updateToken: (() => {
     const updateToken = config.updateToken
     const fn = {
-      boolean: () => (updateToken ? {'req.headers.authorization': 'req.headers.authorization'} : undefined),
+      boolean: () => (updateToken ? {'req.headers.authorization': `req.headers.authorization`} : undefined),
       string: () => ({[`req.headers.${updateToken}`]: `req.headers.${updateToken}`}),
       array: () => updateToken.reduce((acc, cur) => ({...acc, [`req.headers.${cur}`]: `req.headers.${cur}`}), {}),
       object: () => Object.entries(updateToken).reduce((acc, [key, value]) => ({
@@ -173,7 +173,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
           ? value
           : isType(value, `function`)
             ? value
-            : undefined
+            : undefined,
       }), {}),
     }[isType(updateToken)]
     return fn ? fn() : undefined
