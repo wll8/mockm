@@ -372,13 +372,16 @@ function to(promise, errorExt) {
 }
 
 function http() {
-  let axios = require(`axios`)
-  axios.defaults.timeout = 30 * 1e3
-  axios.defaults.retry = 3 // 重试次数
-  axios.defaults.retryDelay = 1000 // 重试延时
-  axios.defaults.shouldRetry = (error) => true // 重试条件，默认只要是错误都需要重试
+  let axios = require('axios').default
+  const http = axios.create({
+    proxy: false,
+  })
+  http.defaults.timeout = 30 * 1e3
+  http.defaults.retry = 3 // 重试次数
+  http.defaults.retryDelay = 1000 // 重试延时
+  http.defaults.shouldRetry = (error) => true // 重试条件，默认只要是错误都需要重试
 
-  axios.interceptors.response.use(undefined, (err) => {
+  http.interceptors.response.use(undefined, (err) => {
     const config = err.config
 
     // 判断是否配置了重试
@@ -410,12 +413,12 @@ function http() {
       }, config.retryDelay || 1)
     })
  
-    // 重新发起axios请求
+    // 重新发起请求
     return backoff.then(() => {
-      return axios(config)
+      return http(config)
     })
   })
-  return axios
+  return http
 }
 
 module.exports = {

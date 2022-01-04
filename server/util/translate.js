@@ -1,4 +1,5 @@
 const util = require(`./index.js`)
+const http = require(`./http.js`)
 const {
   tool,
 } = util
@@ -115,7 +116,6 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
       if(Boolean((key && appid)) === false) {
         return reject(`请添加百度翻译 key appid`)
       }
-      const axios = require('axios')
       const querystring = require('querystring')
 
       const cfg = {
@@ -135,7 +135,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
       }
       const paramsUrl = querystring.stringify(paramsObj)
       const url = `http://api.fanyi.baidu.com/api/trans/vip/translate?${paramsUrl}`
-      axios.get(url).then(res => {
+      http.get(url).then(res => {
         // if (Boolean(res.data.trans_result) === false) {
         //   reject(res.data)
         // }
