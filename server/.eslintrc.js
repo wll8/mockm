@@ -9,8 +9,25 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2021, // es 语法
   },
+  ignorePatterns: [
+    `page/`,
+    `lib/`,
+  ],
   rules: {
-    "no-unused-vars": [`off`],
+    "no-var": `error`,
+    "spaced-comment": `error`,
+    "comma-dangle": [`error`, `always-multiline`],
+    "semi": [
+      `error`,
+      `never`,
+    ],
+    "quotes": [
+      `error`,
+      `backtick`,
+    ],
+    "no-unused-vars": `off`,
+    "no-console": `off`,
+    "no-debugger": `off`,
     "no-async-promise-executor": [`off`],
   },
-};
+}

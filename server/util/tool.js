@@ -1,4 +1,4 @@
-const {print} = require('./log.js')
+const {print} = require(`./log.js`)
 
 function tool() { // 与业务没有相关性, 可以脱离业务使用的工具函数
   function npm() { // npm 相关
@@ -27,13 +27,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      */
     function getServerVersion(name) { // 从 npmjs 中获取版本号
       return new Promise((resolve, reject) => {
-        const https = require('https');
+        const https = require(`https`)
         https.get(`https://registry.npmjs.org/-/package/${name}/dist-tags`, res => {
-            let data = ''
-            res.on('data', chunk => {
+            let data = ``
+            res.on(`data`, chunk => {
               data += chunk
             })
-            res.on('end', () => {
+            res.on(`end`, () => {
               const latest = JSON.parse(data || `{}`).latest // 获取最新版本
               resolve(latest)
             })
@@ -94,7 +94,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         let res = ``
         let err = ``
         try {
-          const argsString = args.map(arg => JSON.stringify(arg)).join(', ');
+          const argsString = args.map(arg => JSON.stringify(arg)).join(`, `)
           const codeString = `
             const { writeFileSync } = require('fs')
             const fn = ${fnStr}
@@ -178,7 +178,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function hasPackage(name, cfg = {}) { // 是还存在某个包
     const path = require(`path`)
-    const mainPath = cfg.mainPath || path.join(__dirname, '../') // 主程序目录
+    const mainPath = cfg.mainPath || path.join(__dirname, `../`) // 主程序目录
     const packgePath =  `${mainPath}/node_modules/${name}`
     const hasPackge = tool().file.hasFile(packgePath)
     return hasPackge
@@ -205,14 +205,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
             NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
             ...process.env,
             ...env,
-          }
-        }
+          },
+        },
       )
       if(attemptNum < attempt) {
         print(`number of retries: ${attempt - attemptNum}/${attempt - 1}`)
       }
       attemptNum = attemptNum - 1
-    } while (hasPackage(packageName) === false && attemptNum > 0);
+    } while (hasPackage(packageName) === false && attemptNum > 0)
     const hasPackageRes = hasPackage(packageName)
     print(tool().cli.colors[[`red`, `green`][Number(hasPackageRes)]](`Initialize ${packageName} ${[`failed`, `successfully`][Number(hasPackageRes)]}`))
     return hasPackageRes
@@ -231,7 +231,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     async function initPackge(packageName, {version, getRequire = true, env = {}, msg} = {}) {
       try {
         const path = require(`path`)
-        const mainPath = path.join(__dirname, '../') // 主程序目录
+        const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
         version = version || packageJson.pluginDependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
@@ -264,29 +264,29 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function hex() { // 进制转换
     function string10to62(number) { // 10 进制转 62 进制, 用来压缩数字长度
-      const chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'.split('')
+      const chars = `0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ`.split(``)
       const radix = chars.length
       const arr = []
       let qutient = +number
       do {
-        const mod = qutient % radix;
-        qutient = (qutient - mod) / radix;
-        arr.unshift(chars[mod]);
-      } while (qutient);
-      return arr.join('');
+        const mod = qutient % radix
+        qutient = (qutient - mod) / radix
+        arr.unshift(chars[mod])
+      } while (qutient)
+      return arr.join(``)
     }
 
     function string62to10(str) { // 62 进制转 10 进制
       str = String(str)
-      const chars = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'
+      const chars = `0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ`
       const radix = chars.length
       const len = str.length
       let origin_number = 0
       let i = 0
       while (i < len) {
-        origin_number += Math.pow(radix, i++) * chars.indexOf(str.charAt(len - i) || 0);
+        origin_number += Math.pow(radix, i++) * chars.indexOf(str.charAt(len - i) || 0)
       }
-      return origin_number;
+      return origin_number
     }
 
     return {
@@ -303,7 +303,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     * nodejs 内置颜色: https://nodejs.org/api/util.html#util_foreground_colors
     */
     function colors () {
-      const util = require('util')
+      const util = require(`util`)
 
       function colorize (color, text) {
         const codes = util.inspect.colors[color]
@@ -320,7 +320,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           // 在没有对应的具名颜色函数时, 返回空函数作为兼容处理
           const res = obj[prop] ? obj[prop] : (arg => arg)
           return res
-        }
+        },
       })
 
       // 取消下行注释, 查看所有的颜色和名字:
@@ -336,16 +336,16 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      */
     function spawn (cmd, args, opts) {
       opts = { stdio: `inherit`, ...opts }
-      opts.shell = opts.shell || process.platform === 'win32'
+      opts.shell = opts.shell || process.platform === `win32`
       return new Promise((resolve, reject) => {
-        const cp = require('child_process')
+        const cp = require(`child_process`)
         const child = cp.spawn(cmd, args, opts)
-        let stdout = ''
-        let stderr = ''
-        child.stdout && child.stdout.on('data', d => { stdout += d })
-        child.stderr && child.stderr.on('data', d => { stderr += d })
-        child.on('error', reject)
-        child.on('close', code => {
+        let stdout = ``
+        let stderr = ``
+        child.stdout && child.stdout.on(`data`, d => { stdout += d })
+        child.stderr && child.stderr.on(`data`, d => { stderr += d })
+        child.on(`error`, reject)
+        child.on(`close`, code => {
           resolve({code, stdout, stderr})
         })
       })
@@ -353,13 +353,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function parseArgv(arr) { // 解析命令行参数
       return (arr || process.argv.slice(2)).reduce((acc, arg) => {
-        let [k, ...v] = arg.split('=')
+        let [k, ...v] = arg.split(`=`)
         v = v.join(`=`) // 把带有 = 的值合并为字符串
-        acc[k] = v === '' // 没有值时, 则表示为 true
+        acc[k] = v === `` // 没有值时, 则表示为 true
           ? true
           : (
             /^(true|false)$/.test(v) // 转换指明的 true/false
-            ? v === 'true'
+            ? v === `true`
             : (
               /[\d|.]+/.test(v)
               ? (isNaN(Number(v)) ? v : Number(v)) // 如果转换为数字失败, 则使用原始字符
@@ -418,7 +418,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      */
     function findLikeUrl({
       urlList,
-      pathname
+      pathname,
     }) {
       const apiSplitList = new URL(`http://127.0.0.1${pathname}`).pathname.split(`/`)
       const lvList = urlList.map((openApiItem) => {
@@ -467,7 +467,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       
       // 把 swagger 的 path /status/{codes} 转为正则 /status/.+?$
       function swgPathToReg(path) {
-        return new RegExp(`^${path.replace(/\{.+?\}/g, '.+?')+`$`}`)
+        return new RegExp(`^${path.replace(/\{.+?\}/g, `.+?`)+`$`}`)
       }
 
       /**
@@ -488,7 +488,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         method = method ? method.toLowerCase() : undefined
         // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
         const re = new RegExp(`^(${basePath})(/.*)`)
-        const reqPath = path.replace(re, '$2')
+        const reqPath = path.replace(re, `$2`)
         
         let res = undefined
         Object.entries(paths).find(([resPath, val], index) => {
@@ -513,7 +513,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
-      const pathToRegexp = require('path-to-regexp')
+      const pathToRegexp = require(`path-to-regexp`)
       const isType = type().isType
       const proxyType = isType(proxy)
       let resProxy = []
@@ -632,7 +632,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           host: parentUrl.host,
           port: parentUrl.port || 80,
           hostname: parentUrl.hostname,
-          pathname: parentUrl.pathname.replace(/\/$/, '') + '/',
+          pathname: parentUrl.pathname.replace(/\/$/, ``) + `/`,
           origin: parentUrl.origin,
           isIp: (parentUrl.host.match(/\./g) || []).length === 3,
         }
@@ -676,7 +676,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     function parseRegPath(rePath, url) { // 使用 path-to-regexp 转换 express 的 router, 并解析参数为对象
       // 注: path-to-regexp 1.x 自带 match 方法可处理此方法, 但是当前的 json-server 依赖的 express 的路由语法仅支持 path-to-regexp@0.1.7
       // 所以只能手动转换, 参考: https://github.com/ForbesLindesay/express-route-tester/blob/f39c57fa660490e74b387ed67bf8f2b50ee3c27f/index.js#L96
-      const pathToRegexp = require('path-to-regexp')
+      const pathToRegexp = require(`path-to-regexp`)
       const keys = []
       const re = pathToRegexp(rePath, keys)
       // 去除 url 中的 origin
@@ -725,7 +725,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       const fs = require(`fs`)
       const path = require(`path`)
 
-      hasFile(to) === false && fs.mkdirSync(to);
+      hasFile(to) === false && fs.mkdirSync(to)
       fs.readdirSync(from).forEach(element => {
         if (fs.lstatSync(path.join(from, element)).isFile()) {
           hasFile(path.join(to, element)) === false && fs.copyFileSync(path.join(from, element), path.join(to, element))
@@ -741,7 +741,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param action {stirng} 操作方式 create remove
      */
     function filesCreateOrRemove (objOrArr, action) {
-      const {writeFileSync, unlinkSync} = require('fs')
+      const {writeFileSync, unlinkSync} = require(`fs`)
       Object.keys(objOrArr).forEach(key => {
         const name = objOrArr[key]
         if (action === `create`) {
@@ -781,13 +781,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const tag = Date.now()
         const fnStr = ((arg) => {
           console.log(arg)
-          setInterval(() => {}, 2 * 1000);
+          setInterval(() => {}, 2 * 1000)
         }).toString()
 
         fs.writeFileSync(jsFile, `(${fnStr})('')`)
         setTimeout(() => {
           fs.writeFileSync(jsFile, `(${fnStr})(${tag})`)
-        }, 500);
+        }, 500)
 
         nodemon({
           ignoreRoot: [],
@@ -795,7 +795,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           watch: [jsFile],
           stdout: false,
         })
-        .on('readable', function(arg) {
+        .on(`readable`, function(arg) {
           this.stdout.on(`data`, data => {
             let log =String(data).trim()
             if(log && log.includes(tag)) {
@@ -806,7 +806,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
         setTimeout(() => {
           end(false)
-        }, timeout);
+        }, timeout)
 
         function end(isOk) {
           resolve(isOk)
@@ -864,8 +864,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     function getFileMd5(pathOrBuffer, type) {
       const fs = require(`fs`)
       const buffer = type === `path` ? fs.readFileSync(pathOrBuffer) : pathOrBuffer
-      const crypto = require('crypto');
-      const md5 = crypto.createHash('md5').update(buffer).digest('hex')
+      const crypto = require(`crypto`)
+      const md5 = crypto.createHash(`md5`).update(buffer).digest(`hex`)
       return md5
     }
 
@@ -886,22 +886,22 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           if (statusCode !== 200) {
             reject(statusCode)
           }
-          let data = ''
-          res.setEncoding('binary')
-          res.on('data', (chunk) => {
+          let data = ``
+          res.setEncoding(`binary`)
+          res.on(`data`, (chunk) => {
             data += chunk
-          });
-          res.on('end', () => {
-            const mime = require('mime')
+          })
+          res.on(`end`, () => {
+            const mime = require(`mime`)
             const ext = mime.getExtension(res.headers[`content-type`]) || ``
             resolve({
               data,
               ext,
             })
           })
-        }).on('error', (e) => {
+        }).on(`error`, (e) => {
           reject(e.message)
-        });
+        })
       })
     }
 
@@ -912,19 +912,19 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @returns {object} {pathname, fileName} fileName 是 query 参数生成的名字
      */
     function getFilePath({url, isFull = false}) {
-      const filenamify = require('filenamify')
+      const filenamify = require(`filenamify`)
       let {
         pathname,
         search = ``,
       } = new URL(url)
       const fileName = filenamify(
         search,
-        { maxLength: 255, replacement: '_' }
+        { maxLength: 255, replacement: `_` },
       )
       if(isFull) {
         pathname = filenamify(
           url,
-          { maxLength: 255, replacement: '_' }
+          { maxLength: 255, replacement: `_` },
         )
       }
       return {
@@ -953,7 +953,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         pathname,
         fileName,
       } = getFilePath({url: fileUrl, isFull: true})
-      const fs = require('fs')
+      const fs = require(`fs`)
       const dir = `${baseDir}/${pathname}`
       fs.mkdirSync(dir, { recursive: true })
       // 从符合备份文件名规则的所有文件中找到最新备份的那个文件名和时间, 获取文件的 md5 与请求的 md5 做比较
@@ -992,7 +992,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         pathname,
         fileName,
       } = getFilePath({url: fileUrl, isFull: true})
-      const fs = require('fs')
+      const fs = require(`fs`)
       const dir = `${baseDir}/${pathname}`
       if(hasFile(dir) === false) {
         return undefined
@@ -1019,28 +1019,28 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {binary} bin 二进制内容
      */
     function saveFile(filePath, bin) {
-      const fs = require('fs')
-      fs.writeFileSync(filePath, bin, { encoding: 'binary' })
+      const fs = require(`fs`)
+      fs.writeFileSync(filePath, bin, { encoding: `binary` })
     }
 
     function getMd5(path) { // 获取文件 md5
       return new Promise((resolve, reject) => {
-        const fs = require('fs')
-        const crypto = require('crypto')
-        const md5sum = crypto.createHash('md5')
+        const fs = require(`fs`)
+        const crypto = require(`crypto`)
+        const md5sum = crypto.createHash(`md5`)
         const stream = fs.createReadStream(path)
-        stream.on('data', (chunk) => {
+        stream.on(`data`, (chunk) => {
           md5sum.update(chunk)
         })
-        stream.on('end', () => {
-          const md5 = md5sum.digest('hex').toUpperCase()
+        stream.on(`end`, () => {
+          const md5 = md5sum.digest(`hex`).toUpperCase()
           resolve(md5)
         })
       })
     }
 
     function getMd5Sync(path) { // 获取文件 md5
-      const fs = require('fs')
+      const fs = require(`fs`)
       const buffer = fs.readFileSync(path)
       return tool().string.getMd5(buffer)
     }
@@ -1069,10 +1069,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function middleware() { // express 中间件
-    const compression = require('compression') // 压缩 http 响应
+    const compression = require(`compression`) // 压缩 http 响应
 
     function httpLog({config}) { // 设置 http 请求日志中间件
-      const morgan = require('morgan')
+      const morgan = require(`morgan`)
       const colors = tool().cli.colors
       return morgan( (tokens, req, res) => {
         const colorTable = {
@@ -1089,8 +1089,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           tool().httpClient.getClientIp(req),
           res.getHeader(config.apiInHeader),
           `${statusCode} ${res.statusMessage}`,
-          `${tokens['response-time'](req, res)} ms`,
-          len ? `${len} byte` : '',
+          `${tokens[`response-time`](req, res)} ms`,
+          len ? `${len} byte` : ``,
         ].join(` `)
         // 使用原生 nodejs 打印日志
         print(colors[colorTable[statusCode[0]]](str)) // 根据状态码的第一位获取颜色函数
@@ -1102,8 +1102,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       // 利用 jsonServer 已有的中间件, 而不用额外的安装
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
 
-      const jsonServer = require('json-server')
-      const middlewares = jsonServer.defaults({bodyParser: true, logger: false, static: require(`path`).join(__dirname, '../public2')}) // 可以直接使用的所有中间件数组
+      const jsonServer = require(`json-server`)
+      const middlewares = jsonServer.defaults({bodyParser: true, logger: false, static: require(`path`).join(__dirname, `../public2`)}) // 可以直接使用的所有中间件数组
       middlewares.push(httpLog({config}))
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
         // 使用 jsonServer 里面的中间件, 以保持一致:
@@ -1117,7 +1117,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     function reWriteRouter({app, routes = {}}) { // 根据 routes 对象, 重写路由
-      const rewrite = require('express-urlrewrite')
+      const rewrite = require(`express-urlrewrite`)
       Object.keys(routes).forEach(key => {
         app.use(rewrite(key, routes[key]))
       })
@@ -1179,7 +1179,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }}).data
         try {
           const lineHeaders = history.res.lineHeaders
-          const headers = lineHeaders.headers || require(require('path').resolve(lineHeaders.headPath))
+          const headers = lineHeaders.headers || require(require(`path`).resolve(lineHeaders.headPath))
           setHeader(res, {
             ...headers, // 还原 headers
             ...reSetApiInHeader({headers}), // 更新 testApi
@@ -1187,7 +1187,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           allowCors({res, req})
           const bodyPath = history.res.bodyPath
           if(bodyPath) {
-            const path = require('path')
+            const path = require(`path`)
             const newPath = path.resolve(bodyPath) // 发送 body
             res.sendFile(newPath)
           } else {
@@ -1216,7 +1216,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function httpClient() {
 
     function midResJson({res, proxyRes, key, val, cb = body => body}) {
-      const modifyResponse = require('node-http-proxy-json')
+      const modifyResponse = require(`node-http-proxy-json`)
       modifyResponse(res, proxyRes, body => {
         if([`array`, `object`].includes(type().isType(body))) {
           key && obj().deepSet(body, key, val)
@@ -1235,15 +1235,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function getClientIp (req) { // 获取客户端 IP
       const {deepGet} = obj()
-      let ip = deepGet(req, `headers.x-forwarded-for`, ``).split(',').pop().trim() || // 判断是否有反向代理 IP
+      let ip = deepGet(req, `headers.x-forwarded-for`, ``).split(`,`).pop().trim() || // 判断是否有反向代理 IP
         req.ip ||
         deepGet(req, `connection.remoteAddress`) || // 判断 connection 的远程 IP
         deepGet(req, `socket.remoteAddress`) || // 判断后端的 socket 的 IP
-        deepGet(req, `connection.socket.remoteAddress`) || ''
-      if (ip.includes(',')) {
-        ip = ip.split(',')[0]
+        deepGet(req, `connection.socket.remoteAddress`) || ``
+      if (ip.includes(`,`)) {
+        ip = ip.split(`,`)[0]
       }
-      ip = ip.substr(ip.lastIndexOf(':') + 1, ip.length) // ::ffff:127.0.0.1 => 127.0.0.1
+      ip = ip.substr(ip.lastIndexOf(`:`) + 1, ip.length) // ::ffff:127.0.0.1 => 127.0.0.1
       return ip
     }
 
@@ -1261,7 +1261,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         return f(...a.map(
           v => {
             return (type().isEmpty(v) ? undefined : v)
-          }
+          },
         ))
       }
     }
@@ -1279,29 +1279,29 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         } else {
           newObj[key] = obj[key]
         }
-      });
+      })
       return newObj
     }
     
     function flatObj(value, currentKey) { // 展开对象
-      let result = {};
+      let result = {}
       Object.keys(value).forEach(key => {
-        const tempKey = currentKey ? `${currentKey}.${key}` : key;
-        if (typeof value[key] !== "object") {
-          result[tempKey] = value[key];
+        const tempKey = currentKey ? `${currentKey}.${key}` : key
+        if (typeof value[key] !== `object`) {
+          result[tempKey] = value[key]
         } else {
-          result = { ...result, ...flatObj(value[key], tempKey) };
+          result = { ...result, ...flatObj(value[key], tempKey) }
         }
-      });
-      return result;
+      })
+      return result
     }
 
     function deepGet(object, keys = [], defaultValue) { // 深层获取对象值
       let res = (!Array.isArray(keys)
         ? keys
-          .replace(/\[/g, '.')
-          .replace(/\]/g, '')
-          .split('.')
+          .replace(/\[/g, `.`)
+          .replace(/\]/g, ``)
+          .split(`.`)
         : keys
       ).reduce((o, k) => (o || {})[k], object)
       return res !== undefined ? res : defaultValue
@@ -1317,9 +1317,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function deepSet(object, keys, val) { // 深层设置对象值
       keys = Array.isArray(keys) ? keys : keys
-        .replace(/\[/g, '.')
-        .replace(/\]/g, '')
-        .split('.');
+        .replace(/\[/g, `.`)
+        .replace(/\]/g, ``)
+        .split(`.`)
       if (keys.length > 1) {
         object[keys[0]] = object[keys[0]] || {}
         deepSet(object[keys[0]], keys.slice(1), val)
@@ -1390,10 +1390,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         return Promise.all(port.map(item => portIsOk(item)))
       }
       return new Promise(resolve => {
-        const net = require('net')
+        const net = require(`net`)
         const server = net.createServer().listen(port)
-        server.on('listening', () => server.close(resolve(true)))
-        server.on('error', () => resolve(port))
+        server.on(`listening`, () => server.close(resolve(true)))
+        server.on(`error`, () => resolve(port))
       })
     }
     function getOsIp() { // 获取系统 ip
@@ -1448,13 +1448,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         'D+': date.getDate().toString(),            // 日
         'h+': date.getHours().toString(),           // 时
         'm+': date.getMinutes().toString(),         // 分
-        's+': date.getSeconds().toString()          // 秒
+        's+': date.getSeconds().toString(),          // 秒
         // 有其他格式化字符需求可以继续添加，必须转化成字符串
       }
       for (let k in opt) {
         ret = new RegExp(`(${k})`).exec(fmt)
         if (ret) {
-          fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, '0')))
+          fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, `0`)))
         }
       }
       return fmt
@@ -1471,9 +1471,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     * @param {*} str 字符串
     */
     function getMd5(str) {
-      const crypto = require('crypto')
-      const md5 = crypto.createHash('md5')
-      return md5.update(str).digest('hex')
+      const crypto = require(`crypto`)
+      const md5 = crypto.createHash(`md5`)
+      return md5.update(str).digest(`hex`)
     }
 
     /**
@@ -1482,7 +1482,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     */
     function toLine(str) {
       str = str.replace(str[0],str[0].toLowerCase())
-      return str.replace(/([A-Z])/g, `_$1`).toLowerCase();
+      return str.replace(/([A-Z])/g, `_$1`).toLowerCase()
     }
 
     /**
@@ -1491,16 +1491,16 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     */
     function toLittleHump(str) {
       str = toLine(str) // 先转一下, 避免本来是驼峰转换后不是驼峰了
-      let arr = str.split(' ').join('-').split('-').join('_').split('_')
+      let arr = str.split(` `).join(`-`).split(`-`).join(`_`).split(`_`)
       for (let i = 1; i < arr.length; i++) {
         arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].substring(1)
       }
       arr[0] = arr[0].toLowerCase() // 此行为小驼峰
-      return arr.join('')
+      return arr.join(``)
     }
 
     function removeLeft(str) {
-      const lines = str.split('\n')
+      const lines = str.split(`\n`)
       // 获取应该删除的空白符数量
       const minSpaceNum = lines.filter(item => item.trim())
         .map(item => item.match(/(^\s+)?/)[0].length)
@@ -1508,7 +1508,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       // 删除空白符
       const newStr = lines
         .map(item => item.slice(minSpaceNum))
-        .join('\n')
+        .join(`\n`)
       return newStr
     }
     return {
@@ -1543,27 +1543,27 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     * @param {function} childrenFn  // 如果有 children 时, 可以接收 parent
     */
     function toTree(data, childrenFn = () => {}) {
-      let result = [];
+      let result = []
       if (!Array.isArray(data)) {
-        return result;
+        return result
       }
       data.forEach((item) => {
-        delete item.children;
-      });
-      let map = {};
+        delete item.children
+      })
+      let map = {}
       data.forEach((item) => {
-        map[item.id] = item;
-      });
+        map[item.id] = item
+      })
       data.forEach((item) => {
-        let parent = map[item.pid];
+        let parent = map[item.pid]
         if (parent) {
           childrenFn && childrenFn(parent);
-          (parent.children || (parent.children = [])).push(item);
+          (parent.children || (parent.children = [])).push(item)
         } else {
-          result.push(item);
+          result.push(item)
         }
-      });
-      return result;
+      })
+      return result
     }
 
 

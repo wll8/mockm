@@ -1,6 +1,7 @@
 const lib = require(`./lib.js`)
-const { print } = require('./log.js')
+const { print } = require(`./log.js`)
 const tool = require(`./tool.js`)
+const http = require(`./http.js`)
 
 function business() { // 与业务相关性的函数
   /**
@@ -53,7 +54,7 @@ function business() { // 与业务相关性的函数
   * @param {object} options 规则
   */
   function listToData(list, options = {}){
-    const Mock = require('better-mock')
+    const Mock = require(`better-mock`)
     const mockMethods = Object.keys(Mock.Random).map(key => `@${key}`)
 
     function listToDataRef (list) {
@@ -68,9 +69,9 @@ function business() { // 与业务相关性的函数
             const vm = new NodeVM({
               sandbox: { // 给 vm 使用的变量
                 Mock,
-              }
+              },
             })
-            example = vm.run(`module.exports = ${example}`, `vm.js`) || ``;
+            example = vm.run(`module.exports = ${example}`, `vm.js`) || ``
           } catch (err) {
             console.log(`err`, err)
           }
@@ -92,23 +93,23 @@ function business() { // 与业务相关性的函数
           switch(item.type) {
             case `object`:
               res[item.name] = listToDataRef(item.children)
-              break;
+              break
             case `array`:
               res[item.name] = res[item.name] || []
               res[item.name].push(listToDataRef(item.children))
-              break;
+              break
             default:
               console.log(`no type`, item.type)
           }
         } else { // 如果不是引用类型, 则应用最后转换后的值 example
-          res[`${item.name}#${item.type || 'string'}`] = example
+          res[`${item.name}#${item.type || `string`}`] = example
         }
       })
       return res
     }
     let res = listToDataRef(list)
     res = {
-      [`data${options.rule ? `|${options.rule}` : ''}`]: {object: res, array: [res]}[options.type]
+      [`data${options.rule ? `|${options.rule}` : ``}`]: {object: res, array: [res]}[options.type],
     }
     const data = Mock.mock(res)
     return data
@@ -145,7 +146,7 @@ function business() { // 与业务相关性的函数
             next()
           }
         },
-        require('serve-static')(item.fileDir),
+        require(`serve-static`)(item.fileDir),
       ]
     })
     return obj
@@ -188,7 +189,7 @@ function business() { // 与业务相关性的函数
         }
         if (useDataType === `custom`) { // 自定义逻辑
           try {
-            const { NodeVM } = require(`vm2`);
+            const { NodeVM } = require(`vm2`)
             const vm = new NodeVM({
               sandbox: { // 给 vm 使用的变量
                 tool: {
@@ -197,9 +198,9 @@ function business() { // 与业务相关性的函数
                   listToData,
                   cur,
                 },
-              }
-            });
-            const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``;
+              },
+            })
+            const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``
             const codeType = typeof(code)
             if([`function`].includes(codeType)) { // 如果是函数则运行函数
               code(req, res, next)
@@ -210,7 +211,7 @@ function business() { // 与业务相关性的函数
             console.log(`err`, err)
             // 处理客户端代码出现问题, 代码错误或出现不允许的权限
             res.status(403).json({
-              msg: err.message
+              msg: err.message,
             })
           }
         }
@@ -227,7 +228,7 @@ function business() { // 与业务相关性的函数
           const sendData = (data) => {
             const strData = JSON.stringify(data)
             ws.send(strData)
-            ws.on('message', (msg) => {
+            ws.on(`message`, (msg) => {
               ws.send(strData)
             })
           }
@@ -246,7 +247,7 @@ function business() { // 与业务相关性的函数
           }
           if (useDataType === `custom`) { // 自定义逻辑
             try {
-              const { NodeVM } = require(`vm2`);
+              const { NodeVM } = require(`vm2`)
               const vm = new NodeVM({
                 sandbox: { // 给 vm 使用的变量
                   tool: {
@@ -255,9 +256,9 @@ function business() { // 与业务相关性的函数
                     listToData,
                     cur,
                   },
-                }
-              });
-              const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``;
+                },
+              })
+              const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``
               const codeType = typeof(code)
               if([`function`].includes(codeType)) { // 如果是函数则运行函数
                 code(ws, req)
@@ -291,7 +292,7 @@ function business() { // 与业务相关性的函数
     */
 
     function parseApi() { // 解析自定义 api
-      const pathToRegexp = require('path-to-regexp')
+      const pathToRegexp = require(`path-to-regexp`)
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = tool.url.fullApi2Obj(key)
@@ -315,7 +316,7 @@ function business() { // 与业务相关性的函数
             val = (ws, req) => {
               const strData = JSON.stringify(backVal)
               ws.send(strData)
-              ws.on('message', (msg) => ws.send(strData))
+              ws.on(`message`, (msg) => ws.send(strData))
             }
           } else {
             val = (req, res, next) => res.json(backVal)
@@ -402,7 +403,7 @@ function business() { // 与业务相关性的函数
         给定一个 method 和 path, 根据 db.json 来判断是否应该过滤
         根据 db.json 获取要拦截的 route , 参考 node_modules/json-server/lib/server/router/index.js
       */
-      const pathToRegexp = require('path-to-regexp')
+      const pathToRegexp = require(`path-to-regexp`)
 
       method = method.trim().toLowerCase()
       const isType = tool.type.isType
@@ -518,7 +519,7 @@ function business() { // 与业务相关性的函数
         no: `config`,
         yes: `--config`,
         v: `1.1.26`,
-      });
+      })
       
       
       if((cliArg[`--config`] === true) && (hasCwdConfig === false)) { // 如果 config=true 并且当前目录没有配置时, 则生成示例配置并使用
@@ -540,9 +541,8 @@ function business() { // 与业务相关性的函数
     function getOpenApi({openApi}) { // 使用服务器获取远程 openApi , 避免跨域
       const [, tag = ``, username, password] = openApi.match(/:\/\/((.+):(.+)@)/) || []
       openApi = openApi.replace(tag, ``)
-      const axios = require('axios')
       return new Promise((resolve, reject) => {
-        axios.get(openApi, {
+        http.get(openApi, {
           auth: username ? {username, password} : {},
         }).then(res => {
           resolve(res.data)
@@ -583,7 +583,7 @@ function business() { // 与业务相关性的函数
         tool.type.isEmpty(config.watch) === false && nodemon({
           exec: `node -e 0`, // 由于必须存在 exec 参数, 所以放置一条啥也不干的命令
           watch: config.watch,
-        }).on('restart', () => {
+        }).on(`restart`, () => {
           reStartServer(config.config)
         })
       }
@@ -593,7 +593,7 @@ function business() { // 与业务相关性的函数
         && fs.writeFile(
           config._gitIgnore.file,
           tool.string.removeLeft(config._gitIgnore.content).trim(),
-          () => {}
+          () => {},
         )
       }
 
@@ -605,7 +605,7 @@ function business() { // 与业务相关性的函数
           readme:
             - 本文件用于存储 mockm 运行过程中捕获到的一些错误.
           `).trim(),
-          () => {}
+          () => {},
         )
       }
 
@@ -721,7 +721,7 @@ function business() { // 与业务相关性的函数
      * 获取原始 history
      * @param {object} param0 参数
      */
-    function getRawHistory({}) {
+    function getRawHistory() {
       const history = global.HTTPHISTORY
       let list = []
       list = Object.keys(history).reduce((acc, cur) => {
@@ -754,7 +754,7 @@ function business() { // 与业务相关性的函数
         const resBodyMd5 = resBodyPath && md5 && tool.file.hasFile(resBodyPath) ? tool.file.getMd5Sync(resBodyPath) : undefined
         const reqBodySize = reqBodyPath && tool.file.hasFile(reqBodyPath) ? fs.statSync(reqBodyPath).size : 0
         const reqBodyMd5 = reqBodyPath && md5 && tool.file.hasFile(reqBodyPath) ? tool.file.getMd5Sync(reqBodyPath) : undefined
-        const headers = res.lineHeaders.headers || require(require('path').resolve(res.lineHeaders.headPath))
+        const headers = res.lineHeaders.headers || require(require(`path`).resolve(res.lineHeaders.headPath))
         return {
           id,
           method,
@@ -763,7 +763,7 @@ function business() { // 与业务相关性的函数
           fullApi,
           statusCode: res.lineHeaders.line.statusCode,
           contentType: headers[`content-type`],
-          extensionName: (resBodyPath || '').replace(/(.*)(\.)/, ''),
+          extensionName: (resBodyPath || ``).replace(/(.*)(\.)/, ``),
           resBodySize,
           resBodyMd5,
           resBodyPath,
@@ -803,14 +803,14 @@ function business() { // 与业务相关性的函数
         method.match(/OPTIONS/i)
         || (
           method.match(/GET/i) && url.match(new RegExp(`//${config._proxyTargetInfo.pathname}//`))
-        )
+        ),
       )
     }
 
     function createBodyPath({config, req, headersObj, reqOrRes, apiId, isHeader = false}) { // 根据 url 生成文件路径, reqOrRes: req, res
-      const filenamify = require('filenamify')
+      const filenamify = require(`filenamify`)
       const fs = require(`fs`)
-      const mime = require('mime')
+      const mime = require(`mime`)
       const headers = headersObj[reqOrRes]
       const contentType = isHeader ? `application/json;charset=utf-8` : headers[`content-type`]
       const extensionName = mime.getExtension(contentType) || ``
@@ -832,7 +832,7 @@ function business() { // 与业务相关性的函数
         const filePath = `${apiDir}/${
           filenamify(
             `${shortUrl}_${method}_${apiId}_${reqOrRes}${isHeader ? `_h` : ``}.${extensionName}`,
-            {maxLength: 255, replacement: '_'}
+            {maxLength: 255, replacement: `_`},
           )
         }`
         // 如果 filePath 已存在于记录中, 则使用新的
@@ -871,10 +871,10 @@ function business() { // 与业务相关性的函数
         }
       }
       const {headersPathReq, headersPathRes, bodyPathReq, bodyPathRes} = getBodyPath()
-      fs.writeFileSync(headersPathReq, JSON.stringify(headersObj.req), {encoding: 'utf8'})
-      fs.writeFileSync(headersPathRes, JSON.stringify(headersObj.res), {encoding: 'utf8'})
-      bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: 'utf8'})
-      bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: 'buffer'})
+      fs.writeFileSync(headersPathReq, JSON.stringify(headersObj.req), {encoding: `utf8`})
+      fs.writeFileSync(headersPathRes, JSON.stringify(headersObj.res), {encoding: `utf8`})
+      bodyPathReq && fs.writeFileSync(bodyPathReq, JSON.stringify(reqBody), {encoding: `utf8`})
+      bodyPathRes && fs.writeFileSync(bodyPathRes, buffer, {encoding: `buffer`})
       const resDataObj = {
         req: {
           lineHeaders: {
@@ -924,7 +924,7 @@ function business() { // 与业务相关性的函数
 
     function setHttpHistoryWrap({config, req, res, mock = false, buffer}) { // 从 req, res 记录 history
       if(ignoreHttpHistory({config, req}) === false) {
-        const data = [];
+        const data = []
         const arg = {
           config,
           buffer,
@@ -945,11 +945,11 @@ function business() { // 与业务相关性的函数
               isSave = true
             }
           }
-          res.on('data', function(chunk) {
+          res.on(`data`, function(chunk) {
             data.push(chunk)
           })
-          req.on('close', () => saveHistory(`req close`))
-          res.on('close', () => saveHistory(`res close`))
+          req.on(`close`, () => saveHistory(`req close`))
+          res.on(`close`, () => saveHistory(`res close`))
         }
       }
     }
@@ -1036,7 +1036,7 @@ function business() { // 与业务相关性的函数
         return false
       }
       res && setHeader(res, {
-        'access-control-allow-headers': req.headers['access-control-allow-headers'],
+        'access-control-allow-headers': req.headers[`access-control-allow-headers`],
         'access-control-allow-methods': req.method,
         'access-control-allow-credentials': `true`,
         'access-control-allow-origin': req.headers.origin || `*`,
@@ -1047,7 +1047,7 @@ function business() { // 与业务相关性的函数
         'referer': target, // referer 实际上是 "referrer" 误拼写
         'referrer': target,
         'origin': target, // 不应包含任何路径信息
-        'host': (new URL(target)).host
+        'host': (new URL(target)).host,
       })
     }
 
@@ -1092,7 +1092,6 @@ function business() { // 与业务相关性的函数
 
   function reqHandle({config}) { // 请求处理程序
     function sendReq({getHistory, api, res, apiId}) { // 发送请求
-      const axios = require('axios')
       const fs = require(`fs`)
 
       // api httpHistory 中的 api
@@ -1107,20 +1106,20 @@ function business() { // 与业务相关性的函数
       }
       const httpDataReq = getHistoryData.req
       let {line: {path, query, params}, headers} = httpDataReq.lineHeaders
-      headers = headers || require(require('path').resolve(httpDataReq.lineHeaders.headPath))
+      headers = headers || require(require(`path`).resolve(httpDataReq.lineHeaders.headPath))
       const [, method, url] = api.match(/(\w+)\s+(.*)/)
       reqHandle({config}).injectionReq({req: { headers }, res, type: `set`})
       const pathOrUrl = path || url
-      axios({
+      http({
         baseURL: `http://localhost:${config.port}`,
         method,
         url: pathOrUrl, // 注意不要 url 和 params 上都同时存在 query
         params: query,
         headers,
         data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
-        responseType: 'arraybuffer',
+        responseType: `arraybuffer`,
       }).then(aRes => {
-        const {status, statusText, } = aRes
+        const {status, statusText } = aRes
         res.send({
           success: true,
           msg: `${status} ${statusText}`,
@@ -1158,11 +1157,11 @@ function business() { // 与业务相关性的函数
             const fn = {
               string: () => {
                 const value = tool.obj.deepGet(arg, formKey)
-                ;(value !== undefined) && (global.INJECTION_REQUEST[toKey] = value);
+                ;(value !== undefined) && (global.INJECTION_REQUEST[toKey] = value)
               },
               function: () => {
                 const [key, value] = toKey({req}) || []
-                ;(value !== undefined) && (global.INJECTION_REQUEST[key] = value);
+                ;(value !== undefined) && (global.INJECTION_REQUEST[key] = value)
               },
             }[tool.type.isType(toKey)]
             fn && fn()
@@ -1190,10 +1189,10 @@ function business() { // 与业务相关性的函数
      */
     async function runNgrok({serverList}) {
       await tool.generate.initPackge(`ngrok`, {getRequire: false, env: {
-        NGROK_CDN_URL: `https://cdn.jsdelivr.net/gh/wll8/static@1.0.2/bin.equinox.io/`
+        NGROK_CDN_URL: `https://cdn.jsdelivr.net/gh/wll8/static@1.0.2/bin.equinox.io/`,
       }})
       const path = require(`path`)
-      const mainPath = path.join(__dirname, '../') // 主程序目录
+      const mainPath = path.join(__dirname, `../`) // 主程序目录
       const yaml = await tool.generate.initPackge(`yaml`)
       const getPort = await tool.generate.initPackge(`get-port`)
       const spawn = tool.cli.spawn
@@ -1205,7 +1204,7 @@ function business() { // 与业务相关性的函数
         {
           // stdio: [0, `pipe`, 2],
           cwd: mainPath,
-        }
+        },
       )
 
       // 获取未占用的 tcp 端口, 用于 ngrok 的 web_addr, 会生成一个 api 供我们调用
@@ -1221,7 +1220,7 @@ function business() { // 与业务相关性的函数
               proto: `http`,
               ...config,
             },
-          }
+          },
         }
 
         // 存储 nginx 配置文件, 然后让 ngrok 读取它们
@@ -1235,19 +1234,18 @@ function business() { // 与业务相关性的函数
           {
             stdio: [0, `pipe`, 2],
             cwd: mainPath,
-          }
+          },
         )
       })
 
       // 收集启动 nginx 之后的公网 url
       const urlList = []
-      const axios = require(`axios`)
       await Promise.all(portList.map((item, index) => {
         return tool.control.awaitTrue({
           timeout: 30e3,
           condition: () => { // 等待 /api/tunnels 接口返回所需的 url
             return new Promise(async resolve => {
-              const res = await axios.get(`http://localhost:${item}/api/tunnels`).catch((err = {}) => {
+              const res = await http.get(`http://localhost:${item}/api/tunnels`).catch((err = {}) => {
                 tool.cli.onlyLine(err.message)
                 resolve(false)
               })

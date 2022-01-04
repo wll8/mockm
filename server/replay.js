@@ -24,8 +24,8 @@ function serverReplay({
   } = historyHandle({config})
 
 
-  const jsonServer = require('json-server')
-  const proxy = require('http-proxy-middleware').createProxyMiddleware
+  const jsonServer = require(`json-server`)
+  const proxy = require(`http-proxy-middleware`).createProxyMiddleware
   const serverReplay = jsonServer.create()
   middleware.reWriteRouter({app: serverReplay, routes: config.route})
   serverReplay.use(middlewaresObj.corsMiddleware)

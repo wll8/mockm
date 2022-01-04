@@ -12,8 +12,8 @@ module.exports = util => {
         'data|3-7': [{
           userId: `@id`,
           userName: `@cname`,
-        }]
+        }],
       })),
-    }
+    },
   }
 }

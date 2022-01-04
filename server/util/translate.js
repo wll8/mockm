@@ -1,4 +1,5 @@
 const util = require(`./index.js`)
+const http = require(`./http.js`)
 const {
   tool,
 } = util
@@ -63,7 +64,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
   async function translatePlatforms() {
     return new Promise(async (resolve, reject) => {
       await tool.generate.initPackge(`translate-platforms`, {getRequire: false})
-      const { google, microsoft, youdao, baidu } = require('translate-platforms')
+      const { google, microsoft, youdao, baidu } = require(`translate-platforms`)
       let errInfo = []
       const handleYouDao = (...arg) => {
         // - [ ] fix: youdao 的翻译结果 text 和 word 顺序颠倒了: https://github.com/imlinhanchao/translate-platforms/issues/1
@@ -115,8 +116,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
       if(Boolean((key && appid)) === false) {
         return reject(`请添加百度翻译 key appid`)
       }
-      const axios = require('axios')
-      const querystring = require('querystring')
+      const querystring = require(`querystring`)
 
       const cfg = {
         appid,
@@ -135,7 +135,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
       }
       const paramsUrl = querystring.stringify(paramsObj)
       const url = `http://api.fanyi.baidu.com/api/trans/vip/translate?${paramsUrl}`
-      axios.get(url).then(res => {
+      http.get(url).then(res => {
         // if (Boolean(res.data.trans_result) === false) {
         //   reject(res.data)
         // }
@@ -159,7 +159,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
     fnArr = (appid && key)
       ? fnArr.reverse() // 如果传了 key, 则优先使用需要 key 的方法
       : fnArr
-    const res = await fnArr[0]() || await fnArr[1]();
+    const res = await fnArr[0]() || await fnArr[1]()
     res ? resolve(res) : reject(errInfo)
   })
 
@@ -309,7 +309,7 @@ function ruleHandle({type, word}) {
     },
   ]
   let res // 结果
-  const Random = require('better-mock').Random
+  const Random = require(`better-mock`).Random
   const hasMockMethod = Object.keys(Random).some(method => {
     return method.match(new RegExp(`^${word}$`, `i`))
   })
@@ -345,5 +345,5 @@ function ruleHandle({type, word}) {
 
 module.exports = {
   batchTextEnglish,
-  translateTextToLine
+  translateTextToLine,
 }

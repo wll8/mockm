@@ -1,5 +1,5 @@
 const util = require(`./util/index.js`)
-const { print } = require('./util/log.js')
+const { print } = require(`./util/log.js`)
 
 function serverTest({
   config,
@@ -50,7 +50,7 @@ function serverTest({
   const apiWebStore = tool.file.fileStore(config.apiWeb)
   const disableApiList = apiWebStore.get(`disable`)
 
-  const jsonServer = require('json-server')
+  const jsonServer = require(`json-server`)
   const serverTest = jsonServer.create()
   serverTest.use(middlewaresObj.corsMiddleware)
   serverTest.use(middlewaresObj.jsonParser)
@@ -84,17 +84,17 @@ function serverTest({
       try {
         const httpData = getHistory({fullApi, id}).data[reqOrRes]
         if(reqOrRes === `res`) { // 模仿 res 中的响应头, 但是开启跨域
-          const headers = httpData.lineHeaders.headers || require(require('path').resolve(httpData.lineHeaders.headPath))
+          const headers = httpData.lineHeaders.headers || require(require(`path`).resolve(httpData.lineHeaders.headPath))
           res.set(headers)
           allowCors({res, req})
         }
         if(tool.file.hasFile(httpData.bodyPath)) {
-          res.sendFile(require('path').resolve(httpData.bodyPath))
+          res.sendFile(require(`path`).resolve(httpData.bodyPath))
         } else {
           throw new Error(`不存在文件 ${httpData.bodyPath}`)
         }
       } catch (err) {
-        console.log('err', {api, err})
+        console.log(`err`, {api, err})
         res.status(404).json({msg: err.message})
       }
     }
@@ -116,11 +116,11 @@ function serverTest({
         if(_sort[0] === `date`) {
           _sort[0] = item => new Date(item.date).getTime()
         }
-        const page = _page;
-        const limit = _limit;
-        const orderBy = require(`lodash.orderby`);
-        const drop = require(`lodash.drop`);
-        const take = require(`lodash.take`);
+        const page = _page
+        const limit = _limit
+        const orderBy = require(`lodash.orderby`)
+        const drop = require(`lodash.drop`)
+        const take = require(`lodash.take`)
         const results = take(
           drop(
             orderBy(
@@ -181,18 +181,18 @@ function serverTest({
       },
       getApiListSse() {
         res.writeHead(200, {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-          "Connection": "keep-alive"
+          "Content-Type": `text/event-stream`,
+          "Cache-Control": `no-cache`,
+          "Connection": `keep-alive`,
         })
-        res.write("retry: 10000\n")
-        res.write("event: message\n")
+        res.write(`retry: 10000\n`)
+        res.write(`event: message\n`)
         let oldSize = -1
         const interval = setInterval( () => {
           const fs = require(`fs`)
           fs.stat(config._httpHistory, (err, stats) => { // 不用全部读取文件即可读取文件大小信息, 减少内存占用
             if (err) {
-              return console.error(err);
+              return console.error(err)
             }
             if(stats.size !== oldSize) {
               const str = JSON.stringify(getHistoryList({}))
@@ -203,9 +203,9 @@ function serverTest({
           })
         }, 500)
 
-        req.connection.addListener("close",  () => {
-          clearInterval(interval);
-        }, false);
+        req.connection.addListener(`close`,  () => {
+          clearInterval(interval)
+        }, false)
       },
       replay() {
         sendReq({
@@ -246,7 +246,6 @@ function serverTest({
       getApiResponseById() {
         middleware.replayHistoryMiddleware({
           id: actionArg0,
-          HTTPHISTORY,
           config,
           business,
         })(req, res, next)

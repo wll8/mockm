@@ -38,14 +38,14 @@ module.exports = util => {
       // 自定义拦截过程, 参考 https://github.com/chimurai/http-proxy-middleware#http-proxy-options
       '/get': {
           onProxyReq (proxyReq, req, res) { // 拦截请求
-            proxyReq.setHeader('x-added', 'req');
+            proxyReq.setHeader(`x-added`, `req`)
           },
           mid (req, res, next) { // 在进行代理之前添加中间件
             setTimeout(next, 2000) // 延时
           },
           onProxyRes (proxyRes, req, res) { // 拦截响应
             midResJson({proxyRes, res, key: `origin`, val: `127.0.0.1`}) // 修改 body
-            proxyRes.headers['x-added'] = 'res' // 修改 headers
+            proxyRes.headers[`x-added`] = `res` // 修改 headers
           },
       },
 
@@ -78,8 +78,8 @@ module.exports = util => {
     remote: false,
     openApi: `http://httpbin.org/spec.json`,
     cors: true,
-    dataDir: './httpData/',
-    dbJsonPath: './httpData/db.json',
+    dataDir: `./httpData/`,
+    dbJsonPath: `./httpData/db.json`,
     dbCover: false,
     db () {
       const data = mockjs.mock({
@@ -93,16 +93,16 @@ module.exports = util => {
             author: {
               'name|1': [`张三`, `李四`],
             },
-            title: '@ctitle',
-          }
+            title: `@ctitle`,
+          },
         ],
       })
       return data
     },
     route: {
-      '/db/api/*': '/$1',
+      '/db/api/*': `/$1`,
     },
-    apiWeb: './apiWeb.json',
+    apiWeb: `./apiWeb.json`,
     apiWebWrap: wrapApiData,
     api (util) {
       const { run } = util
@@ -162,12 +162,12 @@ module.exports = util => {
         async 'get /fetch' (req, res, next) { // 运行 fetch 方法并获取执行结果
           const fetch = await toolObj.generate.initPackge(`node-fetch`)
           // 示例 fetch 方法
-          const fetchRes = fetch("http://www.httpbin.org/ip", {
+          const fetchRes = fetch(`http://www.httpbin.org/ip`, {
             "headers": {
-              "accept": "*/*",
-              "accept-language": "zh-CN,zh;q=0.9"
+              "accept": `*/*`,
+              "accept-language": `zh-CN,zh;q=0.9`,
             },
-          });
+          })
           run.fetch({
             req,
             res,
@@ -180,7 +180,7 @@ module.exports = util => {
         // fetch-snippet
         'ws /wsecho' (ws, req) { // 创建 websocket API
           ws.send(`连接成功`)
-          ws.on('message', (msg) => {
+          ws.on(`message`, (msg) => {
             ws.send(msg)
           })
         },

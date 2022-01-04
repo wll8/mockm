@@ -1,5 +1,5 @@
 const util = require(`./util/index.js`)
-const { print } = require('./util/log.js')
+const { print } = require(`./util/log.js`)
 
 async function serverProxy({
   api,
@@ -19,6 +19,7 @@ async function serverProxy({
     clientInjection,
     historyHandle,
     customApi,
+    saveLog,
   } = business
   const {
     allowCors,
@@ -39,32 +40,32 @@ async function serverProxy({
     getDataRouter,
   } = customApi({api, db, config})
 
-  const jsonServer = require('json-server')
-  const proxy = require('http-proxy-middleware').createProxyMiddleware
+  const jsonServer = require(`json-server`)
+  const proxy = require(`http-proxy-middleware`).createProxyMiddleware
   const server = jsonServer.create()
-  const http = require('http');
-  const serverRef = http.createServer(server);
+  const http = require(`http`)
+  const serverRef = http.createServer(server)
   // 使用 upgrade 升级为 ws https://github.com/expressjs/express/issues/2594#issuecomment-103265227
-  serverRef.on('upgrade', async (req, socket, upgradeHead) => {
+  serverRef.on(`upgrade`, async (req, socket, upgradeHead) => {
     const ws = await tool.generate.initPackge(`ws`)
-    const wss = new ws.Server({ noServer: true });
-    const res = new http.ServerResponse(req);
-    res.assignSocket(socket);
+    const wss = new ws.Server({ noServer: true })
+    const res = new http.ServerResponse(req)
+    res.assignSocket(socket)
     res.websocket = (cb) => {
-      let head = new Buffer.alloc(upgradeHead.length);
-      upgradeHead.copy(head);
+      let head = new Buffer.alloc(upgradeHead.length)
+      upgradeHead.copy(head)
       wss.handleUpgrade(req, socket, head, (client) => {
-        wss.emit('connection'+req.url, client);
-        wss.emit('connection', client);
-        cb(client);
-      });
-    };
+        wss.emit(`connection`+req.url, client)
+        wss.emit(`connection`, client)
+        cb(client)
+      })
+    }
     // 捕获错误 ECONNRESET 错误 https://github.com/http-party/node-http-proxy/issues/1286#issuecomment-437672954
-    socket.on('error', err => {
+    socket.on(`error`, err => {
       print(err)
-    });
-    return server(req, res);
-  });
+    })
+    return server(req, res)
+  })
   server.use((req, res, next) => {
     next()
   })
@@ -85,7 +86,7 @@ async function serverProxy({
         }
       }
       // 把代理路径 `/any` 变成 `/any/**` 的形式, 这样才能实现排除功能
-      const key = `${item.context}${item.context.endsWith(`/`) ? '' : `/`}**`
+      const key = `${item.context}${item.context.endsWith(`/`) ? `` : `/`}**`
       const mid = proxy([key], getProxyConfig(item.options))
       item.options.mid && server.use(item.context, midHandler(item.options.mid))
       server.use(item.context, midHandler(mid))
@@ -116,7 +117,7 @@ async function serverProxy({
     next()
   })
   server.use((req, res, next) => { // 保存自定义接口的请求历史
-    const cloneDeep = require('lodash.clonedeep')
+    const cloneDeep = require(`lodash.clonedeep`)
     const newReq = cloneDeep(req) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
     const oldSend = res.send
     res.send = (data = ``) => {
@@ -176,7 +177,7 @@ async function serverProxy({
 
   server.use(async (req, res, next) => {
     reqHandle({config}).injectionReq({req, res, type: `get`})
-    const pathToRegexp = require('path-to-regexp')
+    const pathToRegexp = require(`path-to-regexp`)
     const hasRouter = serverRouterList.some(item => {
       const {method, router, action} = item
       /**
@@ -217,7 +218,7 @@ async function serverProxy({
             print(err)
             res.status(500).send(String(err))
           }
-        })();
+        })()
         return true
       } else {
         return false
@@ -244,13 +245,13 @@ async function serverProxy({
     // https://github.com/typicode/json-server/issues/311
     // https://github.com/typicode/json-server/issues/314
 
-    const querystring = require('querystring')
+    const querystring = require(`querystring`)
     if(req._parsedUrl) {
       const query = querystring.parse(req._parsedUrl.query)
       req.query = query
     }
     let returnData = res.locals.data // 前面的数据返回的 data 结构
-    const xTotalCount = res.get('X-Total-Count')
+    const xTotalCount = res.get(`X-Total-Count`)
     if(xTotalCount) {
       returnData = {
         count: xTotalCount,
