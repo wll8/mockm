@@ -32,7 +32,9 @@
     "nodemon": "^2.0.6",
     "path-to-regexp": "0.1.7"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^8.6.0"
+  },
   "pluginDependencies": {
     "connect-history-api-fallback": "1.6.0",
     "node-fetch": "2.6.2",
@@ -48,6 +50,7 @@
     "ngrok": "4.2.2"
   },
   "scripts": {
+    "lint": "eslint --ignore-path ../.gitignore .",
     "dts": "npx shx mkdir -p ./node_modules/mockm & npx shx cp -r ./@types ./node_modules/mockm/",
     "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9000 & node run.js --log-line\"",
     "serve": "node run.js --log-line",
