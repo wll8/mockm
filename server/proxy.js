@@ -19,6 +19,7 @@ async function serverProxy({
     clientInjection,
     historyHandle,
     customApi,
+    saveLog,
   } = business
   const {
     allowCors,
