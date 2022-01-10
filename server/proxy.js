@@ -81,7 +81,7 @@ async function serverProxy({
       // eslint-disable-next-line no-inner-declarations
       function midHandler(fn) {
         return (req, res, next) => {
-          const hasFind = serverRouterList.some(item => item.re.test(req.originalUrl))
+          const hasFind = serverRouterList.filter(item => item.action.disable !== true).some(item => item.re.test(req.originalUrl))
           hasFind ? next() : fn(req, res, next)
         }
       }
