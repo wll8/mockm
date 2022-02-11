@@ -152,7 +152,7 @@ function serverTest({
         }))
         const openApi = matchInfo.spec
         // openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
-        getOpenApi({openApi}).then(openApiData => {
+        getOpenApi({openApi}).then((openApiData = {}) => {
           openApiData.info = {
             ...openApiData.info,
             // _openApiPrefix: openApiPrefix,
