@@ -54,7 +54,7 @@ function business() { // 与业务相关性的函数
   * @param {object} options 规则
   */
   function listToData(list, options = {}){
-    const Mock = require(`better-mock`)
+    const Mock = require(`@wll8/better-mock`)
     const mockMethods = Object.keys(Mock.Random).map(key => `@${key}`)
 
     function listToDataRef (list) {
