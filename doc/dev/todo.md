@@ -4,7 +4,7 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
-- [ ] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
+- [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
 - [ ] refactor: 在 util 中
   - 抽离以下方法, 因为他们属于业务
     - prepareProxy
