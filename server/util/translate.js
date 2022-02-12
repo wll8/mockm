@@ -309,7 +309,7 @@ function ruleHandle({type, word}) {
     },
   ]
   let res // 结果
-  const Random = require(`better-mock`).Random
+  const Random = require(`@wll8/better-mock`).Random
   const hasMockMethod = Object.keys(Random).some(method => {
     return method.match(new RegExp(`^${word}$`, `i`))
   })
