@@ -243,7 +243,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || packageJson.pluginDependencies[packageName]
+        version = version || (packageJson.pluginDependencies || {})[packageName] || packageJson.dependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
         if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           const cnpmVersion = npm().getLocalVersion(`cnpm`)
