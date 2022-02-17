@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.1.26-alpha.5",
+  "version": "1.1.26-alpha.6",
   "description": "Analog interface server, painless parallel development of front and back ends.",
   "main": "server.js",
   "bin": {
@@ -29,7 +29,7 @@
     "lodash.orderby": "^4.6.0",
     "lodash.take": "^4.1.1",
     "mime": "^2.4.7",
-    "@wll8/better-mock": "^0.3.2-alpha",
+    "@wll8/better-mock": "^0.3.3-alpha",
     "vm2": "^3.9.2",
     "morgan": "^1.10.0",
     "node-http-proxy-json": "^0.1.9",
