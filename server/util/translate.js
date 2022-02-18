@@ -139,7 +139,7 @@ async function translateTextToLine({ text, appid, key }) { // 翻译行
         // if (Boolean(res.data.trans_result) === false) {
         //   reject(res.data)
         // }
-        const handle = res.data.trans_result.map(item => {
+        const handle = res.trans_result.map(item => {
           const zh = isChinese ? item.src : item.dst
           const en = isChinese ? item.dst : item.src
           const raw = isChinese ? zh : en
@@ -309,7 +309,7 @@ function ruleHandle({type, word}) {
     },
   ]
   let res // 结果
-  const Random = require(`better-mock`).Random
+  const Random = require(`@wll8/better-mock`).Random
   const hasMockMethod = Object.keys(Random).some(method => {
     return method.match(new RegExp(`^${word}$`, `i`))
   })

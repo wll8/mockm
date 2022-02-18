@@ -266,6 +266,7 @@ async function serverProxy({
     const defaultConfig = {
       ws: true,
       target: rootTarget,
+      secure: false,
       changeOrigin: true,
       onProxyReq: (proxyReq, req, res) => {
         allowCors({req: proxyReq, proxyConfig: userConfig})

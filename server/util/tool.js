@@ -185,6 +185,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   async function installPackage({cwd, env, packageName, version, attempt = 3}) {
+    cwd = cwd.replace(/\\/g, `/`)
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
     // const installEr = {cnpm: `npm`}[packageName] || `cnpm`
     const installEr = `cnpm`
@@ -192,8 +193,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
     // --no-save 不保存依赖名称到 package.json 中
     const cmd = `npx ${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`
-    print(`initializing: ${packageName}...`)
-    print(cmd)
+    const cd = require(`os`).type() === `Windows_NT` ? `cd /d` : `cd`
+    const tips = tool().string.removeLeft(`
+      initializing: ${packageName}...
+      ${tool().cli.colors.yellow(`If the automatic installation fails, you can try running the following commands manually:`)}
+      ${tool().cli.getFullLine()}
+      ${cd} "${cwd}"
+      ${cmd}
+      ${cd} "${process.cwd()}"
+      ${tool().cli.getFullLine()}
+    `)
+    print(tips)
     let attemptNum = attempt // 重试次数
     do {
       await cli().spawn(
@@ -233,7 +243,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || packageJson.pluginDependencies[packageName]
+        version = version || (packageJson.pluginDependencies || {})[packageName] || packageJson.dependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
         if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           const cnpmVersion = npm().getLocalVersion(`cnpm`)
@@ -401,7 +411,19 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       str = str.length > columns ? str : ` `.repeat(columns).replace(new RegExp(`.{${str.length}}`), str) // 以空格补齐整行终端, 避免其他字符侵入本行
       process.stdout.write(`\r${str}`)
     }
+
+    /**
+     * 获取与终端大小相同的字符串
+     * @param {string} str 要输出的字符
+     * @returns {string}
+     */
+    function getFullLine(str = `=`) {
+      const size = (process.stdout.columns || 80) - 1 // 给换行符让位
+      return str.repeat(size)
+    }
+
     return {
+      getFullLine,
       onlyLine,
       spawn,
       parseArgv,

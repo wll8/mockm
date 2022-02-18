@@ -54,7 +54,7 @@ function business() { // 与业务相关性的函数
   * @param {object} options 规则
   */
   function listToData(list, options = {}){
-    const Mock = require(`better-mock`)
+    const Mock = require(`@wll8/better-mock`)
     const mockMethods = Object.keys(Mock.Random).map(key => `@${key}`)
 
     function listToDataRef (list) {
@@ -545,7 +545,7 @@ function business() { // 与业务相关性的函数
         http.get(openApi, {
           auth: username ? {username, password} : {},
         }).then(res => {
-          resolve(res.data)
+          resolve(res)
         }).catch(err => {
           print(`err`, `Failed to get openApi`)
           reject(err.message)
@@ -1249,8 +1249,8 @@ function business() { // 与业务相关性的函数
                 tool.cli.onlyLine(err.message)
                 resolve(false)
               })
-              if(res) {
-                const tunnels = res.data.tunnels
+              if(res && res.tunnels) {
+                const tunnels = res.tunnels
                 const hasUrl = tunnels.length > 0
                 if(hasUrl) {
                   urlList[index] = tunnels[0].public_url

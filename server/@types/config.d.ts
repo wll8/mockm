@@ -1,5 +1,5 @@
 import { AxiosStatic as axios, Method } from 'axios'
-import { BetterMock as mockjs } from 'better-mock'
+import { BetterMock as mockjs } from '@wll8/better-mock'
 import * as http from 'http'
 import { Request, Response } from 'express'
 import { Options as connectHistoryApiFallbackOptions } from 'connect-history-api-fallback'

@@ -4,7 +4,18 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
-- [ ] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
+- [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
+- [ ] refactor: 在 util 中
+  - 抽离以下方法, 因为他们属于业务
+    - prepareProxy
+    - parseProxyTarget
+    - fullApi2Obj
+    - parseRegPath
+  - 把 handlePathArg 放到 cli 中
+  - 把 initPackge, hasPackage, installPackage 放到 npm 中
+  - middleware 中内容应属业务方法
+  - httpClient 中内容应属业务方法
+  - clearProcess 方法应重新封装
 - [x] fix: 连接不存在的 ws api 2-3次会报错
 - [x] fix: config.proxy 非 `/` 代理时, host 不应是 `/` 的代理
 - [ ] feat: 支持根据运行环境自动切换语言
