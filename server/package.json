@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "2.0.0-alpha.3",
+  "version": "2.0.0-alpha.4",
   "description": "Analog interface server, painless parallel development of front and back ends.",
   "main": "server.js",
   "bin": {
@@ -15,29 +15,29 @@
     "connect-history-api-fallback": "1.6.0",
     "ws": "7.5.5",
     "translate-platforms": "0.0.7",
-    "multiparty": "4.2.2",
-    "@babel/runtime-corejs3": "^7.12.5",
-    "core-js": "^3.8.2",
-    "axios": "^0.23.0",
+    "multiparty": "4.2.3",
+    "@babel/runtime-corejs3": "^7.17.2",
+    "core-js": "^3.21.1",
+    "axios": "^0.26.0",
     "compression": "^1.7.4",
     "express-urlrewrite": "^1.4.0",
     "filenamify": "4.3.0",
-    "http-proxy-middleware": "^2.0.1",
-    "json-server": "0.16.3",
+    "http-proxy-middleware": "^2.0.3",
+    "json-server": "0.17.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.drop": "^4.1.1",
     "lodash.orderby": "^4.6.0",
     "lodash.take": "^4.1.1",
-    "mime": "^2.4.7",
+    "mime": "^3.0.0",
     "@wll8/better-mock": "^0.3.3-alpha",
-    "vm2": "^3.9.2",
+    "vm2": "^3.9.8",
     "morgan": "^1.10.0",
     "node-http-proxy-json": "^0.1.9",
-    "nodemon": "^2.0.6",
+    "nodemon": "^2.0.15",
     "path-to-regexp": "0.1.7"
   },
   "devDependencies": {
-    "eslint": "^8.6.0"
+    "eslint": "^8.9.0"
   },
   "pluginDependencies": {
     "node-fetch": "2.6.2",

@@ -1118,6 +1118,7 @@ function business() { // 与业务相关性的函数
         headers,
         data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
         responseType: `arraybuffer`,
+        _getRaw: true,
       }).then(aRes => {
         const {status, statusText } = aRes
         res.send({
