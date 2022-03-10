@@ -506,7 +506,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const path = new URL(`http://127.0.0.1${api}`).pathname
         const openApiFile = await file().getBackUrl(config._openApiHistoryDir, spec)
         const specJson = require(openApiFile)
-        let {paths, basePath = ``} = specJson
+        let {paths = {}, basePath = ``} = specJson
         method = method ? method.toLowerCase() : undefined
         // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
         const re = new RegExp(`^(${basePath})(/.*)`)
