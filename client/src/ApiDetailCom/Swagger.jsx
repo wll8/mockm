@@ -153,7 +153,7 @@ function Swagger(props) {
           ) { // 本地模式
             host = `${hostname}:${window.serverConfig.port}`
           } else { // 公网模式
-            host = new URL(store.note.remote.port).host
+            host = new URL(store.note.remote.port || store.note.local.port).host
           }
 
           const servers = (spec.servers || []).map(item => {
