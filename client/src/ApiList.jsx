@@ -166,7 +166,7 @@ const ApiList = (() => {
           onChange={text => {
             console.log(`text`, text)
           }}
-          isMock={false}
+          isMock={true}
           data={''}
         />
         <Table scroll={{x: 800}} loading={state.loading} size="small" rowKey="key" pagination={{
