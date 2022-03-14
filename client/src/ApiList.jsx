@@ -167,7 +167,7 @@ const ApiList = (() => {
             console.log(`text`, text)
           }}
           isMock={true}
-          data={''}
+          data={JSON.stringify(testData)}
         />
         <Table scroll={{x: 800}} loading={state.loading} size="small" rowKey="key" pagination={{
           defaultPageSize: state.defaultPageSize,

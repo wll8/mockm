@@ -16,7 +16,7 @@ export default class MockSelect extends React.Component {
     };
     this.mock = context.Model.__jsonSchemaMock || [];
   }
-
+  
   static propTypes = {
     schema: PropTypes.object,
     showEdit: PropTypes.func,
@@ -26,16 +26,14 @@ export default class MockSelect extends React.Component {
   render() {
     // const children = [];
     const { schema } = this.props;
-    const children = this.mock.map((item) => <Option key={item.mock}>{item.mock}</Option>);
-
+    const options = this.mock.map((item) => ({ value: item.mock }))
     return (
       <div>
         <AutoComplete
           className="certain-category-search"
           dropdownMatchSelectWidth={false}
-          dataSource={children}
+          options={options}
           placeholder={LocaleProvider('mock')}
-          optionLabelProp="value"
           filterOption={true}
           value={schema.mock ? schema.mock.mock : ''}
           onChange={this.props.onChange}
