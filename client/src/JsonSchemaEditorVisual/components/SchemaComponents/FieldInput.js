@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import {Input} from 'antd'
+import * as antd from 'antd'
+const { Input } = antd
 
 export default class FieldInput extends PureComponent {
   static propTypes = {

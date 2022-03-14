@@ -7,7 +7,7 @@ import moox from 'moox'
 import schema from './models/schema'
 import PropTypes from 'prop-types'
 
-module.exports = (config = {})=>{
+export default (config = {})=>{
   if(config.lang) utils.lang = config.lang;
   
   const Model = moox({

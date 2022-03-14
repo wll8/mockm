@@ -16,8 +16,10 @@
     "react-dom": "^17.0.1",
     "react-json-view": "^1.19.1",
     "react-keeper": "^2.2.2",
+    "react-redux": "^5.0.6",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.1"
+    "react-scripts": "4.0.1",
+    "redux": "^4.1.2"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -26,6 +28,9 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
+    "ignorePatterns": [
+      "src/JsonSchemaEditorVisual"
+    ],
     "extends": "react-app",
     "rules": {
       "no-unused-vars": 0

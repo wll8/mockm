@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
-import {
+import * as antd from 'antd'
+const {
   Dropdown,
   Menu,
   Input,
@@ -14,7 +15,8 @@ import {
   message,
   Tooltip,
   Switch
-} from 'antd';
+} = antd
+
 import { QuestionCircleOutlined } from '@ant-design/icons'
 const { TextArea } = Input;
 import './schemaJson.css';

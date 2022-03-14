@@ -1,8 +1,13 @@
 import React from 'react'
 import * as antd from 'antd'
 import utils from './utils.jsx'
+import jSchema from './JsonSchemaEditorVisual'
+import variable from './variable'
 import common from './common.jsx'
 import './ApiList.scss'
+
+console.log(`variable.MOCK_SOURCE`, variable.MOCK_SOURCE)
+const ResBodySchema = jSchema({ lang: 'zh_CN', mock: variable.MOCK_SOURCE });
 
 const $ = window.$
 const HotKey = window.HotKey
@@ -133,8 +138,37 @@ const ApiList = (() => {
         setState(preState => ({...preState, loading: false}))
       })
     }
+    const testData = {
+      "type": "object",
+      "title": "title",
+      "properties": {
+        "name": {
+          "type": "string",
+          "mock": {
+            "mock": "@cname"
+          }
+        },
+        "title": {
+          "type": "string",
+          "mock": {
+            "mock": "@ctitle"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "title"
+      ]
+    }
     return (
       <div className="ApiList">
+        <ResBodySchema
+          onChange={text => {
+            console.log(`text`, text)
+          }}
+          isMock={false}
+          data={''}
+        />
         <Table scroll={{x: 800}} loading={state.loading} size="small" rowKey="key" pagination={{
           defaultPageSize: state.defaultPageSize,
           total: state.apiListData.count,

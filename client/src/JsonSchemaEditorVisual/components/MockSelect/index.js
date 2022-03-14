@@ -1,5 +1,6 @@
 import React from 'react';
-import { Input, AutoComplete, Icon } from 'antd';
+import * as antd from 'antd';
+const { Input, AutoComplete, Icon } = antd
 import PropTypes from 'prop-types';
 const Option = AutoComplete.Option;
 import LocaleProvider from '../LocalProvider/index.js';

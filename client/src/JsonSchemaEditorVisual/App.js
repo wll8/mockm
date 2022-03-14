@@ -1,5 +1,6 @@
 import React from 'react';
-import {
+import * as antd from 'antd'
+const {
   Input,
   Row,
   Tooltip,
@@ -11,7 +12,8 @@ import {
   Modal,
   message,
   Tabs,
-} from 'antd';
+} = antd
+
 import {
   QuestionCircleOutlined,
   CaretDownOutlined,

@@ -1,5 +1,6 @@
 import React, { Component, PureComponent } from 'react';
-import {
+import * as antd from 'antd'
+const {
   Dropdown,
   Menu,
   Row,
@@ -12,7 +13,8 @@ import {
   Modal,
   message,
   Tooltip
-} from 'antd';
+} = antd
+
 import {
   CaretDownOutlined,
   CaretRightOutlined,
