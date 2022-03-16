@@ -169,13 +169,81 @@
 - [x] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
   - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
 
-## 破坏性更新计划
-- 2.x
-  - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
+## 更新计划
+- 2.x - 破坏性
   - [ ] refactor: node 支持版本调整为 v12+
   - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
   - [ ] fix: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
   - [ ] refactor: 期望 httpHistory 中仅保存 id, 因为可能大多数请求只有少量报文却有大量 header, 导致 httpHistory 文件激增
+    ``` json httpHistory.json
+    {
+      "path": {
+        "/post": ["1", "2"]
+      }
+    }
+    ```
+  - [ ] refactor: 请求信息文件存储方式变更为
+    - request/ 请求记录文件夹
+      - post/ 接口路径
+        - ${id}_info.json 保存请求信息及索引, 例如请求头、响应头, 其实就是 har 文件的一部分
+        ``` json 1_info.json
+        {
+          "entriesItem": {
+            "_id": "1", // 请求 id
+            "_apiType": "apiWeb", // apiWeb api db use proxy
+            "cache": {},
+            "connection": "1248649",
+            "request": {
+              "method": "POST",
+              "url": "http://httpbin.org/anything?p1=111&p2=222",
+              "httpVersion": "HTTP/1.1",
+              "headers": [
+                {
+                  "name": "Host",
+                  "value": "httpbin.org"
+                }
+              ],
+              "queryString": [
+                {
+                  "name": "p1",
+                  "value": "111"
+                }
+              ],
+              "headersSize": 513,
+              "bodySize": 20,
+              "postData": {
+                "mimeType": "application/json",
+                "_file": "${shortUrl}_${method}_${id}_${reqOrRes}.json",
+                "text": "" // _file
+              }
+            },
+            "response": {
+              "status": 200,
+              "statusText": "OK",
+              "httpVersion": "HTTP/1.1",
+              "headers": [
+                {
+                  "name": "Date",
+                  "value": "Tue, 15 Mar 2022 02:16:05 GMT"
+                }
+              ],
+              "cookies": [],
+              "content": {
+                "size": 930,
+                "mimeType": "application/json",
+                "compression": 0,
+                "_file": "${shortUrl}_${method}_${id}_${reqOrRes}.json",
+                "text": "" // _file
+              },
+              "headersSize": 253,
+              "bodySize": 930
+            },
+            "serverIPAddress": "34.227.133.25",
+            "startedDateTime": "2022-03-15T02:16:03.732Z"
+          }
+        }
+        ```
+        - ${shortUrl}_${method}_${id}_${reqOrRes}.json 请求或响应数据
   - [ ] refactor: 期望更改 httpData 目录为 mockm_data, 因为 httpData 名字比较通用, 可能会被其他程序使用
   - [ ] feat: 依赖更新: ws@8.x 文本消息和关闭原因不再解码为字符串, 而是默认返回 Buffers. 另外, 8.2.x 支持 esm
   - [ ] feat(server): 更改 openApi 的功能 - 破坏性修改
@@ -188,6 +256,14 @@
     - object.resPrefix - 将前缀添加到 oepnApi 的 path 中
     - object.reqPrefix - 将前缀添加到请求的 path 中
     - array[object] - 参考 object
+
+- 2.x - 非破坏性
+  - [ ] refactor: 替换 react 为 vue 
+  - [ ] refactor: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn
+  - [ ] feat: 支持插件机制
+    - 支持在 9005 的服务入口添加代码, 例如向页面插入脚本或添加授权逻辑
+    - 支持向 9005 中的 actionFnObj 注入方法, 这样即通过 api 控制 server
+  - webApi json 编辑器表优化
 ## 备注
 - [ ] filenamify@5.x 只支持 esm
 - [ ] node-fetch@3.x 只支持 esm
