@@ -171,6 +171,8 @@
 
 ## 更新计划
 - 2.x - 破坏性
+  - [ ] feat: 更改代理方式
+    - `"/": 'http://127.0.0.1/api'`  应代理到 `/api` 而不是 `/`.
   - [ ] refactor: node 支持版本调整为 v12+
   - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
   - [ ] fix: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
