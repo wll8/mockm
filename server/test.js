@@ -362,6 +362,13 @@ function serverTest({
       removeApi() {
         const {setPath} = req.body
         apiWebStore.set(setPath, undefined)
+        { // 清除空的 API
+          const pathsData = apiWebStore.get(`paths`)
+          Object.entries(pathsData).forEach(([key, val]) => {
+            pathsData[key] = Object.keys(val || {}).length ? val : undefined
+          })
+          apiWebStore.set(`paths`, pathsData)
+        }
         res.json({msg: `ok`})
         reStartServer(config.config)
       },
