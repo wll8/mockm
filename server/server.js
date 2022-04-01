@@ -47,7 +47,7 @@ new Promise(async () => {
   } = customApi({api, db, config})
 
   global.HTTPHISTORY = require(config._httpHistory) // 请求历史
-  global.INJECTION_REQUEST = {} // 自动注入下次调试请求的数据
+  global.STORE = tool.file.fileStore(config._store) // 自动注入下次调试请求的数据
   require(`./proxy.js`)({
     api,
     db,
