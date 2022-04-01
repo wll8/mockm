@@ -94,7 +94,7 @@ function Swagger(props) {
 
   function initSwagger({store, cb}) {
     // 添加 swagger-ui.css
-    $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui.css">`))
+    $(`head`).append($(`<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/swagger-ui-dist@3.52.5/swagger-ui.css">`))
     $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
     // 添加 swagger-ui-bundle.js 并初始化 swg
 
@@ -119,7 +119,7 @@ function Swagger(props) {
       }
     });
 
-    $.getScript2(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.25.1/swagger-ui-bundle.min.js`, () => {
+    $.getScript2(`//cdn.jsdelivr.net/npm/swagger-ui-dist@3.52.5/swagger-ui-bundle.min.js`, () => {
       const parseHashData = parseHash()
       window.swaggerUi = window.SwaggerUIBundle({
         url: `${cfg.baseURL}/api/getOpenApi/${parseHashData.api ? `?api=${parseHashData.api}` : ``}`,
@@ -128,10 +128,16 @@ function Swagger(props) {
           UrlMutatorPlugin,
         ],
         requestInterceptor (req) {
-          Object.entries(window.injectionRequest).forEach(([key, value]) => {
-            ;(value !== undefined) && deepSet({req}, key, value)
-          })
-          return req
+          return new Promise((resolve, reject) => {
+            http.get(`${cfg.baseURL}/api/getInjectionRequest/`).then(res => {
+              Object.entries(res).forEach(([key, value]) => {
+                ;(value !== undefined) && deepSet({req}, key, value)
+              })
+            }).finally(() => {
+              // 在下一个宏任务中返回 req, 以保证它被处理
+              setTimeout(() => resolve(req), 0)
+            })
+          });
         },
         configs: {
           preFetch (req) { // 请求前处理 req

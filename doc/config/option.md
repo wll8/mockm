@@ -95,6 +95,8 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 
 指定如何从上一个 http 请求获取数据到重放和调试时的 http 请求上.
 
+对象的 key 指定了从上一个请求的的哪里获取值.
+
 ``` js
 /** 
  * 不使用
@@ -128,8 +130,8 @@ updateToken = [`auth`, `auth2`]
 updateToken = {
   'req.headers.authorization': 'req.headers.authorization',
   'req.headers.a': 'req.headers.b',
-  'req.headers.a2': ({req}) => { // 自定义设置的 key 和 value
-    return ['req.headers.b2', `123456`]
+  'req.headers.a2': ({req, value}) => { // 动态设置, 参数中的 value 是上一次请求中对应路径的值
+    return ['req.headers.b2', `123456`] // 第一项是要设置的 key, 第二项是 value
   },
 }
 ```
