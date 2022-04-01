@@ -125,11 +125,13 @@ new Promise(async () => { // 启动 server.js
     // arg SIGUSR2 正常退出, 例如修改文件
     // arg undefined 用户退出, 例如 ctrl+c
     if(log.match(/killProcess:/)) { // 检测到错误日志时重启
-      restart()
+      console.log(`exit: ${arg}`)
       saveLog({
+        code: arg,
         logStr: log,
         logPath: config._errLog,
       })
+      restart()
     }
   })
   .on(`restart`, (arg) => {
