@@ -89,11 +89,11 @@ new Promise( async () => { // 检查更新
 new Promise(async () => { // 启动 server.js
   let log = ``
   function restart() {
-    config.guard && setTimeout(() => {
+    config.guard ? setTimeout(() => {
       nodemon.emit(`restart`)
       print(`Abnormal exit, service has been restarted!`)
       log = ``
-    }, 1000)
+    }, 1000) : process.exit()
   }
   const nodeArg = typeof(cliArg[`--node-options`]) === `string` ? cliArg[`--node-options`] : ``
   nodemon({
