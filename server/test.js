@@ -270,7 +270,7 @@ function serverTest({
         res.send(config)
       },
       getInjectionRequest() {
-        res.send(global.INJECTION_REQUEST)
+        res.send(global.STORE.get(`updateToken`))
       },
       getStore() {
         const str = require(`fs`).readFileSync(config._store, `utf8`)
