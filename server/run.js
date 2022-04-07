@@ -89,11 +89,11 @@ new Promise( async () => { // 检查更新
 new Promise(async () => { // 启动 server.js
   let log = ``
   function restart() {
-    config.guard && setTimeout(() => {
+    config.guard ? setTimeout(() => {
       nodemon.emit(`restart`)
       print(`Abnormal exit, service has been restarted!`)
       log = ``
-    }, 1000)
+    }, 1000) : process.exit()
   }
   const nodeArg = typeof(cliArg[`--node-options`]) === `string` ? cliArg[`--node-options`] : ``
   nodemon({
@@ -125,11 +125,13 @@ new Promise(async () => { // 启动 server.js
     // arg SIGUSR2 正常退出, 例如修改文件
     // arg undefined 用户退出, 例如 ctrl+c
     if(log.match(/killProcess:/)) { // 检测到错误日志时重启
-      restart()
+      console.log(`exit: ${arg}`)
       saveLog({
+        code: arg,
         logStr: log,
         logPath: config._errLog,
       })
+      restart()
     }
   })
   .on(`restart`, (arg) => {

@@ -7,7 +7,7 @@ function business() { // 与业务相关性的函数
   /**
    * 保存日志
    */
-  function saveLog({logStr, logPath}) {
+  function saveLog({logStr, logPath, code = `-`}) {
     const fs = require(`fs`)
     const os = require(`os`)
     const packageJson = require(`../package.json`)
@@ -19,6 +19,7 @@ function business() { // 与业务相关性的函数
           `mockm:${packageJson.version}`, // mockm 版本号
           `node:${process.version}`, // node 版本号
           `os:${os.type()} ${os.release()}`, // 操作系统和版本号
+          `code:${code}`, // 退出码
           `arg:${process.argv.splice(2)}`, // 命令行参数
           `lang:${process.env.LANG}`, // 终端语言环境
         ].join(`, `), // 附件信息
@@ -616,6 +617,7 @@ function business() { // 与业务相关性的函数
           note: {
             remote: {},
           },
+          updateToken: {},
         })
         // 需要每次根据 osIp 更新调试地址
         store.set(`note.local`, {
@@ -1154,23 +1156,26 @@ function business() { // 与业务相关性的函数
       const {req, res, type} = arg
       if(type === `get`) {
         new Promise(() => {
+          const updateToken = global.STORE.get(`updateToken`)
           Object.entries(config.updateToken).forEach(([formKey, toKey]) => {
             const fn = {
               string: () => {
-                const value = tool.obj.deepGet(arg, formKey)
-                ;(value !== undefined) && (global.INJECTION_REQUEST[toKey] = value)
+                const prev = tool.obj.deepGet(arg, formKey)
+                ;(prev !== undefined) && (updateToken[toKey] = prev)
               },
               function: () => {
-                const [key, value] = toKey({req}) || []
-                ;(value !== undefined) && (global.INJECTION_REQUEST[key] = value)
+                const prev = tool.obj.deepGet(arg, formKey)
+                const [key, value] = toKey({req, value: prev}) || []
+                ;(value !== undefined) && (updateToken[key] = value)
               },
             }[tool.type.isType(toKey)]
             fn && fn()
           })
+          global.STORE.set(`updateToken`, updateToken)
         })
       }
       if(type === `set`) {
-        Object.entries(global.INJECTION_REQUEST).forEach(([key, value]) => {
+        Object.entries(global.STORE.get(`updateToken`)).forEach(([key, value]) => {
           tool.obj.deepSet(arg, key, value)
         })
       }

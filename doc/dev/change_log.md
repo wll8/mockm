@@ -9,6 +9,26 @@
 
 :::
 
+## 2022 年 03 月
+#### v1.1.26-alpha.10
+- server
+  - fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
+- client
+  - fix: 处理边缘情况, 前端通过外网访问, 但 server 未启用 remote 时报错
+    ```
+    Uncaught TypeError: Failed to construct 'URL': Invalid URL
+        at onComplete (Swagger.jsx:156:1)
+    ```
+
+## 2022 年 02 月
+#### v1.1.26-alpha.8
+- server
+  - fix: 在页面上重发请求时提示 `重发请求成功 undefined undefined`
+  - feat: 升级依赖
+  - feat: 调整按需安装的依赖
+  - fix: 处理获取 openApi 时的边界情况
+  - refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
+
 ## 2022 年 01 月
 
 #### v1.1.26-alpha.2

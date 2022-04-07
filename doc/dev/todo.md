@@ -34,9 +34,9 @@
   - 因为 id 引用的是 httpHistory 目录中的内容, 但此目录通常又不方便上传到版本控制系统, 所以把请求记录的值直接转换为 webApi, 可方便的多人共享或复用已有的数据.
 - [x] feat: 支持自定义多个重放时要更新的 header
   - 有些授权字段不一定是 authorization, 可能是其他的一个或多个字段, 这时候可以通过 config.updateToken 来配置. 重发请求或者在 swagger 界面测试请求时, 都会更新指定的 header 后再发送请求.
-- [ ] fix: 重载时 global.INJECTION_REQUEST 中的值不应丢失
-  - [ ] server 应该把值保存在文件中, 而不是变量中
-  - [ ] client 应在请求时获取 INJECTION_REQUEST, 而不是刷新页面才获取
+- [x] fix: 重载时 global.INJECTION_REQUEST 中的值不应丢失
+  - [x] server 应该把值保存在文件中, 而不是变量中
+  - [x] client 应在请求时获取 INJECTION_REQUEST, 而不是刷新页面才获取
 - [ ] feat: 支持关闭和开启 testPort 和 replayPort 功能, 因为某些服务可能不需要
 - [ ] feat: 支持禁用请求记录, 例如禁用所有, 禁用某个 url, 仅保存后xx条, 因为有些类似心跳的请求总是记录的意义不大
 - [ ] feat: 参考 https://github.com/YMFE/yapi 重新实现 webApi table 的开发, 以支持各种格式的数据
@@ -129,7 +129,7 @@
     '/api2': `http://192.168.1.2:9000/api/`,
   },
   ```
-- [ ] fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
+- [x] fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
 - [x] fix: 添加 webApi 时不能自动生效
   - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
 - [x] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
