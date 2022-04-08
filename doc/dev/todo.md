@@ -5,6 +5,7 @@
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
 - [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
+- [ ] refactor: 把 config 放置于全局, 避免传参位置过多
 - [ ] refactor: 在 util 中
   - 抽离以下方法, 因为他们属于业务
     - prepareProxy
@@ -38,7 +39,10 @@
   - [x] server 应该把值保存在文件中, 而不是变量中
   - [x] client 应在请求时获取 INJECTION_REQUEST, 而不是刷新页面才获取
 - [ ] feat: 支持关闭和开启 testPort 和 replayPort 功能, 因为某些服务可能不需要
-- [ ] feat: 支持禁用请求记录, 例如禁用所有, 禁用某个 url, 仅保存后xx条, 因为有些类似心跳的请求总是记录的意义不大
+- [x] feat: 支持禁用请求记录, 因为有些类似心跳的请求总是记录的意义不大. 例如
+  - [x] 禁用所有
+  - [x] 禁用某个 url
+  - [ ] 仅记录后 n 条
 - [ ] feat: 参考 https://github.com/YMFE/yapi 重新实现 webApi table 的开发, 以支持各种格式的数据
 - [ ] feat: webApi 支持从 json 数据解析为 table
 - [ ] feat: webApi 接口列表支持多选删除, 禁用, 启用
@@ -115,6 +119,7 @@
 - [x] fix: v1.1.25-alpha.12 版本的 path 功能失效, v1.1.25-alpha.10 可以正常使用
 - [ ] fix: 当前端参数为 form data 时, 请求头为 content-type: application/x-www-form-urlencoded, 请求体没有被记录和保存
 - [ ] fix: 奔溃自动重启后会丢失 cli 上传入的参数
+  - 未重现
 - [x] fix: config.proxy 无法代理到其他域
   ``` js
   // 正确 http://127.0.0.1:9000/api2/quickSearch == ok
