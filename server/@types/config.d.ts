@@ -295,6 +295,13 @@ interface ConfigObj {
    * @default
    */
   static: string | Static | Static[],
+
+  /**
+   * 哪些请求不记录
+   * @default
+   * false
+   */
+   disableRecord: boolean | string | string[] | DisableRecord | DisableRecord[],
 }
 
 interface WrapApiData {
@@ -338,4 +345,23 @@ interface Static {
    * @default
    */
   option?: connectHistoryApiFallbackOptions,
+}
+
+interface DisableRecord {
+  /**
+   * 请求地址, 将被转换为正则
+   */
+  path: string,
+
+  /**
+   * 请求方法, 不指定时为匹配所有
+   */
+  method: Method,
+
+  /**
+   * 仅记录后 n 条, 0 表示不记录
+   * @default
+   * 0
+   */
+  num: number,
 }
