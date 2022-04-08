@@ -272,9 +272,9 @@ async function serverProxy({
         allowCors({req: proxyReq, proxyConfig: userConfig})
         middlewaresObj.logger(req, res, () => {})
         middlewaresObj.jsonParser(req, res, () => {
-          if(ignoreHttpHistory({config, req}) === false) {
-            // setHttpHistory(`${method} ${url}`, {req})
-          }
+          // if(ignoreHttpHistory({config, req}) === false) {
+          //   // setHttpHistory(`${method} ${url}`, {req})
+          // }
         })
         reqHandle({config}).injectionReq({req, res, type: `get`})
       },
