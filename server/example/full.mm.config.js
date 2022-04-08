@@ -193,6 +193,7 @@ module.exports = util => {
     guard: false,
     backOpenApi: 10,
     static: [],
+    disableRecord: false,
   }
 }
 

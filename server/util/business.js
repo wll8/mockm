@@ -801,11 +801,26 @@ function business() { // 与业务相关性的函数
 
     function ignoreHttpHistory({config, req}) { // 是否应该记录 req
       const {method, url} = req
+      function disableRecord() {
+        const disableRecord = config.disableRecord
+        if(tool.type.isType(disableRecord, `boolean`)) {
+          return disableRecord
+        } else {
+          return config.disableRecord.some(item => {
+            const match = url.match(new RegExp(item.path)) && (item.method ? method.match(new RegExp(`^${item.method}$`, `i`)) : true)
+            if(match && item.num) { // todo 删除超过规定条数的记录
+              // ...
+            }
+            return match
+          })
+        }
+      }
       return Boolean(
         method.match(/OPTIONS/i)
         || (
           method.match(/GET/i) && url.match(new RegExp(`//${config._proxyTargetInfo.pathname}//`))
-        ),
+        )
+        || disableRecord(),
       )
     }
 

@@ -102,6 +102,7 @@ const defaultConfigFn = (util) => { // 默认配置
     guard: false,
     backOpenApi: 10,
     static: undefined,
+    disableRecord: false,
   }
 }
 
@@ -208,6 +209,25 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     object: () => [config.openApi],
   }[isType(config.openApi)](),
   backOpenApi: config.backOpenApi === true ? defaultArg.backOpenApi : config.backOpenApi,
+  disableRecord: (() => {
+    const disableRecord = config.disableRecord
+    const fn = {
+      undefined: () => false,
+      boolean: () => disableRecord,
+      string: () => ([{path: disableRecord, num: 0}]),
+      array: () => (disableRecord.map(item => {
+        return {
+          string: {
+            path: item,
+            num: 0,
+          },
+          object: item,
+        }[isType(item)]
+      } )),
+      object: () => ([disableRecord]),
+    }[isType(disableRecord)]
+    return fn ? fn() : false
+  })(),
 
   // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
   _proxyTargetInfo, // 解析 proxy[`/`] 的内容
