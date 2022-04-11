@@ -1133,7 +1133,9 @@ function business() { // 与业务相关性的函数
         url: pathOrUrl, // 注意不要 url 和 params 上都同时存在 query
         params: query,
         headers,
-        data: httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {},
+        data: method.toLowerCase() === `get`
+          ? undefined 
+          : (httpDataReq.bodyPath ? fs.readFileSync(httpDataReq.bodyPath) : {}),
         responseType: `arraybuffer`,
         _getRaw: true,
       }).then(aRes => {

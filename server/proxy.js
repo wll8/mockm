@@ -75,7 +75,7 @@ async function serverProxy({
   // disable = false 才走自定义 proxy
   config.disable === false && config.proxy.forEach(item => {
     if(item.context === `/` || config.hostMode) { // 过滤掉主 URL, 给后面的拦截器使用
-      return false
+      return undefined
     } else {
       // 在统一的中间件里判断经过 proxy 的路由是否也存在于自定义 api 中, 如果存在则不进入代理, 即当 proxy 和自定义 api 同时存在时, 后者优先
       // eslint-disable-next-line no-inner-declarations
@@ -272,9 +272,9 @@ async function serverProxy({
         allowCors({req: proxyReq, proxyConfig: userConfig})
         middlewaresObj.logger(req, res, () => {})
         middlewaresObj.jsonParser(req, res, () => {
-          if(ignoreHttpHistory({config, req}) === false) {
-            // setHttpHistory(`${method} ${url}`, {req})
-          }
+          // if(ignoreHttpHistory({config, req}) === false) {
+          //   // setHttpHistory(`${method} ${url}`, {req})
+          // }
         })
         reqHandle({config}).injectionReq({req, res, type: `get`})
       },
