@@ -74,6 +74,7 @@ module.exports = util => {
       '/any/proxy/test/slashSuffix1/': `/anything/proxy/test/slashSuffix1/`,
       '/any/proxy/test/slashSuffix2': `/anything/proxy/test/slashSuffix2`,
       '/any/proxy/test/slashSuffix3': `/anything/proxy/test/slashSuffix3/`,
+      '/any/proxy/test/proxyAndApiQuery': `/anything/proxyAndApiQuery`,
     },
     remote: false,
     openApi: `http://httpbin.org/spec.json`,
@@ -133,6 +134,7 @@ module.exports = util => {
           })
         },
         'get /ip': {res: `127.0.0.1`},
+        '/any/proxy/test/proxyAndApiQuery/myApi': `ok`,
         '/anything/overrideProxy': `ok`,
         '/any/proxy/test/byConfigAPICoverage': `ok`,
         'get /name': {name: mockjs.mock(`@cname`)},
