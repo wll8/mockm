@@ -81,7 +81,12 @@ async function serverProxy({
       // eslint-disable-next-line no-inner-declarations
       function midHandler(fn) {
         return (req, res, next) => {
-          const hasFind = serverRouterList.filter(item => item.action.disable !== true).some(item => item.re.test(req.originalUrl))
+          // todo 也应校验 method, 例如自定义 api 只使用到了 get 方法的情况下 post 这些方法应通往真实服务器
+          const hasFind = serverRouterList.some(item => {
+            let path = req.path.endsWith(`/`) ? req.path : `${req.path}/` //  item.re 是带 / 后缀的
+            path = `${req.baseUrl}${path}` // req.path 是去除代理路径前缀后的, 所以这里要加上
+            return item.re.test(path) && (item.action.disable !== true)
+          })
           hasFind ? next() : fn(req, res, next)
         }
       }
