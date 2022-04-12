@@ -30,6 +30,18 @@
   - middleware 中内容应属业务方法
   - httpClient 中内容应属业务方法
   - clearProcess 方法应重新封装
+- [x] fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
+  例如以下配置不应导致 `/api/test?a=1` 不能使用
+  ``` js
+  config = {
+    proxy: {
+      '/api/': `http://172.16.203.81/api/`,
+    },
+    api: {
+      '/api/test': {msg: 123},
+    },
+  }
+  ```
 - [x] fix: 连接不存在的 ws api 2-3次会报错
 - [x] fix: config.proxy 非 `/` 代理时, host 不应是 `/` 的代理
 - [ ] feat: 支持根据运行环境自动切换语言
