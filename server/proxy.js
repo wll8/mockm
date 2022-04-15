@@ -66,7 +66,12 @@ async function serverProxy({
     })
     return server(req, res)
   })
+  // 此中间件比任何用户自定义的都要先运行
   server.use((req, res, next) => {
+    // 创建一个对象用于挂载用户添加的方法
+    res.mm = {
+      resHandleJsonApi: (arg) => arg.resHandleJsonApi(arg),
+    }
     next()
   })
   middleware.reWriteRouter({app: server, routes: config.route})
@@ -263,7 +268,13 @@ async function serverProxy({
         results: res.locals.data,
       }
     }
-    res.json(config.resHandleJsonApi({req, res, data: returnData}))
+    const data = res.mm.resHandleJsonApi({
+      req,
+      res,
+      data: returnData,
+      resHandleJsonApi: config.resHandleJsonApi,
+    })
+    res.json(data)
   }
 
   function getProxyConfig (userConfig = {}) {

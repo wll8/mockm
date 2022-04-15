@@ -199,6 +199,15 @@ describe('基本功能', () => {
         ))
       })
     })
+    it(`拦截 config.db`, async () => {
+      util.ok(await util.runMockm(
+        async ({arg, str}) => {
+          const res1 = (await http.get(`http://127.0.0.1:${arg.port}/books/111`)).data
+          const res2 = (await http.patch(`http://127.0.0.1:${arg.port}/books/1`, {a: 1})).data
+          return res1.id === `111` && res2.data.a === `222`
+        }
+      ))
+    })
     it(`* 号代表处理此路径的所有方法`, async () => {
       util.ok(await util.runMockm(
         async ({arg, str}) => {

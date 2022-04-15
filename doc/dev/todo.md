@@ -4,6 +4,20 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 支持操作 lowdb 实例
+  - https://github.com/typicode/json-server/issues/484 - 推荐
+  - https://github.com/typicode/json-server/issues/401
+  - https://github.com/typicode/lowdb
+  - https://github.com/typicode/json-server/issues/349
+
+- [ ] feat: 支持自动添加更新时间
+  - https://github.com/typicode/json-server/issues/125
+  - https://github.com/typicode/json-server/issues/262
+  - https://github.com/typicode/json-server/issues/854
+  - https://github.com/typicode/json-server/issues/113
+  - https://github.com/typicode/json-server/issues/125
+
+- [x] feat: 支持从 config.api 拦截 config.db 的接口
 - [ ] feat: 支持根路径拦截
   ``` js
   config.proxy = {
