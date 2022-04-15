@@ -141,6 +141,17 @@ module.exports = util => {
         'get /file' (req, res, next) { // 发送文件
           res.sendFile(__filename)
         },
+        'get /books/:id' (req, res, next) { // 拦截 config.db
+          res.json(req.params)
+        },
+        'patch /books/:id' (req, res, next) { // 拦截 config.db
+          req.body.a = `111` // 修改用户传入的数据
+          next()
+          res.mm.resHandleJsonApi = (arg) => {
+            arg.data.a = `222` // 修改响应, 不会存储到 db.json
+            return arg.resHandleJsonApi(arg)
+          }
+        },
         'post /status/:code' (req, res, next) { // 获取 url 上的 params, query 以及 body 参数
           const {params, query, body} = req
           res.status(params.code).json({params, query, body})
