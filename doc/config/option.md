@@ -546,6 +546,18 @@ api: {
   }
   // 使用中间件实现静态资源访问, config.static 就是基于此方式实现的
   'use /news/': require('serve-static')(`${__dirname}/public`),
+  // 拦截 config.db 生成的接口
+  '/books/:id' (req, res, next) { // 在所有自定义 api 之前添加中间件
+    req.body.a = 1 // 修改用户传入的数据
+    next()
+    res.mm.resHandleJsonApi = (arg) => {
+      arg.res.locals.data // json-server 原始的数据
+      arg.data // 经预处理的数据, 例如将分页统计放置于响应体中
+      arg.resHandleJsonApi // 是全局 config.resHandleJsonApi 的引用, 若无需处理则直接 return arg.data
+      arg.data.a = 2 // 修改响应, 不会存储到 db.json
+      return arg.resHandleJsonApi(arg)
+    }
+  },
 },
 ```
 
@@ -652,3 +664,36 @@ api: {
 }
 ```
 ::: 
+
+## config.disableRecord
+类型: boolean | string | string[] | DisableRecord | DisableRecord[]
+默认: false
+
+哪些请求不记录.
+
+- boolean 是否禁用
+  - false 默认不禁用
+  - true 不记录所有
+- string 禁用的 path
+- DisableRecord 使用对象配置
+  ``` ts
+  interface DisableRecord {
+    /**
+     * 请求地址, 将被转换为正则
+     */
+    path: string,
+
+    /**
+     * 请求方法, 不指定时为匹配所有
+     */
+    method: Method,
+
+    /**
+     * 仅记录后 n 条, 0 表示不记录
+     * @default
+     * 0
+     */
+    num: number,
+  }
+  ```
+- DisableRecord[] 使用多个配置
