@@ -9,6 +9,53 @@
 
 :::
 
+## 2022 年 04 月
+#### v1.1.26-alpha.17
+- feat: 支持从 config.api 拦截 config.db 的接口
+  ``` js
+  config = {
+    api: {
+      '/books/:id' (req, res, next) { // 在所有自定义 api 之前添加中间件
+        req.body.a = 1 // 修改用户传入的数据
+        next()
+        res.mm.resHandleJsonApi = (arg) => {
+          arg.res.locals.data // json-server 原始的数据
+          arg.data // 经预处理的数据, 例如将分页统计放置于响应体中
+          arg.resHandleJsonApi // 是全局 config.resHandleJsonApi 的引用, 若无需处理则直接 return arg.data
+          arg.data.a = 2 // 修改响应, 不会存储到 db.json
+          return arg.resHandleJsonApi(arg)
+        }
+      },
+    },
+    db: {
+      book: [
+        {
+          name: `js`,
+        },
+      ]
+    },
+  }
+  ```
+- fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
+  例如以下配置不应导致 `/api/test?a=1` 不能使用
+  ``` js
+  config = {
+    proxy: {
+      '/api/': `http://172.16.203.81/api/`,
+    },
+    api: {
+      '/api/test': {msg: 123},
+    },
+  }
+  ```
+- refactor: 去除冗余的逻辑
+- feat: 支持 [config.disablerecord](../config/option.md#config-disablerecord) 禁用请求记录
+- feat: 未启动进程守护时, 遇到错误连同父进程退出
+- feat: 在错误日志中保存退出码
+- fix: 重载时 global.INJECTION_REQUEST 中的值不应丢失
+  - server 应该把值保存在文件中, 而不是变量中
+  - client 应在请求时获取 INJECTION_REQUEST, 而不是刷新页面才获取
+
 ## 2022 年 03 月
 #### v1.1.26-alpha.10
 - server
