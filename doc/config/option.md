@@ -664,3 +664,36 @@ api: {
 }
 ```
 ::: 
+
+## config.disableRecord
+类型: boolean | string | string[] | DisableRecord | DisableRecord[]
+默认: false
+
+哪些请求不记录.
+
+- boolean 是否禁用
+  - false 默认不禁用
+  - true 不记录所有
+- string 禁用的 path
+- DisableRecord 使用对象配置
+  ``` ts
+  interface DisableRecord {
+    /**
+     * 请求地址, 将被转换为正则
+     */
+    path: string,
+
+    /**
+     * 请求方法, 不指定时为匹配所有
+     */
+    method: Method,
+
+    /**
+     * 仅记录后 n 条, 0 表示不记录
+     * @default
+     * 0
+     */
+    num: number,
+  }
+  ```
+- DisableRecord[] 使用多个配置
