@@ -36,10 +36,10 @@ Simplicity is the goal of this tool, for example:
 node -v
 
 # Install
-npm i -D mockm
+npm i -g mockm
 
-# Create and run with template
-npx mockm --template 
+# Run it with the sample configuration
+mockm --config 
 
 # Browser open http://127.0.0.1:9005/#/apiStudio/
 ```
@@ -47,79 +47,7 @@ npx mockm --template
 The above command will generate common configuration, modify `mm.config.js` and try it out.
 
 
-<details>
-<summary>👉 Some examples</summary>
-
-``` js
-/**
- * @see: https://www.hongqiye.com/doc/mockm/config/option.html
- * @type {import('mockm/@types/config').Config}
- */
-module.exports = util => {
-  return  {
-    // The interface of the proxy backend, if not, leave it blank
-    proxy: {
-      // root node
-      '/': `https://httpbin.org/`,
-      
-      // interface forwarding
-      '/get': `https://www.httpbin.org/ip`,
-      
-      // Modify the json in the response body
-      '/anything/mid': [`headers.Host`, `xxxxxx`],
-
-      // Use the function to modify the response body
-      '/anything/proxy/fn':[({req, json}) => {
-        return (json.method + req.method).toLowerCase() // getget
-      }],
-    },
-
-    // Interface written by yourself
-    api: {
-      // When it is a basic data type, directly return the data, this interface returns {"msg":"ok"}
-      '/api/1': {msg: `ok`},
-
-      // can also return data like express
-      '/api/2' (req, res) {
-        res.send({msg: `ok`})
-      },
-
-      // An interface that can only be accessed using the post method
-      'post /api/3': {msg: `ok`},
-
-      // A websocket interface, will send the received message
-      'ws /api/4' (ws, req) {
-        ws.on(`message`, (msg) => ws.send(msg))
-      },
-
-      // An interface to download files
-      '/file' (req, res) {
-        res.download(__filename)
-      },
-
-      // Get the parameters of the dynamic interface path code
-      '/status/:code' (req, res) {
-        res.json({statusCode: req.params.code})
-      },
-    },
-    
-    // Automatically generate Restful API
-    db: {
-      'users': util.libObj.mockjs.mock({
-        'data|15-23': [ // Randomly generate 15 to 23 data
-          {
-            'id|+1': 1, // id increments from 1
-            name: `@cname`, // Randomly generate Chinese name
-            'sex|1': [`male`, `female`, `secret`], // Gender randomly choose one from these three options
-          },
-        ]
-      }).data,
-    },
-  }
-}
-```
-
-</details>
+👉 [Some examples](./server/example/simple.mm.config.js)
 
 You can also [create an API through the UI interface](https://hongqiye.com/doc/mockm/use/webui.html#%E6%8E%A5%E5%8F%A3%E7%BC%96%E8%BE%91).
 

@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "description": "Analog interface server, painless parallel development of front and back ends.",
   "main": "server.js",
   "bin": {
@@ -37,7 +37,7 @@
     "path-to-regexp": "0.1.7"
   },
   "devDependencies": {
-    "eslint": "^8.9.0"
+    "eslint": "7.32.0"
   },
   "pluginDependencies": {
     "node-fetch": "2.6.2",

@@ -7,13 +7,13 @@ util 目前包含以下内容:
 - 功能: 运行 curl 命令, 并返回结果, 会把响应头绑定到自定义 api 上.
 - 示例:
 
-@[code transcludeWith=curl-snippet](@/../server/example/full.mm.config.js)
+@[code transcludeWith=curl-snippet](@/../test/config.api.test.js)
 
 ## util.run.fetch
 - 功能: 运行 fetch 方法并返回结果, 会把响应头绑定到自定义 api 上, 它是对 node-fetch 的一个封装.
 - 示例:
 
-@[code transcludeWith=fetch-snippet](@/../server/example/full.mm.config.js)
+@[code transcludeWith=fetch-snippet](@/../test/config.api.test.js)
 
 ::: details FQA
 **与 config.fn 有什么不同**

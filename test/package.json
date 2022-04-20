@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:dev": "cross-env testEnv=dev mocha ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index",
-    "test:build": "cross-env testEnv=build mocha ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome -t 0 --reporter-options reportDir=./res,reportFilename=index"
+    "test:dev": "cross-env MOCKM_REGISTRY=https://registry.npm.taobao.org/ testEnv=dev mocha --require mochawesome/src/register ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome --timeout 0 --reporter-options reportDir=./res,reportFilename=index",
+    "test:build": "cross-env MOCKM_REGISTRY=https://registry.npm.taobao.org/ testEnv=build mocha --require mochawesome/src/register ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome --timeout 0 --reporter-options reportDir=./res,reportFilename=index"
   },
   "keywords": [],
   "author": "",
@@ -14,8 +14,8 @@
     "axios": "^0.21.1",
     "cross-env": "^7.0.3",
     "get-port": "^5.1.1",
-    "mocha": "^9.0.2",
-    "mochawesome": "^6.2.2",
+    "mocha": "^9.1.3",
+    "mochawesome": "^7.1.3",
     "shelljs": "^0.8.4",
     "ws": "^7.5.3"
   }

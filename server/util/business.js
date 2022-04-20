@@ -524,7 +524,7 @@ function business() { // 与业务相关性的函数
       
       
       if((cliArg[`--config`] === true) && (hasCwdConfig === false)) { // 如果 config=true 并且当前目录没有配置时, 则生成示例配置并使用
-        const example = fs.readFileSync( `${__dirname}/../example/full.mm.config.js`, `utf8`)
+        const example = fs.readFileSync( `${__dirname}/../example/simple.mm.config.js`, `utf8`)
         fs.writeFileSync(cwdConfigPath, example)
         res = cwdConfigPath
       } else if((cliArg[`--config`] === true) && (hasCwdConfig === true)) { // 使用生成的示例配置
