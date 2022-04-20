@@ -192,12 +192,12 @@ module.exports = {
           //   description : `记录除自己以外的贡献者`,
           //   path: `/dev/contribution.md`,
           // },
-          // {
-          //   title: `实现`,
-          //   collapsable: false,
-          //   description : `讲解项目结构, 运作方式, 注意点, 用于帮助他人参考或贡献`,
-          //   path: `/dev/realize.md`,
-          // },
+          {
+            title: `实现`,
+            collapsable: false,
+            description : `讲解项目结构, 运作方式, 注意点, 用于帮助他人参考或贡献`,
+            path: `/dev/realize.md`,
+          },
         ]
       },
     ],
