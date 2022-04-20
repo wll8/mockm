@@ -178,11 +178,31 @@ describe('config.api', () => {
       },
     }))
   })
-  it.skip(`运行 curl/bash 命令并获取执行结果`, async () => {
+  it(`运行 curl/bash 命令并获取执行结果`, async () => {
     util.ok(await util.runMockm({
-      cli: {
-        '--config': true,
+      // curl-snippet
+      mockm: (util) => {
+        return {
+          api: ({run}) => {
+            return {
+              'get /curl' (req, res, next) { // 运行 curl/bash 命令并获取执行结果
+                // 示例 curl/bash 命令
+                const cmd = `
+                  curl 'http://www.httpbin.org/ip' \
+                    -H 'Accept: */*' \
+                    -H 'Accept-Language: zh-CN,zh;q=0.9' \
+                    --compressed \
+                    --insecure
+                `
+                run.curl({req, res, cmd}).then(curRes => {
+                  res.send(curRes.body)
+                })
+              },
+            }
+          },
+        }
       },
+      // curl-snippet
       okFn: async ({arg, str}) => {
         const httpData = (await http.get(`http://127.0.0.1:${arg.port}/curl`)).data
         return (httpData.origin)
@@ -194,6 +214,7 @@ describe('config.api', () => {
   })
   it(`运行 fetch 方法并获取执行结果`, async () => {
     util.ok(await util.runMockm({
+      // fetch-snippet
       mockm: (util) => {
         return {
           api: ({run}) => {
@@ -220,6 +241,7 @@ describe('config.api', () => {
           },
         }
       },
+      // fetch-snippet
       okFn: async ({arg, str}) => {
         const httpData = (await http.get(`http://127.0.0.1:${arg.port}/fetch`)).data
         return (httpData.origin)
