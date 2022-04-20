@@ -35,16 +35,18 @@ function ok(val) {
  */
 async function runMockm(fnArg) {
   fnArg = typeof(fnArg) === `function` ? {okFn: fnArg} : fnArg
-  const {
+  let {
     runOk = true, // 是否等待运行完成
-    mockm = undefined, // mockm 参数
+    mockm = undefined, // 转换成配置文件的参数
+    cli = undefined, // 在命令行上传送的参数
     timeout = undefined, // 超时
     okFn = () => {}, // 运行成功回调, 返回为真时不继续匹配终端输出
   } = fnArg || {}
+  cli = getConfigFile(mockm, cli)
   const {
     fullCmd: cmd,
     arg,
-  } = await craeteMockmCmdInfo(mockm)
+  } = await craeteMockmCmdInfo(cli)
   return new Promise((resolve, reject) => {
     testCliText({
       cmd,
@@ -77,6 +79,31 @@ async function runMockm(fnArg) {
 }
 
 /**
+ * 生成 config 文件
+ * mockm 函数
+ * cli 对象
+ */
+function getConfigFile(mockm, cli = {}) {
+  if(mockm === undefined) {
+    return cli
+  }
+  
+  const cwd = getTempDir()
+  
+  if(cli[`--cwd`] === undefined) {
+    cli[`--cwd`] = cwd
+  }
+  if(cli[`--config`] === undefined) {
+    const config = `${cwd}/${uuid()}.js`
+    const str = `module.exports = ${mockm.toString()}`
+    fs.writeFileSync(config, str)
+    cli[`--config`] = config
+  }
+  
+  return cli
+}
+
+/**
  * 生成 mockm 的运行命令, 端口默认随机, 可以传入对象参数覆盖
  */
 async function craeteMockmCmdInfo(arg = {}, runPath) {
@@ -106,7 +133,11 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     },
   }[process.env.testEnv]
   const argCmd = Object.entries(res.arg).reduce((acc, [key, val]) => {
-    return `${acc} ${key}=${val === undefined ? true : val}`
+    if(val === undefined) {
+      return acc
+    } else {
+      return `${acc} ${key}=${val}`
+    }
   } , ``)
   res.fullCmd = `node ${res.runPath} ${argCmd}`
   res.argCmd = argCmd

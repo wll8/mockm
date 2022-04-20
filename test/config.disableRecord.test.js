@@ -1,7 +1,5 @@
 const util = require('./util.js')
 const http = util.http
-const getPort = require(`get-port`)
-const assert = require('assert')
 
 describe('config.disableRecord', () => {
   it(`默认不禁用 boolean/false`, async () => {
@@ -21,9 +19,9 @@ describe('config.disableRecord', () => {
   })
   it(`不记录所有请求 boolean/true`, async () => {
     util.ok(await util.runMockm({
-      mockm: {
+      mockm: () => ({
         disableRecord: true,
-      },
+      }),
       okFn: async ({arg, str}) => {
         const t1 = (await http({
           method: `get`,
@@ -39,9 +37,9 @@ describe('config.disableRecord', () => {
   })
   it(`不记录匹配的请求 string, 不限定 method`, async () => {
     util.ok(await util.runMockm({
-      mockm: {
+      mockm: () => ({
         disableRecord: `^/anything/disableRecord/$`,
-      },
+      }),
       okFn: async ({arg, str}) => {
         const t1 = (await http({
           method: `get`,
@@ -61,11 +59,11 @@ describe('config.disableRecord', () => {
   })
   it.skip(`不记录匹配的请求 object, 不限定 method`, async () => {
     util.ok(await util.runMockm({
-      mockm: {
+      mockm: () => ({
         disableRecord: {
           path: `^/anything/disableRecord/$`
         },
-      },
+      }),
       okFn: async ({arg, str}) => {
         const t1 = (await http({
           method: `get`,
@@ -85,12 +83,12 @@ describe('config.disableRecord', () => {
   })
   it.skip(`不记录匹配的请求 object, 限定 method`, async () => {
     util.ok(await util.runMockm({
-      mockm: {
+      mockm: () => ({
         disableRecord: {
           path: `^/anything/disableRecord/$`,
           method: `get`,
         },
-      },
+      }),
       okFn: async ({arg, str}) => {
         const t1 = (await http({
           method: `get`,
