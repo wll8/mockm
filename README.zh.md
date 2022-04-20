@@ -36,89 +36,17 @@ mockm 是由纯 node/js 实现的, 这意味着:
 node -v
 
 # 安装
-npm i -D mockm
+npm i -g mockm
 
-# 创建并使用模板运行
-npx mockm --template 
+# 使用示例配置运行它
+mockm --config
 
 # 浏览器打开 http://127.0.0.1:9005/#/apiStudio/
 ```
 
 以上命令会生成常用配置, 修改 `mm.config.js` 尽情尝试吧.
 
-<details>
-<summary>👉 部分示例</summary>
-
-``` js
-/**
- * @see: https://www.hongqiye.com/doc/mockm/config/option.html
- * @type {import('mockm/@types/config').Config}
- */
-module.exports = util => {
-  return  {
-    // 代理后端的接口, 如果没有可以不填
-    proxy: {
-      // 根结点
-      '/': `https://httpbin.org/`,
-      
-      // 接口转发
-      '/get': `https://www.httpbin.org/ip`,
-      
-      // 修改响应体中的 json
-      '/anything/mid': [`headers.Host`, `xxxxxx`],
-
-      // 使用函数修改响应体
-      '/anything/proxy/fn':[({req, json}) => {
-        return (json.method + req.method).toLowerCase() // getget
-      }],
-    },
-
-    // 自己编写的接口
-    api: {
-      // 当为基本数据类型时, 直接返回数据, 这个接口返回 {"msg":"ok"}
-      '/api/1': {msg: `ok`},
-
-      // 也可以像 express 一样返回数据
-      '/api/2' (req, res) {
-        res.send({msg: `ok`})
-      },
-
-      // 一个只能使用 post 方法访问的接口
-      'post /api/3': {msg: `ok`},
-
-      // 一个 websocket 接口, 会发送收到的消息
-      'ws /api/4' (ws, req) {
-        ws.on(`message`, (msg) => ws.send(msg))
-      },
-
-      // 一个下载文件的接口
-      '/file' (req, res) {
-        res.download(__filename)
-      },
-
-      // 获取动态的接口路径的参数 code
-      '/status/:code' (req, res) {
-        res.json({statusCode: req.params.code})
-      },
-    },
-    
-    // 自动生成 Restful API
-    db: {
-      'users': util.libObj.mockjs.mock({
-        'data|15-23': [ // 随机生成 15 至 23 条数据
-          {
-            'id|+1': 1, // id 从 1 开始自增
-            name: `@cname`, // 随机生成中文名字
-            'sex|1': [`男`, `女`, `保密`], // 性别从这三个选项中随机选择一个
-          },
-        ]
-      }).data,
-    },
-  }
-}
-```
-
-</details>
+👉 [部分示例](./server/example/simple.mm.config.js)
 
 也可以[通过 UI 界面创建接口](https://hongqiye.com/doc/mockm/use/webui.html#%E6%8E%A5%E5%8F%A3%E7%BC%96%E8%BE%91).
 
