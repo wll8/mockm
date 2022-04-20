@@ -1,21 +1,13 @@
 # 尝试
 1. **安装**: 命令行输入 `npm i -g mockm`
-2. **配置**: 创建文件 `mm.config.js` 并录入内容
-``` js
-module.exports = {
-  proxy: `https://example.com/`, // 替换为后端的接口地址, 如果没有可不填
-  api: { // 编写自己的接口
-    '/my/api': {
-      msg: `我的 api`
-    },
-  },
-}
-```
-3. **启动**: 命令行输入 `mm`
+2. **启动**: 命令行输入 `mm --config`
 
 所有工作已经结束了, 并且你还创建了一个自己的 api, 拥有了后端接口允许跨域的功能, 接口记录功能和重放功能...
-- 浏览器访问 http://127.0.0.1:9000/my/api 查看效果.
-- 浏览器访问 http://127.0.0.1:9005/#/get/my/api 查看请求详情.
+
+
+为了让你更快的找到感觉, `--config` 这个参数创建了一个简单的示例配置 [mm.config.js](https://github.com/wll8/mockm/blob/dev/server/example/simple.mm.config.js), 你可以查看它窥探天机！
+- 浏览器访问 http://127.0.0.1:9000/api/1 查看效果.
+- 浏览器访问 http://127.0.0.1:9005/#/get/api/1 查看请求详情.
 - 想了解更多功能请继续...
 
 ::: details FQA
