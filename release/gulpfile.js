@@ -3,6 +3,11 @@ const gulp = require(`gulp`)
 const del = require(`del`)
 const uglify = require(`gulp-uglify-es`).default
 const babel = require('gulp-babel')
+const argv = process.argv.reduce((acc, cur) => {
+  const [key, val] = cur.split(`=`)
+  acc[key] = val
+  return acc
+}, {})
 
 gulp.task(`clear`, () => { // 清理发布目录
   return del([`../dist/**`, `!../dist`], { force: true }) // 清除目录
@@ -98,6 +103,21 @@ gulp.task(`tar`, () => { // 压缩相关文件为发布包 .tgz
     },
     [`package/`]
   )
+})
+
+gulp.task(`npm`, (cb) => { // 发布到 npm
+  const option = [`alpha`, `beta`, `latest`, `next`]
+  const tag = argv[`--tag`]
+  if(option.includes(tag)) {
+    const package = require(`../dist/package/package.json`)
+    const shell = require(`shelljs`)
+    console.log(`process`, process.argv)
+    shell.exec(`cd ../ && npm run bit`)
+    shell.exec(`cd ../dist/ && echo npm publish ./${package.name}-${package.version}.tgz --tag=${tag}`)
+  } else {
+    console.log(`option`, option)
+  }
+  cb()
 })
 
 // see: https://github.com/gulpjs/gulp/issues/1091#issuecomment-163151632
