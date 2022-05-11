@@ -54,6 +54,22 @@ interface libObj {
   mime: any,
 }
 
+interface openApi {
+  /**
+   * openApi 地址
+   */
+  spec: string, 
+  /**
+   * 将前缀添加到 oepnApi 的 path 中
+   * 
+   */
+  resPrefix: string|((api: string) => string),
+  /**
+   * 将前缀添加到请求的 path 中
+   */
+  reqPrefix: string|((api: string) => string),
+}
+
 interface ConfigFnArg {
   toolObj: any,
   /**
@@ -168,9 +184,7 @@ interface ConfigObj {
    * @default
    * `http://httpbin.org/spec.json`
    */
-  openApi: string | string[] | {
-    [key: string]: string,
-  },
+  openApi: string | string[] | openApi | openApi[],
 
   /**
    * 是否允许通过跨域.

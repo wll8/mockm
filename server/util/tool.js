@@ -494,11 +494,11 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
       /**
        * 在 openApi 中获取给定的 api
-       * @param {*} param0.spec openApi json 或 json 路径
-       * @param {*} param0.reqPrefix 请求前缀
-       * @param {*} param0.resPrefix 响应前缀
-       * @param {*} param0.api 请求地址
-       * @param {*} param0.method 请求方法
+       * @param {string} param0.spec openApi json 或 json 路径
+       * @param {string|function} param0.reqPrefix 请求前缀
+       * @param {string|function} param0.resPrefix 响应前缀
+       * @param {string} param0.api 请求地址
+       * @param {string} param0.method 请求方法
        * @returns {*} 找到的那个 path 对象
        */
       async function hasInpath({spec, resPrefix = ``, reqPrefix = ``, api, method, config}) {

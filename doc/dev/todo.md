@@ -292,13 +292,13 @@
         - ${shortUrl}_${method}_${id}_${reqOrRes}.json 请求或响应数据
   - [ ] refactor: 期望更改 httpData 目录为 mockm_data, 因为 httpData 名字比较通用, 可能会被其他程序使用
   - [ ] feat: 依赖更新: ws@8.x 文本消息和关闭原因不再解码为字符串, 而是默认返回 Buffers. 另外, 8.2.x 支持 esm
-  - [ ] feat(server): 更改 openApi 的功能 - 破坏性修改
+  - [x] feat(server): 更改 openApi 的功能 - 破坏性修改
     - 为了统一逻辑, 删除 array[string] 的 pathname 最高匹配度特性
     - 支持的类型: string | array[string] | object | array[object] 
     - string - 指定一个 openApi 地址
     - array[string] - 根据顺序到每个 json 中匹配对应的 path 返回 json
     - object - 配置后再进行匹配，例如上个版本的 key 作为此版本的 resPrefix
-    - object.url openApi - 文件地址
+    - object.spec openApi - 文件地址
     - object.resPrefix - 将前缀添加到 oepnApi 的 path 中
     - object.reqPrefix - 将前缀添加到请求的 path 中
     - array[object] - 参考 object
