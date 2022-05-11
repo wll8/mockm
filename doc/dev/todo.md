@@ -4,6 +4,13 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] feat: 在翻译的 api 中返回翻译服务提供商, 以便于排查问题
+- [ ] chore: 应向发布后的包注入 commit hash, 以便于精确追溯历史版本, 便于回退版本, 修复缺陷
+- [ ] fix: 避免依赖冲突
+  ```
+  warning package.json: "dependencies" has dependency "mockjs" with range "^1.0.1-beta3" that collides with a dependency in "devDependencies" of the same name with version "^1.1.0"
+  ```
+
 - [ ] fix: config.route 也应支持 webApi
 - [ ] feat: config.proxy 应支持 url 匹配模式
   ``` js
@@ -165,6 +172,7 @@
 - [ ] fix: 当 webApi 与 config.api 相同时, webApi 不应该优先
   - 违背了文档: `从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权`
   - 这似乎是某个版本之后导致的问题
+  - 禁用 webApi 也无效
 - [x] fix: 当 config.proxy 与 config.api 相同时, proxy 不应该优先
   - 违背了文档: `当与 config.proxy 中的路由冲突时, config.api 优先.`
 - [x] fix: 某些设备修改 mm.config.js 文件并不会自动重载
