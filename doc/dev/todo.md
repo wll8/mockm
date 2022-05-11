@@ -4,6 +4,25 @@
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
+- [ ] fix: config.route 也应支持 webApi
+- [ ] feat: config.proxy 应支持 url 匹配模式
+  ``` js
+  config.proxy = {
+    "/": `http://127.0.0.1`,
+    '/api/:id': [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
+  }
+  ```
+- [ ] fix: config.proxy 子路径拦截不应该失效
+  ``` js
+  config.proxy = {
+    "/api/": `http://127.0.0.1/api/`,
+    '/api/a/b/c/:id': [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
+  }
+  config.proxy = {
+    '/api/a/b/c/:id': [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
+    "/api/": `http://127.0.0.1/api/`,
+  }
+  ```
 - [ ] feat: 支持操作 lowdb 实例
   - https://github.com/typicode/json-server/issues/484 - 推荐
   - https://github.com/typicode/json-server/issues/401
