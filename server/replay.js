@@ -9,12 +9,10 @@ function serverReplay({
     business,
   } = util
   const {
+    middleware,
     historyHandle,
     saveLog,
   } = business
-  const {
-    middleware,
-  } = tool
   const {
     middlewares,
     middlewaresObj,

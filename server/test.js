@@ -9,7 +9,6 @@ function serverTest({
     business,
   } = util
   const {
-    middleware,
     httpClient,
     file: {
       getBackUrl,
@@ -19,6 +18,7 @@ function serverTest({
     },
   } = tool
   const {
+    middleware,
     saveLog,
     initHandle,
     reqHandle,

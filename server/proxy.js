@@ -13,8 +13,6 @@ async function serverProxy({
   } = util
   const {
     middleware,
-  } = tool
-  const {
     reqHandle,
     clientInjection,
     historyHandle,
