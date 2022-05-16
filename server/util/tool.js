@@ -1014,7 +1014,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function middleware() { // express 中间件
     const compression = require(`compression`) // 压缩 http 响应
 
-    function httpLog({config}) { // 设置 http 请求日志中间件
+    function httpLog() { // 设置 http 请求日志中间件
       const morgan = require(`morgan`)
       const colors = tool().cli.colors
       return morgan( (tokens, req, res) => {
@@ -1030,7 +1030,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const str = [
           tool().time.dateFormat(`hh:mm:ss`, new Date),
           tool().httpClient.getClientIp(req),
-          res.getHeader(config.apiInHeader),
+          res.getHeader(global.config.apiInHeader),
           `${statusCode} ${res.statusMessage}`,
           `${tokens[`response-time`](req, res)} ms`,
           len ? `${len} byte` : ``,
@@ -1041,13 +1041,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-    function getJsonServerMiddlewares({config}) { // 获取 jsonServer 中的中间件
+    function getJsonServerMiddlewares() { // 获取 jsonServer 中的中间件
       // 利用 jsonServer 已有的中间件, 而不用额外的安装
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
 
       const jsonServer = require(`json-server`)
       const middlewares = jsonServer.defaults({bodyParser: true, logger: false, static: require(`path`).join(__dirname, `../public2`)}) // 可以直接使用的所有中间件数组
-      middlewares.push(httpLog({config}))
+      middlewares.push(httpLog())
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
         // 使用 jsonServer 里面的中间件, 以保持一致:
         // compression, corsMiddleware, serveStatic, logger, jsonParser, urlencodedParser
@@ -1068,7 +1068,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     function replayHistoryMiddleware ({
       id,
-      config,
       business,
     } = {}) {
       const {
@@ -1079,10 +1078,10 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         allowCors,
         setHeader,
         reSetApiInHeader,
-      } = clientInjection({config})
+      } = clientInjection()
       const {
         getHistory,
-      } = historyHandle({config})
+      } = historyHandle()
       return (req, res, next) => { // 修改分页参数, 符合项目中的参数
         const method = req.method.toLowerCase()
         const fullApi = id ? undefined :`${method} ${req.originalUrl}`
@@ -1110,9 +1109,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           })
           const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
           let getItemRes = undefined
-          if(config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
+          if(global.config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
             try {
-              getItemRes = list.find((...arg) => config.replayProxyFind(...arg))
+              getItemRes = list.find((...arg) => global.config.replayProxyFind(...arg))
             } catch (error) {
               console.log(error)
             }
@@ -1141,7 +1140,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           }
         } catch (err) {
           console.log(`err`, err)
-          res.json(config.resHandleReplay({req, res}))
+          res.json(global.config.resHandleReplay({req, res}))
         }
       }
     }

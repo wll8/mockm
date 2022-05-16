@@ -2,8 +2,8 @@ const util = require(`./util/index.js`)
 
 function serverReplay({
   noProxyTest,
-  config,
 }) {
+  const config = global.config
   const {
     tool,
     business,
@@ -18,10 +18,10 @@ function serverReplay({
   const {
     middlewares,
     middlewaresObj,
-  } = middleware.getJsonServerMiddlewares({config})
+  } = middleware.getJsonServerMiddlewares()
   const {
     getHistory,
-  } = historyHandle({config})
+  } = historyHandle()
 
 
   const jsonServer = require(`json-server`)
@@ -49,7 +49,6 @@ function serverReplay({
   ))
   serverReplay.use(middlewares)
   serverReplay.use(middleware.replayHistoryMiddleware({
-    config,
     business,
   }))
 
