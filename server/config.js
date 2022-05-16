@@ -3,30 +3,28 @@ const exportsUtil = require(`./util/index.js`)
 const {
   lib,
   business,
+  business: {
+    midResJson,
+    url: {
+      prepareProxy,
+      parseProxyTarget,
+    },
+    wrapApiData,
+  },
   tool,
   tool: {
-    httpClient: {
-      midResJson,
-    },
     type: {
       isType,
     },
     os: {
       getOsIp,
     },
-    url: {
-      handlePathArg,
-      prepareProxy,
-      parseProxyTarget,
-    },
     cli: {
+      handlePathArg,
       parseArgv,
     },
   },
 } = exportsUtil
-const {
-  wrapApiData,
-} = business
 
 let cliArg = parseArgv()
 let fileArgFn = () => {}

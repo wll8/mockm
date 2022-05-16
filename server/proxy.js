@@ -218,7 +218,7 @@ async function serverProxy({
             由于这里的接口实际都是通过 `app.use('*')` 过来的, 所以 req.params 参数并不存在.
             那么就需要我们自己去通过 config.api 中的 router 规则去解析得到 params
           */
-          req.params = tool.url.parseRegPath(router, req.path)
+          req.params = business.url.parseRegPath(router, req.path)
           try {
             action(req, res, next)
           } catch (err) {

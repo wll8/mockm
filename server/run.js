@@ -22,7 +22,7 @@ const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平�
 const nodemon = require(`nodemon`)
 
 { // 尽早的, 无依赖的修改 cwd, 避免其他读取到旧值
-  const cwd = tool.url.handlePathArg(
+  const cwd = tool.cli.handlePathArg(
     typeof(cliArg[`--cwd`]) === `string` 
       ? cliArg[`--cwd`] 
       : process.cwd(),

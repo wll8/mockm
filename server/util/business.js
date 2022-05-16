@@ -4,6 +4,173 @@ const tool = require(`./tool.js`)
 const http = require(`./http.js`)
 
 function business() { // 与业务相关性的函数
+  function midResJson({res, proxyRes, key, val, cb = body => body}) {
+    const modifyResponse = require(`node-http-proxy-json`)
+    modifyResponse(res, proxyRes, body => {
+      if([`array`, `object`].includes(tool.type.isType(body))) {
+        key && tool.obj.deepSet(body, key, val)
+      }
+      return cb(body)
+    })
+  }
+
+  function url() { // url 处理程序
+    function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
+      const pathToRegexp = require(`path-to-regexp`)
+      const isType = tool.type.isType
+      const proxyType = isType(proxy)
+      let resProxy = []
+      if(proxyType === `string`) { // 任何路径都转发到 proxy
+        proxy = {
+          '/': proxy,
+        }
+      }
+      function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
+        const indexVal = proxy[`/`]
+        delete proxy[`/`]
+        proxy[`/`] = indexVal
+        return proxy
+      }
+      proxy = setIndexOfEnd(proxy)
+      resProxy = Object.keys(proxy).map(context => {
+        let options = proxy[context]
+        const optionsType = isType(options)
+        if(optionsType === `string`) { // 转换字符串的 value 为对象
+          const rootOptions = proxy[`/`]
+          options = {
+            pathRewrite: { [`^${context}`]: options }, // 原样代理 /a 到 /a
+            target: options.includes(`://`) // 如果要代理的目录地址已有主域
+              ? new URL(options).origin // 那么就代理到该主域上
+              : { // 否则就代理到 / 设定的域上
+                string: rootOptions,
+                object: rootOptions.target, // 当主域是对象时则取其 target
+              }[isType(rootOptions)],
+          }
+        }
+        if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
+          const [item1, item2] = options
+          const item1Type = isType(item1)
+          const item2Type = isType(item2)
+          const deepMergeObject = tool.obj.deepMergeObject
+
+          if((item1Type !== `function`) && (options.length <= 1)) { // 只有0个或一个项, 直接替换 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: () => item1})
+              },
+            }
+          }
+          if((item1Type === `function`) && (options.length <= 1)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => item1({req, json})})
+              },
+            }
+          }
+          if((item1Type === `function`) && (item2Type === `function`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => {
+                  return item2({req, json: item1({req, json})})
+                }})
+              },
+            }
+          }
+          if((item1Type === `string`) && (item2Type === `function`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => {
+                  return item2({req, json: tool.obj.deepGet(json, item1)})
+                }})
+              },
+            }
+          }
+          if((item1Type === `function`) && (item2Type === `string`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: json => {
+                  return tool.obj.deepGet(item1({req, json}), item2)
+                }})
+              },
+            }
+          }
+          if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, key: item1, val: item2})
+              },
+            }
+          }
+          if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: body => {
+                  return ({
+                    'deep': deepMergeObject(body, item1), // 父级【不会】被替换
+                    '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
+                  })[item2 || `deep`]
+                }})
+              },
+            }
+          }
+        }
+        const re = pathToRegexp(context)
+        return {
+          re,
+          context,
+          options,
+        }
+      })
+      return resProxy
+    }
+
+    function parseProxyTarget (proxy) { // 解析 proxy 为 {pathname, origin}
+      let origin = ``
+      try {
+        if(typeof(proxy) === `string`) {
+          origin = proxy
+        }
+        if(typeof(proxy) === `object`) {
+          origin = proxy[`/`].target || proxy[`/`]
+        }
+        const parentUrl = new URL(origin)
+        const res = {
+          host: parentUrl.host,
+          port: parentUrl.port || 80,
+          hostname: parentUrl.hostname,
+          pathname: parentUrl.pathname.replace(/\/$/, ``) + `/`,
+          origin: parentUrl.origin,
+          isIp: (parentUrl.host.match(/\./g) || []).length === 3,
+        }
+        return res
+      } catch (error) {
+        console.error(`请正确填写 proxy 参数`, error)
+        process.exit()
+      }
+    }
+
+    function parseRegPath(rePath, url) { // 使用 path-to-regexp 转换 express 的 router, 并解析参数为对象
+      // 注: path-to-regexp 1.x 自带 match 方法可处理此方法, 但是当前的 json-server 依赖的 express 的路由语法仅支持 path-to-regexp@0.1.7
+      // 所以只能手动转换, 参考: https://github.com/ForbesLindesay/express-route-tester/blob/f39c57fa660490e74b387ed67bf8f2b50ee3c27f/index.js#L96
+      const pathToRegexp = require(`path-to-regexp`)
+      const keys = []
+      const re = pathToRegexp(rePath, keys)
+      // 去除 url 中的 origin
+      const pathUrl = url.match(/^\//) ? url : url.replace((new URL(url)).origin, ``)
+      const result = re.exec(pathUrl)
+      const obj = keys.reduce((acc, cur, index) => {
+        acc[cur.name] = result[index + 1]
+        return acc
+      }, {})
+      return obj
+    }
+
+    return {
+      prepareProxy,
+      parseProxyTarget,
+      parseRegPath,
+    }
+  }
   function middleware() { // express 中间件
     const compression = require(`compression`) // 压缩 http 响应
   
@@ -1488,6 +1655,8 @@ function business() { // 与业务相关性的函数
   }
 
   return {
+    midResJson,
+    url: url(),
     middleware: middleware(),
     saveLog,
     listToData,

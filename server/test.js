@@ -13,11 +13,11 @@ function serverTest({
     file: {
       getBackUrl,
     },
+  } = tool
+  const {
     url: {
       parseRegPath,
     },
-  } = tool
-  const {
     middleware,
     saveLog,
     initHandle,
