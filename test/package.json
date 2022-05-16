@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:dev": "cross-env MOCKM_REGISTRY=https://registry.npm.taobao.org/ testEnv=dev mocha --parallel --require mochawesome/src/register ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome --timeout 0 --reporter-options reportDir=./res,reportFilename=index",
-    "test:build": "cross-env MOCKM_REGISTRY=https://registry.npm.taobao.org/ testEnv=build mocha --parallel --require mochawesome/src/register ./*.test.js --retries 3 --exit --require ./fixtures.js -R mochawesome --timeout 0 --reporter-options reportDir=./res,reportFilename=index"
+    "test:dev": "cross-env testEnv=dev mocha",
+    "test:build": "cross-env testEnv=build mocha"
   },
   "keywords": [],
   "author": "",
