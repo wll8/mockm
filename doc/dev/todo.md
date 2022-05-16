@@ -59,17 +59,13 @@
   可以修改 `config.proxy.forEach`  中的逻辑 context 为 `/` 时也运行 server.use 逻辑, 目前修改之后会导致 config.db 中的接口失效
 - [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
 - [x] refactor: 把 config 放置于全局, 避免传参位置过多
-- [ ] refactor: 在 util 中
+- [x] refactor: 在 util 中
   - 抽离以下方法, 因为他们属于业务
-    - prepareProxy
-    - parseProxyTarget
-    - fullApi2Obj
-    - parseRegPath
-  - 把 handlePathArg 放到 cli 中
-  - 把 initPackge, hasPackage, installPackage 放到 npm 中
-  - middleware 中内容应属业务方法
-  - httpClient 中内容应属业务方法
-  - clearProcess 方法应重新封装
+    - [x] prepareProxy
+    - [x] parseProxyTarget
+    - [x] parseRegPath
+  - [x] 把 handlePathArg 放到 cli 中
+  - [x] middleware 中内容应属业务方法
 - [x] fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
   例如以下配置不应导致 `/api/test?a=1` 不能使用
   ``` js
@@ -242,6 +238,8 @@
 
 ## 破坏性更新计划
 - 2.x
+  - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
+  - [ ] refactor: 把 initPackge, hasPackage, installPackage 放到 npm 中
   - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
   - [ ] refactor: node 支持版本调整为 v12+
   - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj

@@ -308,6 +308,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function cli() { // 命令行相关处理程序
     /**
+     * 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+     * @param {*} pathStr 路径
+     */
+     function handlePathArg(pathStr) {
+      const path = require(`path`)
+      let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
+      newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
+      return newPathStr
+    }
+
+    /**
     * 自定义控制台颜色
     * https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
     * nodejs 内置颜色: https://nodejs.org/api/util.html#util_foreground_colors
@@ -423,6 +434,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      handlePathArg,
       getFullLine,
       onlyLine,
       spawn,
@@ -459,141 +471,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return urlList[maxIndex]
     }
 
-    function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
-      const pathToRegexp = require(`path-to-regexp`)
-      const isType = type().isType
-      const proxyType = isType(proxy)
-      let resProxy = []
-      if(proxyType === `string`) { // 任何路径都转发到 proxy
-        proxy = {
-          '/': proxy,
-        }
-      }
-      function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
-        const indexVal = proxy[`/`]
-        delete proxy[`/`]
-        proxy[`/`] = indexVal
-        return proxy
-      }
-      proxy = setIndexOfEnd(proxy)
-      resProxy = Object.keys(proxy).map(context => {
-        let options = proxy[context]
-        const optionsType = isType(options)
-        if(optionsType === `string`) { // 转换字符串的 value 为对象
-          const rootOptions = proxy[`/`]
-          options = {
-            pathRewrite: { [`^${context}`]: options }, // 原样代理 /a 到 /a
-            target: options.includes(`://`) // 如果要代理的目录地址已有主域
-              ? new URL(options).origin // 那么就代理到该主域上
-              : { // 否则就代理到 / 设定的域上
-                string: rootOptions,
-                object: rootOptions.target, // 当主域是对象时则取其 target
-              }[isType(rootOptions)],
-          }
-        }
-        if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
-          const [item1, item2] = options
-          const item1Type = isType(item1)
-          const item2Type = isType(item2)
-          const midResJson = httpClient().midResJson
-          const deepMergeObject = obj().deepMergeObject
-
-          if((item1Type !== `function`) && (options.length <= 1)) { // 只有0个或一个项, 直接替换 res
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, cb: () => item1})
-              },
-            }
-          }
-          if((item1Type === `function`) && (options.length <= 1)) {
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, cb: (json) => item1({req, json})})
-              },
-            }
-          }
-          if((item1Type === `function`) && (item2Type === `function`)) {
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, cb: (json) => {
-                  return item2({req, json: item1({req, json})})
-                }})
-              },
-            }
-          }
-          if((item1Type === `string`) && (item2Type === `function`)) {
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, cb: (json) => {
-                  return item2({req, json: obj().deepGet(json, item1)})
-                }})
-              },
-            }
-          }
-          if((item1Type === `function`) && (item2Type === `string`)) {
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, cb: json => {
-                  return obj().deepGet(item1({req, json}), item2)
-                }})
-              },
-            }
-          }
-          if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, key: item1, val: item2})
-              },
-            }
-          }
-          if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
-            options = {
-              onProxyRes (proxyRes, req, res) {
-                midResJson({proxyRes, res, cb: body => {
-                  return ({
-                    'deep': deepMergeObject(body, item1), // 父级【不会】被替换
-                    '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
-                  })[item2 || `deep`]
-                }})
-              },
-            }
-          }
-        }
-        const re = pathToRegexp(context)
-        return {
-          re,
-          context,
-          options,
-        }
-      })
-      return resProxy
-    }
-
-    function parseProxyTarget (proxy) { // 解析 proxy 为 {pathname, origin}
-      let origin = ``
-      try {
-        if(typeof(proxy) === `string`) {
-          origin = proxy
-        }
-        if(typeof(proxy) === `object`) {
-          origin = proxy[`/`].target || proxy[`/`]
-        }
-        const parentUrl = new URL(origin)
-        const res = {
-          host: parentUrl.host,
-          port: parentUrl.port || 80,
-          hostname: parentUrl.hostname,
-          pathname: parentUrl.pathname.replace(/\/$/, ``) + `/`,
-          origin: parentUrl.origin,
-          isIp: (parentUrl.host.match(/\./g) || []).length === 3,
-        }
-        return res
-      } catch (error) {
-        console.error(`请正确填写 proxy 参数`, error)
-        process.exit()
-      }
-    }
-
     function fullApi2Obj(api) {
       let [, method, url] = api.match(/(\S+)\s+(.*)/) || [undefined, `*`, api.trim()]
       if(method === `*`) {
@@ -613,33 +490,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return {path, method, url}
     }
 
-    /**
-     * 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
-     * @param {*} pathStr 路径
-     */
-    function handlePathArg(pathStr) {
-      const path = require(`path`)
-      let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
-      newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
-      return newPathStr
-    }
-
-    function parseRegPath(rePath, url) { // 使用 path-to-regexp 转换 express 的 router, 并解析参数为对象
-      // 注: path-to-regexp 1.x 自带 match 方法可处理此方法, 但是当前的 json-server 依赖的 express 的路由语法仅支持 path-to-regexp@0.1.7
-      // 所以只能手动转换, 参考: https://github.com/ForbesLindesay/express-route-tester/blob/f39c57fa660490e74b387ed67bf8f2b50ee3c27f/index.js#L96
-      const pathToRegexp = require(`path-to-regexp`)
-      const keys = []
-      const re = pathToRegexp(rePath, keys)
-      // 去除 url 中的 origin
-      const pathUrl = url.match(/^\//) ? url : url.replace((new URL(url)).origin, ``)
-      const result = re.exec(pathUrl)
-      const obj = keys.reduce((acc, cur, index) => {
-        acc[cur.name] = result[index + 1]
-        return acc
-      }, {})
-      return obj
-    }
-
     function parseUrlArgToObjList(urlArg){ // 转换 url 参数为对象数组
       const querystring = require(`querystring`)
       const obj = querystring.parse(urlArg) // <= urlArg
@@ -656,11 +506,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
     return {
       findLikeUrl,
-      prepareProxy,
-      parseProxyTarget,
       fullApi2Obj,
-      handlePathArg,
-      parseRegPath,
       parseUrlArgToObjList,
     }
   }
@@ -1013,16 +859,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   function httpClient() {
 
-    function midResJson({res, proxyRes, key, val, cb = body => body}) {
-      const modifyResponse = require(`node-http-proxy-json`)
-      modifyResponse(res, proxyRes, body => {
-        if([`array`, `object`].includes(type().isType(body))) {
-          key && obj().deepSet(body, key, val)
-        }
-        return cb(body)
-      })
-    }
-
     function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
       // 当重定向路由(mock api)时, req.originalUrl 和 req.url 不一致, req.originalUrl 为浏览器中访问的 url, 应该基于这个 url 获取 path
       return {
@@ -1046,7 +882,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
-      midResJson,
       getClientUrlAndPath,
       getClientIp,
     }
