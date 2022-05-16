@@ -58,7 +58,7 @@
   ```
   可以修改 `config.proxy.forEach`  中的逻辑 context 为 `/` 时也运行 server.use 逻辑, 目前修改之后会导致 config.db 中的接口失效
 - [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
-- [ ] refactor: 把 config 放置于全局, 避免传参位置过多
+- [x] refactor: 把 config 放置于全局, 避免传参位置过多
 - [ ] refactor: 在 util 中
   - 抽离以下方法, 因为他们属于业务
     - prepareProxy
