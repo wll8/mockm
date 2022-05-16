@@ -5,8 +5,8 @@ async function serverProxy({
   api,
   db,
   apiRootInjection,
-  config,
 }) {
+  const config = global.config
   const {
     tool,
     business,
@@ -23,22 +23,22 @@ async function serverProxy({
   } = business
   const {
     allowCors,
-  } = clientInjection({config})
+  } = clientInjection()
   const {
     setHttpHistoryWrap,
     ignoreHttpHistory,
-  } = historyHandle({config})
+  } = historyHandle()
   const {
     middlewares,
     middlewaresObj,
-  } = middleware.getJsonServerMiddlewares({config})
+  } = middleware.getJsonServerMiddlewares()
   const {
     parseApi: {
       noProxyTest,
       serverRouterList,
     },
     getDataRouter,
-  } = customApi({api, db, config})
+  } = customApi({api, db})
 
   const jsonServer = require(`json-server`)
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
@@ -141,7 +141,6 @@ async function serverProxy({
       }
       res.send = oldSend
       setHttpHistoryWrap({
-        config,
         req: newReq,
         res,
         mock: true,
@@ -186,7 +185,7 @@ async function serverProxy({
   }
 
   server.use(async (req, res, next) => {
-    reqHandle({config}).injectionReq({req, res, type: `get`})
+    reqHandle().injectionReq({req, res, type: `get`})
     const pathToRegexp = require(`path-to-regexp`)
     const hasRouter = serverRouterList.some(item => {
       const {method, router, action} = item
@@ -292,12 +291,11 @@ async function serverProxy({
           //   // setHttpHistory(`${method} ${url}`, {req})
           // }
         })
-        reqHandle({config}).injectionReq({req, res, type: `get`})
+        reqHandle().injectionReq({req, res, type: `get`})
       },
       onProxyRes: (proxyRes, req, res) => {
         allowCors({res: proxyRes, req, proxyConfig: userConfig})
         setHttpHistoryWrap({
-          config,
           req,
           res: proxyRes,
         })
