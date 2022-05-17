@@ -452,7 +452,17 @@ function http() {
   return http
 }
 
+function upload(api, data) {
+  const FormData = require(`form-data`)
+  const formdata = new FormData()
+  Object.entries(data).forEach(([key, val]) => formdata.append(key, val))
+  return http().post(api, formdata, {
+    headers: formdata.getHeaders(),
+  })
+}
+
 module.exports = {
+  upload,
   to,
   ok,
   runMockm,
