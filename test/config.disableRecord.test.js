@@ -57,7 +57,7 @@ describe('config.disableRecord', () => {
       },
     }))
   })
-  it.skip(`不记录匹配的请求 object, 不限定 method`, async () => {
+  it(`不记录匹配的请求 object, 不限定 method`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
         disableRecord: {
@@ -81,7 +81,7 @@ describe('config.disableRecord', () => {
       },
     }))
   })
-  it.skip(`不记录匹配的请求 object, 限定 method`, async () => {
+  it(`不记录匹配的请求 object, 限定 method`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
         disableRecord: {
