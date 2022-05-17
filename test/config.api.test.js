@@ -209,8 +209,29 @@ describe('config.api', () => {
       },
     }))
   })
-  it.skip(`获取客户端上传的文件`, async () => {
-    // todo
+  it(`获取客户端上传的文件`, async () => {
+    util.ok(await util.runMockm({
+      mockm: (util) => {
+        return {
+          api: {
+            async 'post /test/upload' (req, res) {
+              const multiparty = await util.toolObj.generate.initPackge(`multiparty`)
+              const form = new multiparty.Form()
+              form.parse(req, (err, fields = [], formData) => {
+                const data = {fields, formData, err}
+                res.json(data)
+              })
+            },
+          },
+        }
+      },
+      okFn: async ({arg, str}) => {
+        const formData = (await util.upload(`http://127.0.0.1:${arg.port}/test/upload`, {
+          files: require(`fs`).createReadStream(__filename),
+        })).data.formData.files[0]
+        return util.hasFile(formData.path)
+      },
+    }))
   })
   it(`运行 fetch 方法并获取执行结果`, async () => {
     util.ok(await util.runMockm({
