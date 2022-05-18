@@ -1,6 +1,24 @@
 # 待完成
 
 ## 文档
+- [ ] fix: 多个 proxy ws 无法代理
+  - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
+  - https://github.com/chimurai/http-proxy-middleware/issues/463
+  ``` js
+  config = {
+    proxy: {
+      '/': `http://httpbin.org`,
+      '/ws1': `ws://ws.ifelse.io`, // 不应无法工作
+      '/ws2': `http://ws.ifelse.io`, // 不应无法工作
+    }
+  }
+  config = {
+    proxy: {
+      '/': `http://127.0.0.1:9000`,
+      '/ws': `http://127.0.0.1:9000/websocket`, // 不应无法工作
+    },
+  }
+  ```
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
