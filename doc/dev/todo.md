@@ -1,6 +1,33 @@
 # 待完成
 
 ## 文档
+- [ ] fix: config.proxy 子路径冲突
+  ``` js
+    config = {
+      proxy: {
+        '/im':`ws:///192.168.160.74:10000/im`,
+        '/im/dept':`http://192.168.160.74:10000/im/dept`, // 不应该无法使用
+      }
+    }
+  ```
+- [ ] refactor: 更改 `require('serve-static')` 为 `app.static`
+- [ ] refactor: 尝试使用 express-ws 替代 ws
+  - 替代后可以统一使用 `app.ws(route, fn)` 的形式实现逻辑, 而不是在 root 下自己实现 upgrade 协议升级和路由判断
+  - express-ws 已一年以上没有更新
+- [ ] refactor: 使用单个中间件实现多个 use 的效果
+  ```js
+  // 修改前
+  app.use(fn)
+  isOk && app.use(fn2)
+  ``` 
+  ```js
+  // 修改后
+  app.use(() => {
+    return isOk ? [fn, fn2] : [fn]
+  })
+  ``` 
+- [ ] refactor: 移动 `router.render` 的位置到 router 声明的地方
+- [ ] refactor: 抽取 getProxyConfig 方法到公共业务中
 - [ ] fix: 多个 proxy ws 无法代理
   - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
   - https://github.com/chimurai/http-proxy-middleware/issues/463
@@ -19,6 +46,34 @@
     },
   }
   ```
+- [ ] feat: 目前 config.route 是否支持参数映射
+  - 例如 path 中的参数转为 query 中的参数
+  - https://github.com/typicode/json-server#add-custom-routes
+- [ ] refactor: 在统一的地方处理 api, 由于目前处理这些配置的时机不同和方式不同, 出现问题不便处理
+  - 目前以下配置都会生成 exporess 中间件, 优先级由上到下从高到低
+    - config.route - getDataRouter - 路由重定向, 对 api apiWeb db static 生效, 而不对 proxy 生效
+    - config.api - parseApi
+    - config.db - parseDbApi
+    - config.static - staticHandle - use
+    - config.apiWeb - apiWebHandle
+    - config.proxy - http-proxy-middleware
+  - 先把以上配置都进行统一格式化为一个列表, 并按优先级排序此列表, 标记占用情况
+    ``` js
+    list = [
+      {
+        route: String, // 用户路径
+        re: RegExp, // 用户路径转换为正则
+        method: String, // 用户方法, * 或 all
+        type: Enum, // 属于什么配置, 例如 api db proxy
+        action: Function, // 要执行中间件函数
+        occupied: { // 被谁占用, 如果是被占用的状态, 则不会被使用
+          type: Enum,
+          route: String,
+        }
+      },
+    ]
+    ```
+  - 转换 proxy 以及内部路由判断为普通的 use
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
@@ -155,6 +210,7 @@
 - [ ] feat: 思考如何解决记录的请求与实际发送的请求的混乱问题, 例如
   - req.url 和 req.method 被修改, 应该如何记录
 - [ ] feat: 应该记录原始请求, 例如 req.originalUrl , 因为 req.url 会在程序内被修改, 记录它会感觉很奇怪
+- [ ] fix: 应该尽量使用 req.originalUrl
 - [ ] feat: 注入 Eruda 或 vConsole
 - [ ] feat: 自定义日志输出 https://github.com/expressjs/morgan#using-a-custom-format-function
 - [ ] feat: 支持 yaml 格式的 openApi, 例如 https://petstore.swagger.io/v2/swagger.yaml
