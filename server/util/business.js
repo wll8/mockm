@@ -598,12 +598,51 @@ function business() { // 与业务相关性的函数
   }
 
   function customApi({api, db}) {
+    const pathToRegexp = require(`path-to-regexp`)
     /**
     * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
     */
 
     function parseApi() { // 解析自定义 api
-      const pathToRegexp = require(`path-to-regexp`)
+      const { setHeader, allowCors } = clientInjection()
+      const run = {
+        async curl({req, res, cmd}) { // cmd: curl/bash
+          const options = await tool.cli.getOptions(cmd)
+          return new Promise(async (resolve, reject) => {
+            const request = await tool.generate.initPackge(`request`)
+            request(options, (err, curlRes = {}, body) => {
+              setHeader(res, curlRes.headers) // 复制远程的 header
+              allowCors({req, res}) // 设置 header 为允许跨域模式
+              const mergeRes = curlRes
+              err ? reject(err) : resolve(mergeRes)
+            })
+          })
+        },
+        fetch({req, res, fetchRes}) { // node-fetch
+          return new Promise((resolve, reject) => {
+            fetchRes.then(fetchThenRes => {
+              const headers = [...fetchThenRes.headers].reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
+              const contentEncoding = headers[`content-encoding`]
+              if(contentEncoding && contentEncoding.includes(`gzip`)) {
+                // 由于返回的内容其实已经被解码过了, 所以不能再告诉客户端 content-encoding 是压缩的 `gzip`, 否则会导致客户端无法解压缩
+                // - 例如导致浏览器无法解码: net::ERR_CONTENT_DECODING_FAILED 200 (OK)
+                delete headers[`content-encoding`]
+              }
+              setHeader(res, headers)
+              allowCors({req, res})
+              const mergeRes = fetchThenRes
+              resolve(mergeRes)
+            }).catch(err => {
+              console.log(`err`, err)
+              reject(err)
+            })
+          })
+        },
+      }
+      const api = global.config.api({ // 向 config.api 暴露一些工具库
+        run,
+      })
+
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = tool.url.fullApi2Obj(key)
@@ -709,6 +748,49 @@ function business() { // 与业务相关性的函数
       return apiList
     }
 
+    function parseDbApi2() {
+      const router = require(`json-server`).router(global.config.dbJsonPath, {
+        _noDataNext: true,
+      })
+      router.render = (req, res) => { // 修改输出的数据, 符合项目格式
+        // 在 render 方法中, req.query 会被删除
+        // https://github.com/typicode/json-server/issues/311
+        // https://github.com/typicode/json-server/issues/314
+
+        const querystring = require(`querystring`)
+        if(req._parsedUrl) {
+          const query = querystring.parse(req._parsedUrl.query)
+          req.query = query
+        }
+        let returnData = res.locals.data // 前面的数据返回的 data 结构
+        const xTotalCount = res.get(`X-Total-Count`)
+        if(xTotalCount) {
+          returnData = {
+            count: xTotalCount,
+            results: res.locals.data,
+          }
+        }
+        const data = res.mm.resHandleJsonApi({
+          req,
+          res,
+          data: returnData,
+          resHandleJsonApi: global.config.resHandleJsonApi,
+        })
+        res.json(data)
+      }
+      const list = [
+        {
+          route: `/`,
+          re: pathToRegexp(`/`),
+          method: `use`,
+          type: `static`,
+          action: router,
+          occupied: {},
+        },
+      ]
+      return list
+    }
+
     function getDataRouter({method, pathname}) {
       /**
         给定一个 method 和 path, 根据 db.json 来判断是否应该过滤
@@ -734,7 +816,379 @@ function business() { // 与业务相关性的函数
       return res
     }
 
+    function parseApi2() { // 解析自定义 api
+      const { setHeader, allowCors } = clientInjection()
+      const run = {
+        async curl({req, res, cmd}) { // cmd: curl/bash
+          const options = await tool.cli.getOptions(cmd)
+          return new Promise(async (resolve, reject) => {
+            const request = await tool.generate.initPackge(`request`)
+            request(options, (err, curlRes = {}, body) => {
+              setHeader(res, curlRes.headers) // 复制远程的 header
+              allowCors({req, res}) // 设置 header 为允许跨域模式
+              const mergeRes = curlRes
+              err ? reject(err) : resolve(mergeRes)
+            })
+          })
+        },
+        fetch({req, res, fetchRes}) { // node-fetch
+          return new Promise((resolve, reject) => {
+            fetchRes.then(fetchThenRes => {
+              const headers = [...fetchThenRes.headers].reduce((acc, cur) => ({...acc, [cur[0]]: cur[1]}), {})
+              const contentEncoding = headers[`content-encoding`]
+              if(contentEncoding && contentEncoding.includes(`gzip`)) {
+                // 由于返回的内容其实已经被解码过了, 所以不能再告诉客户端 content-encoding 是压缩的 `gzip`, 否则会导致客户端无法解压缩
+                // - 例如导致浏览器无法解码: net::ERR_CONTENT_DECODING_FAILED 200 (OK)
+                delete headers[`content-encoding`]
+              }
+              setHeader(res, headers)
+              allowCors({req, res})
+              const mergeRes = fetchThenRes
+              resolve(mergeRes)
+            }).catch(err => {
+              console.log(`err`, err)
+              reject(err)
+            })
+          })
+        },
+      }
+      const api = global.config.api({ // 向 config.api 暴露一些工具库
+        run,
+      })
+
+      const serverRouterList = [] // server 可使用的路由列表
+      Object.keys(api).forEach(key => {
+        let {method, url} = tool.url.fullApi2Obj(key)
+        method = method.toLowerCase()
+        let val = api[key]
+        if(method === `use`) { // 自定义中间件时不使用自动返回 json 的规则
+          if([`function`, `array`].includes(tool.type.isType(val)) === false) { // use 支持单个和多个(数组)中间件
+            print(tool.cli.colors.red(`Data other than function|array type is not allowed in the use mode in config.api: ${val}`))
+            val = (req, res, next) => next()
+          }
+        } else if([
+          `string`,
+          `number`,
+          `object`,
+          `array`,
+          `boolean`,
+          `null`,
+        ].includes(tool.type.isType(val))) { // 如果配置的值是 json 支持的数据类型, 则直接作为返回值, 注意, 读取一个文件也是对象
+          const backVal = val
+          if(method === `ws`) {
+            val = (ws, req) => {
+              const strData = JSON.stringify(backVal)
+              ws.send(strData)
+              ws.on(`message`, (msg) => ws.send(strData))
+            }
+          } else {
+            val = (req, res, next) => res.json(backVal)
+          }
+        }
+        serverRouterList.push({
+          route: url,
+          re: pathToRegexp(url),
+          method,
+          type: `api`,
+          action: val,
+          occupied: {},
+        })
+      })
+      return serverRouterList
+    }
+
+    function apiWebHandle() { // 处理 webApi 为 api
+      const apiWebStore = tool.file.fileStore(global.config.apiWeb)
+      const paths = apiWebStore.get(`paths`)
+      const disableApiList = apiWebStore.get(`disable`)
+      const pathList = Object.keys(paths).map(path => {
+        return Object.keys(paths[path]).map(method => ({
+          key: `${method} ${path}`,
+          path,
+          method,
+          ...paths[path][method],
+        }))
+      }).flat()
+      const apiList = pathList.reduce((acc, cur, curIndex) => {
+        let fn = (req, res, next) => {
+          const {example = {}, table = []} = cur.responses[`200`]
+          const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
+          if(useDataType === `table`) { // 使用表格中的数据
+            try {
+              const { setHeader } = clientInjection()
+              setHeader(res, headers) // 设置自定义 header
+              let data
+              const listToDataRes = listToData(table, {rule, type})
+              data = listToDataRes.data
+              // 根据 apiWebWrap 处理数据
+              if(global.config.apiWebWrap === true) {
+                data = wrapApiData({data, code: 200})
+              } else if(typeof(global.config.apiWebWrap) === `function`) {
+                data = global.config.apiWebWrap({data, code: 200})
+              }
+              res.json(data)
+            } catch (err) {
+              print(err)
+              res.status(500).json({msg: String(err)})
+            }
+          }
+          if (useDataType === `custom`) { // 自定义逻辑
+            try {
+              const { NodeVM } = require(`vm2`)
+              const vm = new NodeVM({
+                sandbox: { // 给 vm 使用的变量
+                  tool: {
+                    libObj: lib,
+                    wrapApiData,
+                    listToData,
+                    cur,
+                  },
+                },
+              })
+              const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``
+              const codeType = typeof(code)
+              if([`function`].includes(codeType)) { // 如果是函数则运行函数
+                code(req, res, next)
+              } else { // 函数之外的类型则当作 json 返回
+                res.json(code)
+              }
+            } catch (err) {
+              console.log(`err`, err)
+              // 处理客户端代码出现问题, 代码错误或出现不允许的权限
+              res.status(403).json({
+                msg: err.message,
+              })
+            }
+          }
+          if (useDataType === `history`) { // 使用历史记录
+            middleware().replayHistoryMiddleware({
+              id: history,
+              business: business(),
+            })(req, res, next)
+          }
+        }
+        if(cur.method === `ws`) { // 如果是 websocket 方法则更换函数模版
+          fn = (ws, req) => {
+            const sendData = (data) => {
+              const strData = JSON.stringify(data)
+              ws.send(strData)
+              ws.on(`message`, (msg) => {
+                ws.send(strData)
+              })
+            }
+            const {example = {}, table = []} = cur.responses[`200`]
+            const {headers = {}, useDataType = `table`, custom, history, rule, type} = example
+            if(useDataType === `table`) { // 使用表格中的数据
+              try {
+                let data
+                const listToDataRes = listToData(table, {rule, type})
+                data = listToDataRes.data
+                sendData(data)
+              } catch (err) {
+                print(err)
+                sendData({msg: String(err)})
+              }
+            }
+            if (useDataType === `custom`) { // 自定义逻辑
+              try {
+                const { NodeVM } = require(`vm2`)
+                const vm = new NodeVM({
+                  sandbox: { // 给 vm 使用的变量
+                    tool: {
+                      libObj: lib,
+                      wrapApiData,
+                      listToData,
+                      cur,
+                    },
+                  },
+                })
+                const code = vm.run(`module.exports = ${custom}`, `vm.js`) || ``
+                const codeType = typeof(code)
+                if([`function`].includes(codeType)) { // 如果是函数则运行函数
+                  code(ws, req)
+                } else { // 函数之外的类型则当作 json 返回
+                  sendData(code)
+                }
+              } catch (err) {
+                console.log(`err`, err)
+                // 处理客户端代码出现问题, 代码错误或出现不允许的权限
+                sendData({msg: err.message})
+              }
+            }
+          }
+        }
+        fn.type = `apiWeb`
+        fn.description = cur.description
+        fn.disable = disableApiList.includes(`/`)  // 如果含有根结点, 则表示全部禁用
+          ? true
+          : disableApiList.includes(cur.key)
+        acc.push({
+          route: cur.path,
+          re: pathToRegexp(cur.path),
+          method: cur.method,
+          type: `apiWeb`,
+          action: fn,
+          occupied: {},
+        })
+        return acc
+      }, [])
+      return apiList
+    }
+
+    function prepareProxy (proxy = {}) { // 解析 proxy 参数, proxy: string, object
+      const isType = tool.type.isType
+      const proxyType = isType(proxy)
+      let resProxy = []
+      if(proxyType === `string`) { // 任何路径都转发到 proxy
+        proxy = {
+          '/': proxy,
+        }
+      }
+      function setIndexOfEnd(proxy) { // 需要排序 key:/ 到最后, 否则它生成的拦截器会被其他 key 覆盖
+        const indexVal = proxy[`/`]
+        delete proxy[`/`]
+        proxy[`/`] = indexVal
+        return proxy
+      }
+      proxy = setIndexOfEnd(proxy)
+      resProxy = Object.keys(proxy).map(context => {
+        let options = proxy[context]
+        const optionsType = isType(options)
+        if(optionsType === `string`) { // 转换字符串的 value 为对象
+          const rootOptions = proxy[`/`]
+          options = {
+            pathRewrite: { [`^${context}`]: options }, // 原样代理 /a 到 /a
+            target: options.includes(`://`) // 如果要代理的目录地址已有主域
+              ? new URL(options).origin // 那么就代理到该主域上
+              : { // 否则就代理到 / 设定的域上
+                string: rootOptions,
+                object: rootOptions.target, // 当主域是对象时则取其 target
+              }[isType(rootOptions)],
+          }
+        }
+        if(optionsType === `array`) { // 是数组时, 视为设计 res body 的值, 语法为: [k, v]
+          const [item1, item2] = options
+          const item1Type = isType(item1)
+          const item2Type = isType(item2)
+          const deepMergeObject = tool.obj.deepMergeObject
+
+          if((item1Type !== `function`) && (options.length <= 1)) { // 只有0个或一个项, 直接替换 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: () => item1})
+              },
+            }
+          }
+          if((item1Type === `function`) && (options.length <= 1)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => item1({req, json})})
+              },
+            }
+          }
+          if((item1Type === `function`) && (item2Type === `function`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => {
+                  return item2({req, json: item1({req, json})})
+                }})
+              },
+            }
+          }
+          if((item1Type === `string`) && (item2Type === `function`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: (json) => {
+                  return item2({req, json: tool.obj.deepGet(json, item1)})
+                }})
+              },
+            }
+          }
+          if((item1Type === `function`) && (item2Type === `string`)) {
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: json => {
+                  return tool.obj.deepGet(item1({req, json}), item2)
+                }})
+              },
+            }
+          }
+          if((item1Type === `string`) && (options.length === 2)) { // 以 item1 作为 key, item2 作为 val, 修改原 res
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, key: item1, val: item2})
+              },
+            }
+          }
+          if((item1Type === `object`) && (options.length === 2)) { // 根据 item2 的类型, 合并 item1
+            options = {
+              onProxyRes (proxyRes, req, res) {
+                midResJson({proxyRes, res, cb: body => {
+                  return ({
+                    'deep': deepMergeObject(body, item1), // 父级【不会】被替换
+                    '...': {...body, ...item1}, // 父级【会】被替换, 类似于js扩展运行符
+                  })[item2 || `deep`]
+                }})
+              },
+            }
+          }
+        }
+        return {
+          route: context,
+          re: pathToRegexp(context),
+          method: undefined,
+          type: `proxy`,
+          action: undefined,
+          occupied: {},
+          options,
+        }
+      })
+      return resProxy
+    }
+
+    function staticHandle() { // 处理 static 为 api, 实际上是转换为 use 中间件的形式
+      let list = []
+      global.config.static.map(item => {
+        list.push({
+          route: item.path,
+          re: pathToRegexp(item.path),
+          method: `use`,
+          type: `static`,
+          action: [
+            async (req, res, next) => { // mode history
+              if(item.mode === `history`) {
+                require(`connect-history-api-fallback`)(item.option)(req, res, next)
+              } else {
+                next()
+              }
+            },
+            require(`serve-static`)(item.fileDir),
+          ],
+          occupied: {},
+        })
+      })
+      return list
+    }
+    
+    // 处理为统一的列表
+    const obj = {
+      api: parseApi2(),
+      db: parseDbApi2(),
+      apiWeb: apiWebHandle(),
+      proxy: prepareProxy(global.config.proxy),
+      static: staticHandle(),
+    }
+    const allRoute = [
+      ...obj.api,
+      ...obj.db,
+      ...obj.static,
+      ...obj.apiWeb,
+      ...obj.proxy,
+    ]
+    allRoute.obj = obj
+
     return {
+      allRoute,
       parseApi: parseApi(),
       parseDbApi: parseDbApi(),
       getDataRouter,
@@ -1114,7 +1568,7 @@ function business() { // 与业务相关性的函数
     }
 
     function ignoreHttpHistory({req}) { // 是否应该记录 req
-      const {method, url} = req
+      const {method, originalUrl: url} = req
       function disableRecord() {
         const disableRecord = global.config.disableRecord
         if(tool.type.isType(disableRecord, `boolean`)) {
