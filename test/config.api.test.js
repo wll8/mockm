@@ -2,19 +2,11 @@ const util = require('./util.js')
 const http = util.http
 
 describe('config.api', () => {
-  it(`覆盖 config.proxy 某部分路径`, async () => {
+  it(`覆盖 config.proxy 的同级路径`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
-        proxy: {
-          '/anything/proxy/fn_fn':[({req, json}) => {
-            return json.method
-          }, ({req, json}) => {
-            return json.toLowerCase() // get
-          }],
-          '/any/proxy/test/proxyAndApiQuery': `/anything/proxyAndApiQuery`,
-        },
+        proxy: {},
         api: {
-          '/any/proxy/test/proxyAndApiQuery/myApi': `ok`,
           '/anything/overrideProxy': `ok`,
         },
       }),
@@ -22,14 +14,30 @@ describe('config.api', () => {
         const id = util.uuid()
         const res1 = (await http.get(`http://127.0.0.1:${arg.port}/anything/overrideProxy`)).data
         const res2 = (await http.get(`http://127.0.0.1:${arg.port}/anything/${id}`)).data
-
-        // config.api 是 config.proxy 的子路径
-        const res3 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi`)).data
-        const res4 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi?q=${id}`)).data
+        debugger
         return (
           res1 === `ok`
           && res2.url.match(id)
-          && res3 === `ok`
+        )
+      },
+    }))
+  })
+  it(`覆盖 config.proxy 的子路径`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {
+          '/any/proxy/test/proxyAndApiQuery': `/anything/proxyAndApiQuery`,
+        },
+        api: {
+          '/any/proxy/test/proxyAndApiQuery/myApi': `ok`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const id = util.uuid()
+        const res3 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi`)).data
+        const res4 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi?q=${id}`)).data
+        return (
+          res3 === `ok`
           && res4 === `ok`
         )
       },
