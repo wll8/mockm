@@ -1,5 +1,5 @@
 diff --git a/node_modules/json-server/lib/server/router/index.js b/node_modules/json-server/lib/server/router/index.js
-index a11d834..1f9d8ca 100644
+index a11d834..8fa9810 100644
 --- a/node_modules/json-server/lib/server/router/index.js
 +++ b/node_modules/json-server/lib/server/router/index.js
 @@ -29,6 +29,7 @@ const mixins = require('../mixins');
@@ -10,7 +10,17 @@ index a11d834..1f9d8ca 100644
      _isFake: false
    }, opts);
  
-@@ -82,14 +83,17 @@ module.exports = (db, opts) => {
+@@ -62,7 +63,8 @@ module.exports = (db, opts) => {
+     res.jsonp(db.getState());
+   }); // Handle /:parent/:parentId/:resource
+ 
+-  router.use(nested(opts)); // Create routes
++  const keys = Object.keys(db.value()).map(key => `/${key}`)
++  opts._noDataNext && keys.length && router.use(keys, nested(opts)); // Create routes
+ 
+   db.forEach((value, key) => {
+     if (_.isPlainObject(value)) {
+@@ -82,14 +84,16 @@ module.exports = (db, opts) => {
      const msg = `Type of "${key}" (${typeof value}) ${sourceMessage} is not supported. ` + `Use objects or arrays of objects.`;
      throw new Error(msg);
    }).value();
@@ -24,7 +34,6 @@ index a11d834..1f9d8ca 100644
      router.render(req, res);
 -  });
 +  }
-+  const keys = Object.keys(db.value()).map(key => `/${key}`)
 +  opts._noDataNext && keys.length && router.use(keys, render)
 +  !opts._noDataNext && router.use(render);
    router.use((err, req, res, next) => {
