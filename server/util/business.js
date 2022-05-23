@@ -206,7 +206,7 @@ function business() { // 与业务相关性的函数
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
   
       const jsonServer = require(`json-server`)
-      const middlewares = jsonServer.defaults({bodyParser: true, logger: false, static: require(`path`).join(__dirname, `../public2`)}) // 可以直接使用的所有中间件数组
+      const middlewares = jsonServer.defaults({bodyParser: true, logger: false}) // 可以直接使用的所有中间件数组
       middlewares.push(httpLog())
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
         // 使用 jsonServer 里面的中间件, 以保持一致:
