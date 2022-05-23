@@ -751,6 +751,7 @@ function business() { // 与业务相关性的函数
     function parseDbApi2() {
       const router = require(`json-server`).router(global.config.dbJsonPath, {
         _noDataNext: true,
+        _noDbRoute: true,
       })
       router.render = (req, res) => { // 修改输出的数据, 符合项目格式
         // 在 render 方法中, req.query 会被删除
