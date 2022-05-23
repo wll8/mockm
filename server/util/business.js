@@ -783,7 +783,7 @@ function business() { // 与业务相关性的函数
           route: `/`,
           re: pathToRegexp(`/`),
           method: `use`,
-          type: `static`,
+          type: `db`,
           action: router,
           occupied: {},
         },
