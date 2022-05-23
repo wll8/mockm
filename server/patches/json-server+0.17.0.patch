@@ -1,16 +1,22 @@
 diff --git a/node_modules/json-server/lib/server/router/index.js b/node_modules/json-server/lib/server/router/index.js
-index a11d834..8fa9810 100644
+index a11d834..5a44e8c 100644
 --- a/node_modules/json-server/lib/server/router/index.js
 +++ b/node_modules/json-server/lib/server/router/index.js
-@@ -29,6 +29,7 @@ const mixins = require('../mixins');
+@@ -29,6 +29,8 @@ const mixins = require('../mixins');
  module.exports = (db, opts) => {
    opts = Object.assign({
      foreignKeySuffix: 'Id',
 +    _noDataNext: false,
++    _noDbRoute: false,
      _isFake: false
    }, opts);
  
-@@ -62,7 +63,8 @@ module.exports = (db, opts) => {
+@@ -58,11 +60,12 @@ module.exports = (db, opts) => {
+   }; // GET /db
+ 
+ 
+-  router.get('/db', (req, res) => {
++  !opts._noDbRoute && router.get('/db', (req, res) => {
      res.jsonp(db.getState());
    }); // Handle /:parent/:parentId/:resource
  
@@ -20,7 +26,7 @@ index a11d834..8fa9810 100644
  
    db.forEach((value, key) => {
      if (_.isPlainObject(value)) {
-@@ -82,14 +84,16 @@ module.exports = (db, opts) => {
+@@ -82,14 +85,16 @@ module.exports = (db, opts) => {
      const msg = `Type of "${key}" (${typeof value}) ${sourceMessage} is not supported. ` + `Use objects or arrays of objects.`;
      throw new Error(msg);
    }).value();
