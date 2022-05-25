@@ -1,9 +1,7 @@
 const util = require(`./util/index.js`)
 const { print } = require(`./util/log.js`)
 
-function serverTest({
-  parseDbApi,
-}) {
+function serverTest() {
   const {
     tool,
     business,
@@ -29,7 +27,6 @@ function serverTest({
     listToData,
   } = business
   const {
-    init,
     getOpenApi,
   } = initHandle()
   const {
@@ -284,24 +281,17 @@ function serverTest({
           let sendData = []
           const disableApiList = apiWebStore.get(`disable`)
           const {
-            api,
-            db,
-          } = init() // 重新运行初始化方法, 以读取最新的 db 和 webApi 文件
-          const {
-            parseApi: {
-              serverRouterList,
-            },
-          } = customApi({api, db})
-          serverRouterList.forEach(item => { // 来自 config.apiWeb 和 config.api
+            allRoute,
+          } = customApi()
+          allRoute.forEach(item => { // 来自 config.apiWeb 和 config.api
             sendData.push({
-              path: item.router,
-              method: item.method,
-              type: item.action.type || `api`,
-              description: item.action.description,
-              disable: item.action.disable,
+              ...item,
+              path: item.route,
+              type: item.type || `api`,
+              description: item.description,
+              disable: item.disable,
             })
           })
-          sendData = sendData.concat(parseDbApi) // 来自 config.db
           res.json({api: sendData, disable: disableApiList})
         }
       },

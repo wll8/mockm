@@ -2,9 +2,7 @@ const util = require(`./util/index.js`)
 const { print } = require(`./util/log.js`)
 
 async function serverProxy({
-  api,
-  db,
-  apiRootInjection,
+  allRoute,
 }) {
   const config = global.config
   const {
@@ -16,7 +14,6 @@ async function serverProxy({
     reqHandle,
     clientInjection,
     historyHandle,
-    customApi,
     saveLog,
   } = business
   const {
@@ -30,14 +27,6 @@ async function serverProxy({
     middlewares,
     middlewaresObj,
   } = middleware.getJsonServerMiddlewares()
-  const {
-    parseApi: {
-      noProxyTest,
-      serverRouterList,
-    },
-    getDataRouter,
-    allRoute,
-  } = customApi({api, db})
 
   const jsonServer = require(`json-server`)
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
@@ -83,8 +72,6 @@ async function serverProxy({
     next()
   })
 
-  // 前端自行添加的测试 api
-  server.use(apiRootInjection)
   server.use((req, res, next) => { // 注入上次请求
     reqHandle().injectionReq({req, res, type: `get`})
     next()
@@ -100,7 +87,9 @@ async function serverProxy({
   }, []).flat()
   for (let index = 0; index < list.length; index++) {
     const item = list[index]
-    server[item.method](item.route, item.action)
+    if(Boolean(item.disable) === false) {
+      server[item.method](item.route, item.action)
+    }
   }
   list = [
     `proxy`,

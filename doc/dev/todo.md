@@ -1,6 +1,10 @@
 # 待完成
 
 ## 文档
+- [ ] fix: 前端界面不能设置响应头, 疑似被错误禁用
+- [ ] feat: config.db 在列表中支持可折叠
+- [ ] feat: httpLog 显示完整的时间
+- [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
 - [ ] fix: config.proxy 子路径冲突
   ``` js
     config = {
@@ -49,7 +53,7 @@
 - [ ] feat: 目前 config.route 是否支持参数映射
   - 例如 path 中的参数转为 query 中的参数
   - https://github.com/typicode/json-server#add-custom-routes
-- [ ] refactor: 在统一的地方处理 api, 由于目前处理这些配置的时机不同和方式不同, 出现问题不便处理
+- [x] refactor: 在统一的地方处理 api, 由于目前处理这些配置的时机不同和方式不同, 出现问题不便处理
   - 目前以下配置都会生成 exporess 中间件, 优先级由上到下从高到低
     - config.route - getDataRouter - 路由重定向, 对 api apiWeb db static 生效, 而不对 proxy 生效
     - config.api - parseApi
@@ -65,6 +69,8 @@
         re: RegExp, // 用户路径转换为正则
         method: String, // 用户方法, * 或 all
         type: Enum, // 属于什么配置, 例如 api db proxy
+        description: String, // 接口描述
+        disable: Boolean, // 是否禁用
         action: Function, // 要执行中间件函数
         occupied: { // 被谁占用, 如果是被占用的状态, 则不会被使用
           type: Enum,
