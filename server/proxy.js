@@ -134,12 +134,12 @@ async function serverProxy({
       changeOrigin: true,
       onProxyReq: (proxyReq, req, res) => {
         allowCors({req: proxyReq, proxyConfig: userConfig})
-        middlewaresObj.logger(req, res, () => {})
-        middlewaresObj.jsonParser(req, res, () => {
-          // if(ignoreHttpHistory({config, req}) === false) {
-          //   // setHttpHistory(`${method} ${url}`, {req})
-          // }
-        })
+        // middlewaresObj.logger(req, res, () => {})
+        // middlewaresObj.jsonParser(req, res, () => {
+        //   // if(ignoreHttpHistory({config, req}) === false) {
+        //   //   // setHttpHistory(`${method} ${url}`, {req})
+        //   // }
+        // })
         reqHandle().injectionReq({req, res, type: `get`})
       },
       onProxyRes: (proxyRes, req, res) => {

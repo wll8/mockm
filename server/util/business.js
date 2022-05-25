@@ -308,7 +308,6 @@ function business() { // 与业务相关性的函数
     return {
       reWriteRouter,
       compression,
-      httpLog,
       getJsonServerMiddlewares,
       replayHistoryMiddleware,
     }
