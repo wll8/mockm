@@ -1140,7 +1140,7 @@ function business() { // 与业务相关性的函数
           type: `proxy`,
           action: undefined,
           occupied: {},
-          options,
+          info: options,
         }
       })
       return resProxy

@@ -111,8 +111,8 @@ async function serverProxy({
   for (let index = 0; index < list.length; index++) {
     const item = list[index]
     if(config.hostMode === false) {
-      item.options.mid && server.use(item.route, item.options.mid)
-      server.use(item.route, proxy(item.route, getProxyConfig(item.options)))
+      item.info.mid && server.use(item.route, item.info.mid)
+      server.use(item.route, proxy(item.route, getProxyConfig(item.info)))
     }
   }
 
