@@ -69,7 +69,8 @@
         occupied: { // 被谁占用, 如果是被占用的状态, 则不会被使用
           type: Enum,
           route: String,
-        }
+        },
+        info: {}, // 根据 type 可能不同结构的附加信息
       },
     ]
     ```
