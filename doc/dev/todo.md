@@ -23,7 +23,7 @@
       }
     }
   ```
-- [ ] refactor: 更改 `require('serve-static')` 为 `app.static`
+- [x] refactor: 更改 `require('serve-static')` 为 `express.static`
 - [ ] refactor: 尝试使用 express-ws 替代 ws
   - 替代后可以统一使用 `app.ws(route, fn)` 的形式实现逻辑, 而不是在 root 下自己实现 upgrade 协议升级和路由判断
   - express-ws 已一年以上没有更新

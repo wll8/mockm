@@ -2,6 +2,7 @@ const lib = require(`./lib.js`)
 const { print } = require(`./log.js`)
 const tool = require(`./tool.js`)
 const http = require(`./http.js`)
+const {lib: { express }} = require(`json-server`)
 
 function business() { // 与业务相关性的函数
   function midResJson({res, proxyRes, key, val, cb = body => body}) {
@@ -936,7 +937,7 @@ function business() { // 与业务相关性的函数
                 next()
               }
             },
-            require(`serve-static`)(item.fileDir),
+            express.static(item.fileDir),
           ],
           occupied: {},
         })
