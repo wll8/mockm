@@ -41,7 +41,14 @@ async function serverProxy({
     next()
   })
   middleware.reWriteRouter({app: server, routes: config.route})
-  server.use(middlewares) // 添加中间件, 方便取值 // todo 应删除未使用的中间件
+  server.use(
+    // middlewaresObj.compression,
+    // middlewaresObj.corsMiddleware,
+    // middlewaresObj.serveStatic,
+    middlewaresObj.jsonParser,
+    middlewaresObj.urlencodedParser,
+    middlewaresObj.logger,
+  ) // 添加中间件, 方便取值
   server.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
     req.query.page && (req.query._page = req.query.page)
     req.query.pageSize && (req.query._limit = req.query.pageSize)
