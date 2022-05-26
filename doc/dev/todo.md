@@ -1,6 +1,13 @@
 # 待完成
 
 ## 文档
+- [ ] feat: config.static 支持显示目录列表功能
+  - 可点击路径条
+  - 列表, 排序
+  - 搜索
+- [ ] feat: config.static 配置的目录应是
+  - 绝对路径
+  - 相对路径, 相对于运行时的目录(可被 --cwd 改变)
 - [x] fix(test): 中途退出测试时不应使用 `process.exit`, 否则会导致无法捕获错误的用例, `Uncaught error outside test suite`.
 - [x] fix(test): 优化用例 `WebSocket 消息收发`, 因为启动 mockm 后 websocket 服务可能并未初始化, 此时连接会出错.
 - [ ] fix: 前端界面不能设置响应头, 疑似被错误禁用
