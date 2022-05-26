@@ -294,6 +294,7 @@ describe('config.api', () => {
         }
       },
       okFn: async ({arg, str}) => {
+        await util.sleep(500)
         const id = util.uuid()
         const ws = new WebSocket(`ws://127.0.0.1:${arg.port}/wsecho`);
         const msgList = []
@@ -303,7 +304,7 @@ describe('config.api', () => {
         ws.on('message', (msg) => {
           msgList.push(msg)
         })
-        await util.sleep()
+        await util.sleep(500)
         return (msgList.length >=2 && msgList.includes(id))
       }
     }))
