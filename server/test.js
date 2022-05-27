@@ -46,7 +46,7 @@ function serverTest() {
   const apiWebStore = tool.file.fileStore(global.config.apiWeb)
   const disableApiList = apiWebStore.get(`disable`)
 
-  const jsonServer = require(`json-server`)
+  const jsonServer = require(`@wll8/json-server`)
   const serverTest = jsonServer.create()
   serverTest.use(middlewaresObj.corsMiddleware)
   serverTest.use(middlewaresObj.jsonParser)
