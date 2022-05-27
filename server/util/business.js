@@ -2,7 +2,8 @@ const lib = require(`./lib.js`)
 const { print } = require(`./log.js`)
 const tool = require(`./tool.js`)
 const http = require(`./http.js`)
-const {lib: { express }} = require(`json-server`)
+const jsonServer = require(`@wll8/json-server`)
+const {lib: { express }} = jsonServer
 
 function business() { // 与业务相关性的函数
   function midResJson({res, proxyRes, key, val, cb = body => body}) {
@@ -206,7 +207,7 @@ function business() { // 与业务相关性的函数
       // 利用 jsonServer 已有的中间件, 而不用额外的安装
       // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
   
-      const jsonServer = require(`json-server`)
+      const jsonServer = require(`@wll8/json-server`)
       const middlewares = jsonServer.defaults({bodyParser: true, logger: false}) // 可以直接使用的所有中间件数组
       middlewares.push(httpLog())
       const middlewaresObj = middlewares.flat().reduce((res, item) => {
@@ -624,7 +625,7 @@ function business() { // 与业务相关性的函数
     }
 
     function parseDbApi() {
-      const router = require(`json-server`).router(global.config.dbJsonPath, {
+      const router = jsonServer.router(global.config.dbJsonPath, {
         _noDataNext: true,
         _noDbRoute: true,
       })
