@@ -28,7 +28,7 @@ async function serverProxy({
     middlewaresObj,
   } = middleware.getJsonServerMiddlewares()
 
-  const jsonServer = require(`json-server`)
+  const jsonServer = require(`@wll8/json-server`)
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
   const server = jsonServer.create()
   require(`@wll8/express-ws`)(server)
