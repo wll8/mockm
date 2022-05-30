@@ -10,7 +10,6 @@
   - 相对路径, 相对于运行时的目录(可被 --cwd 改变)
 - [x] fix(test): 中途退出测试时不应使用 `process.exit`, 否则会导致无法捕获错误的用例, `Uncaught error outside test suite`.
 - [x] fix(test): 优化用例 `WebSocket 消息收发`, 因为启动 mockm 后 websocket 服务可能并未初始化, 此时连接会出错.
-- [ ] fix: 前端界面不能设置响应头, 疑似被错误禁用
 - [ ] feat: config.db 在列表中支持可折叠
 - [ ] feat: httpLog 显示完整的时间
 - [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
@@ -24,7 +23,7 @@
     }
   ```
 - [x] refactor: 更改 `require('serve-static')` 为 `express.static`
-- [ ] refactor: 尝试使用 express-ws 替代 ws
+- [x] refactor: 尝试使用 express-ws 替代 ws
   - 替代后可以统一使用 `app.ws(route, fn)` 的形式实现逻辑, 而不是在 root 下自己实现 upgrade 协议升级和路由判断
   - express-ws 已一年以上没有更新
 - [ ] refactor: 使用单个中间件实现多个 use 的效果
@@ -39,11 +38,11 @@
     return isOk ? [fn, fn2] : [fn]
   })
   ``` 
-- [ ] refactor: 移动 `router.render` 的位置到 router 声明的地方
-- [ ] refactor: 抽取 getProxyConfig 方法到公共业务中
+- [x] refactor: 移动 `router.render` 的位置到 router 声明的地方
+- [x] refactor: 抽取 getProxyConfig 方法到公共业务中
 - [ ] fix: 多个 proxy ws 无法代理
   - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
-  - https://github.com/chimurai/http-proxy-middleware/issues/463
+  - https://github.com/chimurai/http-proxy-middleware/issues/463#issuecomment-1128835468
   ``` js
   config = {
     proxy: {
