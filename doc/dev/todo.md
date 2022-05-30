@@ -1,6 +1,11 @@
 # 待完成
 
 ## 文档
+- [ ] feat: 使用默认 ip
+  ``` js
+    const result = require('default-gateway').v4.sync()
+    const res = require('address').ip(result && result.interface) // 获取默认IP
+  ```
 - [ ] fix: 多个 proxy ws 无法代理
   - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
   - https://github.com/chimurai/http-proxy-middleware/issues/463
