@@ -94,7 +94,7 @@ function Swagger(props) {
 
   function initSwagger({store, cb}) {
     // 添加 swagger-ui.css
-    $(`head`).append($(`<link rel="stylesheet" href="//fastly.jsdelivr.net/npm/swagger-ui-dist@3.52.5/swagger-ui.css">`))
+    $(`head`).append($(`<link rel="stylesheet" href="/cdn/npm/swagger-ui-dist@3.52.5/swagger-ui.css">`))
     $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
     // 添加 swagger-ui-bundle.js 并初始化 swg
 
@@ -119,7 +119,7 @@ function Swagger(props) {
       }
     });
 
-    $.getScript2(`//fastly.jsdelivr.net/npm/swagger-ui-dist@3.52.5/swagger-ui-bundle.min.js`, () => {
+    $.getScript2(`/cdn/npm/swagger-ui-dist@3.52.5/swagger-ui-bundle.min.js`, () => {
       const parseHashData = parseHash()
       window.swaggerUi = window.SwaggerUIBundle({
         url: `${cfg.baseURL}/api/getOpenApi/${parseHashData.api ? `?api=${parseHashData.api}` : ``}`,
