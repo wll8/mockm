@@ -1,6 +1,11 @@
 # 待完成
 
 ## 文档
+- [ ] feat: 使用默认 ip
+  ``` js
+    const result = require('default-gateway').v4.sync()
+    const res = require('address').ip(result && result.interface) // 获取默认IP
+  ```
 - [ ] feat: config.static 支持显示目录列表功能
   - 可点击路径条
   - 列表, 排序
