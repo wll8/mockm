@@ -10,6 +10,7 @@ async function serverProxy({
     business,
   } = util
   const {
+    getProxyConfig,
     middleware,
     reqHandle,
     clientInjection,
@@ -120,51 +121,6 @@ async function serverProxy({
   server.listen(config.port, () => {
     // console.log(`服务运行于: http://localhost:${config.port}/`)
   })
-
-  function getProxyConfig (userConfig = {}) {
-    const rootTarget = config._proxyTargetInfo.origin
-    const defaultConfig = {
-      ws: true,
-      target: rootTarget,
-      secure: false,
-      changeOrigin: true,
-      onProxyReq: (proxyReq, req, res) => {
-        allowCors({req: proxyReq, proxyConfig: userConfig})
-        // middlewaresObj.logger(req, res, () => {})
-        // middlewaresObj.jsonParser(req, res, () => {
-        //   // if(ignoreHttpHistory({config, req}) === false) {
-        //   //   // setHttpHistory(`${method} ${url}`, {req})
-        //   // }
-        // })
-        reqHandle().injectionReq({req, res, type: `get`})
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        allowCors({res: proxyRes, req, proxyConfig: userConfig})
-        setHttpHistoryWrap({
-          req,
-          res: proxyRes,
-        })
-      },
-      logLevel: `silent`,
-      // proxyTimeout: 60 * 1000,
-      // timeout: 60 * 1000,
-    }
-    // 为了默认注入一些功能, 例如历史记录功能, 需要把用户添加的函数与程序中的函数合并
-    Object.keys(defaultConfig).forEach(key => {
-      const defaultVal = defaultConfig[key]
-      if(typeof(defaultVal) === `function`) {
-        const userVal = userConfig[key] || (() => undefined)
-        userConfig[key] = (...arg) => {
-          defaultVal(...arg)
-          return userVal(...arg)
-        }
-      }
-    })
-    return {
-      ...defaultConfig,
-      ...userConfig,
-    }
-  }
 
 
 }
