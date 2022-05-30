@@ -877,7 +877,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       if (ip.includes(`,`)) {
         ip = ip.split(`,`)[0]
       }
-      ip = ip.substr(ip.lastIndexOf(`:`) + 1, ip.length) // ::ffff:127.0.0.1 => 127.0.0.1
+      ip = ip.substr(ip.lastIndexOf(`:`) + 1, ip.length) // ::ffff:xxx => xxx
+      ip = {
+        /**
+         当使用以下请求方式时, 获取到的 ip 为 ::1
+         - js fetch(`http://localhost:9090/ip`);
+         - cli http :9000/ip
+        */ 
+        "1": `127.0.0.1`,
+      }[ip] || ip
       return ip
     }
 

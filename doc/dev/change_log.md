@@ -9,6 +9,13 @@
 
 :::
 
+## 2022 年 05 月
+#### v1.1.26-alpha.21
+- feat: 将线上 cdn 替换为本地文件, 以避免各种 dns 污染导致的各种 cdn 失效问题
+- chore: 使用依赖锁文件
+- feat: 简化 --config 参数输出的内容
+  更改 full.mm.config.js 为 simple.mm.config.js, 让配置看起来更容易使用, 不那么吓人和混乱.
+
 ## 2022 年 04 月
 #### v1.1.26-alpha.17
 - feat: 支持从 config.api 拦截 config.db 的接口

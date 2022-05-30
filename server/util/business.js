@@ -180,6 +180,11 @@ function business() { // 与业务相关性的函数
       const morgan = require(`morgan`)
       const colors = tool.cli.colors
       return morgan( (tokens, req, res) => {
+        const testApi = res.getHeader(global.config.apiInHeader)
+        // 当保存了历史记录时, 才在控制台的 http log 显示它
+        if(Boolean(testApi) === false) {
+          return undefined
+        }
         const colorTable = {
           1: `gray`,
           2: `green`,
@@ -192,7 +197,7 @@ function business() { // 与业务相关性的函数
         const str = [
           tool.time.dateFormat(`hh:mm:ss`, new Date),
           tool.httpClient.getClientIp(req),
-          res.getHeader(global.config.apiInHeader),
+          testApi,
           `${statusCode} ${res.statusMessage}`,
           `${tokens[`response-time`](req, res)} ms`,
           len ? `${len} byte` : ``,
