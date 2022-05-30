@@ -95,6 +95,9 @@ async function serverProxy({
   }, []).flat()
   for (let index = 0; index < list.length; index++) {
     const item = list[index]
+    server.use(item.route, (req, res, next) => {
+      allowCors({req, res, next})
+    })
     if(Boolean(item.disable) === false) {
       server[item.method](item.route, item.action)
     }

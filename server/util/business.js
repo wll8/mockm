@@ -1531,25 +1531,53 @@ function business() { // 与业务相关性的函数
       })
     }
 
-    function allowCors({res, req, proxyConfig = {}}) { // 设置为允许跨域
+    function allowCors({res, req, proxyConfig = {}, next}) { // 设置为允许跨域
       const target = proxyConfig.target || global.config._proxyTargetInfo.origin // 自定义代理时应使用 proxyConfig.target 中的 host
       if(global.config.cors === false) { // config.cors 为 false 时, 则不允许跨域
         return false
       }
-      res && setHeader(res, {
-        'access-control-allow-headers': req.headers[`access-control-allow-headers`],
-        'access-control-allow-methods': req.method,
-        'access-control-allow-credentials': `true`,
-        'access-control-allow-origin': req.headers.origin || `*`,
-        // 'access-control-max-age': undefined,
-        // 'access-control-expose-headers': undefined,
-      })
-      req && setHeader(req, { // 一些服务器会校验 req 中的 referer referrer origin host
-        'referer': target, // referer 实际上是 "referrer" 误拼写
-        'referrer': target,
-        'origin': target, // 不应包含任何路径信息
-        'host': (new URL(target)).host,
-      })
+      /**
+       * 这可能是服务器需要的信息
+       * 因为一些服务器会校验 req 中的 referer referrer origin host
+       */
+      if(req) {
+        setHeader(req, {
+          'referer': target, // referer 实际上是 "referrer" 误拼写
+          'referrer': target,
+          'origin': target, // 不应包含任何路径信息
+          'host': (new URL(target)).host,
+        })
+      }
+      /**
+       * 这是浏览器需要的跨域信息
+       */
+      if(res) {
+        const rawHeadersObj = req.rawHeaders.reduce((acc, cur, index) => {
+         /**
+          * req.rawHeaders: [key, val, key, val, ...]
+          * 当遍历到奇数时, 也就是当前是 value 时, value 前面的值则是 key
+          */
+         if(index % 2) {
+           const key = req.rawHeaders[index - 1].toLowerCase()
+           const val = req.rawHeaders[index]
+           acc[key] = val
+         }
+         return acc
+       }, req.headers)
+        setHeader(res, {
+          'access-control-allow-headers': rawHeadersObj[`access-control-request-headers`],
+          'access-control-allow-methods': rawHeadersObj[`access-control-request-method`],
+          'access-control-allow-credentials': `true`, // 当为 true 时 origin 不能为 *, 不过我们并没有优先使用 *
+          'access-control-allow-origin': rawHeadersObj[`origin`] || `*`,
+          // 'access-control-max-age': undefined,
+          // 'access-control-expose-headers': undefined,
+        })
+        if(req.method.toLowerCase() === `options`) {
+          res.sendStatus(200)
+        } else {
+          next && next()
+        }
+      }
     }
 
     function reSetApiInHeader({headers}) { // 根据当前配置刷新 testApi
