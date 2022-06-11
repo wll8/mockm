@@ -6,9 +6,48 @@
     const result = require('default-gateway').v4.sync()
     const res = require('address').ip(result && result.interface) // 获取默认IP
   ```
+- [ ] feat: config.static 支持显示目录列表功能
+  - 可点击路径条
+  - 列表, 排序
+  - 搜索
+- [ ] feat: config.static 配置的目录应是
+  - 绝对路径
+  - 相对路径, 相对于运行时的目录(可被 --cwd 改变)
+- [x] fix(test): 中途退出测试时不应使用 `process.exit`, 否则会导致无法捕获错误的用例, `Uncaught error outside test suite`.
+- [x] fix(test): 优化用例 `WebSocket 消息收发`, 因为启动 mockm 后 websocket 服务可能并未初始化, 此时连接会出错.
+- [ ] feat: config.db 在列表中支持可折叠
+- [ ] feat: httpLog 显示完整的时间
+- [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
+- [ ] fix: config.proxy 子路径冲突
+  ``` js
+    config = {
+      proxy: {
+        '/im':`ws:///192.168.160.74:10000/im`,
+        '/im/dept':`http://192.168.160.74:10000/im/dept`, // 不应该无法使用
+      }
+    }
+  ```
+- [x] refactor: 更改 `require('serve-static')` 为 `express.static`
+- [x] refactor: 尝试使用 express-ws 替代 ws
+  - 替代后可以统一使用 `app.ws(route, fn)` 的形式实现逻辑, 而不是在 root 下自己实现 upgrade 协议升级和路由判断
+  - express-ws 已一年以上没有更新
+- [ ] refactor: 使用单个中间件实现多个 use 的效果
+  ```js
+  // 修改前
+  app.use(fn)
+  isOk && app.use(fn2)
+  ``` 
+  ```js
+  // 修改后
+  app.use(() => {
+    return isOk ? [fn, fn2] : [fn]
+  })
+  ``` 
+- [x] refactor: 移动 `router.render` 的位置到 router 声明的地方
+- [x] refactor: 抽取 getProxyConfig 方法到公共业务中
 - [ ] fix: 多个 proxy ws 无法代理
   - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
-  - https://github.com/chimurai/http-proxy-middleware/issues/463
+  - https://github.com/chimurai/http-proxy-middleware/issues/463#issuecomment-1128835468
   ``` js
   config = {
     proxy: {
@@ -24,6 +63,37 @@
     },
   }
   ```
+- [ ] feat: 目前 config.route 是否支持参数映射
+  - 例如 path 中的参数转为 query 中的参数
+  - https://github.com/typicode/json-server#add-custom-routes
+- [x] refactor: 在统一的地方处理 api, 由于目前处理这些配置的时机不同和方式不同, 出现问题不便处理
+  - 目前以下配置都会生成 exporess 中间件, 优先级由上到下从高到低
+    - config.route - getDataRouter - 路由重定向, 对 api apiWeb db static 生效, 而不对 proxy 生效
+    - config.api - parseApi
+    - config.db - parseDbApi
+    - config.static - staticHandle - use
+    - config.apiWeb - apiWebHandle
+    - config.proxy - http-proxy-middleware
+  - 先把以上配置都进行统一格式化为一个列表, 并按优先级排序此列表, 标记占用情况
+    ``` js
+    list = [
+      {
+        route: String, // 用户路径
+        re: RegExp, // 用户路径转换为正则
+        method: String, // 用户方法, * 或 all
+        type: Enum, // 属于什么配置, 例如 api db proxy
+        description: String, // 接口描述
+        disable: Boolean, // 是否禁用
+        action: Function, // 要执行中间件函数
+        occupied: { // 被谁占用, 如果是被占用的状态, 则不会被使用
+          type: Enum,
+          route: String,
+        },
+        info: {}, // 根据 type 可能不同结构的附加信息
+      },
+    ]
+    ```
+  - 转换 proxy 以及内部路由判断为普通的 use
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
@@ -81,18 +151,14 @@
   ```
   可以修改 `config.proxy.forEach`  中的逻辑 context 为 `/` 时也运行 server.use 逻辑, 目前修改之后会导致 config.db 中的接口失效
 - [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
-- [ ] refactor: 把 config 放置于全局, 避免传参位置过多
-- [ ] refactor: 在 util 中
+- [x] refactor: 把 config 放置于全局, 避免传参位置过多
+- [x] refactor: 在 util 中
   - 抽离以下方法, 因为他们属于业务
-    - prepareProxy
-    - parseProxyTarget
-    - fullApi2Obj
-    - parseRegPath
-  - 把 handlePathArg 放到 cli 中
-  - 把 initPackge, hasPackage, installPackage 放到 npm 中
-  - middleware 中内容应属业务方法
-  - httpClient 中内容应属业务方法
-  - clearProcess 方法应重新封装
+    - [x] prepareProxy
+    - [x] parseProxyTarget
+    - [x] parseRegPath
+  - [x] 把 handlePathArg 放到 cli 中
+  - [x] middleware 中内容应属业务方法
 - [x] fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
   例如以下配置不应导致 `/api/test?a=1` 不能使用
   ``` js
@@ -164,6 +230,7 @@
 - [ ] feat: 思考如何解决记录的请求与实际发送的请求的混乱问题, 例如
   - req.url 和 req.method 被修改, 应该如何记录
 - [ ] feat: 应该记录原始请求, 例如 req.originalUrl , 因为 req.url 会在程序内被修改, 记录它会感觉很奇怪
+- [ ] fix: 应该尽量使用 req.originalUrl
 - [ ] feat: 注入 Eruda 或 vConsole
 - [ ] feat: 自定义日志输出 https://github.com/expressjs/morgan#using-a-custom-format-function
 - [ ] feat: 支持 yaml 格式的 openApi, 例如 https://petstore.swagger.io/v2/swagger.yaml
@@ -265,6 +332,8 @@
 
 ## 破坏性更新计划
 - 2.x
+  - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
+  - [ ] refactor: 把 initPackge, hasPackage, installPackage 放到 npm 中
   - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
   - [ ] refactor: node 支持版本调整为 v12+
   - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj

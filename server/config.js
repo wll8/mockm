@@ -3,30 +3,28 @@ const exportsUtil = require(`./util/index.js`)
 const {
   lib,
   business,
+  business: {
+    midResJson,
+    url: {
+      prepareProxy,
+      parseProxyTarget,
+    },
+    wrapApiData,
+  },
   tool,
   tool: {
-    httpClient: {
-      midResJson,
-    },
     type: {
       isType,
     },
     os: {
       getOsIp,
     },
-    url: {
-      handlePathArg,
-      prepareProxy,
-      parseProxyTarget,
-    },
     cli: {
+      handlePathArg,
       parseArgv,
     },
   },
 } = exportsUtil
-const {
-  wrapApiData,
-} = business
 
 let cliArg = parseArgv()
 let fileArgFn = () => {}
@@ -189,7 +187,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   port: config.hostMode ? _proxyTargetInfo.port : config.port, // 如果是 host 模式, 强制更改端口与目标端口一致
   dbJsonPath: config.dbJsonPath ? handlePathArg(config.dbJsonPath) : handlePathArg(`${config.dataDir}/db.json`),
   dataDir: handlePathArg(config.dataDir),
-  proxy: prepareProxy(config.proxy),
+  proxy: config.proxy,
   api: isType(config.api, `object`) ? () => config.api : config.api,
   apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
   db: isType(config.db, `object`) ? () => config.db : config.db,

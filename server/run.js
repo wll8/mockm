@@ -22,7 +22,7 @@ const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平�
 const nodemon = require(`nodemon`)
 
 { // 尽早的, 无依赖的修改 cwd, 避免其他读取到旧值
-  const cwd = tool.url.handlePathArg(
+  const cwd = tool.cli.handlePathArg(
     typeof(cliArg[`--cwd`]) === `string` 
       ? cliArg[`--cwd`] 
       : process.cwd(),
@@ -39,7 +39,7 @@ const {
   plugin,
   saveLog,
 } = business
-let config = {}
+let shareConfig = {}
 const {
   templateFn,
   configFileFn,
@@ -89,7 +89,7 @@ new Promise( async () => { // 检查更新
 new Promise(async () => { // 启动 server.js
   let log = ``
   function restart() {
-    config.guard ? setTimeout(() => {
+    shareConfig.guard ? setTimeout(() => {
       nodemon.emit(`restart`)
       print(`Abnormal exit, service has been restarted!`)
       log = ``
@@ -129,16 +129,16 @@ new Promise(async () => { // 启动 server.js
       saveLog({
         code: arg,
         logStr: log,
-        logPath: config._errLog,
+        logPath: shareConfig._errLog,
       })
       restart()
     }
   })
   .on(`restart`, (arg) => {
-    if(Boolean(config._store) === false) { // fix: 有时候重载后的 config 值为空 {}
+    if(Boolean(shareConfig._store) === false) { // fix: 有时候重载后的 config 值为空 {}
       return false
     }
-    const store = tool.file.fileStore(config._store)
+    const store = tool.file.fileStore(shareConfig._store)
     store.set(`restartId`, String(Date.now()))
     // console.log(`restart`, arg)
   })
@@ -151,12 +151,12 @@ new Promise(async () => { // 启动 server.js
     timeout: 60e3,
   }).then(() => {
     const share = tool.file.fileStore(sharePath)
-    config = share.get(`config`)
-    const store = tool.file.fileStore(config._store)
+    shareConfig = share.get(`config`)
+    const store = tool.file.fileStore(shareConfig._store)
     store.set(`note.remote`, {})
-    showLocalInfo({store, config})
-    if(config.remote) { // 如果启用远程则进行相关功能处理
-      remoteServer({store, config}).catch(err => console.log(`err`, err))
+    showLocalInfo({store, shareConfig})
+    if(shareConfig.remote) { // 如果启用远程则进行相关功能处理
+      remoteServer({store, shareConfig}).catch(err => console.log(`err`, err))
     }
   }).catch(err => {
     console.log(`err`, err)

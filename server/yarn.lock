@@ -441,6 +441,40 @@
     jimp "^0.16.1"
     regexparam "^1.3.0"
 
+"@wll8/express-ws@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/@wll8/express-ws/-/express-ws-1.0.0.tgz#15aef85528c5432ac5b02737debbd5552146b85c"
+  integrity sha512-y62Ol493OykMFtH654rYjum/XsxDo6YSTsgIkNy3b7FOrHq8VuUtJ6MQatZW5WSW4v9ekK8P8tjkNxh9AIsvrQ==
+  dependencies:
+    path-to-regexp "0.1.7"
+    ws "7.5.5"
+
+"@wll8/json-server@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.npmmirror.com/@wll8/json-server/-/json-server-0.17.1.tgz#4a43a6addc7853bd53c1d4524a0d28fd5efd8af6"
+  integrity sha512-hS4kNETQOvuZQfYJpP9JHL7Nz6R752H9P45HCPwht8FQB5D5rsObygiN+Vsn1c0aBckHHErwF4tqa0e8ZIRjzQ==
+  dependencies:
+    body-parser "^1.19.0"
+    chalk "^4.1.2"
+    compression "^1.7.4"
+    connect-pause "^0.1.1"
+    cors "^2.8.5"
+    errorhandler "^1.5.1"
+    express "^4.17.1"
+    express-urlrewrite "^1.4.0"
+    json-parse-helpfulerror "^1.0.3"
+    lodash "^4.17.21"
+    lodash-id "^0.14.1"
+    lowdb "^1.0.0"
+    method-override "^3.0.0"
+    morgan "^1.10.0"
+    nanoid "^3.1.23"
+    please-upgrade-node "^3.2.0"
+    pluralize "^8.0.0"
+    server-destroy "^1.0.1"
+    update-notifier "^5.1.0"
+    yargs "^17.0.1"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.npmmirror.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -1831,32 +1865,6 @@ json-schema-traverse@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmmirror.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
   integrity sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==
-
-json-server@0.17.0:
-  version "0.17.0"
-  resolved "https://registry.npmmirror.com/json-server/-/json-server-0.17.0.tgz#6db3d1d1028a90c4642ff5e56274d106348ec44c"
-  integrity sha512-+e/nW0mf666j1yTK+5dRx7hgxq5wJTkc5QhTYa/cBfD6vLlQWHfB4l8XKPgzeO55A8Hqm38g44OtZ5SooXi6MQ==
-  dependencies:
-    body-parser "^1.19.0"
-    chalk "^4.1.2"
-    compression "^1.7.4"
-    connect-pause "^0.1.1"
-    cors "^2.8.5"
-    errorhandler "^1.5.1"
-    express "^4.17.1"
-    express-urlrewrite "^1.4.0"
-    json-parse-helpfulerror "^1.0.3"
-    lodash "^4.17.21"
-    lodash-id "^0.14.1"
-    lowdb "^1.0.0"
-    method-override "^3.0.0"
-    morgan "^1.10.0"
-    nanoid "^3.1.23"
-    please-upgrade-node "^3.2.0"
-    pluralize "^8.0.0"
-    server-destroy "^1.0.1"
-    update-notifier "^5.1.0"
-    yargs "^17.0.1"
 
 json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
