@@ -1,25 +1,22 @@
 const util = require(`./util/index.js`)
 const { print } = require(`./util/log.js`)
 
-function serverTest({
-  config,
-  parseDbApi,
-}) {
+function serverTest() {
   const {
     tool,
     business,
   } = util
   const {
-    middleware,
     httpClient,
     file: {
       getBackUrl,
     },
+  } = tool
+  const {
     url: {
       parseRegPath,
     },
-  } = tool
-  const {
+    middleware,
     saveLog,
     initHandle,
     reqHandle,
@@ -30,27 +27,26 @@ function serverTest({
     listToData,
   } = business
   const {
-    init,
     getOpenApi,
   } = initHandle()
   const {
     allowCors,
-  } = clientInjection({config})
+  } = clientInjection()
   const {
     getHistory,
     getHistoryList,
-  } = historyHandle({config})
+  } = historyHandle()
   const {
     sendReq,
-  } = reqHandle({config})
+  } = reqHandle()
   const {
     middlewaresObj,
-  } = middleware.getJsonServerMiddlewares({config})
+  } = middleware.getJsonServerMiddlewares()
 
-  const apiWebStore = tool.file.fileStore(config.apiWeb)
+  const apiWebStore = tool.file.fileStore(global.config.apiWeb)
   const disableApiList = apiWebStore.get(`disable`)
 
-  const jsonServer = require(`json-server`)
+  const jsonServer = require(`@wll8/json-server`)
   const serverTest = jsonServer.create()
   serverTest.use(middlewaresObj.corsMiddleware)
   serverTest.use(middlewaresObj.jsonParser)
@@ -145,18 +141,18 @@ function serverTest({
         const api = req.query.api
         let openApiPrefix = `/` // openApi 的前缀
         const openApi = {
-          string: () => config.openApi, // 字符串时, 直接返回
+          string: () => global.config.openApi, // 字符串时, 直接返回
           array: () => { // 数组时, 返回 pathname 匹配度最高的项
             const pathname = new URL(`http://127.0.0.1${api}`).pathname
             return tool.url.findLikeUrl({
-              urlList: config.openApi,
+              urlList: global.config.openApi,
               pathname,
             })
           },
           object: () => { // 对象时, 以 `new RegExp(key, 'i').test(pathname)` 的形式匹配
             const pathname = new URL(`http://127.0.0.1${api}`).pathname
             let firstKey = ``
-            const key = Object.keys(config.openApi).sort((a, b) => { // 优先从 url 目录层级较多的开始比较
+            const key = Object.keys(global.config.openApi).sort((a, b) => { // 优先从 url 目录层级较多的开始比较
               return b.split(`/`).length - a.split(`/`).length
             }).find(key => {
               if (firstKey === ``) { // 把第一个 key 保存起来, 当没有找到对应的 key 时则把它作为默认的 key
@@ -166,9 +162,9 @@ function serverTest({
               return re.test(pathname)
             })
             openApiPrefix = key || firstKey
-            return config.openApi[openApiPrefix]
+            return global.config.openApi[openApiPrefix]
           },
-        }[tool.type.isType(config.openApi)]()
+        }[tool.type.isType(global.config.openApi)]()
         openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
         getOpenApi({openApi}).then((openApiData = {}) => {
           openApiData.info = {
@@ -179,7 +175,7 @@ function serverTest({
         }).catch(async err => {
           // 当 openApi 获取失败时, 尝试从历史记录中获取, 以期望总是可以查看接口文档
           // header 中的 x-mockm-msg 值为 from history 表示是来自本地历史
-          const file = await getBackUrl(config._openApiHistoryDir, openApi)
+          const file = await getBackUrl(global.config._openApiHistoryDir, openApi)
           if(file) {
             res.setHeader(`x-mockm-msg`, `from history`)
             const openApiData = require(file)
@@ -206,7 +202,7 @@ function serverTest({
         let oldSize = -1
         const interval = setInterval( () => {
           const fs = require(`fs`)
-          fs.stat(config._httpHistory, (err, stats) => { // 不用全部读取文件即可读取文件大小信息, 减少内存占用
+          fs.stat(global.config._httpHistory, (err, stats) => { // 不用全部读取文件即可读取文件大小信息, 减少内存占用
             if (err) {
               return console.error(err)
             }
@@ -262,23 +258,22 @@ function serverTest({
       getApiResponseById() {
         middleware.replayHistoryMiddleware({
           id: actionArg0,
-          config,
           business,
         })(req, res, next)
       },
       getConfig() {
-        res.send(config)
+        res.send(global.config)
       },
       getInjectionRequest() {
         res.send(global.STORE.get(`updateToken`))
       },
       getStore() {
-        const str = require(`fs`).readFileSync(config._store, `utf8`)
+        const str = require(`fs`).readFileSync(global.config._store, `utf8`)
         res.json(JSON.parse(str))
       },
       studio() {
         let path = req.query.path
-        const apiWebStore = tool.file.fileStore(config.apiWeb)
+        const apiWebStore = tool.file.fileStore(global.config.apiWeb)
         const apiWeb = apiWebStore.get(path ? [`paths`, path] : `paths`) || {}
         if(path) { // 获取单条
           res.json(apiWeb)
@@ -286,24 +281,17 @@ function serverTest({
           let sendData = []
           const disableApiList = apiWebStore.get(`disable`)
           const {
-            api,
-            db,
-          } = init({config}) // 重新运行初始化方法, 以读取最新的 db 和 webApi 文件
-          const {
-            parseApi: {
-              serverRouterList,
-            },
-          } = customApi({api, db, config})
-          serverRouterList.forEach(item => { // 来自 config.apiWeb 和 config.api
+            allRoute,
+          } = customApi()
+          allRoute.forEach(item => { // 来自 config.apiWeb 和 config.api
             sendData.push({
-              path: item.router,
-              method: item.method,
-              type: item.action.type || `api`,
-              description: item.action.description,
-              disable: item.action.disable,
+              ...item,
+              path: item.route,
+              type: item.type || `api`,
+              description: item.description,
+              disable: item.disable,
             })
           })
-          sendData = sendData.concat(parseDbApi) // 来自 config.db
           res.json({api: sendData, disable: disableApiList})
         }
       },
@@ -325,7 +313,7 @@ function serverTest({
         const oldVal = apiWebStore.get(setPath)
         apiWebStore.set(setPath, {...oldVal, ...data})
         res.json({msg: `ok`})
-        reStartServer(config.config)
+        reStartServer(global.config.config)
       },
     }
     if (actionFnObj[action]) {
@@ -370,7 +358,7 @@ function serverTest({
           apiWebStore.set(`paths`, pathsData)
         }
         res.json({msg: `ok`})
-        reStartServer(config.config)
+        reStartServer(global.config.config)
       },
       changeWebApiStatus() {
         const {api} = req.body
@@ -381,7 +369,7 @@ function serverTest({
           disableApiList.push(api)
         }
         apiWebStore.set(`disable`, disableApiList)
-        reStartServer(config.config)
+        reStartServer(global.config.config)
         res.json({msg: `ok`})
       },
     }
@@ -394,11 +382,11 @@ function serverTest({
   })
 
   serverTest.use((error, req, res, next) => {
-    saveLog({logStr: error.stack, logPath: config._errLog})
+    saveLog({logStr: error.stack, logPath: global.config._errLog})
     next(error)
   })
 
-  serverTest.listen(config.testPort, () => {
+  serverTest.listen(global.config.testPort, () => {
     // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
   })
 

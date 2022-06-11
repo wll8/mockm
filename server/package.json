@@ -12,29 +12,30 @@
     "url": "git://github.com/wll8/mockm.git"
   },
   "dependencies": {
-    "connect-history-api-fallback": "1.6.0",
-    "ws": "7.5.5",
-    "translate-platforms": "0.0.7",
-    "multiparty": "4.2.3",
     "@babel/runtime-corejs3": "^7.17.2",
-    "core-js": "^3.21.1",
+    "@wll8/better-mock": "^0.3.3-alpha",
+    "@wll8/express-ws": "^1.0.0",
+    "@wll8/json-server": "^0.17.1",
     "axios": "^0.26.0",
     "compression": "^1.7.4",
+    "connect-history-api-fallback": "1.6.0",
+    "core-js": "^3.21.1",
     "express-urlrewrite": "^1.4.0",
     "filenamify": "4.3.0",
     "http-proxy-middleware": "^2.0.3",
-    "json-server": "0.17.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.drop": "^4.1.1",
     "lodash.orderby": "^4.6.0",
     "lodash.take": "^4.1.1",
     "mime": "^3.0.0",
-    "@wll8/better-mock": "^0.3.3-alpha",
-    "vm2": "^3.9.8",
     "morgan": "^1.10.0",
+    "multiparty": "4.2.3",
     "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.15",
-    "path-to-regexp": "0.1.7"
+    "path-to-regexp": "0.1.7",
+    "translate-platforms": "0.0.7",
+    "vm2": "^3.9.8",
+    "ws": "7.5.5"
   },
   "devDependencies": {
     "eslint": "7.32.0"
@@ -52,7 +53,7 @@
   "scripts": {
     "lint": "eslint --ignore-path ../.gitignore .",
     "dts": "npx shx mkdir -p ./node_modules/mockm & npx shx cp -r ./@types ./node_modules/mockm/",
-    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9000 & node run.js --log-line\"",
+    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9090 & node run.js --log-line\"",
     "serve": "node run.js --log-line",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"

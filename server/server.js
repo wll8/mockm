@@ -3,7 +3,8 @@
 const {logHelper, print} = require(`./util/log.js`)
 process.setMaxListeners(0) // 不限制监听数量
 process.argv.includes(`--log-line`) && logHelper()
-const config = require(`./config.js`)
+global.config = require(`./config.js`)
+
 const util = require(`./util/index.js`)
 
 new Promise(async () => {
@@ -11,14 +12,14 @@ new Promise(async () => {
     tool,
     business,
   } = util
-  const portIsOkRes = await (tool.os.portIsOk([config.port, config.testPort, config.replayPort])).catch(err => console.log(`err`, err))
+  const portIsOkRes = await (tool.os.portIsOk([global.config.port, global.config.testPort, global.config.replayPort])).catch(err => console.log(`err`, err))
   if(portIsOkRes.every(item => (item === true)) === false) {
     print(`Port is occupied:`, portIsOkRes)
     process.exit()
   }
 
-  const {isIp, hostname} =  config._proxyTargetInfo
-  if(config.hostMode && (isIp === false)) {
+  const {isIp, hostname} =  global.config._proxyTargetInfo
+  if(global.config.hostMode && (isIp === false)) {
     await tool.os.sysHost(`set`, {hostname})
     tool.os.clearProcess({hostname})
   } else {
@@ -29,38 +30,22 @@ new Promise(async () => {
     customApi,
   } = business
 
-  const {
-    init,
-  } = initHandle()
+  initHandle().init()
 
   const {
-    apiRootInjection,
-    api,
-    db,
-  } = init({config})
+    allRoute,
+    allRouteTest,
+  } = customApi()
 
-  const {
-    parseApi: {
-      noProxyTest,
-    },
-    parseDbApi,
-  } = customApi({api, db, config})
-
-  global.HTTPHISTORY = require(config._httpHistory) // 请求历史
-  global.STORE = tool.file.fileStore(config._store) // 自动注入下次调试请求的数据
+  global.HTTPHISTORY = require(global.config._httpHistory) // 请求历史
+  global.STORE = tool.file.fileStore(global.config._store) // 自动注入下次调试请求的数据
   require(`./proxy.js`)({
-    api,
-    db,
-    apiRootInjection,
-    config,
+    allRoute,
   })
-  require(`./test.js`)({
-    config,
-    parseDbApi,
-  })
+  require(`./test.js`)()
   require(`./replay.js`)({
-    noProxyTest,
-    config,
+    allRoute,
+    allRouteTest,
   })
   
   /**
@@ -72,7 +57,7 @@ new Promise(async () => {
     但是在没有此问题的设备中, 会导致两次重启, 因为没有问题的情况下, 进入 restart 事件回调时就表示重启成功了.
   */
   new Promise(() => {
-    const store = tool.file.fileStore(config._store)
+    const store = tool.file.fileStore(global.config._store)
     const restartId = store.get(`restartId`)
     setInterval(() => {
       const restartIdNew = store.get(`restartId`)
