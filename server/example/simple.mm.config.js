@@ -27,7 +27,14 @@ module.exports = util => {
 
     // 自己编写的接口
     api: {
+      // 可以作为守卫使用
+      async 'use /' (req, res, next) {
+        next()
+      },
+
+      // 覆盖目标路径
       '/anything/overrideProxy': `ok`,
+
       // 当为基本数据类型时, 直接返回数据, 这个接口返回 {"msg":"ok"}
       '/api/1': {msg: `ok`},
 
