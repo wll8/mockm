@@ -634,7 +634,7 @@ function business() { // 与业务相关性的函数
         _noDataNext: true,
         _noDbRoute: true,
       })
-      router.render = (req, res) => { // 修改输出的数据, 符合项目格式
+      router.render = async (req, res) => { // 修改输出的数据, 符合项目格式
         // 在 render 方法中, req.query 会被删除
         // https://github.com/typicode/json-server/issues/311
         // https://github.com/typicode/json-server/issues/314
@@ -652,7 +652,7 @@ function business() { // 与业务相关性的函数
             results: res.locals.data,
           }
         }
-        const data = res.mm.resHandleJsonApi({
+        const data = await res.mm.resHandleJsonApi({
           req,
           res,
           data: returnData,
