@@ -72,7 +72,7 @@ describe('config.api', () => {
             'patch /books/:id' (req, res, next) { // 拦截 config.db
               req.body.a = `111` // 修改用户传入的数据
               next()
-              res.mm.resHandleJsonApi = (arg) => {
+              res.mm.resHandleJsonApi = async (arg) => {
                 arg.data.a = `222` // 修改响应, 不会存储到 db.json
                 return arg.resHandleJsonApi(arg)
               }

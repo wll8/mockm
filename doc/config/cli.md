@@ -49,10 +49,10 @@ module.exports = {
 ### --log-line
 显示 console.log 所在的行.
 
-## --version
+### --version
 仅查看版本号, 然后退出程序, 不启动服务.
 
-## --node-options
+### --node-options
 指定 node 的运行参数, 例如 `--node-options="--inspect-brk"` 可以进入调试模式.
 
 ## 环境变量
