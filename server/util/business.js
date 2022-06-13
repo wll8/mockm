@@ -504,7 +504,7 @@ function business() { // 与业务相关性的函数
         method = method.toLowerCase()
         let val = api[key]
         if(method === `use`) { // 自定义中间件时不使用自动返回 json 的规则
-          if([`function`, `array`].includes(tool.type.isType(val)) === false) { // use 支持单个和多个(数组)中间件
+          if([`function`, `array`, `asyncfunction`].includes(tool.type.isType(val)) === false) { // use 支持单个和多个(数组)中间件
             print(tool.cli.colors.red(`Data other than function|array type is not allowed in the use mode in config.api: ${val}`))
             val = (req, res, next) => next()
           }
