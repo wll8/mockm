@@ -6,6 +6,12 @@
     const result = require('default-gateway').v4.sync()
     const res = require('address').ip(result && result.interface) // 获取默认IP
   ```
+- [ ] feat: 由于移除了 ws, 所以 d.ts 中的 `import WebSocket from 'ws'` 应变更为 `@wll8/express-ws` 中的 ws
+- [ ] feat: 自动检测安装 mockm 使用的包管理器
+  - 参考 [ni](https://github.com/antfu/ni/blob/main/src/detect.ts), 使用 package.json 中的 packageManager 字段
+  - 检测 lock 文件, 例如当都存在时检测更新日期
+  - 检测 node_modules 特征
+
 - [ ] feat: config.static 支持显示目录列表功能
   - 可点击路径条
   - 列表, 排序

@@ -34,8 +34,7 @@
     "nodemon": "^2.0.15",
     "path-to-regexp": "0.1.7",
     "translate-platforms": "0.0.7",
-    "vm2": "^3.9.8",
-    "ws": "7.5.5"
+    "vm2": "^3.9.8"
   },
   "devDependencies": {
     "eslint": "7.32.0"
