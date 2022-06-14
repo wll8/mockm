@@ -39,6 +39,40 @@ describe('config.db', () => {
       },
     }))
   })
+  it(`拦截 config.db 生成的接口`, async () => {
+    util.ok(await util.runMockm({
+      mockm: (util) => {
+        return {
+          api: {
+            'get /books/:id' (req, res, next) { // 拦截 config.db
+              res.json(req.params)
+            },
+            'patch /books/:id' (req, res, next) { // 拦截 config.db
+              req.body.a = `111` // 修改用户传入的数据
+              next()
+              res.mm.resHandleJsonApi = async (arg) => {
+                arg.data.a = `222` // 修改响应, 不会存储到 db.json
+                return arg.resHandleJsonApi(arg)
+              }
+            },
+          },
+          db: util.libObj.mockjs.mock({
+            'books|40-60': [
+              {
+                'id|+1': 1,
+                title: `@ctitle`,
+              },
+            ],
+          }),
+        }
+      },
+      okFn: async ({arg, str}) => {
+        const res1 = (await http.get(`http://127.0.0.1:${arg.port}/books/111`)).data
+        const res2 = (await http.patch(`http://127.0.0.1:${arg.port}/books/1`, {a: 1})).data
+        return res1.id === `111` && res2.data.a === `222`
+      },
+    }))
+  })
   it(`获取列表`, async () => {
     util.ok(await util.runMockm({
       mockm: (util) => {
