@@ -551,7 +551,7 @@ api: {
     req.body.a = 1 // 修改用户传入的数据
     next()
     res.mm.resHandleJsonApi = (arg) => {
-      arg.res.locals.data // json-server 原始的数据
+      arg.res.locals.data // 当前接口的 json-server 原始数据
       arg.data // 经预处理的数据, 例如将分页统计放置于响应体中
       arg.resHandleJsonApi // 是全局 config.resHandleJsonApi 的引用, 若无需处理则直接 return arg.data
       arg.data.a = 2 // 修改响应, 不会存储到 db.json
