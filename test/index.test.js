@@ -43,7 +43,7 @@ describe('基本功能', () => {
   })
 
   describe(`global.config`, () => {
-    it.only(`冻结以及变更`, async () => {
+    it(`冻结以及变更`, async () => {
       util.ok(await util.runMockm({
         mockm: () => ({
           api: {
