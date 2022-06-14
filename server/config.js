@@ -1,6 +1,9 @@
 const path = require(`path`)
 const exportsUtil = require(`./util/index.js`)
 const {
+  print,
+} = require(`./util/log.js`)
+const {
   lib,
   business,
   business: {
@@ -22,6 +25,7 @@ const {
     cli: {
       handlePathArg,
       parseArgv,
+      colors,
     },
   },
 } = exportsUtil
@@ -240,6 +244,16 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   },
   _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
   _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
+  _set(prop, val) { // 暴露一个变更 config 的方法
+    handleConfig[prop] = val
+  },
 }
 
-module.exports = handleConfig
+module.exports = new Proxy(handleConfig, {
+  get(obj, prop) {
+    return obj[prop]
+  },
+  set(obj, prop, val) {
+    print(colors.red(`Operation prohibited global.config: ${prop} = ${val}`))
+  },
+})
