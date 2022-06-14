@@ -634,6 +634,7 @@ function business() { // 与业务相关性的函数
         _noDataNext: true,
         _noDbRoute: true,
       })
+      global.config._set(`_db`, router.db)
       router.render = async (req, res) => { // 修改输出的数据, 符合项目格式
         // 在 render 方法中, req.query 会被删除
         // https://github.com/typicode/json-server/issues/311
