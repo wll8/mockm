@@ -244,8 +244,15 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   },
   _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
   _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
+  _db: {}, // jsonServer 生成 lowdb 实例后, 会将其挂载于此
   _set(prop, val) { // 暴露一个变更 config 的方法
-    handleConfig[prop] = val
+    if([
+      `_db`,
+    ].includes(prop)) {
+      handleConfig[prop] = val
+    } else {
+      this[prop] = val
+    }
   },
 }
 

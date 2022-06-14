@@ -50,18 +50,18 @@ describe('基本功能', () => {
             'get /test' (req, res) {
               global.config.port = `1234`
               global.config.portNewKey = `1234`
-              global.config._set(`change`, `1234`)
+              global.config._set(`_db`, `1234`)
               const {
                 port,
                 portNewKey,
-                change,
+                _db,
               } = global.config
               const check = (
                 global.config.port !== `1234`
                 && global.config.portNewKey !== `1234`
-                && global.config.change === `1234`
+                && global.config._db === `1234`
               )
-              res.json({port, portNewKey, change, check})
+              res.json({port, portNewKey, _db, check})
             },
           },
         }),
