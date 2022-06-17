@@ -1,6 +1,6 @@
 {
   "name": "mockm",
-  "version": "1.1.26-alpha.24",
+  "version": "1.1.26-alpha.25",
   "description": "Analog interface server, painless parallel development of front and back ends.",
   "main": "server.js",
   "bin": {
@@ -14,7 +14,7 @@
   "dependencies": {
     "@babel/runtime-corejs3": "^7.17.2",
     "@wll8/better-mock": "^0.3.3-alpha",
-    "@wll8/express-ws": "^1.0.0",
+    "@wll8/express-ws": "^1.0.1",
     "@wll8/json-server": "^0.17.1",
     "axios": "^0.26.0",
     "compression": "^1.7.4",
