@@ -627,13 +627,13 @@ api: {
 类型: string | object | array
 默认: undefined
 
-配置静态文件访问地址, 优先级大于 proxy, 支持 histroy 模式.
+配置静态文件访问地址, 优先级大于 proxy, 支持 history 模式.
 
 - string 可以是相对于运行目录的路径, 或绝对路径
 - object
   - path: string 浏览器访问的 url 前缀, 默认 `/`
   - fileDir: string 本地文件的位置. 可以是相对于运行目录的路径, 或绝对路径
-  - mode: string 配置访问模式, 可选 `histroy` 和 `hash(默认值)`
+  - mode: string 配置访问模式, 可选 `history` 和 `hash(默认值)`
   - option: object [模式的更多配置](https://github.com/bripkens/connect-history-api-fallback#options)
 - array[object] 使用多个配置
 
