@@ -1,7 +1,8 @@
 import { AxiosStatic as axios, Method } from 'axios'
 import { BetterMock as mockjs } from '@wll8/better-mock'
 import * as http from 'http'
-import { Request, Response } from 'express'
+import { Request, Response, Application } from 'express'
+import { Server } from 'node:net'
 import { Options as connectHistoryApiFallbackOptions } from 'connect-history-api-fallback'
 import WebSocket from 'ws'
 
@@ -55,6 +56,16 @@ interface libObj {
 }
 
 interface ConfigFnArg {
+  server: {
+    /**
+     * express 实例
+     */
+    app: Application,
+    /**
+     * httpServer 实例
+     */
+    httpServer: Server,
+  },
   toolObj: any,
   /**
    * 第三方库
