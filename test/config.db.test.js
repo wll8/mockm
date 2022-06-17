@@ -12,7 +12,7 @@ describe('config.db', () => {
             data.user[0].t1 = 111
             db.write() // 调用 write 存储变更
             data.user[0].t2 = 222
-            db.get(`user`).set(`[0].t3`, 333).value() // 可以使用 lodash 链式操作, 操作完成后需要调用 .value()
+            db.get(`user`).set(`[0].t3`, 333).value() // 可以使用 lowdash 链式操作, 操作完成后需要调用 .value()
             res.json(data.user[0])
           },
         },
