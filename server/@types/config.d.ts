@@ -291,7 +291,7 @@ interface ConfigObj {
   backOpenApi: boolean | number,
 
   /**
-   * 配置静态文件访问地址, 优先级大于 proxy, 支持 histroy 模式.
+   * 配置静态文件访问地址, 优先级大于 proxy, 支持 history 模式.
    * @default
    */
   static: string | Static | Static[],
@@ -338,7 +338,7 @@ interface Static {
    * @default
    * hash
    */
-  mode?: `histroy` | `hash`,
+  mode?: `history` | `hash`,
 
   /**
    * 模式的更多配置
