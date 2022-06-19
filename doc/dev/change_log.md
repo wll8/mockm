@@ -10,6 +10,11 @@
 :::
 
 ## 2022 年 06 月
+#### v1.1.26-alpha.26
+- feat: 在 proxy 的根目录默认添加斜杠
+- fix(doc): 单词拼写错误, histroy, 改为 history
+- feat: 暴露 http 实例到 util 上便于需要时使用
+
 #### v1.1.26-alpha.24
 - refactor(test): 重构测试用例, 把 api.test 中的 db 相关部分移动到 db.test 中
 - feat: 从 config.api 中操作 db
