@@ -132,6 +132,7 @@ config.proxy = [ // 合并 proxy 对象
     ),
   }
 }, {})
+config.proxy[`/`]  = config.proxy[`/`].replace(/$/, `/`).replace(/\/\/$/, `/`) // 当 proxy root 后面的斜杠时添加它
 
 const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
