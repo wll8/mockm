@@ -2,6 +2,29 @@ const util = require('./util.js')
 const http = util.http
 
 describe('config.proxy', () => {
+  it(`代理到原始服务器`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {
+          '/': `http://www.httpbin.org`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const get = (await http.get(`http://127.0.0.1:${arg.port}/get?a=1&b=2`)).data
+        const post = (await http.post(`http://127.0.0.1:${arg.port}/post`, {a: 1, b: 2})).data
+        const bin = (await http.get(`http://127.0.0.1:${arg.port}/image/png`)).data
+        const form = (await util.upload(`http://127.0.0.1:${arg.port}/post`, {a: 1, b: 2})).data
+        const upload = (await util.upload(`http://127.0.0.1:${arg.port}/post`, {f1: require(`fs`).createReadStream(__filename)})).data
+        return (
+          get.args.a === `1`
+          && post.json.a === 1
+          && bin.match(`PNG`)
+          && form.form.a === `1`
+          && util.getType(upload.files.f1, `string`)
+        )
+      },
+    }))
+  })
   it(`拦截请求`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
