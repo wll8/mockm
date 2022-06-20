@@ -462,6 +462,7 @@ function upload(api, data) {
 }
 
 module.exports = {
+  getType,
   upload,
   to,
   ok,

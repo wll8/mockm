@@ -1878,6 +1878,9 @@ function business() { // 与业务相关性的函数
         //   // }
         // })
         reqHandle().injectionReq({req, res, type: `get`})
+
+        // https://github.com/chimurai/http-proxy-middleware/pull/492
+        require(`http-proxy-middleware`).fixRequestBody(proxyReq, req)
       },
       onProxyRes: (proxyRes, req, res) => {
         allowCors({res: proxyRes, req, proxyConfig: userConfig})
