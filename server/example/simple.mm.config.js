@@ -82,7 +82,7 @@ module.exports = util => {
     
     static: [
       {
-        fileDir: `D:/git2/mockm/server`,
+        fileDir: `./public/`,
         path: `/file/`,
       },
     ],
