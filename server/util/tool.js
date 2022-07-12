@@ -1038,11 +1038,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
     function getOsIp() { // 获取系统 ip
-      const obj = require(`os`).networkInterfaces()
-      const ipObj = Object.keys(obj).reduce((res, cur, index) => {
-        return [...res, ...obj[cur]]
-      }, []).filter(item => item.family === `IPv4`)[0] || {}
-      return ipObj.address || `127.0.0.1`
+      let gatewayIp
+      try {
+        const gateway = require('default-gateway').v4.sync()
+        gatewayIp = require('address').ip(gateway && gateway.interface) // 获取默认IP
+      } catch (error) { // 获取默认网关错误
+        const obj = require(`os`).networkInterfaces()
+        const ipObj = Object.keys(obj).reduce((res, cur, index) => {
+          return [...res, ...obj[cur]]
+        }, []).filter(item => item.family === `IPv4`)[0] || {}
+        gatewayIp = ipObj.address
+      }
+      return gatewayIp || `127.0.0.1`
     }
     return {
       clearProcess,
