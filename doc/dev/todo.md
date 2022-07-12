@@ -1,7 +1,7 @@
 # 待完成
 
 ## 文档
-- [ ] feat: 使用默认 ip
+- [x] feat: 使用默认网关的 ip 作为 osIp 的默认值
   ``` js
     const result = require('default-gateway').v4.sync()
     const res = require('address').ip(result && result.interface) // 获取默认IP
