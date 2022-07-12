@@ -22,7 +22,7 @@
 - [x] fix(test): 中途退出测试时不应使用 `process.exit`, 否则会导致无法捕获错误的用例, `Uncaught error outside test suite`.
 - [x] fix(test): 优化用例 `WebSocket 消息收发`, 因为启动 mockm 后 websocket 服务可能并未初始化, 此时连接会出错.
 - [ ] feat: config.db 在列表中支持可折叠
-- [ ] feat: httpLog 显示完整的时间
+- [x] feat: httpLog 显示完整的时间
 - [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
 - [ ] fix: config.proxy 子路径冲突
   ``` js

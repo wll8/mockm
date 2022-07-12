@@ -195,7 +195,7 @@ function business() { // 与业务相关性的函数
         const statusCode = String(res.statusCode)
         const len = res.getHeader(`Content-Length`)
         const str = [
-          tool.time.dateFormat(`hh:mm:ss`, new Date),
+          tool.time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date),
           tool.httpClient.getClientIp(req),
           testApi,
           `${statusCode} ${res.statusMessage}`,
