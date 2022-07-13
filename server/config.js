@@ -132,6 +132,7 @@ config.proxy = [ // 合并 proxy 对象
     ),
   }
 }, {})
+config.proxy = tool.obj.sortKey(config.proxy, {firstLong: true}) // 转换为子路径优先的形式
 config.proxy[`/`]  = config.proxy[`/`].replace(/$/, `/`).replace(/\/\/$/, `/`) // 当 proxy root 后面的斜杠时添加它
 
 const _proxyTargetInfo = parseProxyTarget(config.proxy)

@@ -164,4 +164,22 @@ describe('config.proxy', () => {
       },
     }))
   })
+  it(`子路径优先`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {
+          '/any': `http://www.httpbin.org/anything`,
+          '/any/first': `http://www.httpbin.org/anything/sub`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const httpData1 = (await http.get(`http://127.0.0.1:${arg.port}/any/x`)).data
+        const httpData2 = (await http.get(`http://127.0.0.1:${arg.port}/any/first/x`)).data
+        return (
+          httpData1.url.includes(`/anything/x`) &&
+          httpData2.url.includes(`/anything/sub/x`)
+        )
+      },
+    }))
+  })
 })

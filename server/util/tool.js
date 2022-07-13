@@ -912,6 +912,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
+    // 深度排序对象
     function sortObj(obj, newObj = {}){
       Object.keys(obj).sort().forEach(key=>{
         if(typeof obj[key] === `object`){
@@ -921,6 +922,23 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           newObj[key] = obj[key]
         }
       })
+      return newObj
+    }
+    /**
+     * 排序对象的 key, 仅操作第一层
+     * @param {*} obj 要排序的对象
+     * @param {*} opt.firstLong 是否长 key 在前, 默认 false
+     * @returns 
+     */
+    function sortKey(obj, {
+      firstLong = false,
+    } = {}) {
+      const newObj = {}
+      let keys = Object.keys(obj).sort()
+      if(firstLong) {
+        keys = keys.reverse()
+      }
+      keys.forEach(key => (newObj[key] = obj[key]))
       return newObj
     }
     
@@ -984,6 +1002,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      sortKey,
       sortObj,
       npm,
       deepMergeObject,
