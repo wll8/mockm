@@ -24,7 +24,7 @@
 - [ ] feat: config.db 在列表中支持可折叠
 - [x] feat: httpLog 显示完整的时间
 - [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
-- [ ] fix: config.proxy 子路径冲突
+- [x] fix: config.proxy 子路径冲突
   ``` js
     config = {
       proxy: {
@@ -129,7 +129,7 @@
     "/api/": `http://127.0.0.1/api/`,
   }
   ```
-- [ ] feat: 支持操作 lowdb 实例
+- [x] feat: 支持操作 lowdb 实例
   - https://github.com/typicode/json-server/issues/484 - 推荐
   - https://github.com/typicode/json-server/issues/401
   - https://github.com/typicode/lowdb
