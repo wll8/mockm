@@ -273,6 +273,33 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function hex() { // 进制转换
+    /**
+     * 字节可读化
+     * @param {*} size
+     * @returns
+     */
+    function getSize(size) {
+      const sizes = [
+        ` Bytes`,
+        ` KB`,
+        ` MB`,
+        ` GB`,
+        ` TB`,
+        ` PB`,
+        ` EB`,
+        ` ZB`,
+        ` YB`,
+      ]
+
+      for (let i = 1; i < sizes.length; i++) {
+        if (size < Math.pow(1024, i))
+          return (
+            Math.round((size / Math.pow(1024, i - 1)) * 100) / 100 + sizes[i - 1]
+          )
+      }
+      return size
+    }
+
     function string10to62(number) { // 10 进制转 62 进制, 用来压缩数字长度
       const chars = `0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ`.split(``)
       const radix = chars.length
@@ -300,6 +327,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      getSize,
       string10to62,
       string62to10,
     }

@@ -12,8 +12,8 @@
   - 检测 lock 文件, 例如当都存在时检测更新日期
   - 检测 node_modules 特征
 
-- [ ] feat: config.static 支持显示目录列表功能
-  - 可点击路径条
+- [x] feat: config.static 支持显示目录列表功能
+  - [x] 可点击路径条
   - 列表, 排序
   - 搜索
 - [ ] feat: config.static 配置的目录应是
