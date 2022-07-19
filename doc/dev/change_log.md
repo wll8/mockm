@@ -9,6 +9,20 @@
 
 :::
 
+## 2022 年 07 月
+#### v1.1.26-alpha.29
+- feat: config.static 支持显示目录列表功能
+
+#### v1.1.26-alpha.28
+- fix: config.proxy 子路径应优先
+
+#### v1.1.26-alpha.27
+- feat: httpLog 也显示完整年月日
+- feat: 使用默认网关的 ip 作为 config.osIp 的默认值
+  期望在同一个局域网下, 得到大家都可以访问的 ip url, 而不是本机私有 vpn 实现的 ip.
+- fix: 使用 body-parser 之后某些代理失效, 一直挂起
+  https://github.com/chimurai/http-proxy-middleware/issues/299
+
 ## 2022 年 06 月
 #### v1.1.26-alpha.26
 - feat: 在 proxy 的根目录默认添加斜杠

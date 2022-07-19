@@ -352,6 +352,13 @@ interface Static {
   mode?: `history` | `hash`,
 
   /**
+   * 是否显示内容列表
+   * @default
+   * false
+   */
+  list?: boolean,
+
+  /**
    * 模式的更多配置
    * @default
    */
