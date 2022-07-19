@@ -62,7 +62,7 @@ module.exports = util => {
       },
     },
     
-    // 自动生成 Restful API
+    // 使用 mockjs 生成数据以及 Restful API
     dbCover: true,
     db: util.libObj.mockjs.mock({
       'books|40-60': [
@@ -80,10 +80,12 @@ module.exports = util => {
       ],
     }),
     
+    // 实现一个静态文件服务
     static: [
       {
         fileDir: `./public/`,
-        path: `/file/`,
+        path: `/fs/`,
+        list: true,
       },
     ],
   }

@@ -2,6 +2,7 @@ const lib = require(`./lib.js`)
 const { print } = require(`./log.js`)
 const tool = require(`./tool.js`)
 const http = require(`./http.js`)
+const fileList = require(`../lib/file-list.js`)
 const jsonServer = require(`@wll8/json-server`)
 const {lib: { express }} = jsonServer
 
@@ -937,6 +938,15 @@ function business() { // 与业务相关性的函数
           method: `use`,
           type: `static`,
           action: [
+            async (req, res, next) => { // 开启列表显示时
+              if(item.list && item.mode !== `history`) {
+                fileList({
+                  root: item.fileDir,
+                })(req, res, next)
+              } else {
+                next()
+              }
+            },
             async (req, res, next) => { // mode history
               if(item.mode === `history`) {
                 require(`connect-history-api-fallback`)(item.option)(req, res, next)
