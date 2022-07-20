@@ -1,7 +1,8 @@
 import { AxiosStatic as axios, Method } from 'axios'
 import { BetterMock as mockjs } from '@wll8/better-mock'
 import * as http from 'http'
-import { Request, Response } from 'express'
+import { Request, Response, Application } from 'express'
+import { Server } from 'node:net'
 import { Options as connectHistoryApiFallbackOptions } from 'connect-history-api-fallback'
 import WebSocket from 'ws'
 
@@ -71,6 +72,16 @@ interface openApi {
 }
 
 interface ConfigFnArg {
+  server: {
+    /**
+     * express 实例
+     */
+    app: Application,
+    /**
+     * httpServer 实例
+     */
+    httpServer: Server,
+  },
   toolObj: any,
   /**
    * 第三方库
@@ -305,7 +316,7 @@ interface ConfigObj {
   backOpenApi: boolean | number,
 
   /**
-   * 配置静态文件访问地址, 优先级大于 proxy, 支持 histroy 模式.
+   * 配置静态文件访问地址, 优先级大于 proxy, 支持 history 模式.
    * @default
    */
   static: string | Static | Static[],
@@ -352,7 +363,14 @@ interface Static {
    * @default
    * hash
    */
-  mode?: `histroy` | `hash`,
+  mode?: `history` | `hash`,
+
+  /**
+   * 是否显示内容列表
+   * @default
+   * false
+   */
+  list?: boolean,
 
   /**
    * 模式的更多配置

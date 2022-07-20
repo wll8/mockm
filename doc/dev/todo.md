@@ -244,6 +244,9 @@
 - 2.x - 破坏性
   - [ ] feat: 更改代理方式
     - `"/": 'http://127.0.0.1/api'`  应代理到 `/api` 而不是 `/`.
+  - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
+  - [ ] refactor: 把 initPackge, hasPackage, installPackage 放到 npm 中
+  - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
   - [ ] refactor: node 支持版本调整为 v12+
   - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
   - [ ] fix: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api

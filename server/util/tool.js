@@ -273,6 +273,33 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function hex() { // 进制转换
+    /**
+     * 字节可读化
+     * @param {*} size
+     * @returns
+     */
+    function getSize(size) {
+      const sizes = [
+        ` Bytes`,
+        ` KB`,
+        ` MB`,
+        ` GB`,
+        ` TB`,
+        ` PB`,
+        ` EB`,
+        ` ZB`,
+        ` YB`,
+      ]
+
+      for (let i = 1; i < sizes.length; i++) {
+        if (size < Math.pow(1024, i))
+          return (
+            Math.round((size / Math.pow(1024, i - 1)) * 100) / 100 + sizes[i - 1]
+          )
+      }
+      return size
+    }
+
     function string10to62(number) { // 10 进制转 62 进制, 用来压缩数字长度
       const chars = `0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ`.split(``)
       const radix = chars.length
@@ -300,6 +327,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      getSize,
       string10to62,
       string62to10,
     }
@@ -307,6 +335,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function cli() { // 命令行相关处理程序
+    /**
+     * 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
+     * @param {*} pathStr 路径
+     */
+     function handlePathArg(pathStr) {
+      const path = require(`path`)
+      let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
+      newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
+      return newPathStr
+    }
+
     /**
     * 自定义控制台颜色
     * https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
@@ -423,6 +462,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      handlePathArg,
       getFullLine,
       onlyLine,
       spawn,
@@ -688,33 +728,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return {path, method, url}
     }
 
-    /**
-     * 处理命令行上传入的路径参数, 如果是相对路径, 则相对于运行命令的目录, 而不是相对于书写 require() 方法文件的目录
-     * @param {*} pathStr 路径
-     */
-    function handlePathArg(pathStr) {
-      const path = require(`path`)
-      let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
-      newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
-      return newPathStr
-    }
-
-    function parseRegPath(rePath, url) { // 使用 path-to-regexp 转换 express 的 router, 并解析参数为对象
-      // 注: path-to-regexp 1.x 自带 match 方法可处理此方法, 但是当前的 json-server 依赖的 express 的路由语法仅支持 path-to-regexp@0.1.7
-      // 所以只能手动转换, 参考: https://github.com/ForbesLindesay/express-route-tester/blob/f39c57fa660490e74b387ed67bf8f2b50ee3c27f/index.js#L96
-      const pathToRegexp = require(`path-to-regexp`)
-      const keys = []
-      const re = pathToRegexp(rePath, keys)
-      // 去除 url 中的 origin
-      const pathUrl = url.match(/^\//) ? url : url.replace((new URL(url)).origin, ``)
-      const result = re.exec(pathUrl)
-      const obj = keys.reduce((acc, cur, index) => {
-        acc[cur.name] = result[index + 1]
-        return acc
-      }, {})
-      return obj
-    }
-
     function parseUrlArgToObjList(urlArg){ // 转换 url 参数为对象数组
       const querystring = require(`querystring`)
       const obj = querystring.parse(urlArg) // <= urlArg
@@ -732,11 +745,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     return {
       findLikePath,
       findLikeUrl,
-      prepareProxy,
-      parseProxyTarget,
       fullApi2Obj,
-      handlePathArg,
-      parseRegPath,
       parseUrlArgToObjList,
     }
   }
@@ -1094,162 +1103,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
   }
 
-  function middleware() { // express 中间件
-    const compression = require(`compression`) // 压缩 http 响应
-
-    function httpLog({config}) { // 设置 http 请求日志中间件
-      const morgan = require(`morgan`)
-      const colors = tool().cli.colors
-      return morgan( (tokens, req, res) => {
-        const colorTable = {
-          1: `gray`,
-          2: `green`,
-          3: `yellowBright`,
-          4: `yellow`,
-          5: `red`,
-        }
-        const statusCode = String(res.statusCode)
-        const len = res.getHeader(`Content-Length`)
-        const str = [
-          tool().time.dateFormat(`hh:mm:ss`, new Date),
-          tool().httpClient.getClientIp(req),
-          res.getHeader(config.apiInHeader),
-          `${statusCode} ${res.statusMessage}`,
-          `${tokens[`response-time`](req, res)} ms`,
-          len ? `${len} byte` : ``,
-        ].join(` `)
-        // 使用原生 nodejs 打印日志
-        print(colors[colorTable[statusCode[0]]](str)) // 根据状态码的第一位获取颜色函数
-        return [] // return list.join(' ')
-      })
-    }
-
-    function getJsonServerMiddlewares({config}) { // 获取 jsonServer 中的中间件
-      // 利用 jsonServer 已有的中间件, 而不用额外的安装
-      // 注意: 可能根据 jsonServer 版本的不同, 存在的中间件不同
-
-      const jsonServer = require(`json-server`)
-      const middlewares = jsonServer.defaults({bodyParser: true, logger: false, static: require(`path`).join(__dirname, `../public2`)}) // 可以直接使用的所有中间件数组
-      middlewares.push(httpLog({config}))
-      const middlewaresObj = middlewares.flat().reduce((res, item) => {
-        // 使用 jsonServer 里面的中间件, 以保持一致:
-        // compression, corsMiddleware, serveStatic, logger, jsonParser, urlencodedParser
-        return ({
-          ...res,
-          [item.name]: item,
-        })
-      }, {})
-      return {middlewares, middlewaresObj}
-    }
-
-    function reWriteRouter({app, routes = {}}) { // 根据 routes 对象, 重写路由
-      const rewrite = require(`express-urlrewrite`)
-      Object.keys(routes).forEach(key => {
-        app.use(rewrite(key, routes[key]))
-      })
-    }
-
-    function replayHistoryMiddleware ({
-      id,
-      config,
-      business,
-    } = {}) {
-      const {
-        clientInjection,
-        historyHandle,
-      } = business
-      const {
-        allowCors,
-        setHeader,
-        reSetApiInHeader,
-      } = clientInjection({config})
-      const {
-        getHistory,
-      } = historyHandle({config})
-      return (req, res, next) => { // 修改分页参数, 符合项目中的参数
-        const method = req.method.toLowerCase()
-        const fullApi = id ? undefined :`${method} ${req.originalUrl}`
-        const history = getHistory({id, fullApi, find: list => {
-          const getSize = (path) => {
-            const bodyPathCwd = require(`path`).join(process.cwd(), path)
-            return require(`fs`).readFileSync(bodyPathCwd).length
-          }
-          const getStatus = (item) => {
-            try {
-              return item.data.res.lineHeaders.line.statusCode
-            } catch (err) {
-              console.log(`err`, err)
-            }
-          }
-          list.sort((item, item1) => {
-            try {
-              const size = getSize(item.data.res.bodyPath)
-              const size1 = getSize(item1.data.res.bodyPath)
-              return size1 - size
-            } catch (error) {
-              console.log(`error`, error)
-              return 0
-            }
-          })
-          const getStatusCodeItem = list => list.find(item => getStatus(item) === 200) // 查找 http 状态码为 200 的条目
-          let getItemRes = undefined
-          if(config.replayProxyFind) { // 先使用配置的 replayProxyFind 函数, 如果没有打到则使用普通状态码
-            try {
-              getItemRes = list.find((...arg) => config.replayProxyFind(...arg))
-            } catch (error) {
-              console.log(error)
-            }
-          }
-          getItemRes = getItemRes || getStatusCodeItem(list) || list[0] || {} // 如果也没有找到状态码为 200 的, 则直接取第一条
-          return getItemRes
-        }}).data
-        try {
-          const lineHeaders = history.res.lineHeaders
-          const headers = lineHeaders.headers || require(require(`path`).resolve(lineHeaders.headPath))
-          setHeader(res, {
-            ...headers, // 还原 headers
-            ...reSetApiInHeader({headers}), // 更新 testApi
-          })
-          allowCors({res, req})
-          const bodyPath = history.res.bodyPath
-          if(bodyPath) {
-            const path = require(`path`)
-            const newPath = path.resolve(bodyPath) // 发送 body
-            res.sendFile(newPath)
-          } else {
-            const {statusCode, statusMessage} = lineHeaders.line
-            res.statusCode = statusCode
-            res.statusMessage = statusMessage
-            res.send()
-          }
-        } catch (err) {
-          console.log(`err`, err)
-          res.json(config.resHandleReplay({req, res}))
-        }
-      }
-    }
-
-    return {
-      reWriteRouter,
-      compression,
-      httpLog,
-      getJsonServerMiddlewares,
-      replayHistoryMiddleware,
-    }
-
-  }
-
   function httpClient() {
-
-    function midResJson({res, proxyRes, key, val, cb = body => body}) {
-      const modifyResponse = require(`node-http-proxy-json`)
-      modifyResponse(res, proxyRes, body => {
-        if([`array`, `object`].includes(type().isType(body))) {
-          key && obj().deepSet(body, key, val)
-        }
-        return cb(body)
-      })
-    }
 
     function getClientUrlAndPath (originalUrl) { // 获取从客户端访问的 url 以及 path
       // 当重定向路由(mock api)时, req.originalUrl 和 req.url 不一致, req.originalUrl 为浏览器中访问的 url, 应该基于这个 url 获取 path
@@ -1269,12 +1123,19 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       if (ip.includes(`,`)) {
         ip = ip.split(`,`)[0]
       }
-      ip = ip.substr(ip.lastIndexOf(`:`) + 1, ip.length) // ::ffff:127.0.0.1 => 127.0.0.1
+      ip = ip.substr(ip.lastIndexOf(`:`) + 1, ip.length) // ::ffff:xxx => xxx
+      ip = {
+        /**
+         当使用以下请求方式时, 获取到的 ip 为 ::1
+         - js fetch(`http://localhost:9090/ip`);
+         - cli http :9000/ip
+        */ 
+        "1": `127.0.0.1`,
+      }[ip] || ip
       return ip
     }
 
     return {
-      midResJson,
       getClientUrlAndPath,
       getClientIp,
     }
@@ -1297,6 +1158,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function obj() { // 对象处理工具
+    // 深度排序对象
     function sortObj(obj, newObj = {}){
       Object.keys(obj).sort().forEach(key=>{
         if(typeof obj[key] === `object`){
@@ -1306,6 +1168,23 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
           newObj[key] = obj[key]
         }
       })
+      return newObj
+    }
+    /**
+     * 排序对象的 key, 仅操作第一层
+     * @param {*} obj 要排序的对象
+     * @param {*} opt.firstLong 是否长 key 在前, 默认 false
+     * @returns 
+     */
+    function sortKey(obj, {
+      firstLong = false,
+    } = {}) {
+      const newObj = {}
+      let keys = Object.keys(obj).sort()
+      if(firstLong) {
+        keys = keys.reverse()
+      }
+      keys.forEach(key => (newObj[key] = obj[key]))
       return newObj
     }
     
@@ -1369,6 +1248,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return JSON.stringify(o, null, 2)
     }
     return {
+      sortKey,
       sortObj,
       npm,
       deepMergeObject,
@@ -1423,11 +1303,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
     function getOsIp() { // 获取系统 ip
-      const obj = require(`os`).networkInterfaces()
-      const ipObj = Object.keys(obj).reduce((res, cur, index) => {
-        return [...res, ...obj[cur]]
-      }, []).filter(item => item.family === `IPv4`)[0] || {}
-      return ipObj.address || `127.0.0.1`
+      let gatewayIp
+      try {
+        const gateway = require('default-gateway').v4.sync()
+        gatewayIp = require('address').ip(gateway && gateway.interface) // 获取默认IP
+      } catch (error) { // 获取默认网关错误
+        const obj = require(`os`).networkInterfaces()
+        const ipObj = Object.keys(obj).reduce((res, cur, index) => {
+          return [...res, ...obj[cur]]
+        }, []).filter(item => item.family === `IPv4`)[0] || {}
+        gatewayIp = ipObj.address
+      }
+      return gatewayIp || `127.0.0.1`
     }
     return {
       clearProcess,
@@ -1655,7 +1542,6 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     file: file(),
     cli: cli(),
     hex: hex(),
-    middleware: middleware(),
     httpClient: httpClient(),
     fn: fn(),
     obj: obj(),

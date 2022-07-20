@@ -566,7 +566,7 @@ api: {
     req.body.a = 1 // 修改用户传入的数据
     next()
     res.mm.resHandleJsonApi = (arg) => {
-      arg.res.locals.data // json-server 原始的数据
+      arg.res.locals.data // 当前接口的 json-server 原始数据
       arg.data // 经预处理的数据, 例如将分页统计放置于响应体中
       arg.resHandleJsonApi // 是全局 config.resHandleJsonApi 的引用, 若无需处理则直接 return arg.data
       arg.data.a = 2 // 修改响应, 不会存储到 db.json
@@ -642,13 +642,14 @@ api: {
 类型: string | object | array
 默认: undefined
 
-配置静态文件访问地址, 优先级大于 proxy, 支持 histroy 模式.
+配置静态文件访问地址, 优先级大于 proxy, 支持 history 模式.
 
 - string 可以是相对于运行目录的路径, 或绝对路径
 - object
   - path: string 浏览器访问的 url 前缀, 默认 `/`
   - fileDir: string 本地文件的位置. 可以是相对于运行目录的路径, 或绝对路径
-  - mode: string 配置访问模式, 可选 `histroy` 和 `hash(默认值)`
+  - list: boolean 是否显示目录列表, 当 mode 不为 history 时可用
+  - mode: string 配置访问模式, 可选 `history` 和 `hash(默认值)`
   - option: object [模式的更多配置](https://github.com/bripkens/connect-history-api-fallback#options)
 - array[object] 使用多个配置
 

@@ -9,33 +9,46 @@
 
 :::
 
+## 2022 年 07 月
+#### v1.1.26-alpha.29
+- feat: config.static 支持显示目录列表功能
+
+#### v1.1.26-alpha.28
+- fix: config.proxy 子路径应优先
+
+#### v1.1.26-alpha.27
+- feat: httpLog 也显示完整年月日
+- feat: 使用默认网关的 ip 作为 config.osIp 的默认值
+  期望在同一个局域网下, 得到大家都可以访问的 ip url, 而不是本机私有 vpn 实现的 ip.
+- fix: 使用 body-parser 之后某些代理失效, 一直挂起
+  https://github.com/chimurai/http-proxy-middleware/issues/299
+
+## 2022 年 06 月
+#### v1.1.26-alpha.26
+- feat: 在 proxy 的根目录默认添加斜杠
+- fix(doc): 单词拼写错误, histroy, 改为 history
+- feat: 暴露 http 实例到 util 上便于需要时使用
+
+#### v1.1.26-alpha.24
+- refactor(test): 重构测试用例, 把 api.test 中的 db 相关部分移动到 db.test 中
+- feat: 从 config.api 中操作 db
+- feat: 冻结 global.config 中的属性
+- feat: config.api 中的 use 支持 async
+- refactor: 移除未使用的依赖 ws
+- feat: resHandleJsonApi 支持使用 Promise
+- fix(client): 本地 cdn 目录中的 dist 不应被忽略
+
+## 2022 年 05 月
+#### v1.1.26-alpha.21
+- feat: 将线上 cdn 替换为本地文件, 以避免各种 dns 污染导致的各种 cdn 失效问题
+- chore: 使用依赖锁文件
+- feat: 简化 --config 参数输出的内容
+  更改 full.mm.config.js 为 simple.mm.config.js, 让配置看起来更容易使用, 不那么吓人和混乱.
+
 ## 2022 年 04 月
 #### v1.1.26-alpha.17
 - feat: 支持从 config.api 拦截 config.db 的接口
-  ``` js
-  config = {
-    api: {
-      '/books/:id' (req, res, next) { // 在所有自定义 api 之前添加中间件
-        req.body.a = 1 // 修改用户传入的数据
-        next()
-        res.mm.resHandleJsonApi = (arg) => {
-          arg.res.locals.data // json-server 原始的数据
-          arg.data // 经预处理的数据, 例如将分页统计放置于响应体中
-          arg.resHandleJsonApi // 是全局 config.resHandleJsonApi 的引用, 若无需处理则直接 return arg.data
-          arg.data.a = 2 // 修改响应, 不会存储到 db.json
-          return arg.resHandleJsonApi(arg)
-        }
-      },
-    },
-    db: {
-      book: [
-        {
-          name: `js`,
-        },
-      ]
-    },
-  }
-  ```
+  参考 [config.api](../config/option.md#config-api) 示例中的 `/books/:id`
 - fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
   例如以下配置不应导致 `/api/test?a=1` 不能使用
   ``` js

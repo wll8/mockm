@@ -2,19 +2,66 @@ const util = require('./util.js')
 const http = util.http
 
 describe('config.api', () => {
-  it(`覆盖 config.proxy 某部分路径`, async () => {
+  it(`use array, 添加 header`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
-        proxy: {
-          '/anything/proxy/fn_fn':[({req, json}) => {
-            return json.method
-          }, ({req, json}) => {
-            return json.toLowerCase() // get
-          }],
-          '/any/proxy/test/proxyAndApiQuery': `/anything/proxyAndApiQuery`,
-        },
         api: {
-          '/any/proxy/test/proxyAndApiQuery/myApi': `ok`,
+          'use /use/test': [
+            (req, res, next) => {
+              res.setHeader(`use1`, `111`)
+              next()
+            },
+            async (req, res, next) => {
+              res.setHeader(`use2`, `222`)
+              next()
+            },
+          ],
+          'get /use/test': `ok`,
+          'get /use/test/:id': `sub`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const id = util.uuid()
+        const res1 = (await http.get(`http://127.0.0.1:${arg.port}/use/test`))
+        const res2 = (await http.get(`http://127.0.0.1:${arg.port}/use/test/${id}`))
+        return (
+          (res1.headers.use1 === `111` && res1.headers.use2 === `222` && res1.data === `ok`)
+          && (res2.headers.use1 === `111` && res2.headers.use2 === `222` && res2.data === `sub`)
+        )
+      },
+    }))
+  })
+  it(`use function / asyncfunction`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        api: {
+          'use /use/test' (req, res, next) {
+            res.setHeader(`use1`, `111`)
+            next()
+          },
+          async 'use /use/test2' (req, res, next) {
+            res.setHeader(`use2`, `222`)
+            next()
+          },
+          'get /use/test': `test`,
+          'get /use/test2': `test2`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const res1 = (await http.get(`http://127.0.0.1:${arg.port}/use/test`))
+        const res2 = (await http.get(`http://127.0.0.1:${arg.port}/use/test2`))
+        return (
+          (res1.headers.use1 === `111` && res1.data === `test`)
+          && (res2.headers.use2 === `222` && res2.data === `test2`)
+        )
+      },
+    }))
+  })
+  it(`覆盖 config.proxy 的同级路径`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {},
+        api: {
           '/anything/overrideProxy': `ok`,
         },
       }),
@@ -22,14 +69,29 @@ describe('config.api', () => {
         const id = util.uuid()
         const res1 = (await http.get(`http://127.0.0.1:${arg.port}/anything/overrideProxy`)).data
         const res2 = (await http.get(`http://127.0.0.1:${arg.port}/anything/${id}`)).data
-
-        // config.api 是 config.proxy 的子路径
-        const res3 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi`)).data
-        const res4 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi?q=${id}`)).data
         return (
           res1 === `ok`
           && res2.url.match(id)
-          && res3 === `ok`
+        )
+      },
+    }))
+  })
+  it(`覆盖 config.proxy 的子路径`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {
+          '/any/proxy/test/proxyAndApiQuery': `/anything/proxyAndApiQuery`,
+        },
+        api: {
+          '/any/proxy/test/proxyAndApiQuery/myApi': `ok`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const id = util.uuid()
+        const res3 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi`)).data
+        const res4 = (await http.get(`http://127.0.0.1:${arg.port}/any/proxy/test/proxyAndApiQuery/myApi?q=${id}`)).data
+        return (
+          res3 === `ok`
           && res4 === `ok`
         )
       },
@@ -50,40 +112,6 @@ describe('config.api', () => {
         return (
           res1 === `ok`
         )
-      },
-    }))
-  })
-  it(`拦截 config.db`, async () => {
-    util.ok(await util.runMockm({
-      mockm: (util) => {
-        return {
-          api: {
-            'get /books/:id' (req, res, next) { // 拦截 config.db
-              res.json(req.params)
-            },
-            'patch /books/:id' (req, res, next) { // 拦截 config.db
-              req.body.a = `111` // 修改用户传入的数据
-              next()
-              res.mm.resHandleJsonApi = (arg) => {
-                arg.data.a = `222` // 修改响应, 不会存储到 db.json
-                return arg.resHandleJsonApi(arg)
-              }
-            },
-          },
-          db: util.libObj.mockjs.mock({
-            'books|40-60': [
-              {
-                'id|+1': 1,
-                title: `@ctitle`,
-              },
-            ],
-          }),
-        }
-      },
-      okFn: async ({arg, str}) => {
-        const res1 = (await http.get(`http://127.0.0.1:${arg.port}/books/111`)).data
-        const res2 = (await http.patch(`http://127.0.0.1:${arg.port}/books/1`, {a: 1})).data
-        return res1.id === `111` && res2.data.a === `222`
       },
     }))
   })
@@ -286,6 +314,7 @@ describe('config.api', () => {
         }
       },
       okFn: async ({arg, str}) => {
+        await util.sleep(500)
         const id = util.uuid()
         const ws = new WebSocket(`ws://127.0.0.1:${arg.port}/wsecho`);
         const msgList = []
@@ -295,7 +324,7 @@ describe('config.api', () => {
         ws.on('message', (msg) => {
           msgList.push(msg)
         })
-        await util.sleep()
+        await util.sleep(500)
         return (msgList.length >=2 && msgList.includes(id))
       }
     }))

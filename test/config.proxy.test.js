@@ -2,6 +2,29 @@ const util = require('./util.js')
 const http = util.http
 
 describe('config.proxy', () => {
+  it(`代理到原始服务器`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {
+          '/': `http://www.httpbin.org`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const get = (await http.get(`http://127.0.0.1:${arg.port}/get?a=1&b=2`)).data
+        const post = (await http.post(`http://127.0.0.1:${arg.port}/post`, {a: 1, b: 2})).data
+        const bin = (await http.get(`http://127.0.0.1:${arg.port}/image/png`)).data
+        const form = (await util.upload(`http://127.0.0.1:${arg.port}/post`, {a: 1, b: 2})).data
+        const upload = (await util.upload(`http://127.0.0.1:${arg.port}/post`, {f1: require(`fs`).createReadStream(__filename)})).data
+        return (
+          get.args.a === `1`
+          && post.json.a === 1
+          && bin.match(`PNG`)
+          && form.form.a === `1`
+          && util.getType(upload.files.f1, `string`)
+        )
+      },
+    }))
+  })
   it(`拦截请求`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
@@ -138,6 +161,24 @@ describe('config.proxy', () => {
       okFn: async ({arg, str}) => {
         const httpData = (await http.get(`http://127.0.0.1:${arg.port}/anything/proxy/string_fn`)).data
         return httpData === `get`
+      },
+    }))
+  })
+  it(`子路径优先`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        proxy: {
+          '/any': `http://www.httpbin.org/anything`,
+          '/any/first': `http://www.httpbin.org/anything/sub`,
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        const httpData1 = (await http.get(`http://127.0.0.1:${arg.port}/any/x`)).data
+        const httpData2 = (await http.get(`http://127.0.0.1:${arg.port}/any/first/x`)).data
+        return (
+          httpData1.url.includes(`/anything/x`) &&
+          httpData2.url.includes(`/anything/sub/x`)
+        )
       },
     }))
   })

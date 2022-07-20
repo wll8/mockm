@@ -1,30 +1,29 @@
 const util = require(`./util/index.js`)
 
 function serverReplay({
-  noProxyTest,
-  config,
+  allRoute,
+  allRouteTest,
 }) {
+  const config = global.config
   const {
     tool,
     business,
   } = util
   const {
+    middleware,
     historyHandle,
     saveLog,
   } = business
   const {
-    middleware,
-  } = tool
-  const {
     middlewares,
     middlewaresObj,
-  } = middleware.getJsonServerMiddlewares({config})
+  } = middleware.getJsonServerMiddlewares()
   const {
     getHistory,
-  } = historyHandle({config})
+  } = historyHandle()
 
 
-  const jsonServer = require(`json-server`)
+  const jsonServer = require(`@wll8/json-server`)
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
   const serverReplay = jsonServer.create()
   middleware.reWriteRouter({app: serverReplay, routes: config.route})
@@ -36,7 +35,7 @@ function serverReplay({
       const history = getHistory({fullApi}).data
       if(history || config.hostMode) { // 当存在 history 则不进入代理
         return false
-      } else if(noProxyTest({method, pathname}) === true) { // 当没有 history, 则使用 noProxy 规则
+      } else if(allRouteTest({allRoute, method, pathname})) { // 当没有 history, 则使用 noProxy 规则
         return true
       } else { // 当没有 history 也不匹配 noProxy 时, 则根据 replayProxy 规则
         return config.replayProxy
@@ -49,7 +48,6 @@ function serverReplay({
   ))
   serverReplay.use(middlewares)
   serverReplay.use(middleware.replayHistoryMiddleware({
-    config,
     business,
   }))
 

@@ -1,32 +1,34 @@
 const path = require(`path`)
 const exportsUtil = require(`./util/index.js`)
 const {
+  print,
+} = require(`./util/log.js`)
+const {
   lib,
   business,
+  business: {
+    midResJson,
+    url: {
+      prepareProxy,
+      parseProxyTarget,
+    },
+    wrapApiData,
+  },
   tool,
   tool: {
-    httpClient: {
-      midResJson,
-    },
     type: {
       isType,
     },
     os: {
       getOsIp,
     },
-    url: {
-      handlePathArg,
-      prepareProxy,
-      parseProxyTarget,
-    },
     cli: {
+      handlePathArg,
       parseArgv,
+      colors,
     },
   },
 } = exportsUtil
-const {
-  wrapApiData,
-} = business
 
 let cliArg = parseArgv()
 let fileArgFn = () => {}
@@ -130,6 +132,8 @@ config.proxy = [ // 合并 proxy 对象
     ),
   }
 }, {})
+config.proxy = tool.obj.sortKey(config.proxy, {firstLong: true}) // 转换为子路径优先的形式
+config.proxy[`/`]  = config.proxy[`/`].replace(/$/, `/`).replace(/\/\/$/, `/`) // 当 proxy root 后面的斜杠时添加它
 
 const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
@@ -189,7 +193,7 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   port: config.hostMode ? _proxyTargetInfo.port : config.port, // 如果是 host 模式, 强制更改端口与目标端口一致
   dbJsonPath: config.dbJsonPath ? handlePathArg(config.dbJsonPath) : handlePathArg(`${config.dataDir}/db.json`),
   dataDir: handlePathArg(config.dataDir),
-  proxy: prepareProxy(config.proxy),
+  proxy: config.proxy,
   api: isType(config.api, `object`) ? () => config.api : config.api,
   apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
   db: isType(config.db, `object`) ? () => config.db : config.db,
@@ -247,6 +251,23 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   },
   _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
   _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
+  _db: {}, // jsonServer 生成 lowdb 实例后, 会将其挂载于此
+  _set(prop, val) { // 暴露一个变更 config 的方法
+    if([
+      `_db`,
+    ].includes(prop)) {
+      handleConfig[prop] = val
+    } else {
+      this[prop] = val
+    }
+  },
 }
 
-module.exports = handleConfig
+module.exports = new Proxy(handleConfig, {
+  get(obj, prop) {
+    return obj[prop]
+  },
+  set(obj, prop, val) {
+    print(colors.red(`Operation prohibited global.config: ${prop} = ${val}`))
+  },
+})

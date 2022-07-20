@@ -42,7 +42,39 @@ describe('基本功能', () => {
     })
   })
 
+  describe(`global.config`, () => {
+    it(`冻结以及变更`, async () => {
+      util.ok(await util.runMockm({
+        mockm: () => ({
+          api: {
+            'get /test' (req, res) {
+              global.config.port = `1234`
+              global.config.portNewKey = `1234`
+              global.config._set(`_db`, `1234`)
+              const {
+                port,
+                portNewKey,
+                _db,
+              } = global.config
+              const check = (
+                global.config.port !== `1234`
+                && global.config.portNewKey !== `1234`
+                && global.config._db === `1234`
+              )
+              res.json({port, portNewKey, _db, check})
+            },
+          },
+        }),
+        okFn: async ({arg, str}) => {
+          const data = (await http.get(`http://127.0.0.1:${arg.port}/test`)).data
+          console.log(`data`, data)
+          return data.check
+        },
+      }))
+    })
+  })
 })
+
 describe.skip('性能', () => {
   describe('接口服务', () => {
     it(`存在较多历史时造成的影响情况`, async () => {

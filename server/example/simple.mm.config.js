@@ -4,16 +4,20 @@
  */
 module.exports = util => {
   return  {
+    port: 9090,
+    testPort: 9095,
+    replayPort: 9091,
+
     // 代理后端的接口, 如果没有可以不填
     proxy: {
-      // 根结点
-      '/': `https://httpbin.org/`,
+      // // 根结点
+      // '/': `https://httpbin.org/`,
       
-      // 接口转发
-      '/get': `https://www.httpbin.org/ip`,
+      // // 接口转发
+      // '/get': `https://www.httpbin.org/ip`,
       
-      // 修改响应体中的 json
-      '/anything/mid': [`headers.Host`, `xxxxxx`],
+      // // 修改响应体中的 json
+      // '/anything/mid': [`headers.Host`, `xxxxxx`],
 
       // 使用函数修改响应体
       '/anything/proxy/fn':[({req, json}) => {
@@ -23,6 +27,14 @@ module.exports = util => {
 
     // 自己编写的接口
     api: {
+      // 可以作为守卫使用
+      async 'use /' (req, res, next) {
+        next()
+      },
+
+      // 覆盖目标路径
+      '/anything/overrideProxy': `ok`,
+
       // 当为基本数据类型时, 直接返回数据, 这个接口返回 {"msg":"ok"}
       '/api/1': {msg: `ok`},
 
@@ -50,7 +62,7 @@ module.exports = util => {
       },
     },
     
-    // 自动生成 Restful API
+    // 使用 mockjs 生成数据以及 Restful API
     dbCover: true,
     db: util.libObj.mockjs.mock({
       'books|40-60': [
@@ -67,5 +79,14 @@ module.exports = util => {
         },
       ],
     }),
+    
+    // 实现一个静态文件服务
+    static: [
+      {
+        fileDir: `./public/`,
+        path: `/fs/`,
+        list: true,
+      },
+    ],
   }
 }

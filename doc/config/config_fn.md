@@ -2,6 +2,31 @@
 当 [配置](./config_file.md#js) 为函数的时候, 会向函数传入一个 util 对象:.
 util 目前包含以下内容:
 
+## util.server
+暴露出来服务.
+
+### util.server.app httpServer
+原生 httpServer 实例, 例如需要监听 http 协议升级时:
+``` js
+module.exports = util => {
+  util.server.httpServer.on(`upgrade`, () => {})
+}
+```
+
+### util.server.app
+express 实例.
+
+``` js
+module.exports = util => {
+  const app = util.server.app
+  app.get(`/`, (req, res) => {
+    res.send(`Hello World`)
+  })
+}
+```
+
+### util.libObj.mockjs 数据生成库
+
 ## util.libObj 第三方库
 ### util.libObj.mockjs 数据生成库
 - 参考: http://wll8.gitee.io/mockjs-examples/
