@@ -235,6 +235,7 @@
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
 
 ## 重构
+- [x] refactor: 移除 tool 中的 prepareProxy parseProxyTarget
 - [x] refactor: 处理接口 `:9005/api/getOpenApi/` 的返回值, 更改为在原始 openApi.info 中添加 _openApiPrefix 作为接口前缀
 - [x] refactor: 修正拼写错误的 oepnApiData 为 openApiData
 - [x] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
