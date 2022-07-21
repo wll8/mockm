@@ -147,8 +147,19 @@ function serverTest() {
           config,
         }))
         const openApi = matchInfo.spec
+        const reqPrefixHandler = (pathsObj = {}) => {
+          const data = Object.entries(pathsObj).reduce((acc, [key, val]) => {
+            const newKey = key !== matchInfo.reqPrefix 
+              ? key.replace(new RegExp(`^${matchInfo.reqPrefix}`), ``) 
+              : matchInfo.reqPrefix
+            acc[newKey] = val
+            return acc
+          }, {})
+          return data
+        }
         // openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
         getOpenApi({openApi}).then((openApiData = {}) => {
+          openApiData.paths = reqPrefixHandler(openApiData.paths)
           openApiData.info = {
             ...openApiData.info,
             // _openApiPrefix: openApiPrefix,
@@ -162,6 +173,7 @@ function serverTest() {
           if(file) {
             res.setHeader(`x-mockm-msg`, `from history`)
             const openApiData = require(file)
+            openApiData.paths = reqPrefixHandler(openApiData.paths)
             openApiData.info = {
               ...openApiData.info,
               _matchInfo: matchInfo,

@@ -367,11 +367,13 @@ proxy: {
      */
     resPrefix: string|((api: string) => string),
     /**
-     * 将前缀添加到请求的 path 中
+     * 将前缀添加到请求的 path 中, 常用于 openApi 中的 path 需要, 但实际请求没有的情况
      */
     reqPrefix: string|((api: string) => string),
   }
   ```
+swagger api 自动匹配逻辑为, `请求前缀+实际请求的 path` 与 `响应前缀+实际 openApi 的 path` 进行对比.
+  
 支持 basic-auth 认证, 在 url 上携带用户名密码即可, 例如 http://name:passwd@httpbin.org/spec.json.
 
 当为 object 时, key 也作为 ui 界面上 swagger 调试地址的匹配. 例如某个服务有 openApi 地址, 在里面有一个 api 是 /user, 但是最终部署之后经过代理的请求接口实际是 /api/server/user, 这种情况下 key 的值就是 `/api/server`.
