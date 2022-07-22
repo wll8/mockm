@@ -545,6 +545,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         api = isType(reqPrefix, `string`) ? `${reqPrefix}${api}` : reqPrefix(api)
         const path = new URL(`http://127.0.0.1${api}`).pathname
         const openApiFile = await file().getBackUrl(config._openApiHistoryDir, spec)
+        if(!openApiFile) {
+          return undefined
+        }
         const specJson = require(openApiFile)
         let {paths = {}, basePath = ``} = specJson
         method = method ? method.toLowerCase() : undefined
