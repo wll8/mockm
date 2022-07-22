@@ -3,7 +3,7 @@ process.env.MOCKM_REGISTRY = `https://registry.npm.taobao.org/`
 
 // 当测试用例中含有 .only 时应关闭并行测试
 const onlyFile = [...shelljs.ls(`./*.test.js`)].find((item) => {
-  return require(`fs`).readFileSync(item).includes(`it.only`)
+  return require(`fs`).readFileSync(item).includes(`.only(`)
 })
 
 module.exports = {
