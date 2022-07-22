@@ -23,7 +23,7 @@ describe('config.openApi', () => {
         }
       },
       okFn: async ({arg, str}) => {
-        await util.sleep()
+        await util.sleep(3000)
         await http.patch(`http://127.0.0.1:${arg.port}/oa`, {a: `1`})
         await util.sleep()
         await http.patch(`http://127.0.0.1:${arg.port}/oa`, {a: `2`})
@@ -64,7 +64,7 @@ describe('config.openApi', () => {
         }
       },
       okFn: async ({arg, str}) => {
-        await util.sleep()
+        await util.sleep(3000)
         await http.patch(`http://127.0.0.1:${arg.port}/oa`, {a: `1`})
         await http.patch(`http://127.0.0.1:${arg.port}/oa1`, {a: `1`})
         await util.sleep()
@@ -104,7 +104,7 @@ describe('config.openApi', () => {
         }
       },
       okFn: async ({arg, str}) => {
-        await util.sleep()
+        await util.sleep(3000)
         await http.patch(`http://127.0.0.1:${arg.port}/oa`, {a: `1`})
         await util.sleep()
         await http.patch(`http://127.0.0.1:${arg.port}/oa`, {a: `2`})
@@ -153,7 +153,7 @@ describe('config.openApi', () => {
         }
       },
       okFn: async ({arg, str}) => {
-        await util.sleep()
+        await util.sleep(3000)
         const resPrefix = await http.get(`http://127.0.0.1:${arg.testPort}/api/getOpenApi/?api=/test/hb/status/203`)
         const reqPrefix = await http.get(`http://127.0.0.1:${arg.testPort}/api/getOpenApi/?api=/png`)
         const normal = await http.get(`http://127.0.0.1:${arg.testPort}/api/getOpenApi/?api=/image/png`)
@@ -195,7 +195,7 @@ describe('config.openApi', () => {
         }
       },
       okFn: async ({arg, str}) => {
-        await util.sleep()
+        await util.sleep(3000)
         await http.patch(`http://127.0.0.1:${arg.port}/oa`, {a: `1`})
         await http.patch(`http://127.0.0.1:${arg.port}/oa1`, {a: `1`})
         await util.sleep()
