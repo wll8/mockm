@@ -177,11 +177,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   }
 
   function hasPackage(name, cfg = {}) { // 是还存在某个包
-    const path = require(`path`)
-    const mainPath = cfg.mainPath || path.join(__dirname, `../`) // 主程序目录
-    const packgePath =  `${mainPath}/node_modules/${name}`
-    const hasPackge = tool().file.hasFile(packgePath)
-    return hasPackge
+    return Boolean(npm().getLocalVersion(name))
   }
 
   async function installPackage({cwd, env, packageName, version, attempt = 3}) {
