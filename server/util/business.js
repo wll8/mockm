@@ -949,7 +949,7 @@ function business() { // 与业务相关性的函数
             },
             async (req, res, next) => { // mode history
               if(item.mode === `history`) {
-                require(`connect-history-api-fallback`)(item.option)(req, res, next)
+                ;(await tool.generate.initPackge(`connect-history-api-fallback`))(item.option)(req, res, next)
               } else {
                 next()
               }
