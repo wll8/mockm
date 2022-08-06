@@ -229,7 +229,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 如果某个依赖不存在, 则安装它
      * @param {*} packageName 依赖名称
      * @param {object} param1 配置
-     * @param {string} param1.version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
+     * @param {string} param1.version 版本, 如果不填则从 packageJson.optionalDependencies 中获取
      * @param {boolean} param1.getRequire 是否安装完成后进行 require
      * @param {object} param1.env 安装时的环境变量
      * @param {string} param1.msg 依赖不存在时提示的消息
@@ -239,7 +239,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || (packageJson.pluginDependencies || {})[packageName] || packageJson.dependencies[packageName]
+        version = version || (packageJson.optionalDependencies || {})[packageName] || packageJson.dependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
         if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           const cnpmVersion = npm().getLocalVersion(`cnpm`)
