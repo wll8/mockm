@@ -166,7 +166,7 @@ function serverTest() {
           },
         }[tool.type.isType(global.config.openApi)]()
         openApiPrefix = openApiPrefix.replace(/\/$/, ``) // 最后面不需要 `/`, 否则会出现两个 `//`, 因为它是拼接在 `/` 开头的 api 前面的
-        getOpenApi({openApi}).then((openApiData = {}) => {
+        openApi && getOpenApi({openApi}).then((openApiData = {}) => {
           openApiData.info = {
             ...openApiData.info,
             _openApiPrefix: openApiPrefix,
@@ -185,11 +185,15 @@ function serverTest() {
             }
             res.send(openApiData)
           } else {
-            res.status(404)
-            res.send({msg: `获取 openApi 错误`, err})
+            res.status(500)
+            res.send({msg: `openApi 读取错误`, err})
           }
           console.log(`err`, err)
         })
+        if(!openApi) {
+          res.status(404)
+          res.send({msg: `openApi 未找到`})
+        }
       },
       getApiListSse() {
         res.writeHead(200, {
