@@ -38,6 +38,7 @@ const {
   initHandle,
   plugin,
   saveLog,
+  build,
 } = business
 let shareConfig = {}
 const {
@@ -52,13 +53,14 @@ const os = require(`os`)
 const sharePath = path.normalize(`${os.tmpdir}/publicStore_${Date.now()}.json`) // 此文件用于 run.js 与 server.js 共享变量
 
 new Promise(async () => { // 显示程序信息, 例如版本号, logo
-  const vTag = `>> mockm v`
+  const vTag = `version: `
   const logText = require(`fs`).readFileSync(`${__dirname}/util/logo.txt`, `utf8`)
   const versionLogo = logText.replace(new RegExp(`(${vTag})(.*)`), (match, $1, $2) => {
-    const vLength = packageJson.version.length
+    const vStr = build.getBuildStr(packageJson)
+    const vLength = vStr.length
     const vLine = vLength > $2.length // 如果版本号替换到版本标志后面
-      ? `${$1}${packageJson.version}` 
-      : match.replace(new RegExp(`(${vTag})(.{${vLength}})`), `$1${packageJson.version}`)
+      ? `${$1}${vStr}` 
+      : match.replace(new RegExp(`(${vTag})(.{${vLength}})`), `$1${vStr}`)
     return vLine
   })
   process.argv.includes(`--log-line`) === false && print(versionLogo)

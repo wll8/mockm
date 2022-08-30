@@ -1916,10 +1916,25 @@ function business() { // 与业务相关性的函数
     }
   }
 
+  function build() {
+    function getBuildStr(packageJson) {
+      const buildInfo = packageJson.buildInfo
+      if(buildInfo && buildInfo.hash) {
+        return `${packageJson.version} => ${buildInfo.branch}/${buildInfo.hash.slice(0, 7)}`
+      } else {
+        return packageJson.version
+      }
+    }
+    return {
+      getBuildStr
+    }
+  }
+
   return {
     getProxyConfig,
     midResJson,
     url: url(),
+    build: build(),
     middleware: middleware(),
     saveLog,
     listToData,
