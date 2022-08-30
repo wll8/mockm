@@ -507,10 +507,10 @@
     path-to-regexp "0.1.7"
     ws "7.5.5"
 
-"@wll8/json-server@^0.17.2-alpha.2":
-  version "0.17.2-alpha.2"
-  resolved "https://registry.yarnpkg.com/@wll8/json-server/-/json-server-0.17.2-alpha.2.tgz#0a27ec5e4bdba448e9ccd4e8e5b449f857868b31"
-  integrity sha512-ZaZTDgRHWxTRgS5zo/q4yeQgP3pYyBSkz0s6K5CgtWl3TtZ6YGnEPZnvXV/uLUvf3K6XSrZVATHN2FViCkb3iw==
+"@wll8/json-server@^0.17.2-alpha.3":
+  version "0.17.2-alpha.3"
+  resolved "https://registry.yarnpkg.com/@wll8/json-server/-/json-server-0.17.2-alpha.3.tgz#56df8d7375d0c61aaf168e2cd5e7a822f9478cb1"
+  integrity sha512-zGV2TePxxFt3NJnTovGd4K6Q3ESnmQmqm9k27XdCNYtXBkYTcxMAo9n0jtawsvQ0rlJk7NGDij/9YGRuoYYG/w==
   dependencies:
     body-parser "^1.19.0"
     chalk "^4.1.2"

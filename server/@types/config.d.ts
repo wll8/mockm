@@ -4,6 +4,7 @@ import * as http from 'http'
 import { Request, Response, Application } from 'express'
 import { Server } from 'node:net'
 import { Options as connectHistoryApiFallbackOptions } from 'connect-history-api-fallback'
+import { OptionsJson, OptionsUrlencoded } from 'body-parser'
 import WebSocket from 'ws'
 
 export {
@@ -326,7 +327,16 @@ interface ConfigObj {
    * @default
    * false
    */
-   disableRecord: boolean | string | string[] | DisableRecord | DisableRecord[],
+  disableRecord: boolean | string | string[] | DisableRecord | DisableRecord[],
+
+  /**
+   * bodyParser 相关的中间件配置
+   * @default
+   */
+  bodyParser: {
+    json?: OptionsJson,
+    urlencoded?: OptionsUrlencoded,
+  },
 }
 
 interface WrapApiData {

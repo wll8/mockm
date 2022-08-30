@@ -15,9 +15,10 @@
     "@babel/runtime-corejs3": "^7.17.2",
     "@wll8/better-mock": "^0.3.3-alpha",
     "@wll8/express-ws": "^1.0.1",
-    "@wll8/json-server": "^0.17.2-alpha.2",
+    "@wll8/json-server": "^0.17.2-alpha.3",
     "address": "^1.2.0",
     "axios": "^0.26.0",
+    "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "1.6.0",
     "core-js": "^3.21.1",
@@ -54,7 +55,8 @@
   "scripts": {
     "lint": "eslint --ignore-path ../.gitignore .",
     "dts": "npx shx mkdir -p ./node_modules/mockm & npx shx cp -r ./@types ./node_modules/mockm/",
-    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \" fkill -f :9090 & node run.js port=9090 testPort=9095 replayPort=9091 --log-line\"",
+    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \"fkill -f :9090 & node run.js port=9090 testPort=9095 replayPort=9091 --log-line\"",
+    "start:example": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \"fkill -f :9090 & node run.js port=9090 testPort=9095 replayPort=9091 --config=./example/simple.mm.config.js --log-line\"",
     "serve": "node run.js --log-line",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
