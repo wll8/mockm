@@ -4,9 +4,9 @@
  */
 module.exports = util => {
   return  {
-    port: 9090,
-    testPort: 9095,
-    replayPort: 9091,
+    port: 9000,
+    testPort: 9005,
+    replayPort: 9001,
 
     // 代理后端的接口, 如果没有可以不填
     proxy: {
