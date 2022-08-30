@@ -1,6 +1,8 @@
 const gulp = require(`gulp`)
 // const rename = require(`gulp-rename`)
 const del = require(`del`)
+const cp = require(`child_process`)
+const fs = require(`fs`)
 const uglify = require(`gulp-uglify-es`).default
 const babel = require('gulp-babel')
 const argv = process.argv.reduce((acc, cur) => {
@@ -22,7 +24,6 @@ gulp.task(`copyServer`, (cb) => { // 复制 server 中的文件, 例如 package.
     npx shx cp -r ../server/example ../dist/package/
     npx shx cp -r ../server/@types ../dist/package/
     npx shx cp ../README.md ../dist/package/
-    npx shx rm  ../dist/package/package-lock.json
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
     console.log(`run: ${cmd}`)
@@ -91,6 +92,17 @@ gulp.task(`uglify`, () => { // 代码压缩, 处理兼容性
     .pipe(gulp.dest(`../dist/package`))
 })
 
+gulp.task(`setBuildInfo`, (cb) => { // 代码压缩, 处理兼容性
+  const packagePath = `../dist/package/package.json`
+  const package = require(packagePath)
+  package.buildInfo = package.buildInfo || {}
+  package.buildInfo.branch = String(cp.execSync(`git branch --show-current`)).trim()
+  package.buildInfo.date = require(`../server/util/tool.js`).time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date())
+  package.buildInfo.hash = String(cp.execSync(`git log --oneline`)).trim().split(`\n`)[0].match(/(.{7})/)[0]
+  fs.writeFileSync(packagePath, JSON.stringify(package, null, 2))
+  cb()
+})
+
 gulp.task(`tar`, () => { // 压缩相关文件为发布包 .tgz
   const tar = require(`tar`)
   const package = require(`../dist/package/package.json`)
@@ -126,6 +138,6 @@ gulp.task(
   gulp.series(
     `clear`,
     gulp.parallel(`copyServer`),
-    gulp.series(`uglify`, `tar`, done => done())
+    gulp.series(`uglify`, `setBuildInfo`, `tar`, done => done())
   ),
 )
