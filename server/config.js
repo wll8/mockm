@@ -58,7 +58,7 @@ if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
 /** @type {import('mockm/@types/config').Config} */
 const defaultConfigFn = (util) => { // 默认配置
   const {
-    libObj: { midResJson, axios, mime, mockjs },
+    libObj: { midResJson, axios, mime, mockjs, bodyParser },
     toolObj,
   } = util
   return {
@@ -105,6 +105,15 @@ const defaultConfigFn = (util) => { // 默认配置
     backOpenApi: 10,
     static: undefined,
     disableRecord: false,
+    bodyParser: {
+      json: {
+        limit: `100mb`,
+        extended: false,
+      },
+      urlencoded: {
+        extended: false,
+      },
+    },
   }
 }
 
@@ -134,6 +143,7 @@ config.proxy = [ // 合并 proxy 对象
 }, {})
 config.proxy = tool.obj.sortKey(config.proxy, {firstLong: true}) // 转换为子路径优先的形式
 config.proxy[`/`]  = config.proxy[`/`].replace(/$/, `/`).replace(/\/\/$/, `/`) // 当 proxy root 后面的斜杠时添加它
+config.bodyParser = tool.obj.deepMergeObject(defaultArg.bodyParser, fileArg.bodyParser || {})
 
 const _proxyTargetInfo = parseProxyTarget(config.proxy)
 const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
@@ -229,6 +239,10 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
   })(),
 
   // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
+  _bodyParserMid: [
+    lib.bodyParser.json(config.bodyParser.json),
+    lib.bodyParser.urlencoded(config.bodyParser.urlencoded),
+  ],
   _proxyTargetInfo, // 解析 proxy[`/`] 的内容
   _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
   _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置

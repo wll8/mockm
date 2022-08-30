@@ -45,7 +45,7 @@ async function serverProxy({
     // middlewaresObj.compression,
     // middlewaresObj.corsMiddleware,
     // middlewaresObj.serveStatic,
-    middlewaresObj.jsonParser,
+    config._bodyParserMid,
     middlewaresObj.urlencodedParser,
     middlewaresObj.logger,
   ) // 添加中间件, 方便取值
