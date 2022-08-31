@@ -1739,9 +1739,8 @@ function business() { // 与业务相关性的函数
      * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
      */
     async function runNgrok({serverList}) {
-      await tool.generate.initPackge(`ngrok`, {getRequire: false, env: {
-        NGROK_CDN_URL: `https://cdn.jsdelivr.net/gh/wll8/static@1.0.2/bin.equinox.io/`,
-      }})
+      // 不再使用 NGROK_CDN_URL, 因为它不稳定
+      await tool.generate.initPackge(`ngrok`, {getRequire: false})
       const path = require(`path`)
       const mainPath = path.join(__dirname, `../`) // 主程序目录
       const yaml = await tool.generate.initPackge(`yaml`)
