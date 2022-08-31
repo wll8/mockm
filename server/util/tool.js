@@ -183,12 +183,20 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   async function installPackage({cwd, env, packageName, version, attempt = 3}) {
     cwd = cwd.replace(/\\/g, `/`)
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
-    // const installEr = {cnpm: `npm`}[packageName] || `cnpm`
-    const installEr = `cnpm`
-    let {MOCKM_REGISTRY, NPM_CONFIG_REGISTRY} = process.env
-    MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
-    // --no-save 不保存依赖名称到 package.json 中
-    const cmd = `npx ${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`
+    const { manager } = require(`whatnpm`)
+    let installEr = manager(cwd).er || `npm`
+    if(hasPackage(installEr) === false) { // 如果安装器不存在, 则退出, 注意: 可能遇到安装器判断错误的情况.
+      print(cli.colors.red(`Please install mockm with npm and try again`))
+      process.exit()
+    }
+    // 不再使用 --registry 参数, 因为某些管理器要求此值与 lock 中的值一致
+    // 不再使用 npx , 因为它在新版本需要交互式确认
+    const cmd = {
+      npm: `npm add ${packageName}@${version}`,
+      pnpm: `pnpm add ${packageName}@${version}`, // pnpm 其实不支持 --registry 参数
+      cnpm: `cnpm i ${packageName}@${version}`, // cnpm 其他不支持 add 参数
+      yarn: `yarn add ${packageName}@${version}`,
+    }[installEr]
     const cd = require(`os`).type() === `Windows_NT` ? `cd /d` : `cd`
     const tips = tool().string.removeLeft(`
       initializing: ${packageName}...
@@ -202,18 +210,14 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     print(tips)
     let attemptNum = attempt // 重试次数
     do {
-      await cli().spawn(
-        `npx`, cmd.split(/\s+/),
-        {
-          detached: false, // 为 true 时拥有自己的窗口, 父进程退出后继续运行
-          cwd,
-          env: {
-            NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
-            ...process.env,
-            ...env,
-          },
+      const cp = require(`child_process`)
+      cp.execSync(cmd, {
+        cwd,
+        env: {
+          ...process.env,
+          ...env,
         },
-      )
+      })
       if(attemptNum < attempt) {
         print(`number of retries: ${attempt - attemptNum}/${attempt - 1}`)
       }
@@ -239,7 +243,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || (packageJson.optionalDependencies || {})[packageName] || packageJson.dependencies[packageName]
+        version = version || (packageJson.pluginDependencies || {})[packageName] || (packageJson.optionalDependencies || {})[packageName] || packageJson.dependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
         if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           const cnpmVersion = npm().getLocalVersion(`cnpm`)
