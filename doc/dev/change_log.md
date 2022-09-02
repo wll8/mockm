@@ -9,14 +9,50 @@
 
 :::
 
+## 2022 年 08 月 v1.1.26-alpha.38
+
+- feat: 把 ngrok 重新放回 pluginDependencies 中
+  不应放置于 optionalDependencies 中, 因为安装它的过程可能会十分漫长, 体验非常差.
+  - 不再使用 NGROK_CDN_URL, 因为它不稳定
+  - 不再使用 --registry 参数, 因为某些管理器要求此值与 lock 中的值一致
+  - 不再使用 npx , 因为它在新版本需要交互式确认
+  - 不再使用 --no-save, 因为某些管理器不支持
+- fix: --config 参数生成的配置文件中的默认端口改为 9000
+  因为很多文档和示例已经以 9000 作为示例了, 默认使用其他端口可能会生成误解
+- chore: 在编译后的启动信息中插入分支以及 commit hash 以便于追溯历史
+- feat: Allows to customize the parameters of bodyParser
+- refactor: 移除 lib.fetch
+  在 `feat: 不默认安装依赖 node-fetch` 这次 commit 中已经不再暴露 lib.fetch
+- fix: 避免 config.openApi 配置为空数组时出现读取错误
+- feat: 调整一些依赖为可选项
+  注: yarn install 使用 --ignore-optional 或 --production 时依然会请求可选项中的依赖表文件
+- feat: 把动态依赖放置于 optionalDependencies
+  因为动态安装经常不太稳定, 如果放置在可选依赖中则可以在第一次安装时尝试安装它们, 就算安装失败了也没有关系
+- fix: hasPackage 不应只检测子级 node_modules
+  例如全局安装时, npm 会把 node_modules 进行扁平化, 例如 md-cli 依赖了 mockm, 安装 md-cli 时, 只会存在 md-cli/node_modules 而不会存在 md-cli/node_modules/mockm/node_modules .
+
 ## 2022 年 07 月
+
+#### v1.1.26-alpha.30
+
+- chore: update dependencies
+- test: 调整 .only 的检测检测方式
+  例如 `describe.only` 和 `it.only` 均可
+- chore(client): 使用复制方式, 避免目录被占用时无法移动
+- test: 给备份 openApi 添加一些时间
+- fix: 避免 openApi 未备份完成时访问该文件出现问题
+- refactor: 移除 tool 中的 prepareProxy parseProxyTarget
+
 #### v1.1.26-alpha.29
+
 - feat: config.static 支持显示目录列表功能
 
 #### v1.1.26-alpha.28
+
 - fix: config.proxy 子路径应优先
 
 #### v1.1.26-alpha.27
+
 - feat: httpLog 也显示完整年月日
 - feat: 使用默认网关的 ip 作为 config.osIp 的默认值
   期望在同一个局域网下, 得到大家都可以访问的 ip url, 而不是本机私有 vpn 实现的 ip.
@@ -24,12 +60,15 @@
   https://github.com/chimurai/http-proxy-middleware/issues/299
 
 ## 2022 年 06 月
+
 #### v1.1.26-alpha.26
+
 - feat: 在 proxy 的根目录默认添加斜杠
 - fix(doc): 单词拼写错误, histroy, 改为 history
 - feat: 暴露 http 实例到 util 上便于需要时使用
 
 #### v1.1.26-alpha.24
+
 - refactor(test): 重构测试用例, 把 api.test 中的 db 相关部分移动到 db.test 中
 - feat: 从 config.api 中操作 db
 - feat: 冻结 global.config 中的属性
@@ -39,27 +78,31 @@
 - fix(client): 本地 cdn 目录中的 dist 不应被忽略
 
 ## 2022 年 05 月
+
 #### v1.1.26-alpha.21
+
 - feat: 将线上 cdn 替换为本地文件, 以避免各种 dns 污染导致的各种 cdn 失效问题
 - chore: 使用依赖锁文件
 - feat: 简化 --config 参数输出的内容
   更改 full.mm.config.js 为 simple.mm.config.js, 让配置看起来更容易使用, 不那么吓人和混乱.
 
 ## 2022 年 04 月
+
 #### v1.1.26-alpha.17
+
 - feat: 支持从 config.api 拦截 config.db 的接口
   参考 [config.api](../config/option.md#config-api) 示例中的 `/books/:id`
 - fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
   例如以下配置不应导致 `/api/test?a=1` 不能使用
-  ``` js
+  ```js
   config = {
     proxy: {
-      '/api/': `http://172.16.203.81/api/`,
+      "/api/": `http://172.16.203.81/api/`,
     },
     api: {
-      '/api/test': {msg: 123},
+      "/api/test": { msg: 123 },
     },
-  }
+  };
   ```
 - refactor: 去除冗余的逻辑
 - feat: 支持 [config.disablerecord](../config/option.md#config-disablerecord) 禁用请求记录
@@ -70,7 +113,9 @@
   - client 应在请求时获取 INJECTION_REQUEST, 而不是刷新页面才获取
 
 ## 2022 年 03 月
+
 #### v1.1.26-alpha.10
+
 - server
   - fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
 - client
@@ -81,7 +126,9 @@
     ```
 
 ## 2022 年 02 月
+
 #### v1.1.26-alpha.8
+
 - server
   - fix: 在页面上重发请求时提示 `重发请求成功 undefined undefined`
   - feat: 升级依赖
@@ -92,6 +139,7 @@
 ## 2022 年 01 月
 
 #### v1.1.26-alpha.2
+
 - server
   - feat: 自动安装依赖时, 也显示安装目录. 当安装失败时可以手动执行命令. (#13)
   - fix: 在判断是否进行代理时应排除已禁用的 webApi
