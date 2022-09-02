@@ -1738,7 +1738,7 @@ function business() { // 与业务相关性的函数
      * 运行多个 nginx 实例并获取他们的 url
      * @param {*} param0.serverList 服务列表, 例 {name: `web`, config: {addr: 8080}}
      */
-    async function runNgrok({serverList}) {
+    async function runNgrok({serverList, shareConfig}) {
       // 不再使用 NGROK_CDN_URL, 因为它不稳定
       await tool.generate.initPackge(`ngrok`, {getRequire: false})
       const path = require(`path`)
@@ -1763,7 +1763,13 @@ function business() { // 与业务相关性的函数
       // 使用这些端口以及用户配置生成 ngrok yaml 格式的配置文件
       portList.forEach((freePort, index) => {
         const {name, config} = serverList[index]
+        const authtoken = shareConfig.remoteToken[{
+          port: 0,
+          testPort: 1,
+          replayPort: 2,
+        }[name]]
         const json = {
+          authtoken,
           web_addr: `localhost:${freePort}`,
           tunnels: {
             [name]: { // 服务名称
@@ -1848,7 +1854,7 @@ function business() { // 与业务相关性的函数
           ...shareConfig.remote[name],
         },
       }))
-      const urlList = await runNgrok({serverList}).catch(err => console.log(`err`, err))
+      const urlList = await runNgrok({serverList, shareConfig}).catch(err => console.log(`err`, err))
       serverList.forEach((item, index) => {
         store.set(`note.remote.${item.name}`, urlList[index])
       })
