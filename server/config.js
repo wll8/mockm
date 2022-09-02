@@ -87,6 +87,7 @@ const defaultConfigFn = (util) => { // 默认配置
       '/': `http://www.httpbin.org/`,
     },
     remote: false,
+    remoteToken: [],
     openApi: `http://httpbin.org/spec.json`,
     cors: true,
     dataDir: `./httpData/`,
@@ -212,6 +213,11 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     : config.remote === true
       ? {}
       : config.remote,
+  remoteToken: isType(config.remoteToken, `string`)
+      ? [config.remoteToken]
+      : isType(config.remoteToken, `array`)
+        ? config.remoteToken
+        : [],
   watch: isType(config.watch, `string`)
       ? [config.watch]
       : isType(config.watch, `array`)
