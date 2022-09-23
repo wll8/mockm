@@ -98,7 +98,20 @@ async function serverProxy({
       allowCors({req, res, next})
     })
     if(Boolean(item.disable) === false) {
-      app[item.method](item.route, item.action)
+      const handleErr = (...arg) => {
+        try {
+          return item.action(...arg)
+        } catch (error) {
+          print(tool.cli.colors.red(`api error: ${item.method} ${item.route}`))
+          print(error)
+          if(item.method !== `ws`) {
+            const [req, res, next] = arg
+            res.status(500).json({msg: String(error)})
+          }
+        }
+      }
+      const action = typeof(item.action) === `function` ? handleErr : item.action
+      app[item.method](item.route, action)
     }
   }
   list = [
