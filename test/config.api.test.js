@@ -181,6 +181,28 @@ describe('config.api', () => {
       },
     }))
   })
+  it(`当自定义的 api 错误时不应导致服务崩溃`, async () => {
+    util.ok(await util.runMockm({
+      mockm: (util) => {
+        return {
+          api: {
+            'get /err' (req, res) { // 模拟一个错误
+              x
+            },
+            'get /yes' (req, res) {
+              res.json(`ok`)
+            },
+          },
+        }
+      },
+      okFn: async ({arg, str}) => {
+        const [err] = await util.to(http.get(`http://127.0.0.1:${arg.port}/err`, {retry: 0}))
+        const yes = (await http.get(`http://127.0.0.1:${arg.port}/yes`)).data
+        await util.sleep(500)
+        return (err && yes)
+      },
+    }))
+  })
   it(`获取 url 上的 params, query 以及 body 参数`, async () => {
     const paramsId = `202`
     const queryId = util.uuid()
