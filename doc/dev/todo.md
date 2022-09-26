@@ -243,6 +243,18 @@
 
 ## 更新计划
 - 2.x - 破坏性
+  - [ ] feat: 删除默认的 query 参数名称转换
+    - 例如把 req.query.pageSize 转换为 req.query._limit
+    - 如果需要转换, 可以在 config.api 的根路由添加中间件自行转换
+    - 例如:
+    ``` js
+    config.api  = {
+      'use /'(req, res, next) {
+        req.query.pageSize && (req.query._limit = req.query.pageSize)
+        next()
+      }
+    }
+    ```
   - [ ] feat: 更改代理方式
     - `"/": 'http://127.0.0.1/api'`  应代理到 `/api` 而不是 `/`.
   - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
