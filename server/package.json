@@ -14,7 +14,7 @@
   "dependencies": {
     "@babel/runtime-corejs3": "^7.17.2",
     "@wll8/better-mock": "^0.3.3-alpha",
-    "@wll8/express-ws": "^1.0.1",
+    "@wll8/express-ws": "^1.0.3",
     "@wll8/json-server": "^0.17.2-alpha.3",
     "address": "^1.2.0",
     "axios": "^0.26.0",
