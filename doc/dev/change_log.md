@@ -9,6 +9,14 @@
 
 :::
 
+## 2022 年 10 月
+- chore: 升级依赖 @wll8/express-ws
+
+## 2022 年 09 月 v1.1.26-alpha.39
+- feat: 提高稳健性, 当自定义的 api 错误时不应导致服务崩溃
+- feat: 允许向外网映射程序传送 authtoken
+- doc: upload
+
 ## 2022 年 08 月 v1.1.26-alpha.38
 
 - feat: 把 ngrok 重新放回 pluginDependencies 中
