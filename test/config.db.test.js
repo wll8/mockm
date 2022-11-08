@@ -142,4 +142,32 @@ describe('config.db', () => {
       },
     }))
   })
+  it(`嵌套`, async () => {
+    util.ok(await util.runMockm({
+      mockm: (util) => {
+        return {
+          route: {
+            '/db/api/*': `/$1`,
+          },
+          db: util.libObj.mockjs.mock({
+            "posts": [
+              { "id": 1, "title": "json-server", "author": "typicode" }
+            ],
+            "comments": [
+              { "id": 1, "body": "some comment", "postId": 1 }
+            ],
+          }),
+        }
+      },
+      okFn: async ({arg, str}) => {
+        const res1 = (await http.get(`http://127.0.0.1:${arg.port}/db/api/posts/1`)).data.data
+        const res2 = (await http.get(`http://127.0.0.1:${arg.port}/posts/1`)).data.data
+        const res3 = (await http.get(`http://127.0.0.1:${arg.port}/db/api/posts/1/comments`)).data.data[0]
+        return (
+          res1.id === res2.id
+          && res1.id === res3.postId
+        )
+      },
+    }))
+  })
 })

@@ -1,7 +1,19 @@
 # 待完成
 
 ## 文档
+- [ ] fix: 创建的 ws 接口在项目中使用时报错 `Invalid frame header`
+  - 控制台可多次正常发送 send, 但是在项目中发送时会触发 `Invalid frame header`
+  - 单独使用 `@wll8/express-ws` 创建的 ws api 可以在项目中正常使用
+  - 使用相同的配置和相同版本的 mockm 启动服务, 但项目中仅 ws 使用该服务时不会出现问题, 但项目中的 http 也走该服务就会出现问题
+  - 初步怀疑是大量的 http proxy 在使用时会与 ws 的使用产生干扰
 - [x] feat: 使用默认网关的 ip 作为 osIp 的默认值
+- [ ] fix: ws 代理无效
+  - 源 host 上有 ws 并可直连使用, 但通过代理无法连接
+- [ ] fix: ws 接口未正常断开时无法再次连接
+  - 在 config.api 中创建 ws 接口, 然后再浏览器中连接它
+  - 刷新浏览器让 ws 在不是调用 ws.close 的情况下异常断开
+  - 再连接 ws 接口
+  - ws 接口报错 `Invalid frame header`
   ``` js
     const result = require('default-gateway').v4.sync()
     const res = require('address').ip(result && result.interface) // 获取默认IP

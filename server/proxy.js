@@ -86,6 +86,7 @@ async function serverProxy({
   let list = [
     `api`,
     `db`,
+    `resetUrl`,
     `static`,
     `apiWeb`,
   ].reduce((acc, cur) => {
