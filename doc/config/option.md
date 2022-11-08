@@ -698,3 +698,22 @@ api: {
   }
   ```
 - DisableRecord[] 使用多个配置
+
+## config.bodyParser
+类型: Object
+默认: 参考下文
+
+向 bodyParser 中间件传入配置.
+
+``` js
+// 默认值
+config.bodyParser = {
+  json: {
+    limit: `100mb`,
+    extended: false,
+  },
+  urlencoded: {
+    extended: false,
+  },
+}
+```
