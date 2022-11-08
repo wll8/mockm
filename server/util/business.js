@@ -962,17 +962,40 @@ function business() { // 与业务相关性的函数
       return list
     }
     
-    // 处理为统一的列表
+    function resetUrl() { // 重置 req.url
+      /**
+       某些中间件例如 json-server 会改变 req.url, 导致后续的 app.use 逻辑不符合预期
+       @see https://github.com/typicode/json-server/blob/5df482bdd6e864258d6e7180342a30bf7b923cbc/src/server/router/nested.js#L13
+       */
+      return [
+        {
+          route: `/`,
+          re: pathToRegexp(`/`),
+          method: `use`,
+          type: `resetUrl`,
+          action: (req, res, next) => {
+            req.url = req.originalUrl
+            next()
+          },
+          info: {},
+          occupied: {},
+        },
+      ]
+    }
+    
+    // 处理为统一的列表, 注意列表中的顺序对应 use 注册的顺序
     const obj = {
       api: parseApi(),
       db: parseDbApi(),
+      resetUrl: resetUrl(),
+      static: staticHandle(),
       apiWeb: apiWebHandle(),
       proxy: prepareProxy(global.config.proxy),
-      static: staticHandle(),
     }
     const allRoute = [
       ...obj.api,
       ...obj.db,
+      ...obj.resetUrl,
       ...obj.static,
       ...obj.apiWeb,
       ...obj.proxy,
