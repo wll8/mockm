@@ -1,6 +1,7 @@
 # 待完成
 
 ## 文档
+- [x] fix: [DELETE request will delete all data](https://github.com/typicode/json-server/issues/885)
 - [ ] fix: 创建的 ws 接口在项目中使用时报错 `Invalid frame header`
   - 控制台可多次正常发送 send, 但是在项目中发送时会触发 `Invalid frame header`
   - 单独使用 `@wll8/express-ws` 创建的 ws api 可以在项目中正常使用
