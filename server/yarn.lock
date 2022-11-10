@@ -612,10 +612,10 @@
     path-to-regexp "0.1.7"
     ws "7.5.5"
 
-"@wll8/json-server@^0.17.2-alpha.5":
-  version "0.17.2-alpha.5"
-  resolved "https://registry.npmmirror.com/@wll8/json-server/-/json-server-0.17.2-alpha.5.tgz#05701b4a3b4c71964154624f2ffc13b017737486"
-  integrity sha512-dllZ/eAkY1hGBEBfI9mxfU+qE5yPqpVfW6a8xWCgV9Gfr0qBCpyRgMmhnXr0NYEJ33rCjnNFtFmIDO6VCaaIWg==
+"@wll8/json-server@^0.17.2-alpha.6":
+  version "0.17.2-alpha.6"
+  resolved "https://registry.npmmirror.com/@wll8/json-server/-/json-server-0.17.2-alpha.6.tgz#199d7af6a2391dc68f2e5346f95676d413e49ad8"
+  integrity sha512-A0Jio1mgWVMYzr/KERK2ay9c7BYt3hRGj50HtRSAwypkunQY3iiNp3v88SvC1fDBwUsAsqlxD5Eficq64yIyXQ==
   dependencies:
     body-parser "^1.19.0"
     chalk "^4.1.2"

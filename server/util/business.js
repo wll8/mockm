@@ -632,6 +632,7 @@ function business() { // 与业务相关性的函数
 
     function parseDbApi() {
       const router = jsonServer.router(global.config.dbJsonPath, {
+        _noRemoveDependents: true,
         _noDataNext: true,
         _noDbRoute: true,
       })
