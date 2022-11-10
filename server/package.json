@@ -1,9 +1,10 @@
 {
-  "name": "mockm",
+  "name": "server-go",
   "version": "1.1.26-alpha.41",
   "description": "Analog interface server, painless parallel development of front and back ends.",
   "main": "server.js",
   "bin": {
+    "server-go": "run.js",
     "mm": "run.js",
     "mockm": "run.js"
   },

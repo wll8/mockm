@@ -1,6 +1,8 @@
 # 待完成
 
 ## 文档
+- [x] chore: 更名为 server-go
+  - 因为原名称 mockm 总是产生专用于模拟数据的感觉
 - [x] fix: [DELETE request will delete all data](https://github.com/typicode/json-server/issues/885)
 - [ ] fix: 创建的 ws 接口在项目中使用时报错 `Invalid frame header`
   - 控制台可多次正常发送 send, 但是在项目中发送时会触发 `Invalid frame header`
