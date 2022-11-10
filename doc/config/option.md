@@ -347,6 +347,13 @@ proxy: {
 
 :::
 
+## config.remoteToken
+类型: string | string[]
+默认: []
+
+外网映射程序所使用的 authtoken, 以数组形式提供多个 token, 分别用于 port/testPort/replayPort 服务的通道  
+目前 ngrok 已注册的免费用户仅可使用 1 通道, 如果你的 tokenA 支持 3 个通道, 可以这样重复使用: [tokenA, tokenA, tokenA]
+
 ## config.openApi
 类型: string | array | object
 默认: `http://httpbin.org/spec.json`
