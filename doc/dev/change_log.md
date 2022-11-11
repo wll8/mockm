@@ -11,6 +11,10 @@
 
 ## 2022 年 11 月
 
+#### v1.1.26-alpha.42
+
+- feat: 不使用 json-server 的依赖清除功能 [#885](https://github.com/typicode/json-server/issues/885#issuecomment-1308426049)
+
 #### v1.1.26-alpha.40
 
 - fix: config.db 嵌套操作时不应 404
