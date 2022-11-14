@@ -59,7 +59,26 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }
     }
 
+    /**
+     * 获取当前 npm 配置文件中使用的注册表地址, 而不是环境变量中的地址
+     */
+    async function getNpmRegistry() {
+      const cp = require(`child_process`)
+      const url = fn().tryFn(() => cp.execSync(`npm config get registry`, {
+        env: {
+          /**
+           * 设置为空, 即可避免使用当前环境变量中的值而是使用 npm 配置文件中的值
+           * 为了避免通过 yarn 启动时, 获取到的值是 registry.yarnpkg.com
+           * 但我们需要的其实是需要 npm 本身配置的值, 例如通过 nrm use 来切换的配置
+           */
+          NPM_CONFIG_REGISTRY: undefined,
+        }
+      }).toString().trim())
+      return url
+    }
+
     return {
+      getNpmRegistry,
       getLocalVersion,
       getServerVersion,
       checkUpdate,
@@ -180,7 +199,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     return Boolean(npm().getLocalVersion(name))
   }
 
+  /**
+   * 自动安装依赖
+   * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果, 
+   *  需要使用 mm remote 这种直接调用可执行文件的方式才能实时输出, 不知道为什么
+   * @param {*} param0 
+   * @returns 
+   */
   async function installPackage({cwd, env, packageName, version, attempt = 3}) {
+    const registryUrl = await npm().getNpmRegistry()
+    const { MOCKM_REGISTRY } = process.env
+    const useUrl = registryUrl || MOCKM_REGISTRY || `https://registry.npm.taobao.org/`
     cwd = cwd.replace(/\\/g, `/`)
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
     const { manager } = require(`whatnpm`)
@@ -212,10 +241,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     do {
       const cp = require(`child_process`)
       cp.execSync(cmd, {
+        stdio: `inherit`, // 实时转发子进程的输出到当前控制台中
         cwd,
         env: {
           ...process.env,
           ...env,
+          NPM_CONFIG_REGISTRY: useUrl,
         },
       })
       if(attemptNum < attempt) {
@@ -934,7 +965,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         ))
       }
     }
+    /**
+     * 让函数运行不报错
+     */
+    function tryFn(fn, ...arg) {
+      try {
+        return fn(...arg)
+      } catch (error) {
+        return undefined
+      }
+    }
     return {
+      tryFn,
       emptyFn,
     }
   }

@@ -57,4 +57,13 @@ module.exports = {
 
 ## 环境变量
 ### MOCKM_REGISTRY
-MOCKM_REGISTRY 或 NPM_CONFIG_REGISTRY 可以指定按需安装依赖时的镜像地址, 默认 https://registry.npm.taobao.org/.
+MOCKM_REGISTRY 可以指定按需安装依赖时的镜像地址, 默认跟随当前 npm 配置, 不存在时使用 https://registry.npm.taobao.org/.
+
+::: details 为什么不使用默认的 NPM_CONFIG_REGISTRY? 
+- 1 假设你通过修改了 npm 的默认镜像地址, 例如 `nrm use taobao`, 
+- 2 你没有指定 NPM_CONFIG_REGISTRY 环境变量,
+- 3 package.json 中有以下 scripts `"dev": "mockm"`,
+- 4 当你运行 `yarn dev` 时, yarn 会自动把 NPM_CONFIG_REGISTRY 值设置为 `https://registry.yarnpkg.com/`, 这与第 2 步冲突了.
+:::
+
+
