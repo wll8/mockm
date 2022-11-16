@@ -1160,14 +1160,15 @@ function business() { // 与业务相关性的函数
       })
       
       
+      const example = fs.readFileSync( `${__dirname}/../example/simple.mm.config.js`, `utf8`)
       if((cliArg[`--config`] === true) && (hasCwdConfig === false)) { // 如果 config=true 并且当前目录没有配置时, 则生成示例配置并使用
-        const example = fs.readFileSync( `${__dirname}/../example/simple.mm.config.js`, `utf8`)
-        fs.writeFileSync(cwdConfigPath, example)
+        tool.file.createFile({filePath: cwdConfigPath, str: example}) && print(tool.cli.colors.yellow(`已从示例配置自动创建 => ${cwdConfigPath}`))
         res = cwdConfigPath
       } else if((cliArg[`--config`] === true) && (hasCwdConfig === true)) { // 使用生成的示例配置
         res = cwdConfigPath
       } else if(typeof(cliArg[`--config`]) === `string`) { // 命令行上指定的 config 文件
         res = cliArg[`--config`]
+        tool.file.createFile({filePath: res, str: example}) && print(tool.cli.colors.yellow(`已从示例配置自动创建 => ${res}`))
       } else if(tool.file.hasFile(cwdConfigPath)) { // 命令运行位置下的配置
         res = cwdConfigPath
       }

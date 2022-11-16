@@ -39,7 +39,7 @@ module.exports = {
 ### --config
 指定配置文件地址. 
 
-例如传入 `--config=test/mm.config.js` 则表示使用 test 目录下的 mm.config.js 文件作为配置.
+例如传入 `--config=test/mm.config.js` 则表示使用 test 目录下的 mm.config.js 文件作为配置, 若不存在则从示例配置自动创建.
 
 当命令行上仅传入 `--config` 或 `--config=true` 值时, 如果当前目录不存在配置文件, 则会自动生成一份较为完整的, 然后按自己的需求修改即可.
 

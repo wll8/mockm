@@ -86,7 +86,7 @@ function ok(val) {
 async function runMockm(fnArg) {
   fnArg = typeof(fnArg) === `function` ? {okFn: fnArg} : fnArg
   let {
-    runOk = true, // 是否等待运行完成
+    runOk = true, // 是否等待运行完成, 例如要测试运行失败时可以使用 false 值
     INJECT = undefined, // 注入数据到此变量并应用到 mockm 的配置文件中
     mockm = undefined, // 转换成配置文件的参数
     cli = undefined, // 在命令行上传送的参数

@@ -904,8 +904,31 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         || fs.readFileSync(file, `utf-8`).trim() === ``
       )
     }
+    
+    /**
+     * 当文件不存在或内容为空时创建文件, 自动创建目录
+     * arg[0].filePath 文件地址
+     * arg[0].str 文件内容
+     * arg[0].force 是否强行覆盖
+     * 
+     * @return boolean 是否创建
+     */
+    function createFile({filePath, str = ``, force = false, msg = ``} = {}) {
+      const path = require(`path`)
+      const fs = require(`fs`)
+      const dir = path.parse(filePath).dir
+      dir && fs.existsSync(dir) === false && fs.mkdirSync(dir, {recursive: true})
+      let res = false
+      if(force) {
+        res = (fs.writeFileSync(filePath, str), true)
+      } else {
+        res = isFileEmpty(filePath) && (fs.writeFileSync(filePath, str), true)
+      }
+      return res
+    }
 
     return {
+      createFile,
       copyFolderSync,
       filesCreateOrRemove,
       createNewFile,
