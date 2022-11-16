@@ -724,3 +724,40 @@ config.bodyParser = {
   },
 }
 ```
+
+## config.https
+类型: configHttps
+默认: 参考类型定义
+
+``` ts
+interface configHttps {
+  /**
+   * 私钥文件地址, 例如 *.key
+   */
+  key: String,
+
+  /**
+   * 公钥文件地址, 例如 *.crt, *.cer
+   */
+  cert: String,
+  
+  /**
+   * 是否重定向到 https
+   * @default true
+   */
+  redirect: Boolean,
+  
+  /**
+   * 配置 https 使用的端口, 默认同 config.port
+   */
+  port: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.testPort
+   */
+  testPort: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.replayPort
+   */
+  replayPort: number | string,
+}
+```

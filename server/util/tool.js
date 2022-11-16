@@ -372,6 +372,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {*} pathStr 路径
      */
      function handlePathArg(pathStr) {
+      if(pathStr === undefined) {
+        return undefined
+      }
       const path = require(`path`)
       let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
       newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
@@ -949,7 +952,21 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return ip
     }
 
+    /**
+     * 判断请求是 http 还是 https
+     * https://stackoverflow.com/questions/10348906/how-to-know-if-a-request-is-http-or-https-in-node-js
+     * @param {*} req 
+     * @returns 
+     */
+    function getProtocol (req) {
+      let proto = req.connection.encrypted ? 'https' : 'http';
+      // only do this if you trust the proxy
+      proto = req.headers['x-forwarded-proto'] || proto;
+      return proto.split(/\s*,\s*/)[0];
+    }
+
     return {
+      getProtocol,
       getClientUrlAndPath,
       getClientIp,
     }
