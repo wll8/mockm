@@ -87,6 +87,7 @@ const defaultConfigFn = (util) => { // 默认配置
       '/': `http://www.httpbin.org/`,
     },
     remote: false,
+    remoteToken: [],
     openApi: `http://httpbin.org/spec.json`,
     cors: true,
     dataDir: `./httpData/`,
@@ -113,6 +114,9 @@ const defaultConfigFn = (util) => { // 默认配置
       urlencoded: {
         extended: false,
       },
+    },
+    https: {
+      redirect: true,
     },
   }
 }
@@ -212,6 +216,11 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     : config.remote === true
       ? {}
       : config.remote,
+  remoteToken: isType(config.remoteToken, `string`)
+      ? [config.remoteToken]
+      : isType(config.remoteToken, `array`)
+        ? config.remoteToken
+        : [],
   watch: isType(config.watch, `string`)
       ? [config.watch]
       : isType(config.watch, `array`)
@@ -242,6 +251,12 @@ const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进�
     }[isType(disableRecord)]
     return fn ? fn() : false
   })(),
+  https: {
+    ...defaultArg.https,
+    ...config.https,
+    key: handlePathArg(config.https.key),
+    cert: handlePathArg(config.https.cert),
+  },
 
   // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
   _bodyParserMid: [

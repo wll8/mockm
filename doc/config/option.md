@@ -347,6 +347,13 @@ proxy: {
 
 :::
 
+## config.remoteToken
+类型: string | string[]
+默认: []
+
+外网映射程序所使用的 authtoken, 以数组形式提供多个 token, 分别用于 port/testPort/replayPort 服务的通道  
+目前 ngrok 已注册的免费用户仅可使用 1 通道, 如果你的 tokenA 支持 3 个通道, 可以这样重复使用: [tokenA, tokenA, tokenA]
+
 ## config.openApi
 类型: string | string[] | openApi | openApi[]
 默认: `http://httpbin.org/spec.json`
@@ -715,3 +722,59 @@ api: {
   }
   ```
 - DisableRecord[] 使用多个配置
+
+## config.bodyParser
+类型: Object
+默认: 参考下文
+
+向 bodyParser 中间件传入配置.
+
+``` js
+// 默认值
+config.bodyParser = {
+  json: {
+    limit: `100mb`,
+    extended: false,
+  },
+  urlencoded: {
+    extended: false,
+  },
+}
+```
+
+## config.https
+类型: configHttps
+默认: 参考类型定义
+
+``` ts
+interface configHttps {
+  /**
+   * 私钥文件地址, 例如 *.key
+   */
+  key: String,
+
+  /**
+   * 公钥文件地址, 例如 *.crt, *.cer
+   */
+  cert: String,
+  
+  /**
+   * 是否重定向到 https
+   * @default true
+   */
+  redirect: Boolean,
+  
+  /**
+   * 配置 https 使用的端口, 默认同 config.port
+   */
+  port: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.testPort
+   */
+  testPort: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.replayPort
+   */
+  replayPort: number | string,
+}
+```

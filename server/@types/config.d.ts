@@ -78,10 +78,6 @@ interface ConfigFnArg {
      * express 实例
      */
     app: Application,
-    /**
-     * httpServer 实例
-     */
-    httpServer: Server,
   },
   toolObj: any,
   /**
@@ -89,6 +85,37 @@ interface ConfigFnArg {
    */
   libObj: libObj,
   business: any,
+}
+
+interface configHttps {
+  /**
+   * 私钥文件地址, 例如 *.key
+   */
+  key: String,
+
+  /**
+   * 公钥文件地址, 例如 *.crt, *.cer
+   */
+  cert: String,
+  
+  /**
+   * 是否重定向到 https
+   * @default true
+   */
+  redirect: Boolean,
+  
+  /**
+   * 配置 https 使用的端口, 默认同 config.port
+   */
+  port: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.testPort
+   */
+  testPort: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.replayPort
+   */
+  replayPort: number | string,
 }
 
 interface ConfigObj {
@@ -190,6 +217,14 @@ interface ConfigObj {
    * false
    */
   remote: boolean,
+
+  /**
+   * 外网映射程序所使用的 authtoken, 以数组形式提供多个 token, 分别用于 port/testPort/replayPort 服务的通道  
+   * 目前 ngrok 已注册的免费用户仅可使用 1 通道, 如果你的 tokenA 支持 3 个通道, 可以这样重复使用: [tokenA, tokenA, tokenA]
+   * @default
+   * []
+   */
+  remoteToken: string | string[],
 
   /**
    * 关联的 openApi 数据文件, 支持 json 格式, 会自动根据当前的 api 匹配对应的 swagger 文档. 支持多个 api 源.
@@ -337,6 +372,12 @@ interface ConfigObj {
     json?: OptionsJson,
     urlencoded?: OptionsUrlencoded,
   },
+
+  /**
+   * https 证书配置
+   * @default {}
+   */
+  https: configHttps,
 }
 
 interface WrapApiData {

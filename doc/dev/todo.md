@@ -1,6 +1,139 @@
 # 待完成
 
 ## 文档
+- [ ] feat(doc): 从 config.d.ts 生成配置说明文档
+- [ ] feat(test): 支持以某个默认配置重测
+  - 例如把支持 https 作为默认配置, 然后重测所有用例, 以检查 https 功能对以往功能是否造成影响
+- [ ] fix: 隐藏获取查询更新时的错误 `certificate has expired`
+- [ ] refactor: test.js 中的 global.config 更改为 config
+- [ ] refactor: 优化 run.js 与 server.js 的通信方式, 避免总是创建临时 json 文件
+- [ ] ? 同一个端口能实现 http => https 吗
+- [ ] fix: 当 proxy.js 中发起 exit 事件时, 应在 run.js 中也 exit
+- [ ] refactor: 把 proxy/test/replay 中的 express 实例统一为名称 app
+- [x] feat: 支持 https 配置
+  - 问: 在同一个端口上实现 http 和 https ?
+  - 答: 
+    - 可行, [通过分析报文特征来重定向](https://github.com/mscdex/httpolyglot/issues/3#issuecomment-173680155)
+    - 可行但不规范, [http 和 https 按标签是属不同端口](https://stackoverflow.com/questions/22453782/nodejs-http-and-https-over-same-port)
+      - https://github.com/elastic/kibana/issues/10181
+  - 注: 当使用 80/443 端口时, 浏览器会强制校验证书
+  - 注: 由于 ngrok 无 token 时不提供 html, 但 80 => 443 通过 html 来重定向
+  - 注: 此功能要求 node 12+, 这是 httpolyglot 这个依赖规定的
+  - 注: 在 axios 在浏览器中禁用重定向可能会失败
+    - https://github.com/axios/axios/issues/3924#issuecomment-917666707
+    - https://stackoverflow.com/questions/228225/prevent-redirection-of-xmlhttprequest/343359#343359
+- [x] fix: [DELETE request will delete all data](https://github.com/typicode/json-server/issues/885)
+- [ ] fix: 创建的 ws 接口在项目中使用时报错 `Invalid frame header`
+  - 控制台可多次正常发送 send, 但是在项目中发送时会触发 `Invalid frame header`
+  - 单独使用 `@wll8/express-ws` 创建的 ws api 可以在项目中正常使用
+  - 使用相同的配置和相同版本的 mockm 启动服务, 但项目中仅 ws 使用该服务时不会出现问题, 但项目中的 http 也走该服务就会出现问题
+  - 初步怀疑是大量的 http proxy 在使用时会与 ws 的使用产生干扰
+- [x] feat: 使用默认网关的 ip 作为 osIp 的默认值
+- [ ] fix: ws 代理无效
+  - 源 host 上有 ws 并可直连使用, 但通过代理无法连接
+- [ ] fix: ws 接口未正常断开时无法再次连接
+  - 在 config.api 中创建 ws 接口, 然后再浏览器中连接它
+  - 刷新浏览器让 ws 在不是调用 ws.close 的情况下异常断开
+  - 再连接 ws 接口
+  - ws 接口报错 `Invalid frame header`
+  ``` js
+    const result = require('default-gateway').v4.sync()
+    const res = require('address').ip(result && result.interface) // 获取默认IP
+  ```
+- [ ] feat: 由于移除了 ws, 所以 d.ts 中的 `import WebSocket from 'ws'` 应变更为 `@wll8/express-ws` 中的 ws
+- [ ] feat: 自动检测安装 mockm 使用的包管理器
+  - 参考 [ni](https://github.com/antfu/ni/blob/main/src/detect.ts), 使用 package.json 中的 packageManager 字段
+  - 检测 lock 文件, 例如当都存在时检测更新日期
+  - 检测 node_modules 特征
+
+- [x] feat: config.static 支持显示目录列表功能
+  - [x] 可点击路径条
+  - 列表, 排序
+  - 搜索
+- [ ] feat: config.static 配置的目录应是
+  - 绝对路径
+  - 相对路径, 相对于运行时的目录(可被 --cwd 改变)
+- [x] fix(test): 中途退出测试时不应使用 `process.exit`, 否则会导致无法捕获错误的用例, `Uncaught error outside test suite`.
+- [x] fix(test): 优化用例 `WebSocket 消息收发`, 因为启动 mockm 后 websocket 服务可能并未初始化, 此时连接会出错.
+- [ ] feat: config.db 在列表中支持可折叠
+- [x] feat: httpLog 显示完整的时间
+- [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
+- [x] fix: config.proxy 子路径冲突
+  ``` js
+    config = {
+      proxy: {
+        '/im':`ws:///192.168.160.74:10000/im`,
+        '/im/dept':`http://192.168.160.74:10000/im/dept`, // 不应该无法使用
+      }
+    }
+  ```
+- [x] refactor: 更改 `require('serve-static')` 为 `express.static`
+- [x] refactor: 尝试使用 express-ws 替代 ws
+  - 替代后可以统一使用 `app.ws(route, fn)` 的形式实现逻辑, 而不是在 root 下自己实现 upgrade 协议升级和路由判断
+  - express-ws 已一年以上没有更新
+- [ ] refactor: 使用单个中间件实现多个 use 的效果
+  ```js
+  // 修改前
+  app.use(fn)
+  isOk && app.use(fn2)
+  ``` 
+  ```js
+  // 修改后
+  app.use(() => {
+    return isOk ? [fn, fn2] : [fn]
+  })
+  ``` 
+- [x] refactor: 移动 `router.render` 的位置到 router 声明的地方
+- [x] refactor: 抽取 getProxyConfig 方法到公共业务中
+- [ ] fix: 多个 proxy ws 无法代理
+  - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
+  - https://github.com/chimurai/http-proxy-middleware/issues/463#issuecomment-1128835468
+  ``` js
+  config = {
+    proxy: {
+      '/': `http://httpbin.org`,
+      '/ws1': `ws://ws.ifelse.io`, // 不应无法工作
+      '/ws2': `http://ws.ifelse.io`, // 不应无法工作
+    }
+  }
+  config = {
+    proxy: {
+      '/': `http://127.0.0.1:9000`,
+      '/ws': `http://127.0.0.1:9000/websocket`, // 不应无法工作
+    },
+  }
+  ```
+- [ ] feat: 目前 config.route 是否支持参数映射
+  - 例如 path 中的参数转为 query 中的参数
+  - https://github.com/typicode/json-server#add-custom-routes
+- [x] refactor: 在统一的地方处理 api, 由于目前处理这些配置的时机不同和方式不同, 出现问题不便处理
+  - 目前以下配置都会生成 exporess 中间件, 优先级由上到下从高到低
+    - config.route - getDataRouter - 路由重定向, 对 api apiWeb db static 生效, 而不对 proxy 生效
+    - config.api - parseApi
+    - config.db - parseDbApi
+    - config.static - staticHandle - use
+    - config.apiWeb - apiWebHandle
+    - config.proxy - http-proxy-middleware
+  - 先把以上配置都进行统一格式化为一个列表, 并按优先级排序此列表, 标记占用情况
+    ``` js
+    list = [
+      {
+        route: String, // 用户路径
+        re: RegExp, // 用户路径转换为正则
+        method: String, // 用户方法, * 或 all
+        type: Enum, // 属于什么配置, 例如 api db proxy
+        description: String, // 接口描述
+        disable: Boolean, // 是否禁用
+        action: Function, // 要执行中间件函数
+        occupied: { // 被谁占用, 如果是被占用的状态, 则不会被使用
+          type: Enum,
+          route: String,
+        },
+        info: {}, // 根据 type 可能不同结构的附加信息
+      },
+    ]
+    ```
+  - 转换 proxy 以及内部路由判断为普通的 use
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
 ## 功能
@@ -257,6 +390,10 @@
     ```
   - [ ] feat: 更改代理方式
     - `"/": 'http://127.0.0.1/api'`  应代理到 `/api` 而不是 `/`.
+  - [ ] feat: 所有相对路径都遵循以下规则
+    - 所有写在配置文件中的地址, 都相对于配置文件
+    - 所有在命令行上传送的地址, 都相对地运行目录
+    - 可以归纳到 `handlePathArg` 函数统一修改
   - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
   - [ ] refactor: 把 initPackge, hasPackage, installPackage 放到 npm 中
   - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 

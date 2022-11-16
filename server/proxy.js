@@ -30,8 +30,10 @@ async function serverProxy({
   } = middleware.getJsonServerMiddlewares()
 
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
-  const {server: {app, httpServer: server}} = require(`./util/index.js`)
-  require(`@wll8/express-ws`)({app, server})
+  const {server: {app}} = require(`./util/index.js`)
+  const httpServer = business.getHttpServer({app, name: `port`})
+  // 当传入 server 之后, app 的 listen 方法被重写为 server 的 listen 方法
+  require(`@wll8/express-ws`)({app, server: httpServer})
   // 此中间件比任何用户自定义的都要先运行
   app.use((req, res, next) => {
     // 创建一个对象用于挂载用户添加的方法
@@ -86,6 +88,7 @@ async function serverProxy({
   let list = [
     `api`,
     `db`,
+    `resetUrl`,
     `static`,
     `apiWeb`,
   ].reduce((acc, cur) => {
@@ -132,11 +135,6 @@ async function serverProxy({
     saveLog({logStr: error.stack, logPath: config._errLog})
     next(error)
   })
-
-  app.listen(config.port, () => {
-    // console.log(`服务运行于: http://localhost:${config.port}/`)
-  })
-
 
 }
 

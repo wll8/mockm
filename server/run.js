@@ -121,11 +121,14 @@ new Promise(async () => { // 启动 server.js
     restart()
   })
   // https://github.com/remy/nodemon/blob/master/doc/events.md
-  .on(`exit`, (arg) => {
-    // console.log(`exit`, arg)
+  .on(`exit`, (arg) => { 
+    console.log(`exit`, arg)
+    // 子程序 process.exit() 时可触发, arg 为 null
+    // 子程序 process.exit(0) 时可触发, arg 为 null
+    // 子程序 process.exit(大于0) 时没有触发
     // arg null 异常退出, 例如语法错误, 端口占用, 运行错误
     // arg SIGUSR2 正常退出, 例如修改文件
-    // arg undefined 用户退出, 例如 ctrl+c
+    // arg undefined 用户退出, 例如 ctrl+c, ctrl+c 不一定触发此回调
     if(log.match(/killProcess:/)) { // 检测到错误日志时重启
       console.log(`exit: ${arg}`)
       saveLog({

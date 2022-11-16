@@ -59,7 +59,26 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       }
     }
 
+    /**
+     * 获取当前 npm 配置文件中使用的注册表地址, 而不是环境变量中的地址
+     */
+    async function getNpmRegistry() {
+      const cp = require(`child_process`)
+      const url = fn().tryFn(() => cp.execSync(`npm config get registry`, {
+        env: {
+          /**
+           * 设置为空, 即可避免使用当前环境变量中的值而是使用 npm 配置文件中的值
+           * 为了避免通过 yarn 启动时, 获取到的值是 registry.yarnpkg.com
+           * 但我们需要的其实是需要 npm 本身配置的值, 例如通过 nrm use 来切换的配置
+           */
+          NPM_CONFIG_REGISTRY: undefined,
+        }
+      }).toString().trim())
+      return url
+    }
+
     return {
+      getNpmRegistry,
       getLocalVersion,
       getServerVersion,
       checkUpdate,
@@ -180,15 +199,34 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     return Boolean(npm().getLocalVersion(name))
   }
 
+  /**
+   * 自动安装依赖
+   * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果, 
+   *  需要使用 mm remote 这种直接调用可执行文件的方式才能实时输出, 不知道为什么
+   * @param {*} param0 
+   * @returns 
+   */
   async function installPackage({cwd, env, packageName, version, attempt = 3}) {
+    const registryUrl = await npm().getNpmRegistry()
+    const { MOCKM_REGISTRY } = process.env
+    const useUrl = registryUrl || MOCKM_REGISTRY || `https://registry.npm.taobao.org/`
+    process.env.NPM_CONFIG_REGISTRY = useUrl
     cwd = cwd.replace(/\\/g, `/`)
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
-    // const installEr = {cnpm: `npm`}[packageName] || `cnpm`
-    const installEr = `cnpm`
-    let {MOCKM_REGISTRY, NPM_CONFIG_REGISTRY} = process.env
-    MOCKM_REGISTRY = MOCKM_REGISTRY || NPM_CONFIG_REGISTRY || `https://registry.npm.taobao.org/`
-    // --no-save 不保存依赖名称到 package.json 中
-    const cmd = `npx ${installEr} i ${packageName}@${version} --product --no-save --registry=${MOCKM_REGISTRY}`
+    const { manager } = require(`whatnpm`)
+    let installEr = manager(cwd).er || `npm`
+    if(hasPackage(installEr) === false) { // 如果安装器不存在, 则退出, 注意: 可能遇到安装器判断错误的情况.
+      print(cli.colors.red(`Please install mockm with npm and try again`))
+      process.exit()
+    }
+    // 不再使用 --registry 参数, 因为某些管理器要求此值与 lock 中的值一致
+    // 不再使用 npx , 因为它在新版本需要交互式确认
+    const cmd = {
+      npm: `npm add ${packageName}@${version}`,
+      pnpm: `pnpm add ${packageName}@${version}`, // pnpm 其实不支持 --registry 参数
+      cnpm: `cnpm i ${packageName}@${version}`, // cnpm 其他不支持 add 参数
+      yarn: `yarn add ${packageName}@${version}`,
+    }[installEr]
     const cd = require(`os`).type() === `Windows_NT` ? `cd /d` : `cd`
     const tips = tool().string.removeLeft(`
       initializing: ${packageName}...
@@ -202,18 +240,16 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     print(tips)
     let attemptNum = attempt // 重试次数
     do {
-      await cli().spawn(
-        `npx`, cmd.split(/\s+/),
-        {
-          detached: false, // 为 true 时拥有自己的窗口, 父进程退出后继续运行
-          cwd,
-          env: {
-            NPM_CONFIG_REGISTRY: MOCKM_REGISTRY,
-            ...process.env,
-            ...env,
-          },
+      const cp = require(`child_process`)
+      cp.execSync(cmd, {
+        stdio: `inherit`, // 实时转发子进程的输出到当前控制台中
+        cwd,
+        env: {
+          ...process.env,
+          ...env,
+          NPM_CONFIG_REGISTRY: useUrl,
         },
-      )
+      })
       if(attemptNum < attempt) {
         print(`number of retries: ${attempt - attemptNum}/${attempt - 1}`)
       }
@@ -229,7 +265,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 如果某个依赖不存在, 则安装它
      * @param {*} packageName 依赖名称
      * @param {object} param1 配置
-     * @param {string} param1.version 版本, 如果不填则从 packageJson.pluginDependencies 中获取
+     * @param {string} param1.version 版本, 如果不填则从 packageJson.optionalDependencies 中获取
      * @param {boolean} param1.getRequire 是否安装完成后进行 require
      * @param {object} param1.env 安装时的环境变量
      * @param {string} param1.msg 依赖不存在时提示的消息
@@ -239,7 +275,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || (packageJson.pluginDependencies || {})[packageName] || packageJson.dependencies[packageName]
+        version = version || (packageJson.pluginDependencies || {})[packageName] || (packageJson.optionalDependencies || {})[packageName] || packageJson.dependencies[packageName]
         const hasPackageRes = hasPackage(packageName)
         if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           const cnpmVersion = npm().getLocalVersion(`cnpm`)
@@ -336,6 +372,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * @param {*} pathStr 路径
      */
      function handlePathArg(pathStr) {
+      if(pathStr === undefined) {
+        return undefined
+      }
       const path = require(`path`)
       let newPathStr = path.isAbsolute(pathStr) ? pathStr : `${process.cwd()}/${pathStr}` // 如果是相对路径, 则相对于运行命令的位置
       newPathStr = path.normalize(newPathStr) // 转换为跨平台的路径
@@ -951,8 +990,31 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         || fs.readFileSync(file, `utf-8`).trim() === ``
       )
     }
+    
+    /**
+     * 当文件不存在或内容为空时创建文件, 自动创建目录
+     * arg[0].filePath 文件地址
+     * arg[0].str 文件内容
+     * arg[0].force 是否强行覆盖
+     * 
+     * @return boolean 是否创建
+     */
+    function createFile({filePath, str = ``, force = false, msg = ``} = {}) {
+      const path = require(`path`)
+      const fs = require(`fs`)
+      const dir = path.parse(filePath).dir
+      dir && fs.existsSync(dir) === false && fs.mkdirSync(dir, {recursive: true})
+      let res = false
+      if(force) {
+        res = (fs.writeFileSync(filePath, str), true)
+      } else {
+        res = isFileEmpty(filePath) && (fs.writeFileSync(filePath, str), true)
+      }
+      return res
+    }
 
     return {
+      createFile,
       copyFolderSync,
       filesCreateOrRemove,
       createNewFile,
@@ -999,7 +1061,21 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       return ip
     }
 
+    /**
+     * 判断请求是 http 还是 https
+     * https://stackoverflow.com/questions/10348906/how-to-know-if-a-request-is-http-or-https-in-node-js
+     * @param {*} req 
+     * @returns 
+     */
+    function getProtocol (req) {
+      let proto = req.connection.encrypted ? 'https' : 'http';
+      // only do this if you trust the proxy
+      proto = req.headers['x-forwarded-proto'] || proto;
+      return proto.split(/\s*,\s*/)[0];
+    }
+
     return {
+      getProtocol,
       getClientUrlAndPath,
       getClientIp,
     }
@@ -1016,7 +1092,18 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         ))
       }
     }
+    /**
+     * 让函数运行不报错
+     */
+    function tryFn(fn, ...arg) {
+      try {
+        return fn(...arg)
+      } catch (error) {
+        return undefined
+      }
+    }
     return {
+      tryFn,
       emptyFn,
     }
   }

@@ -26,6 +26,7 @@ function serverReplay({
   const jsonServer = require(`@wll8/json-server`)
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
   const serverReplay = jsonServer.create()
+  business.getHttpServer({app: serverReplay, name: `replayPort`})
   middleware.reWriteRouter({app: serverReplay, routes: config.route})
   serverReplay.use(middlewaresObj.corsMiddleware)
   serverReplay.use(proxy(
@@ -54,10 +55,6 @@ function serverReplay({
   serverReplay.use((error, req, res, next) => {
     saveLog({logStr: error.stack, logPath: config._errLog})
     next(error)
-  })
-
-  serverReplay.listen(config.replayPort, () => {
-    // console.log(`服务器重放地址: http://localhost:${config.replayPort}/`)
   })
 
 }
