@@ -11,6 +11,15 @@
 
 ## 2022 年 11 月
 
+#### v1.1.26-alpha.43
+
+- server
+  - feat: 当提供的配置若不存在则从示例配置自动创建
+  - feat: [支持 https 配置](../config/option.md#config-https)
+  - feat: 更新自动安装依赖的逻辑(不兼容的更新)
+    - 指定镜像地址的环境变量使用 MOCKM_REGISTRY 而不是 NPM_CONFIG_REGISTRY
+    - 实时显示当前安装进程
+
 #### v1.1.26-alpha.42
 
 - feat: 不使用 json-server 的依赖清除功能 [#885](https://github.com/typicode/json-server/issues/885#issuecomment-1308426049)
