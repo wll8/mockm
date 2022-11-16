@@ -62,10 +62,6 @@ interface ConfigFnArg {
      * express 实例
      */
     app: Application,
-    /**
-     * httpServer 实例
-     */
-    httpServer: Server,
   },
   toolObj: any,
   /**
@@ -73,6 +69,37 @@ interface ConfigFnArg {
    */
   libObj: libObj,
   business: any,
+}
+
+interface configHttps {
+  /**
+   * 私钥文件地址, 例如 *.key
+   */
+  key: String,
+
+  /**
+   * 公钥文件地址, 例如 *.crt, *.cer
+   */
+  cert: String,
+  
+  /**
+   * 是否重定向到 https
+   * @default true
+   */
+  redirect: Boolean,
+  
+  /**
+   * 配置 https 使用的端口, 默认同 config.port
+   */
+  port: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.testPort
+   */
+  testPort: number | string,
+  /**
+   * 配置 https 使用的端口, 默认同 config.replayPort
+   */
+  replayPort: number | string,
 }
 
 interface ConfigObj {
@@ -331,6 +358,12 @@ interface ConfigObj {
     json?: OptionsJson,
     urlencoded?: OptionsUrlencoded,
   },
+
+  /**
+   * https 证书配置
+   * @default {}
+   */
+  https: configHttps,
 }
 
 interface WrapApiData {

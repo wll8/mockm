@@ -20,6 +20,56 @@ const child_process = require('child_process')
 const packgeAdmin = shelljs.which('cnpm') ? 'cnpm' : 'npm'
 
 /**
+ * 获取一个 https 配置, 例如颁发机构, 证书, 以及他们的文件地址
+ * @returns 
+ */
+async function getHttpsKey() {
+  const mkcert = require('mkcert')
+
+  /**
+   * 创建颁发机构
+   * 把 ca.cert 安装的系统的根证书信任区, 即可得到浏览器信任
+   * 使用 https://github.com/daquinoaldo/https-localhost https://github.com/Subash/mkcert 
+   * 这些工具可以支持添加根证书到系统的功能, 但它需要修改系统配置, 需要使用管理员权限,
+   * 可能出现太多兼容性问题, 所以这里仅使用证书, 而不信任证书, 测试时跳过证书验证,
+   * 即仅尝试 https 模式是否成功启动服务, 而不验证证书的正确性
+   */
+  const ca = await mkcert.createCA({
+    organization: 'hello organization',
+    countryCode: 'hello countryCode',
+    state: 'hello state',
+    locality: 'hello locality',
+    validityDays: 825
+  })
+  
+
+  /**
+   * 创建证书
+   */
+  const ce = await mkcert.createCert({
+    domains: ['127.0.0.1', 'localhost'],
+    validityDays: 825,
+    caKey: ca.key,
+    caCert: ca.cert
+  })
+
+  const fileDir = getTempDir()
+  return {
+    ce,
+    ca,
+    fileDir,
+    ceFile: {
+      key: (fs.writeFileSync(`${fileDir}/ce.key`, ce.key), `${fileDir}/ce.key`),
+      cert: (fs.writeFileSync(`${fileDir}/ce.cert`, ce.cert), `${fileDir}/ce.cert`),
+    },
+    caFile: {
+      key: (fs.writeFileSync(`${fileDir}/ca.key`, ce.key), `${fileDir}/ca.key`),
+      cert: (fs.writeFileSync(`${fileDir}/ca.cert`, ce.cert), `${fileDir}/ca.cert`),
+    },
+  }
+}
+
+/**
  * 封装断言方法, 用于打印相关信息
  * @param {*} val 
  */
@@ -37,12 +87,20 @@ async function runMockm(fnArg) {
   fnArg = typeof(fnArg) === `function` ? {okFn: fnArg} : fnArg
   let {
     runOk = true, // 是否等待运行完成
+    INJECT = undefined, // 注入数据到此变量并应用到 mockm 的配置文件中
     mockm = undefined, // 转换成配置文件的参数
     cli = undefined, // 在命令行上传送的参数
     timeout = undefined, // 超时
     okFn = () => {}, // 运行成功回调, 返回为真时不继续匹配终端输出
+    matchFn = ({str, arg}) => { // 定向服务启动成功的条件, 当 runOk 为 true 时会总是尝试匹配此条件
+      return (
+        str.match(`:${arg.port}`) 
+        && str.match(`:${arg.testPort}`)
+      )
+    },
   } = fnArg || {}
-  cli = getConfigFile(mockm, cli)
+  mockm = mockm === undefined && INJECT ? () => INJECT : mockm
+  cli = getConfigFile(mockm, cli, {INJECT})
   const {
     fullCmd: cmd,
     arg,
@@ -55,10 +113,7 @@ async function runMockm(fnArg) {
         console.log(`mockm>`, str)
         if(
           runOk
-          ? (
-            str.match(`:${arg.port}`) 
-            && str.match(`:${arg.testPort}`)
-          ) : true
+          ? matchFn({str, arg}) : true
         ) {
           let res
           try {
@@ -82,8 +137,9 @@ async function runMockm(fnArg) {
  * 生成 config 文件
  * mockm 函数
  * cli 对象
+ * option 其他选项
  */
-function getConfigFile(mockm, cli = {}) {
+function getConfigFile(mockm, cli = {}, option = {}) {
   if(mockm === undefined) {
     return cli
   }
@@ -95,7 +151,8 @@ function getConfigFile(mockm, cli = {}) {
   }
   if(cli[`--config`] === undefined) {
     const config = `${cwd}/${uuid()}.js`
-    const str = `module.exports = ${mockm.toString()}`
+    const INJECT_STR = option.INJECT ? `const INJECT = ${JSON.stringify(option.INJECT, null, 2)}\r\n` : ``
+    const str = `${INJECT_STR}module.exports = ${mockm.toString()}`
     fs.writeFileSync(config, str)
     cli[`--config`] = config
   }
@@ -458,6 +515,7 @@ function upload(api, data) {
 }
 
 module.exports = {
+  getHttpsKey,
   getType,
   upload,
   to,

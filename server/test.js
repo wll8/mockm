@@ -48,6 +48,7 @@ function serverTest() {
 
   const jsonServer = require(`@wll8/json-server`)
   const serverTest = jsonServer.create()
+  business.getHttpServer({app: serverTest, name: `testPort`})
   serverTest.use(middlewaresObj.corsMiddleware)
   serverTest.use(middlewaresObj.jsonParser)
   serverTest.use(middleware.compression())
@@ -388,10 +389,6 @@ function serverTest() {
   serverTest.use((error, req, res, next) => {
     saveLog({logStr: error.stack, logPath: global.config._errLog})
     next(error)
-  })
-
-  serverTest.listen(global.config.testPort, () => {
-    // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
   })
 
 }

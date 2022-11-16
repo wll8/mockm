@@ -1,3 +1,4 @@
+const fs = require(`fs`)
 const lib = require(`./lib.js`)
 const { print } = require(`./log.js`)
 const tool = require(`./tool.js`)
@@ -7,6 +8,64 @@ const jsonServer = require(`@wll8/json-server`)
 const {lib: { express }} = jsonServer
 
 function business() { // 与业务相关性的函数
+
+  /**
+   * 根据一个 app 来创建以及 https 配置来生成 httpServer 并添加端口监听功能
+   * @param {*} param0 
+   * @returns 
+   */
+  function getHttpServer({app, name}) {
+    let httpServer
+    const https = global.config.https
+    const httpProt = global.config[name]
+    const httpsProt = https[name]
+    /**
+     * 如果没有配置 https 的端口时, 使用 httpolyglot 实现同一个端口支持 http 和 https
+     */
+    if(https.key === undefined) {
+      httpServer = require(`http`).createServer(app)
+    }
+    
+    /**
+     * 如果没有配置 https 的端口时, 使用 httpolyglot 实现同一个端口支持 http 和 https
+     */
+    if(https.key && httpsProt === undefined) {
+      app.use((req, res, next) => {
+        const protocol = tool.httpClient.getProtocol(req)
+        if(protocol === `http` && https.redirect) {
+          const hostName = require(`url`).parse(`ws://${req.headers.host}`).hostname
+          res.redirect(301, `https://${hostName}:${httpProt}${req.url}`)
+        } else {
+          next()
+        }
+      })
+      httpServer = require(`@httptoolkit/httpolyglot`).createServer({
+        key: fs.readFileSync(https.key),
+        cert: fs.readFileSync(https.cert),
+      }, app)
+    }
+    
+    /**
+     * 如果配置了 https 的端口时, 那么不使用 httpolyglot 而使用原生 http/https, 实现 http => 301 => https
+     */
+    if(https.key && httpsProt) {
+      require(`http`).createServer(https.redirect ? (req, res) => {
+        const hostName = require(`url`).parse(`ws://${req.headers.host}`).hostname
+        res.writeHead(301, { Location: `https://${hostName}:${httpsProt}${req.url}` })
+        res.end()
+      } : undefined, app).listen(httpProt)
+      httpServer = require(`https`).createServer({
+        key: fs.readFileSync(https.key),
+        cert: fs.readFileSync(https.cert),
+      }, app)
+    }
+
+    httpServer.listen(httpsProt || httpProt, () => {
+      // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
+    })
+    return httpServer
+  }
+
   function midResJson({res, proxyRes, key, val, cb = body => body}) {
     const modifyResponse = require(`node-http-proxy-json`)
     modifyResponse(res, proxyRes, body => {
@@ -1866,6 +1925,11 @@ function business() { // 与业务相关性的函数
      */
     async function remoteServer({store, shareConfig}) {
       print(`Remote service loading...`)
+      /**
+       * 当存在 https 端口时, 直接使用它来进行外网映射
+       * 假设使用原 http 来映射的话, 我们并不知道转发到什么 https 上, 因为 https 没有映射, 所以干脆直接使用 https 来映射
+       * 另外, ngrok 无 token 时不允许响应 content-type/html, 但默认 301 响应返回的就是 html, 这虽然可以使用 content-type/json 来绕过, 但可能并不规范
+       */
       const serverList = [
         `port`,
         `replayPort`,
@@ -1874,21 +1938,22 @@ function business() { // 与业务相关性的函数
         name,
         config: {
           proto: `http`,
-          addr: shareConfig[name],
+          addr: shareConfig.https[name] || shareConfig[name],
           ...shareConfig.remote[name],
         },
       }))
       const urlList = await runNgrok({serverList, shareConfig}).catch(err => console.log(`err`, err))
+      print(`The remote service is loaded.`)
       serverList.forEach((item, index) => {
         store.set(`note.remote.${item.name}`, urlList[index])
+        const msg = [
+          `Interface forwarding: ${store.get(`note.remote.${item.name}`) || ``} => http://${shareConfig.osIp}:${shareConfig.port}/`,
+          ``,
+          `Interface list:       ${store.get(`note.remote.${item.name}`) || ``}/#/apiStudio/ => http://${shareConfig.osIp}:${shareConfig.testPort}/#/apiStudio/`,
+        ][index]
+        msg && print(tool.cli.colors.green(msg))
       })
-      print(`The remote service is loaded.`)
-      const msg = tool.string.removeLeft(`
-        Remote service information:
-        Interface forwarding: ${store.get(`note.remote.port`) || ``} => http://${shareConfig.osIp}:${shareConfig.port}/
-        Interface list:       ${store.get(`note.remote.testPort`) || ``}/#/apiStudio/ => http://${shareConfig.osIp}:${shareConfig.testPort}/#/apiStudio/
-      `)
-      print(tool.cli.colors.green(msg))
+      
     }
 
     return {
@@ -1964,6 +2029,7 @@ function business() { // 与业务相关性的函数
   }
 
   return {
+    getHttpServer,
     getProxyConfig,
     midResJson,
     url: url(),

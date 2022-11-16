@@ -1,6 +1,27 @@
 # 待完成
 
 ## 文档
+- [ ] feat(doc): 从 config.d.ts 生成配置说明文档
+- [ ] feat(test): 支持以某个默认配置重测
+  - 例如把支持 https 作为默认配置, 然后重测所有用例, 以检查 https 功能对以往功能是否造成影响
+- [ ] fix: 隐藏获取查询更新时的错误 `certificate has expired`
+- [ ] refactor: test.js 中的 global.config 更改为 config
+- [ ] refactor: 优化 run.js 与 server.js 的通信方式, 避免总是创建临时 json 文件
+- [ ] ? 同一个端口能实现 http => https 吗
+- [ ] fix: 当 proxy.js 中发起 exit 事件时, 应在 run.js 中也 exit
+- [ ] refactor: 把 proxy/test/replay 中的 express 实例统一为名称 app
+- [x] feat: 支持 https 配置
+  - 问: 在同一个端口上实现 http 和 https ?
+  - 答: 
+    - 可行, [通过分析报文特征来重定向](https://github.com/mscdex/httpolyglot/issues/3#issuecomment-173680155)
+    - 可行但不规范, [http 和 https 按标签是属不同端口](https://stackoverflow.com/questions/22453782/nodejs-http-and-https-over-same-port)
+      - https://github.com/elastic/kibana/issues/10181
+  - 注: 当使用 80/443 端口时, 浏览器会强制校验证书
+  - 注: 由于 ngrok 无 token 时不提供 html, 但 80 => 443 通过 html 来重定向
+  - 注: 此功能要求 node 12+, 这是 httpolyglot 这个依赖规定的
+  - 注: 在 axios 在浏览器中禁用重定向可能会失败
+    - https://github.com/axios/axios/issues/3924#issuecomment-917666707
+    - https://stackoverflow.com/questions/228225/prevent-redirection-of-xmlhttprequest/343359#343359
 - [x] fix: [DELETE request will delete all data](https://github.com/typicode/json-server/issues/885)
 - [ ] fix: 创建的 ws 接口在项目中使用时报错 `Invalid frame header`
   - 控制台可多次正常发送 send, 但是在项目中发送时会触发 `Invalid frame header`
@@ -351,6 +372,10 @@
 
 ## 破坏性更新计划
 - 2.x
+  - [ ] feat: 所有相对路径都遵循以下规则
+    - 所有写在配置文件中的地址, 都相对于配置文件
+    - 所有在命令行上传送的地址, 都相对地运行目录
+    - 可以归纳到 `handlePathArg` 函数统一修改
   - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
   - [ ] refactor: 把 initPackge, hasPackage, installPackage 放到 npm 中
   - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
