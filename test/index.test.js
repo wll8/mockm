@@ -136,14 +136,13 @@ describe.skip('性能', () => {
   })
 })
 describe('命令行', () => {
-  it(`配置文件 故意找不到配置文件`, async () => {
+  it(`配置文件 不存在时自动创建`, async () => {
     util.ok(await util.runMockm({
-      runOk: false,
       cli: {
         '--config': util.uuid(`-`),
       },
       okFn: async ({arg, str}) => {
-        return str.match(`Error: Cannot find module`) 
+        return str.match(` => `) 
       }
     }))
   })

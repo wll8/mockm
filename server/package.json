@@ -59,8 +59,7 @@
   "scripts": {
     "lint": "eslint --ignore-path ../.gitignore .",
     "dts": "npx shx mkdir -p ./node_modules/mockm & npx shx cp -r ./@types ./node_modules/mockm/",
-    "start": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \"fkill -f :9090 & node run.js port=9090 testPort=9095 replayPort=9091 --log-line\"",
-    "start:example": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \"fkill -f :9090 & node run.js port=9090 testPort=9095 replayPort=9091 --config=./example/simple.mm.config.js --log-line\"",
+    "dev": "nodemon --ignore httpData/ --ignore page/ -q -w \"*.js\" --exec \"node run.js --config=.dev.mm.config.js --log-line\"",
     "serve": "node run.js --log-line",
     "start:page": "cd page && browser-sync start --no-notify --server --files '**/**'",
     "test": "echo \"Error: no test specified\" && exit 1"
