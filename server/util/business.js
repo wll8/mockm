@@ -18,7 +18,9 @@ function business() { // 与业务相关性的函数
     let httpServer
     const https = global.config.https
     const httpProt = global.config[name]
-    const httpsProt = https[name]
+    let httpsProt = https[name]
+    httpsProt = Number(httpsProt) === Number(httpProt) ? undefined : httpsProt
+
     /**
      * 如果没有配置 https 的端口时, 使用 httpolyglot 实现同一个端口支持 http 和 https
      */
