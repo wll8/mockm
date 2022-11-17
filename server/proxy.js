@@ -31,8 +31,9 @@ async function serverProxy({
 
   const proxy = require(`http-proxy-middleware`).createProxyMiddleware
   const {server: {app}} = require(`./util/index.js`)
-  const httpServer = business.getHttpServer({app, name: `port`})
+  const {httpServer, onlyHttpServer} = business.getHttpServer({app, name: `port`})
   // 当传入 server 之后, app 的 listen 方法被重写为 server 的 listen 方法
+  onlyHttpServer && require(`@wll8/express-ws`)({app, server: onlyHttpServer})
   require(`@wll8/express-ws`)({app, server: httpServer})
   // 此中间件比任何用户自定义的都要先运行
   app.use((req, res, next) => {
