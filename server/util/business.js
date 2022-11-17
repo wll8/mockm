@@ -12,10 +12,11 @@ function business() { // 与业务相关性的函数
   /**
    * 根据一个 app 来创建以及 https 配置来生成 httpServer 并添加端口监听功能
    * @param {*} param0 
-   * @returns 
+   * @returns {httpServer, onlyHttpServer} 当额外配置 https 端口时才会存在 onlyHttpServer
    */
   function getHttpServer({app, name}) {
     let httpServer
+    let onlyHttpServer
     const https = global.config.https
     const httpProt = global.config[name]
     let httpsProt = https[name]
@@ -51,7 +52,7 @@ function business() { // 与业务相关性的函数
      * 如果配置了 https 的端口时, 那么不使用 httpolyglot 而使用原生 http/https, 实现 http => 301 => https
      */
     if(https.key && httpsProt) {
-      require(`http`).createServer(https.redirect ? (req, res) => {
+      onlyHttpServer = require(`http`).createServer(https.redirect ? (req, res) => {
         const hostName = require(`url`).parse(`ws://${req.headers.host}`).hostname
         res.writeHead(301, { Location: `https://${hostName}:${httpsProt}${req.url}` })
         res.end()
@@ -65,7 +66,12 @@ function business() { // 与业务相关性的函数
     httpServer.listen(httpsProt || httpProt, () => {
       // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
     })
-    return httpServer
+    const server = {
+      httpServer,
+      onlyHttpServer,
+    }
+    app._server = server
+    return server
   }
 
   function midResJson({res, proxyRes, key, val, cb = body => body}) {
