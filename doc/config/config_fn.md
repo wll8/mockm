@@ -5,14 +5,6 @@ util 目前包含以下内容:
 ## util.server
 暴露出来服务.
 
-### util.server.app httpServer
-原生 httpServer 实例, 例如需要监听 http 协议升级时:
-``` js
-module.exports = util => {
-  util.server.httpServer.on(`upgrade`, () => {})
-}
-```
-
 ### util.server.app
 express 实例.
 

@@ -16,8 +16,12 @@
 - server
   - feat: 当提供的配置若不存在则从示例配置自动创建
   - feat: [支持 https 配置](../config/option.md#config-https)
-  - feat: 更新自动安装依赖的逻辑(不兼容的更新)
-    - 指定镜像地址的环境变量使用 MOCKM_REGISTRY 而不是 NPM_CONFIG_REGISTRY
+    - 不兼容的更新
+      - 不再导出 util.server.httpServer, 这是因为需要根据 https 配置动态生成 httpServer, 所以不能在 config 初始化前导出. 在初始后可以通过 util.server.app._server.httpServer 访问到.
+      - 要求 node v12+, 这是 httpolyglot 这个依赖规定的
+  - feat: 更新自动安装依赖的逻辑
+    - 不兼容的更新
+      - 指定镜像地址 的环境变量使用 MOCKM_REGISTRY 而不是 NPM_CONFIG_REGISTRY
     - 实时显示当前安装进程
 
 #### v1.1.26-alpha.42
