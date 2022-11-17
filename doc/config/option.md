@@ -729,6 +729,9 @@ config.bodyParser = {
 类型: configHttps
 默认: 参考类型定义
 
+为服务配置 https 协议, 默认情况下只需填写 key/cert, 即可实现在同一端口同时支持 http/https.
+
+
 ``` ts
 interface configHttps {
   /**
@@ -759,5 +762,18 @@ interface configHttps {
    * 配置 https 使用的端口, 默认同 config.replayPort
    */
   replayPort: number | string,
+}
+```
+
+实现类似 nginx 80/443 端口 https 支持:
+
+``` js
+const config = {
+  port: 80,
+  https: {
+    key: `./key/https.key`,
+    cert: `./key/https.cer`,
+    port: 443,
+  },
 }
 ```
