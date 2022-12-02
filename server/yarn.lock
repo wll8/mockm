@@ -1665,10 +1665,10 @@ core-js-pure@^3.20.2:
   resolved "https://registry.npmmirror.com/core-js-pure/-/core-js-pure-3.22.1.tgz#4d94e0c9a7b710da20dadd727fe98b43543119f0"
   integrity sha512-TChjCtgcMDc8t12RiwAsThjqrS/VpBlEvDgL009ot4HESzBo3h2FSZNa6ZS1nWKZEPDoulnszxUll9n0/spflQ==
 
-core-js@^3.21.1:
-  version "3.22.1"
-  resolved "https://registry.npmmirror.com/core-js/-/core-js-3.22.1.tgz#1936e4f1da82675fe22ae10ee60ef638cd9752fd"
-  integrity sha512-l6CwCLq7XgITOQGhv1dIUmwCFoqFjyQ6zQHUCQlS0xKmb9d6OHIg8jDiEoswhaettT21BSF5qKr6kbvE+aKwxw==
+core-js@^3.26.0:
+  version "3.26.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.26.1.tgz#7a9816dabd9ee846c1c0fe0e8fcad68f3709134e"
+  integrity sha512-21491RRQVzUn0GGM9Z1Jrpr6PNPxPi+Za8OM9q4tksTSnlbXXGKK1nXNg/QvwFYettXvSX6zWKCtHHfjN4puyA==
 
 core-util-is@1.0.2:
   version "1.0.2"
