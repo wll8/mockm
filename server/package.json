@@ -34,7 +34,7 @@
     "morgan": "^1.10.0",
     "node-http-proxy-json": "^0.1.9",
     "nodemon": "^2.0.15",
-    "path-to-regexp": "0.1.7",
+    "path-to-regexp": "0.2.5",
     "vm2": "^3.9.8",
     "whatnpm": "^1.0.0"
   },
