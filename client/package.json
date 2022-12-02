@@ -17,7 +17,7 @@
     "react-json-view": "^1.19.1",
     "react-keeper": "^2.2.2",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.1"
+    "react-scripts": "4.0.3"
   },
   "scripts": {
     "start": "react-app-rewired start",
