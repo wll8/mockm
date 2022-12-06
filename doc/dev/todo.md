@@ -1,6 +1,13 @@
 # 待完成
 
 ## 文档
+- [ ] feat: 支持微服务
+  - 假设有一个 mockm 服务 A, 实现了微信的所有功能, 有例如 /getTicket 和 /getAccessToken 这样的 API
+  - 有一个主服务, 在主服务里可以注册 /wx 路由给服务 A, 实现 /wx/getTicket 来服务服务 A 的接口
+  - 注: 
+    - 服务 A 并没有占用多端口, 不是通过主服务代理到服务 A 的方式
+- [ ] fix: config.route 失效
+- [ ] 添加 config.configDir 便于使用
 - [ ] feat(doc): 从 config.d.ts 生成配置说明文档
 - [ ] feat(test): 支持以某个默认配置重测
   - 例如把支持 https 作为默认配置, 然后重测所有用例, 以检查 https 功能对以往功能是否造成影响
