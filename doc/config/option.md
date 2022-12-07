@@ -480,9 +480,7 @@ GET /books?q=张三 -- 精确全文匹配
 类型: object
 默认: {}
 
-路由映射, 作用于 config.api 及 config.db 产生的 api
-
-::: details 示例
+路由映射.
 
 假设接口 `/books/1` 希望能通过 `/test/db/api/` 前缀访问, 配置如下:
 
@@ -493,7 +491,6 @@ GET /books?q=张三 -- 精确全文匹配
 ```
 
 参考 [json-server](https://github.com/typicode/json-server#add-custom-routes).
-::: 
 
 ## config.apiWeb
 类型: string

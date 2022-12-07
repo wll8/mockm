@@ -6,7 +6,8 @@
   - 有一个主服务, 在主服务里可以注册 /wx 路由给服务 A, 实现 /wx/getTicket 来服务服务 A 的接口
   - 注: 
     - 服务 A 并没有占用多端口, 不是通过主服务代理到服务 A 的方式
-- [ ] fix: config.route 失效
+- [-] fix: config.route 失效
+  - 疑似 commit bec4571 导致, 经测试, 并未失效. 并且原 bec4571 所处理的问题也并不存在
 - [ ] 添加 config.configDir 便于使用
 - [ ] feat(doc): 从 config.d.ts 生成配置说明文档
 - [ ] feat(test): 支持以某个默认配置重测
