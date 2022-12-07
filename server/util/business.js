@@ -366,6 +366,7 @@ function business() { // 与业务相关性的函数
           if(bodyPath) {
             const path = require(`path`)
             const newPath = path.resolve(bodyPath) // 发送 body
+            // 由于 newPath 是由程序生成的, 而不是用户输入的, 所以不用担心路径遍历
             res.sendFile(newPath)
           } else {
             const {statusCode, statusMessage} = lineHeaders.line
