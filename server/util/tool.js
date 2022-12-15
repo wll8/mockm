@@ -202,7 +202,9 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   /**
    * 自动安装依赖
    * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果, 
-   *  需要使用 mm remote 这种直接调用可执行文件的方式才能实时输出, 不知道为什么
+   *     需要使用 mm remote 这种直接调用可执行文件的方式才能实时输出, 不知道为什么
+   * 注意, 假设安装 a 依赖后, a 依赖会被存储到 dependencies 中, 建议保留它, 因为可能是对等依赖
+   *     例如 joi-to-swagger 依赖 joi, 这要求在父项目的 dependencies 中显式存在 joi 并已安装
    * @param {*} param0 
    * @returns 
    */
