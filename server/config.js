@@ -1,297 +1,301 @@
-const path = require(`path`)
-const exportsUtil = require(`./util/index.js`)
-const {
-  print,
-} = require(`./util/log.js`)
-const {
-  lib,
-  business,
-  business: {
-    midResJson,
-    url: {
-      prepareProxy,
-      parseProxyTarget,
-    },
-    wrapApiData,
-  },
-  tool,
-  tool: {
-    type: {
-      isType,
-    },
-    os: {
-      getOsIp,
-    },
-    cli: {
-      handlePathArg,
-      parseArgv,
-      colors,
-    },
-  },
-} = exportsUtil
-
-let cliArg = parseArgv()
-let fileArgFn = () => {}
-if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
-  const base64deCode = JSON.parse(Buffer.from(cliArg._base64, `base64`).toString())
-  if (base64deCode[`--config`]) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
-    const handlePathRes = handlePathArg(base64deCode[`--config`])
-    // 避免 node v14 上 config 文件路径相同并访问了不存在的属性而出现循环引用警告
-    const fileArg = handlePathRes === __filename ? {} : require(handlePathRes)
-    if(typeof(fileArg) === `object`) {
-      fileArgFn = () => fileArg
-    }
-    if(typeof(fileArg) === `function`) {
-      fileArgFn = fileArg
-    }
-  }
-  cliArg = {
-    ...base64deCode,
-    ...cliArg,
-    // 命令行参数 config = true 时, 视为使用程序预设的路径
-    config: cliArg[`--config`] === true ? base64deCode[`--config`] : (base64deCode[`--config`] || cliArg[`--config`]),
-    // 命令行参数 proxy 存在时, 转换为对象, 方便与文件中的 proxy 进行合并
-    ...(typeof(cliArg.proxy) === `string` ? {proxy: {"/": cliArg.proxy}} : {}),
-  }
-}
-
-/** @type {import('mockm/@types/config').Config} */
-const defaultConfigFn = (util) => { // 默认配置
+const fn = async () => {
+  const path = require(`path`)
+  const exportsUtil = require(`./util/index.js`)
   const {
-    libObj: { midResJson, axios, mime, mockjs, bodyParser },
-    toolObj,
-  } = util
-  return {
-    disable: false,
-    osIp: getOsIp(),
-    port: 9000,
-    testPort: 9005,
-    replayPort: 9001,
-    replayProxy: true,
-    // snippet-replayProxyFind
-    replayProxyFind (item) {
-      const bodyPath = item.data.res.bodyPath
-      if(bodyPath && bodyPath.match(/\.json$/)) {
-        const bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
-        const body = require(bodyPathCwd)
-        return body.status === 200 || body.status === `200`
-      } else {
-        return false
+    print,
+  } = require(`./util/log.js`)
+  const {
+    lib,
+    business,
+    business: {
+      midResJson,
+      url: {
+        prepareProxy,
+        parseProxyTarget,
+      },
+      wrapApiData,
+    },
+    tool,
+    tool: {
+      type: {
+        isType,
+      },
+      os: {
+        getOsIp,
+      },
+      cli: {
+        handlePathArg,
+        parseArgv,
+        colors,
+      },
+    },
+  } = exportsUtil
+  
+  let cliArg = parseArgv()
+  let fileArgFn = () => {}
+  if(cliArg._base64) { // 如果指定了 base64 配置, 则先解析并加载它
+    const base64deCode = JSON.parse(Buffer.from(cliArg._base64, `base64`).toString())
+    if (base64deCode[`--config`]) { // 如果指定了 config 文件, 则从文件中加载, 但是命令行上的参数具有最高优先级
+      const handlePathRes = handlePathArg(base64deCode[`--config`])
+      // 避免 node v14 上 config 文件路径相同并访问了不存在的属性而出现循环引用警告
+      const fileArg = handlePathRes === __filename ? {} : require(handlePathRes)
+      if(typeof(fileArg) === `object`) {
+        fileArgFn = () => fileArg
       }
-    },
-    // snippet-replayProxyFind
-    hostMode: false,
-    updateToken: true,
-    apiInHeader: true,
-    proxy: {
-      '/': `http://www.httpbin.org/`,
-    },
-    remote: false,
-    remoteToken: [],
-    openApi: `http://httpbin.org/spec.json`,
-    cors: true,
-    dataDir: `./httpData/`,
-    dbJsonPath: undefined,
-    apiWeb: undefined,
-    apiWebWrap: wrapApiData,
-    dbCover: false,
-    db: {},
-    route: {},
-    api: {},
-    resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
-    resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
-    watch: [],
-    clearHistory: false,
-    guard: false,
-    backOpenApi: 10,
-    static: undefined,
-    disableRecord: false,
-    bodyParser: {
-      json: {
-        limit: `100mb`,
-        extended: false,
-      },
-      urlencoded: {
-        extended: false,
-      },
-    },
-    https: {
-      redirect: true,
-    },
-  }
-}
-
-
-lib.midResJson = midResJson
-const defaultArg = defaultConfigFn(exportsUtil)
-const fileArg = fileArgFn(exportsUtil)
-const config = {
-  ...defaultArg,
-  ...fileArg,
-  ...cliArg,
-}
-
-config.proxy = [ // 合并 proxy 对象
-  defaultArg.proxy,
-  fileArg.proxy,
-  cliArg.proxy,
-].reduce((acc, cur) => {
-  return {
-    ...acc,
-    ...(
-      isType(cur) === `string` // string 时转为对象
-        ? {'/': cur}
-        : cur
-    ),
-  }
-}, {})
-config.proxy = tool.obj.sortKey(config.proxy, {firstLong: true}) // 转换为子路径优先的形式
-config.proxy[`/`]  = config.proxy[`/`].replace(/$/, `/`).replace(/\/\/$/, `/`) // 当 proxy root 后面的斜杠时添加它
-config.bodyParser = tool.obj.deepMergeObject(defaultArg.bodyParser, fileArg.bodyParser || {})
-
-const _proxyTargetInfo = parseProxyTarget(config.proxy)
-const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
-  ...config,
-  static: (() => {
-    const baseObj = {
-      path: `/`,
-      mode: `hash`,
-      option: {},
+      if(typeof(fileArg) === `function`) {
+        fileArgFn = fileArg
+      }
     }
-    return config.static
-      ? (
-        isType(config.static, `string`)
-          ? [{
-            ...baseObj,
-            fileDir: handlePathArg(config.static),
-          }]
-          : isType(config.static, `object`)
+    cliArg = {
+      ...base64deCode,
+      ...cliArg,
+      // 命令行参数 config = true 时, 视为使用程序预设的路径
+      config: cliArg[`--config`] === true ? base64deCode[`--config`] : (base64deCode[`--config`] || cliArg[`--config`]),
+      // 命令行参数 proxy 存在时, 转换为对象, 方便与文件中的 proxy 进行合并
+      ...(typeof(cliArg.proxy) === `string` ? {proxy: {"/": cliArg.proxy}} : {}),
+    }
+  }
+  
+  /** @type {import('mockm/@types/config').Config} */
+  const defaultConfigFn = (util) => { // 默认配置
+    const {
+      libObj: { midResJson, axios, mime, mockjs, bodyParser },
+      toolObj,
+    } = util
+    return {
+      disable: false,
+      osIp: getOsIp(),
+      port: 9000,
+      testPort: 9005,
+      replayPort: 9001,
+      replayProxy: true,
+      // snippet-replayProxyFind
+      replayProxyFind (item) {
+        const bodyPath = item.data.res.bodyPath
+        if(bodyPath && bodyPath.match(/\.json$/)) {
+          const bodyPathCwd = require(`path`).join(process.cwd(), bodyPath)
+          const body = require(bodyPathCwd)
+          return body.status === 200 || body.status === `200`
+        } else {
+          return false
+        }
+      },
+      // snippet-replayProxyFind
+      hostMode: false,
+      updateToken: true,
+      apiInHeader: true,
+      proxy: {
+        '/': `http://www.httpbin.org/`,
+      },
+      remote: false,
+      remoteToken: [],
+      openApi: `http://httpbin.org/spec.json`,
+      cors: true,
+      dataDir: `./httpData/`,
+      dbJsonPath: undefined,
+      apiWeb: undefined,
+      apiWebWrap: wrapApiData,
+      dbCover: false,
+      db: {},
+      route: {},
+      api: {},
+      resHandleReplay: ({req, res}) => wrapApiData({code: 200, data: {}}),
+      resHandleJsonApi: ({req, res: { statusCode: code }, data}) => wrapApiData({code, data}),
+      watch: [],
+      clearHistory: false,
+      guard: false,
+      backOpenApi: 10,
+      static: undefined,
+      disableRecord: false,
+      bodyParser: {
+        json: {
+          limit: `100mb`,
+          extended: false,
+        },
+        urlencoded: {
+          extended: false,
+        },
+      },
+      https: {
+        redirect: true,
+      },
+    }
+  }
+  
+  
+  lib.midResJson = midResJson
+  const defaultArg = await defaultConfigFn(exportsUtil)
+  const fileArg = await fileArgFn(exportsUtil)
+  const config = {
+    ...defaultArg,
+    ...fileArg,
+    ...cliArg,
+  }
+  
+  config.proxy = [ // 合并 proxy 对象
+    defaultArg.proxy,
+    fileArg.proxy,
+    cliArg.proxy,
+  ].reduce((acc, cur) => {
+    return {
+      ...acc,
+      ...(
+        isType(cur) === `string` // string 时转为对象
+          ? {'/': cur}
+          : cur
+      ),
+    }
+  }, {})
+  config.proxy = tool.obj.sortKey(config.proxy, {firstLong: true}) // 转换为子路径优先的形式
+  config.proxy[`/`]  = config.proxy[`/`].replace(/$/, `/`).replace(/\/\/$/, `/`) // 当 proxy root 后面的斜杠时添加它
+  config.bodyParser = tool.obj.deepMergeObject(defaultArg.bodyParser, fileArg.bodyParser || {})
+  
+  const _proxyTargetInfo = parseProxyTarget(config.proxy)
+  const handleConfig = { // 处理配置, 无论用户传入怎样的格式, 进行统一转换, 方便程序解析
+    ...config,
+    static: (() => {
+      const baseObj = {
+        path: `/`,
+        mode: `hash`,
+        option: {},
+      }
+      return config.static
+        ? (
+          isType(config.static, `string`)
             ? [{
               ...baseObj,
-              ...config.static,
+              fileDir: handlePathArg(config.static),
             }]
-            : isType(config.static, `array`)
-              ? config.static.map(item => ({
+            : isType(config.static, `object`)
+              ? [{
                 ...baseObj,
-                ...item,
-                fileDir: handlePathArg(item.fileDir),
-              }))
-              : []
-      )
-      : []
-  })(),
-  updateToken: (() => {
-    const updateToken = config.updateToken
-    const fn = {
-      boolean: () => (updateToken ? {'req.headers.authorization': `req.headers.authorization`} : undefined),
-      string: () => ({[`req.headers.${updateToken}`]: `req.headers.${updateToken}`}),
-      array: () => updateToken.reduce((acc, cur) => ({...acc, [`req.headers.${cur}`]: `req.headers.${cur}`}), {}),
-      object: () => Object.entries(updateToken).reduce((acc, [key, value]) => ({
-        ...acc,
-        [key]: isType(value, `string`) 
-          ? value
-          : isType(value, `function`)
+                ...config.static,
+              }]
+              : isType(config.static, `array`)
+                ? config.static.map(item => ({
+                  ...baseObj,
+                  ...item,
+                  fileDir: handlePathArg(item.fileDir),
+                }))
+                : []
+        )
+        : []
+    })(),
+    updateToken: (() => {
+      const updateToken = config.updateToken
+      const fn = {
+        boolean: () => (updateToken ? {'req.headers.authorization': `req.headers.authorization`} : undefined),
+        string: () => ({[`req.headers.${updateToken}`]: `req.headers.${updateToken}`}),
+        array: () => updateToken.reduce((acc, cur) => ({...acc, [`req.headers.${cur}`]: `req.headers.${cur}`}), {}),
+        object: () => Object.entries(updateToken).reduce((acc, [key, value]) => ({
+          ...acc,
+          [key]: isType(value, `string`) 
             ? value
-            : undefined,
-      }), {}),
-    }[isType(updateToken)]
-    return fn ? fn() : undefined
-  })(),
-  apiInHeader:
-    config.apiInHeader === true
-    ? `x-test-api`
-    : (config.apiInHeader === false
+            : isType(value, `function`)
+              ? value
+              : undefined,
+        }), {}),
+      }[isType(updateToken)]
+      return fn ? fn() : undefined
+    })(),
+    apiInHeader:
+      config.apiInHeader === true
+      ? `x-test-api`
+      : (config.apiInHeader === false
+        ? false
+        : config.apiInHeader
+      ),
+    port: config.hostMode ? _proxyTargetInfo.port : config.port, // 如果是 host 模式, 强制更改端口与目标端口一致
+    dbJsonPath: config.dbJsonPath ? handlePathArg(config.dbJsonPath) : handlePathArg(`${config.dataDir}/db.json`),
+    dataDir: handlePathArg(config.dataDir),
+    proxy: config.proxy,
+    api: isType(config.api, `object`) ? () => config.api : config.api,
+    apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
+    db: isType(config.db, `object`) ? () => config.db : config.db,
+    remote: config.remote === false // 每个服务的 remote 配置
       ? false
-      : config.apiInHeader
-    ),
-  port: config.hostMode ? _proxyTargetInfo.port : config.port, // 如果是 host 模式, 强制更改端口与目标端口一致
-  dbJsonPath: config.dbJsonPath ? handlePathArg(config.dbJsonPath) : handlePathArg(`${config.dataDir}/db.json`),
-  dataDir: handlePathArg(config.dataDir),
-  proxy: config.proxy,
-  api: isType(config.api, `object`) ? () => config.api : config.api,
-  apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
-  db: isType(config.db, `object`) ? () => config.db : config.db,
-  remote: config.remote === false // 每个服务的 remote 配置
-    ? false
-    : config.remote === true
-      ? {}
-      : config.remote,
-  remoteToken: isType(config.remoteToken, `string`)
-      ? [config.remoteToken]
-      : isType(config.remoteToken, `array`)
-        ? config.remoteToken
-        : [],
-  watch: isType(config.watch, `string`)
-      ? [config.watch]
-      : isType(config.watch, `array`)
-        ? config.watch
-        : [],
-  backOpenApi: config.backOpenApi === true ? defaultArg.backOpenApi : config.backOpenApi,
-  disableRecord: (() => {
-    const disableRecord = config.disableRecord
-    const fn = {
-      undefined: () => false,
-      boolean: () => disableRecord,
-      string: () => ([{path: disableRecord, num: 0}]),
-      array: () => (disableRecord.map(item => {
-        return {
-          string: {
-            path: item,
-            num: 0,
-          },
-          object: item,
-        }[isType(item)]
-      } )),
-      object: () => ([disableRecord]),
-    }[isType(disableRecord)]
-    return fn ? fn() : false
-  })(),
-  https: {
-    ...defaultArg.https,
-    ...config.https,
-    key: handlePathArg(config.https.key),
-    cert: handlePathArg(config.https.cert),
-  },
-
-  // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
-  _bodyParserMid: [
-    lib.bodyParser.json(config.bodyParser.json),
-    lib.bodyParser.urlencoded(config.bodyParser.urlencoded),
-  ],
-  _proxyTargetInfo, // 解析 proxy[`/`] 的内容
-  _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
-  _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
-  _openApiHistoryDir: handlePathArg(`${config.dataDir}/openApiHistory/`), // openApi 的更新历史的保存目录
-  _gitIgnore: { // 配置一些几乎总是需要忽略的文件
-    file: handlePathArg(`${config.dataDir}/.gitignore`),
-    content: `
-      openApiHistory/
-      request/
-      db.json
-      httpHistory.json
-      log.err.txt
-      store.json
-    `,
-  },
-  _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
-  _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
-  _db: {}, // jsonServer 生成 lowdb 实例后, 会将其挂载于此
-  _set(prop, val) { // 暴露一个变更 config 的方法
-    if([
-      `_db`,
-    ].includes(prop)) {
-      handleConfig[prop] = val
-    } else {
-      this[prop] = val
-    }
-  },
+      : config.remote === true
+        ? {}
+        : config.remote,
+    remoteToken: isType(config.remoteToken, `string`)
+        ? [config.remoteToken]
+        : isType(config.remoteToken, `array`)
+          ? config.remoteToken
+          : [],
+    watch: isType(config.watch, `string`)
+        ? [config.watch]
+        : isType(config.watch, `array`)
+          ? config.watch
+          : [],
+    backOpenApi: config.backOpenApi === true ? defaultArg.backOpenApi : config.backOpenApi,
+    disableRecord: (() => {
+      const disableRecord = config.disableRecord
+      const fn = {
+        undefined: () => false,
+        boolean: () => disableRecord,
+        string: () => ([{path: disableRecord, num: 0}]),
+        array: () => (disableRecord.map(item => {
+          return {
+            string: {
+              path: item,
+              num: 0,
+            },
+            object: item,
+          }[isType(item)]
+        } )),
+        object: () => ([disableRecord]),
+      }[isType(disableRecord)]
+      return fn ? fn() : false
+    })(),
+    https: {
+      ...defaultArg.https,
+      ...config.https,
+      key: handlePathArg(config.https.key),
+      cert: handlePathArg(config.https.cert),
+    },
+  
+    // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
+    _bodyParserMid: [
+      lib.bodyParser.json(config.bodyParser.json),
+      lib.bodyParser.urlencoded(config.bodyParser.urlencoded),
+    ],
+    _proxyTargetInfo, // 解析 proxy[`/`] 的内容
+    _store: handlePathArg(`${config.dataDir}/store.json`), // 简要信息存储
+    _httpHistory: handlePathArg(`${config.dataDir}/httpHistory.json`), // 请求记录表保存位置
+    _openApiHistoryDir: handlePathArg(`${config.dataDir}/openApiHistory/`), // openApi 的更新历史的保存目录
+    _gitIgnore: { // 配置一些几乎总是需要忽略的文件
+      file: handlePathArg(`${config.dataDir}/.gitignore`),
+      content: `
+        openApiHistory/
+        request/
+        db.json
+        httpHistory.json
+        log.err.txt
+        store.json
+      `,
+    },
+    _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
+    _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
+    _db: {}, // jsonServer 生成 lowdb 实例后, 会将其挂载于此
+    _set(prop, val) { // 暴露一个变更 config 的方法
+      if([
+        `_db`,
+      ].includes(prop)) {
+        handleConfig[prop] = val
+      } else {
+        this[prop] = val
+      }
+    },
+  }
+  
+  return new Proxy(handleConfig, {
+    get(obj, prop) {
+      return obj[prop]
+    },
+    set(obj, prop, val) {
+      print(colors.red(`Operation prohibited global.config: ${prop} = ${val}`))
+    },
+  })
 }
 
-module.exports = new Proxy(handleConfig, {
-  get(obj, prop) {
-    return obj[prop]
-  },
-  set(obj, prop, val) {
-    print(colors.red(`Operation prohibited global.config: ${prop} = ${val}`))
-  },
-})
+module.exports = fn()

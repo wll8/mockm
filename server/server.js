@@ -3,11 +3,11 @@
 const {logHelper, print} = require(`./util/log.js`)
 process.setMaxListeners(0) // 不限制监听数量
 process.argv.includes(`--log-line`) && logHelper()
-global.config = require(`./config.js`)
 
 const util = require(`./util/index.js`)
 
 new Promise(async () => {
+  global.config = await require(`./config.js`)
   const {
     tool,
     business,
