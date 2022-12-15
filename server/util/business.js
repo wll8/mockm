@@ -66,14 +66,14 @@ function business() { // 与业务相关性的函数
         const hostName = require(`url`).parse(`ws://${req.headers.host}`).hostname
         res.writeHead(301, { Location: `https://${hostName}:${httpsProt}${req.url}` })
         res.end()
-      } : undefined, app).listen(httpProt)
+      } : undefined, app).listen(httpProt, `0.0.0.0`)
       httpServer = require(`https`).createServer({
         key: fs.readFileSync(https.key),
         cert: fs.readFileSync(https.cert),
       }, app)
     }
 
-    httpServer.listen(httpsProt || httpProt, () => {
+    httpServer.listen(httpsProt || httpProt, `0.0.0.0`, () => {
       // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
     })
     const server = {
