@@ -8,6 +8,16 @@ const jsonServer = require(`@wll8/json-server`)
 const {lib: { express }} = jsonServer
 
 function business() { // 与业务相关性的函数
+  function Side(arg) {
+    return new Side.prototype.init(arg)
+  }
+  Side.prototype = {
+    init: function (arg) {
+      const res = Object.assign(this, arg)
+      return res
+    },
+  }
+  Side.prototype.init.prototype = Side.prototype
 
   /**
    * 根据一个 app 来创建以及 https 配置来生成 httpServer 并添加端口监听功能
@@ -522,6 +532,26 @@ function business() { // 与业务相关性的函数
   }
 
   function customApi() {
+    // todo 生成 api 文档
+    const pathsDoc = {}
+    
+    // 所有 api, 例如 db 解析后的中间件信息
+    const serverRouterItem = {
+      alias: [], // String[], 路由别名
+      route: undefined, // String, 路由地址
+      re: undefined, // RegExp, 由 route 转换的正则
+      method: undefined, // String, 请求方式, 例如 use get post
+      type: undefined, // Enum, 指定接口来源, 例如 db api
+      description: undefined, // String, 接口描述
+      disable: undefined, // Boolean, 是否禁用
+      action: undefined, // Function, 指定接口要运行的方法
+      occupied: { // Object, 被谁占用, 如果是被占用的状态, 则不会被使用
+        type: undefined, // Enum
+        route: undefined, // String
+      },
+      info: {}, // Object, 根据 type 可能不同结构的附加信息
+    }
+    
     const pathToRegexp = require(`path-to-regexp`)
     /**
     * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
@@ -563,10 +593,27 @@ function business() { // 与业务相关性的函数
           })
         },
       }
-      const api = global.config.api({ // 向 config.api 暴露一些工具库
+      let api = global.config.api({ // 向 config.api 暴露一些工具库
         run,
       })
-
+      //  从 side 函数中扩展 api
+      api = Object.entries(api).reduce((acc, [key, val]) => {
+        if(val instanceof Side) {
+          const sideObj = {
+            alias: [], // 路由别名
+          }
+          val = {
+            ...sideObj,
+            ...val,
+          }
+          val.alias.forEach(alias => {
+            acc[alias] = val.action
+          })
+          val = val.action
+        }
+        acc[key] = val
+        return acc
+      }, {})
       const serverRouterList = [] // server 可使用的路由列表
       Object.keys(api).forEach(key => {
         let {method, url} = tool.url.fullApi2Obj(key)
@@ -597,6 +644,7 @@ function business() { // 与业务相关性的函数
           }
         }
         serverRouterList.push({
+          ...serverRouterItem,
           route: url,
           re: pathToRegexp(url),
           method,
@@ -2039,6 +2087,7 @@ function business() { // 与业务相关性的函数
   }
 
   return {
+    Side,
     getHttpServer,
     getProxyConfig,
     midResJson,
