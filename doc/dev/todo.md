@@ -1,6 +1,21 @@
 # 待完成
 
 ## 文档
+- [ ] refactor: 移除遗留的 cnpm 依赖代码
+- [x] chore: 更新 vm2
+  - https://www.cve.org/CVERecord?id=CVE-2022-36067
+  - https://nvd.nist.gov/vuln/detail/CVE-2022-36067
+- [ ] fix: 优化 http/https 跳转时的安全性
+  - https://cwe.mitre.org/data/definitions/601.html
+  - `curl -L  http://hongqiye.com/favicon.ico -H host:baidu.com > baidu.ico`
+- [ ] feat: 支持微服务
+  - 假设有一个 mockm 服务 A, 实现了微信的所有功能, 有例如 /getTicket 和 /getAccessToken 这样的 API
+  - 有一个主服务, 在主服务里可以注册 /wx 路由给服务 A, 实现 /wx/getTicket 来服务服务 A 的接口
+  - 注: 
+    - 服务 A 并没有占用多端口, 不是通过主服务代理到服务 A 的方式
+- [-] fix: config.route 失效
+  - 疑似 commit bec4571 导致, 经测试, 并未失效. 并且原 bec4571 所处理的问题也并不存在
+- [ ] 添加 config.configDir 便于使用
 - [ ] feat(doc): 从 config.d.ts 生成配置说明文档
 - [ ] feat(test): 支持以某个默认配置重测
   - 例如把支持 https 作为默认配置, 然后重测所有用例, 以检查 https 功能对以往功能是否造成影响

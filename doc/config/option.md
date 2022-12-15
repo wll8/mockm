@@ -497,9 +497,7 @@ GET /books?q=张三 -- 精确全文匹配
 类型: object
 默认: {}
 
-路由映射, 作用于 config.api 及 config.db 产生的 api
-
-::: details 示例
+路由映射.
 
 假设接口 `/books/1` 希望能通过 `/test/db/api/` 前缀访问, 配置如下:
 
@@ -510,7 +508,6 @@ GET /books?q=张三 -- 精确全文匹配
 ```
 
 参考 [json-server](https://github.com/typicode/json-server#add-custom-routes).
-::: 
 
 ## config.apiWeb
 类型: string
@@ -746,6 +743,9 @@ config.bodyParser = {
 类型: configHttps
 默认: 参考类型定义
 
+为服务配置 https 协议, 默认情况下只需填写 key/cert, 即可实现在同一端口同时支持 http/https.
+
+
 ``` ts
 interface configHttps {
   /**
@@ -776,5 +776,18 @@ interface configHttps {
    * 配置 https 使用的端口, 默认同 config.replayPort
    */
   replayPort: number | string,
+}
+```
+
+实现类似 nginx 80/443 端口 https 支持:
+
+``` js
+const config = {
+  port: 80,
+  https: {
+    key: `./key/https.key`,
+    cert: `./key/https.cer`,
+    port: 443,
+  },
 }
 ```

@@ -145,29 +145,40 @@ const obj = {
 
 module.exports = (option) => {
   return async (req, res, next) => {
+    const nodePath = require(`path`)
     const url = decodeURI(req.url.split(`?`)[0])
-    const path = `${option.root}/${url}`
-    if (req.method.toLowerCase() === `get`) {
-      if (fs.existsSync(path)) {
-        if (fs.statSync(path).isDirectory()) {
-          const files = await obj.get({
-            root: path,
-          })
-          const data = {
-            baseUrl: req.baseUrl,
-            originalUrl: `${req.originalUrl}/`.replace(/\/\/$/, `/`),
-            path: url,
-            files,
+    const path = nodePath.normalize(`${option.root}/${url}`)
+    const pathRoot = nodePath.normalize(option.root)
+    /**
+     * 避免路径遍历
+     * https://cwe.mitre.org/data/definitions/23.html
+     */
+    if(path.startsWith(pathRoot) === false) {
+      res.status(403)
+      res.json({ msg: `Forbidden ${url}` })
+    } else {
+      if (req.method.toLowerCase() === `get`) {
+        if (fs.existsSync(path)) {
+          if (fs.statSync(path).isDirectory()) {
+            const files = await obj.get({
+              root: path,
+            })
+            const data = {
+              baseUrl: req.baseUrl,
+              originalUrl: `${req.originalUrl}/`.replace(/\/\/$/, `/`),
+              path: url, // 由于数据不会存储并展示, 所以不用担心 xss
+              files,
+            }
+            res.send(getHtml(data))
+          } else {
+            res.sendFile(path, {
+              hidden: true,
+            })
           }
-          res.send(getHtml(data))
         } else {
-          res.sendFile(path, {
-            hidden: true,
-          })
+          res.status(404)
+          res.json({ msg: `no such file or directory ${path}` })
         }
-      } else {
-        res.status(404)
-        res.json({ msg: `no such file or directory ${path}` })
       }
     }
   }

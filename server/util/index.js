@@ -6,6 +6,7 @@ const business = require(`./business.js`)
 const lib = require(`./lib.js`)
 
 module.exports = {
+  side: business.Side,
   server: {
     app, // express 实例
   },

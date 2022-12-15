@@ -29,8 +29,8 @@ function logHelper(isUse = true) { // 重写 console.log 方法, 打印时附带
       return obj.stack
     }
     const stack = getStackTrace() || ``
-    const matchResult = stack.match(/\(.*?\)/g) || []
-    const line = (matchResult[1] || `()`).match(/^\((.*)\)$/)[1]
+    const matchResult = stack.match(/\s+at .*/g) || []
+    const line = `${matchResult[1]}`.replace(/^\s+at /, ``).trim()
     if( // 重写时忽略的调用栈路径
       line.match(/node_modules/)
     ) {

@@ -5,14 +5,6 @@ util 目前包含以下内容:
 ## util.server
 暴露出来服务.
 
-### util.server.app httpServer
-原生 httpServer 实例, 例如需要监听 http 协议升级时:
-``` js
-module.exports = util => {
-  util.server.httpServer.on(`upgrade`, () => {})
-}
-```
-
 ### util.server.app
 express 实例.
 
@@ -193,3 +185,38 @@ mime.getExtension('text/plain')        // ⇨ 'txt'
 - wrapApiData - 包裹 api 的返回值
 - listToData - 把类似 schema 的列表转换为数据
 - strReMatch - 如果字符串是正则就返回正则, 否则返回 false
+
+## util.side 函数用于扩展 api
+例如为 api 添加别名, 文档等功能.
+
+函数参数为对象, 属性为:
+
+- alias - string[], 路由别名
+- action - 与不使用 side 时可用的值一样
+
+示例:
+
+``` js
+config = ({side}) => ({
+  api: {
+    '/pets': side({
+      alias: [`/pets2`, `put /pets3`],
+      action: 123,
+    }),
+  },
+})
+```
+
+上面使用 side 函数, 让 `* /pets` 和 `* /pets2` 以及 `put /pets3` 这几个接口都返回 123.
+
+与以下代码等效:
+
+``` js
+config = ({side}) => ({
+  api: {
+    '/pets2': 123,
+    'put /pets3': 123,
+    '/pets': 123,
+  },
+})
+```
