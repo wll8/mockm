@@ -223,11 +223,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
     // 不再使用 --registry 参数, 因为某些管理器要求此值与 lock 中的值一致
     // 不再使用 npx , 因为它在新版本需要交互式确认
+    version = version ? `@${version}` : ``
     const cmd = {
-      npm: `npm add ${packageName}@${version}`,
-      pnpm: `pnpm add ${packageName}@${version}`, // pnpm 其实不支持 --registry 参数
-      cnpm: `cnpm i ${packageName}@${version}`, // cnpm 其他不支持 add 参数
-      yarn: `yarn add ${packageName}@${version}`,
+      npm: `npm add ${packageName}${version}`,
+      pnpm: `pnpm add ${packageName}${version}`, // pnpm 其实不支持 --registry 参数
+      cnpm: `cnpm i ${packageName}${version}`, // cnpm 其他不支持 add 参数
+      yarn: `yarn add ${packageName}${version}`,
     }[installEr]
     const cd = require(`os`).type() === `Windows_NT` ? `cd /d` : `cd`
     const tips = tool().string.removeLeft(`
