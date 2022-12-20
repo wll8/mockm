@@ -403,7 +403,7 @@ function business() { // 与业务相关性的函数
   /**
    * 保存日志
    */
-  function saveLog({logStr, logPath, code = `-`}) {
+  function saveLog({logStr = ``, logPath, code = `-`}) {
     const fs = require(`fs`)
     const os = require(`os`)
     const packageJson = require(`../package.json`)
