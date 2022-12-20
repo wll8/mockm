@@ -1,6 +1,9 @@
 # 待完成
 
 ## 文档
+- [ ] feat: 从 config.api 中生成文档
+  - [ ] ? 使用 joi, 参数为文件时, 如何生成文档
+    - 3.0.0.md#considerations-for-file-uploads
 - [ ] refactor: 移除遗留的 cnpm 依赖代码
 - [x] chore: 更新 vm2
   - https://www.cve.org/CVERecord?id=CVE-2022-36067
