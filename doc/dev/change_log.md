@@ -9,6 +9,15 @@
 
 :::
 
+## 2022 年 12 月
+
+#### v1.1.26
+- server
+  - feat(log): 提升 log 容错性
+  - fix(log): 当调用栈中的项不含括号地不应匹配不到
+  - feat: config 函数支持 async
+  - feat: 支持[路由别名](../config/config_fn.md#util-side-函数用于扩展-api)
+
 ## 2022 年 11 月
 
 #### v1.1.26-alpha.43
