@@ -3,9 +3,11 @@ const app = jsonServer.create()
 
 const tool = require(`./tool.js`)
 const business = require(`./business.js`)
+const plugin = require(`../plugin/index.js`)
 const lib = require(`./lib.js`)
 
 module.exports = {
+  plugin,
   side: business.Side,
   server: {
     app, // express 实例
