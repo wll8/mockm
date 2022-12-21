@@ -119,6 +119,7 @@ const fn = async () => {
       https: {
         redirect: true,
       },
+      plugin: [],
     }
   }
   
@@ -253,6 +254,7 @@ const fn = async () => {
       key: handlePathArg(config.https.key),
       cert: handlePathArg(config.https.cert),
     },
+    plugin: config.plugin.map(item => isType(item, `array`) ? item : [item]),
   
     // 约定下划线开头的配置为私有配置, 一般是根据用户配置产生的一些方便使用的变量
     _bodyParserMid: [
@@ -287,7 +289,22 @@ const fn = async () => {
       }
     },
   }
-  
+  // plugin main -- 注册插件并传入参数
+  const plugin = handleConfig.plugin
+  for (let index = 0; index < plugin.length; index++) {
+    const [item, itemConfig] = plugin[index]
+    item._mainReturn = {
+      ...await require(`./plugin/base.js`).main(),
+      ...await item.main({
+        hostInfo: {
+          version: `1.1.26`,
+        },
+        pluginConfig: itemConfig,
+        config: handleConfig,
+        util: exportsUtil,
+      }),
+    }
+  }
   return new Proxy(handleConfig, {
     get(obj, prop) {
       return obj[prop]

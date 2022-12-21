@@ -46,7 +46,7 @@ interface ConfigApiFnArg {
     /**
      * 运行 fetch 方法并返回结果, 会把响应头绑定到自定义 api 上, 它是对 node-fetch 的一个封装.
      */
-    fetch: ((arg: {req: Request, res: Response, fetchRes: Promise}) => void),
+    fetch: ((arg: {req: Request, res: Response, fetchRes: Promise<any>}) => void),
   },
 }
 
@@ -69,6 +69,14 @@ interface ConfigFnArg {
    */
   libObj: libObj,
   business: any,
+  /**
+   * 用于扩展 api 的函数
+   */
+  side: any,
+  /**
+   * 内置插件
+   */
+  plugin: any,
 }
 
 interface configHttps {
@@ -364,6 +372,15 @@ interface ConfigObj {
    * @default {}
    */
   https: configHttps,
+  
+  /**
+   * 注册新插件, 或向内置插件传递参数, 当插件对象为字符串时表示内置插件
+   * - 示例: `[p1, [p2, {}]]` -- 注册 p1 和 p2 两个插件, 并向 p2 传递选项
+   * - 示例: `['validate']` -- 启用内置插件 validate
+   * - 示例: `[['validate', {}]]` -- 启用内置插件并变更它的选项
+   * - 示例: `[['validate', false]]` -- 禁用内置插件 validate
+   */
+  plugin: Plugin[] | [Plugin, any][] | [string, any][],
 }
 
 interface WrapApiData {
@@ -433,4 +450,24 @@ interface DisableRecord {
    * 0
    */
   num: number,
+}
+
+interface Plugin {
+  /**
+   * 插件的唯一标识
+   */
+  key: string,
+
+  /**
+   * 支持的宿主版本
+   * 若版本不被支持时会给予警告
+   */
+  hostVersion: string[],
+
+  /**
+   * 插件入口
+   * function, 需要返回一个对象
+   * 在这里获取用户转给插件的配置
+   */
+  main: Promise<{}>,
 }
