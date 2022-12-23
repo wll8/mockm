@@ -35,6 +35,7 @@ async function serverProxy({
   // 当传入 server 之后, app 的 listen 方法被重写为 server 的 listen 方法
   onlyHttpServer && require(`@wll8/express-ws`)({app, server: onlyHttpServer})
   require(`@wll8/express-ws`)({app, server: httpServer})
+  await business.pluginRun(`useCreated`, app)
   // 此中间件比任何用户自定义的都要先运行
   app.use((req, res, next) => {
     // 创建一个对象用于挂载用户添加的方法
@@ -52,6 +53,7 @@ async function serverProxy({
     middlewaresObj.urlencodedParser,
     middlewaresObj.logger,
   ) // 添加中间件, 方便取值
+  await business.pluginRun(`useParserCreated`)
   app.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
     req.query.page && (req.query._page = req.query.page)
     req.query.pageSize && (req.query._limit = req.query.pageSize)
@@ -102,14 +104,14 @@ async function serverProxy({
       allowCors({req, res, next})
     })
     if(Boolean(item.disable) === false) {
-      const handleErr = (...arg) => {
+      const handleErr = async (...arg) => {
+        const [req, res, next] = arg
         try {
-          return item.action(...arg)
+          return await item.action(...arg)
         } catch (error) {
           print(tool.cli.colors.red(`api error: ${item.method} ${item.route}`))
           print(error)
           if(item.method !== `ws`) {
-            const [req, res, next] = arg
             res.status(500).json({msg: String(error)})
           }
         }

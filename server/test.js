@@ -68,7 +68,7 @@ function serverTest() {
     }
   })
 
-  serverTest.get(`/api/:actionRaw/:api0(*)`, (req, res, next) => { // 给后端查询前端请求的接口
+  serverTest.get(`/api/:actionRaw/:api0(*)`, async (req, res, next) => { // 给后端查询前端请求的接口
     let {actionRaw, api0} = parseRegPath(req.route.path, req.url)
 
     const [action, ...actionArg] = actionRaw.split(`,`)
@@ -272,7 +272,7 @@ function serverTest() {
         const str = require(`fs`).readFileSync(global.config._store, `utf8`)
         res.json(JSON.parse(str))
       },
-      studio() {
+      async studio() {
         let path = req.query.path
         const apiWebStore = tool.file.fileStore(global.config.apiWeb)
         const apiWeb = apiWebStore.get(path ? [`paths`, path] : `paths`) || {}
@@ -283,7 +283,7 @@ function serverTest() {
           const disableApiList = apiWebStore.get(`disable`)
           const {
             allRoute,
-          } = customApi()
+          } = await customApi()
           allRoute.forEach(item => { // 来自 config.apiWeb 和 config.api
             sendData.push({
               ...item,
@@ -298,7 +298,7 @@ function serverTest() {
       },
     }
     if (actionFnObj[action]) {
-      actionFnObj[action](...actionArg)
+      await actionFnObj[action](...actionArg)
     } else {
       print(`No matching method found`, {action, api, method})
       next()

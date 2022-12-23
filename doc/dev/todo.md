@@ -1,6 +1,9 @@
 # 待完成
 
 ## 文档
+- [ ] feat: 从 config.api 中生成文档
+  - [ ] ? 使用 joi, 参数为文件时, 如何生成文档
+    - 3.0.0.md#considerations-for-file-uploads
 - [ ] refactor: 移除遗留的 cnpm 依赖代码
 - [x] chore: 更新 vm2
   - https://www.cve.org/CVERecord?id=CVE-2022-36067
@@ -405,6 +408,11 @@
     ```
   - [ ] feat: 更改代理方式
     - `"/": 'http://127.0.0.1/api'`  应代理到 `/api` 而不是 `/`.
+## 破坏性更新计划
+- 2.x
+  - [ ] feat: 使用插件模式扩展功能
+    - 在以往的 config.db 和 config.static 实现中, 其实都是向 server 注入 use 或 api. 而 config.api 本就支持 use/api 的添加, 所以可以把它们作为插件来扩展 api, 这便于体积优化和功能扩展, 以及生态搭建.
+    - 例如 apiDoc 和 apiWeb 也都可以作为插件支持.
   - [ ] feat: 所有相对路径都遵循以下规则
     - 所有写在配置文件中的地址, 都相对于配置文件
     - 所有在命令行上传送的地址, 都相对地运行目录

@@ -20,6 +20,19 @@ function business() { // 与业务相关性的函数
   Side.prototype.init.prototype = Side.prototype
 
   /**
+   * 运行每个插件的监听函数
+   * @param {*} key 插件的函数
+   * @param  {...any} arg 函数的参数
+   */
+  async function pluginRun(key, ...arg) {
+    const plugin = global.config.plugin
+    for (let index = 0; index < plugin.length; index++) {
+      const [item] = plugin[index]
+      item._mainReturn[key] && await item._mainReturn[key](...arg)
+    }
+  }
+
+  /**
    * 根据一个 app 来创建以及 https 配置来生成 httpServer 并添加端口监听功能
    * @param {*} param0 
    * @returns {httpServer, onlyHttpServer} 当额外配置 https 端口时才会存在 onlyHttpServer
@@ -66,15 +79,17 @@ function business() { // 与业务相关性的函数
         const hostName = require(`url`).parse(`ws://${req.headers.host}`).hostname
         res.writeHead(301, { Location: `https://${hostName}:${httpsProt}${req.url}` })
         res.end()
-      } : undefined, app).listen(httpProt)
+      } : undefined, app).listen(httpProt, `0.0.0.0`, async () => {
+        await pluginRun(`serverCreated`, { onlyHttpServer, httpProt })
+      })
       httpServer = require(`https`).createServer({
         key: fs.readFileSync(https.key),
         cert: fs.readFileSync(https.cert),
       }, app)
     }
 
-    httpServer.listen(httpsProt || httpProt, () => {
-      // console.log(`接口调试地址: http://localhost:${config.testPort}/`)
+    httpServer.listen(httpsProt || httpProt, `0.0.0.0`, async () => {
+      await pluginRun(`serverCreated`, {httpServer, httpsProt, httpProt})
     })
     const server = {
       httpServer,
@@ -403,7 +418,7 @@ function business() { // 与业务相关性的函数
   /**
    * 保存日志
    */
-  function saveLog({logStr, logPath, code = `-`}) {
+  function saveLog({logStr = ``, logPath, code = `-`}) {
     const fs = require(`fs`)
     const os = require(`os`)
     const packageJson = require(`../package.json`)
@@ -531,10 +546,7 @@ function business() { // 与业务相关性的函数
     return re
   }
 
-  function customApi() {
-    // todo 生成 api 文档
-    const pathsDoc = {}
-    
+  async function customApi() {
     // 所有 api, 例如 db 解析后的中间件信息
     const serverRouterItem = {
       alias: [], // String[], 路由别名
@@ -557,7 +569,7 @@ function business() { // 与业务相关性的函数
     * 自定义 api 处理程序, 包括配置中的用户自定义路由(config.api), 以及mock数据生成的路由(config.db)
     */
 
-    function parseApi() { // 解析自定义 api
+    async function parseApi() { // 解析自定义 api
       const { setHeader, allowCors } = clientInjection()
       const run = {
         async curl({req, res, cmd}) { // cmd: curl/bash
@@ -593,9 +605,12 @@ function business() { // 与业务相关性的函数
           })
         },
       }
-      let api = global.config.api({ // 向 config.api 暴露一些工具库
+      const apiUtil = { // 向 config.api 暴露一些工具库
         run,
-      })
+      }
+      let api = global.config.api(apiUtil)
+      await pluginRun(`apiParsed`, api, apiUtil)
+      const side = {}
       //  从 side 函数中扩展 api
       api = Object.entries(api).reduce((acc, [key, val]) => {
         if(val instanceof Side) {
@@ -609,6 +624,7 @@ function business() { // 与业务相关性的函数
           val.alias.forEach(alias => {
             acc[alias] = val.action
           })
+          side[key] = val
           val = val.action
         }
         acc[key] = val
@@ -645,6 +661,7 @@ function business() { // 与业务相关性的函数
         }
         serverRouterList.push({
           ...serverRouterItem,
+          ...side[key],
           route: url,
           re: pathToRegexp(url),
           method,
@@ -653,6 +670,7 @@ function business() { // 与业务相关性的函数
           occupied: {},
         })
       })
+      await pluginRun(`apiListParsed`, serverRouterList)
       return serverRouterList
     }
 
@@ -1102,7 +1120,7 @@ function business() { // 与业务相关性的函数
     
     // 处理为统一的列表, 注意列表中的顺序对应 use 注册的顺序
     const obj = {
-      api: parseApi(),
+      api: await parseApi(),
       db: parseDbApi(),
       resetUrl: resetUrl(),
       static: staticHandle(),
@@ -1704,7 +1722,7 @@ function business() { // 与业务相关性的函数
       /**
        * 这是浏览器需要的跨域信息
        */
-      if(res) {
+      if(res && (res.headersSent === false)) {
         const rawHeadersObj = req.rawHeaders.reduce((acc, cur, index) => {
          /**
           * req.rawHeaders: [key, val, key, val, ...]
@@ -2083,6 +2101,7 @@ function business() { // 与业务相关性的函数
   }
 
   return {
+    pluginRun,
     Side,
     getHttpServer,
     getProxyConfig,

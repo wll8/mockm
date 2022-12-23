@@ -31,11 +31,12 @@ new Promise(async () => {
   } = business
 
   initHandle().init()
-
+  await business.pluginRun(`hostFileCreated`)
+  
   const {
     allRoute,
     allRouteTest,
-  } = customApi()
+  } = await customApi()
 
   global.HTTPHISTORY = require(global.config._httpHistory) // 请求历史
   global.STORE = tool.file.fileStore(global.config._store) // 自动注入下次调试请求的数据
