@@ -208,7 +208,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
    * @param {*} param0 
    * @returns 
    */
-  async function installPackage({cwd, env, packageName, version, attempt = 3}) {
+  async function installPackage({cwd, env, pkg, attempt = 3, requireName}) {
     const registryUrl = await npm().getNpmRegistry()
     const { MOCKM_REGISTRY } = process.env
     const useUrl = registryUrl || MOCKM_REGISTRY || `https://registry.npm.taobao.org/`
@@ -223,16 +223,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
     // 不再使用 --registry 参数, 因为某些管理器要求此值与 lock 中的值一致
     // 不再使用 npx , 因为它在新版本需要交互式确认
-    version = version ? `@${version}` : ``
     const cmd = {
-      npm: `npm add ${packageName}${version}`,
-      pnpm: `pnpm add ${packageName}${version}`, // pnpm 其实不支持 --registry 参数
-      cnpm: `cnpm i ${packageName}${version}`, // cnpm 其他不支持 add 参数
-      yarn: `yarn add ${packageName}${version}`,
+      npm: `npm add ${pkg}`,
+      pnpm: `pnpm add ${pkg}`, // pnpm 其实不支持 --registry 参数
+      cnpm: `cnpm i ${pkg}`, // cnpm 其实不支持 add 参数
+      yarn: `yarn add ${pkg}`,
     }[installEr]
     const cd = require(`os`).type() === `Windows_NT` ? `cd /d` : `cd`
     const tips = tool().string.removeLeft(`
-      initializing: ${packageName}...
+      initializing: ${pkg}...
       ${tool().cli.colors.yellow(`If the automatic installation fails, you can try running the following commands manually:`)}
       ${tool().cli.getFullLine()}
       ${cd} "${cwd}"
@@ -257,40 +256,46 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         print(`number of retries: ${attempt - attemptNum}/${attempt - 1}`)
       }
       attemptNum = attemptNum - 1
-    } while (hasPackage(packageName) === false && attemptNum > 0)
-    const hasPackageRes = hasPackage(packageName)
-    print(tool().cli.colors[[`red`, `green`][Number(hasPackageRes)]](`Initialize ${packageName} ${[`failed`, `successfully`][Number(hasPackageRes)]}`))
+    } while (hasPackage(requireName) === false && attemptNum > 0)
+    const hasPackageRes = hasPackage(requireName)
+    print(tool().cli.colors[[`red`, `green`][Number(hasPackageRes)]](`Initialize ${pkg} ${[`failed`, `successfully`][Number(hasPackageRes)]}`))
     return hasPackageRes
   }
 
   function generate() { // 生成器
     /**
      * 如果某个依赖不存在, 则安装它
-     * @param {*} packageName 依赖名称
+     * @param {*} pkg 要安装的依赖, 与 npm i 后面的参数一致
      * @param {object} param1 配置
-     * @param {string} param1.version 版本, 如果不填则从 packageJson.optionalDependencies 中获取
      * @param {boolean} param1.getRequire 是否安装完成后进行 require
+     * @param {boolean} param1.requireName require 时使用的名称, 默认为自动解析, 例如当使用 url 安装时程序是无法知道真实名称的, 需要指定
      * @param {object} param1.env 安装时的环境变量
      * @param {string} param1.msg 依赖不存在时提示的消息
      */
-    async function initPackge(packageName, {version, getRequire = true, env = {}, msg} = {}) {
+    async function initPackge(pkg, {getRequire = true, requireName, env = {}, msg} = {}) {
       try {
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || (packageJson.pluginDependencies || {})[packageName] || (packageJson.optionalDependencies || {})[packageName] || packageJson.dependencies[packageName]
-        const hasPackageRes = hasPackage(packageName)
-        if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
-          const cnpmVersion = npm().getLocalVersion(`cnpm`)
-          if(cnpmVersion === undefined) { // 如果 cnpm 不存在则先安装 cnpm
-            await installPackage({cwd: mainPath, env, packageName: `cnpm`, version: `6.1.1` })
+
+        let pkgVersion = ``
+        if(pkg.includes(`://`) === false) {
+          let nameEndsAt = pkg[0] === `@` ? pkg.slice(1).indexOf(`@`) + 1 : pkg.indexOf(`@`)
+          pkgVersion = nameEndsAt > 0 ? pkg.slice(nameEndsAt + 1) : ``
+          if(pkgVersion === ``) { // 若未指定版本时, 从已声明的依赖中选择版本
+            pkgVersion = pkgVersion || (packageJson.pluginDependencies || {})[pkg] || (packageJson.optionalDependencies || {})[pkg] || packageJson.dependencies[pkg] || ``
+            pkg = pkgVersion ? `${pkg}@${pkgVersion}`: pkg
           }
+        }
+        const requireNameNew = requireName || (pkgVersion ? pkg.replace(`@${pkgVersion}`, ``) : pkg);
+        const hasPackageRes = hasPackage(requireNameNew)
+        if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           msg && console.log(msg)
-          await installPackage({cwd: mainPath, env, packageName, version })
+          await installPackage({cwd: mainPath, env, pkg, requireName: requireNameNew })
         }
         if(getRequire) {
-          cache().delRequireCache(packageName)
-          return require(packageName)
+          cache().delRequireCache(requireNameNew)
+          return require(requireNameNew)
         }
       } catch (err) {
         console.log(`err`, err)
