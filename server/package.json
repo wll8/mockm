@@ -42,7 +42,6 @@
     "eslint": "7.32.0"
   },
   "optionalDependencies": {
-    "cnpm": "7.1.0",
     "connect-history-api-fallback": "1.6.0",
     "curlconverter": "3.21.0",
     "get-port": "5.1.1",
@@ -54,6 +53,8 @@
     "yaml": "1.10.2"
   },
   "pluginDependencies": {
+    "joi": "^17.7.0",
+    "joi-to-swagger": "^6.2.0",
     "ngrok": "^4.2.2"
   },
   "scripts": {

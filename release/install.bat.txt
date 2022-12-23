@@ -6,7 +6,7 @@ set packName=mockm
 title Automatically install %packName%
 set packCli=mm
 set packArg=--version
-set nodeV=v10.16.3
+set nodeV=v14.15.5
 set nodeName=node-%nodeV%-win-x86
 set nodePath=%installPath%\%nodeName%
 set nodeZip=%nodePath%.zip
@@ -48,8 +48,7 @@ exit /b
 
 :install
   echo Installing %packName%...
-  if exist "%nodePath%\cnpm.cmd" (cd .) else cmd /c "cd /d """%nodePath%""" && npm.cmd i -g cnpm --registry=https://registry.npm.taobao.org"
-  if exist "%nodePath%\%packCli%.cmd" (cd .) else cmd /c "cd /d """%nodePath%""" && cnpm.cmd i -g %packName%"
+  if exist "%nodePath%\%packCli%.cmd" (cd .) else cmd /c "cd /d """%nodePath%""" && npm.cmd i -g %packName% --registry=https://registry.npm.taobao.org"
   goto :test
 exit /b
 

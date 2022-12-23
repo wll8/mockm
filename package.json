@@ -8,7 +8,7 @@
     "push:npm": "cd release && npx gulp npm",
     "bit": "npm run build:client && npm run build:serve && npm run install && npm run test:build",
     "bit:serve": "npm run build:serve && npm run install && npm run test:build",
-    "install": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx cnpm i --product",
+    "install": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org/ npx npm i --product",
     "test": "npm run test:dev",
     "test:dev": "cd test && npm run test:dev",
     "test:build": "cd test && npm run test:build"

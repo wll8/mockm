@@ -17,7 +17,6 @@ const os = require('os')
 const shelljs = require('shelljs')
 const isWin = os.type() === 'Windows_NT'
 const child_process = require('child_process')
-const packgeAdmin = shelljs.which('cnpm') ? 'cnpm' : 'npm'
 
 /**
  * 获取一个 https 配置, 例如颁发机构, 证书, 以及他们的文件地址
@@ -529,7 +528,6 @@ module.exports = {
   http: http(),
   asyncTosync,
   os,
-  packgeAdmin,
   allTestAfter,
   allTestBefore,
   fs,
