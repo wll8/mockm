@@ -1726,7 +1726,7 @@ function business() { // 与业务相关性的函数
       /**
        * 这是浏览器需要的跨域信息
        */
-      if(res && (res.headersSent === false)) {
+      if(res && (res.headersSent !== true)) {
         const rawHeadersObj = req.rawHeaders.reduce((acc, cur, index) => {
          /**
           * req.rawHeaders: [key, val, key, val, ...]
