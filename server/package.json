@@ -15,7 +15,7 @@
     "@babel/runtime-corejs3": "^7.17.2",
     "@httptoolkit/httpolyglot": "^2.1.0",
     "@wll8/better-mock": "^0.3.3-alpha",
-    "@wll8/express-ws": "^1.0.3",
+    "@wll8/express-ws": "^1.0.5",
     "@wll8/json-server": "^0.17.2-alpha.6",
     "address": "^1.2.0",
     "axios": "^0.26.0",
