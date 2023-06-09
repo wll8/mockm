@@ -620,7 +620,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-
+    function fileChange(file, cb) {
+      const chokidar = require(`chokidar`)
+      tool().type.isEmpty(file) === false && chokidar.watch(file, {
+        ignored: `**/node_modules/**`,
+        usePolling: true,
+      }).on(`change`, (files) => {
+        cb(files)
+      })
+    }
 
     /**
      * 根据 dirName 和 fileName 返回一个当前目录不存在的文件名
@@ -936,6 +944,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      fileChange,
       createFile,
       copyFolderSync,
       filesCreateOrRemove,

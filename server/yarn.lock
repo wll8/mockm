@@ -553,6 +553,11 @@
     server-destroy "^1.0.1"
     yargs "^17.0.1"
 
+"@wll8/process-manager@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmmirror.com/@wll8/process-manager/-/process-manager-1.0.1.tgz#99558edaa5bce215b70c97c840ab8509f68abd2f"
+  integrity sha512-KcdpN2wvW5Xlxwpk1Cp60GIzKrt3f6dZqfjYPeX/4urgGZnzzDTnoiUYtcjjg2eh5ITnyRLA3KcKqdiMAOWyyg==
+
 a-sync-waterfall@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/a-sync-waterfall/-/a-sync-waterfall-1.0.1.tgz#75b6b6aa72598b497a125e7a2770f14f4c8a1fa7"
@@ -870,7 +875,7 @@ china-location@^2.0.0:
   resolved "https://registry.npmmirror.com/china-location/-/china-location-2.1.0.tgz#5433ff393a8d6ffb42138a2a64d08bc8dfebefe4"
   integrity sha512-ZUvn1LnoNcTIbCrhM+xHYurb+F2xP7+g0WE87Ksw5IOmycy9uUq2O+fe8mD0m5vliSOhyiGIZOdQDTCxyFaBjw==
 
-chokidar@^3.5.2:
+chokidar@^3.5.2, chokidar@^3.5.3:
   version "3.5.3"
   resolved "https://registry.npmmirror.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==
@@ -2443,10 +2448,10 @@ node-http-proxy-json@^0.1.9:
     bufferhelper "^0.2.1"
     concat-stream "^1.5.1"
 
-nodemon@^2.0.15:
-  version "2.0.20"
-  resolved "https://registry.npmmirror.com/nodemon/-/nodemon-2.0.20.tgz#e3537de768a492e8d74da5c5813cb0c7486fc701"
-  integrity sha512-Km2mWHKKY5GzRg6i1j5OxOHQtuvVsgskLfigG25yTtbyfRGn/GNvIbRyOf1PSCKJ2aT/58TiuUsuOU5UToVViw==
+nodemon@^2.0.22:
+  version "2.0.22"
+  resolved "https://registry.npmmirror.com/nodemon/-/nodemon-2.0.22.tgz#182c45c3a78da486f673d6c1702e00728daf5258"
+  integrity sha512-B8YqaKMmyuCO7BowF1Z1/mkPqLk6cs/l63Ojtd6otKjMx47Dq1utxfRxcavH1I7VSaL8n5BUaoutadnsX3AAVQ==
   dependencies:
     chokidar "^3.5.2"
     debug "^3.2.7"

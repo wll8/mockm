@@ -5,7 +5,7 @@ function killProcess(...arg) {
     console.log('中途退出测试')
     allTestAfter()
   }
-  // process.exit()
+  process.exit()
 }
 process.on(`SIGTERM`, killProcess)
 process.on(`SIGINT`, killProcess)
