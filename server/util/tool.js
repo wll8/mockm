@@ -6,7 +6,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 获取本地 package 版本号
      * @param {string} name packageName
      * @param {object} param1 选项
-     * @param {array} param1.packagePath 指定路径
+     * @param {string} param1.packagePath node_modules 路径
      */
     function getLocalVersion(name, {packagePath} = {}) { // 从本地获取版本号
       const hasFile = tool().file.hasFile
@@ -201,12 +201,12 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   /**
    * 自动安装依赖
-   * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果, 
+   * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果,
    *     需要使用 mm remote 这种直接调用可执行文件的方式才能实时输出, 不知道为什么
    * 注意, 假设安装 a 依赖后, a 依赖会被存储到 dependencies 中, 建议保留它, 因为可能是对等依赖
    *     例如 joi-to-swagger 依赖 joi, 这要求在父项目的 dependencies 中显式存在 joi 并已安装
-   * @param {*} param0 
-   * @returns 
+   * @param {*} param0
+   * @returns
    */
   async function installPackage({cwd, env, pkg, attempt = 3, requireName}) {
     const registryUrl = await npm().getNpmRegistry()
@@ -585,8 +585,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function file() { // 文件相关
     /**
      * 递归复制
-     * @param {*} from 
-     * @param {*} to 
+     * @param {*} from
+     * @param {*} to
      */
     function copyFolderSync(from, to) {
       const fs = require(`fs`)
@@ -601,7 +601,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }
       })
     }
-    
+
     /**
      * 创建或删除一组文件
      * @param objOrArr {object|number} 要操作的内容
@@ -920,13 +920,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         || fs.readFileSync(file, `utf-8`).trim() === ``
       )
     }
-    
+
     /**
      * 当文件不存在或内容为空时创建文件, 自动创建目录
      * arg[0].filePath 文件地址
      * arg[0].str 文件内容
      * arg[0].force 是否强行覆盖
-     * 
+     *
      * @return boolean 是否创建
      */
     function createFile({filePath, str = ``, force = false, msg = ``} = {}) {
@@ -986,7 +986,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
          当使用以下请求方式时, 获取到的 ip 为 ::1
          - js fetch(`http://localhost:9090/ip`);
          - cli http :9000/ip
-        */ 
+        */
         "1": `127.0.0.1`,
       }[ip] || ip
       return ip
@@ -995,8 +995,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     /**
      * 判断请求是 http 还是 https
      * https://stackoverflow.com/questions/10348906/how-to-know-if-a-request-is-http-or-https-in-node-js
-     * @param {*} req 
-     * @returns 
+     * @param {*} req
+     * @returns
      */
     function getProtocol (req) {
       let proto = req.connection.encrypted ? 'https' : 'http';
@@ -1056,7 +1056,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 排序对象的 key, 仅操作第一层
      * @param {*} obj 要排序的对象
      * @param {*} opt.firstLong 是否长 key 在前, 默认 false
-     * @returns 
+     * @returns
      */
     function sortKey(obj, {
       firstLong = false,
@@ -1069,7 +1069,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       keys.forEach(key => (newObj[key] = obj[key]))
       return newObj
     }
-    
+
     function flatObj(value, currentKey) { // 展开对象
       let result = {}
       Object.keys(value).forEach(key => {
