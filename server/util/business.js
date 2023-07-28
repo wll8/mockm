@@ -1293,16 +1293,6 @@ function business() { // 与业务相关性的函数
         }
       }
       
-      { // 监听自定义目录更改后重启服务
-        const nodemon = require(`nodemon`)
-        tool.type.isEmpty(global.config.watch) === false && nodemon({
-          exec: `node -e 0`, // 由于必须存在 exec 参数, 所以放置一条啥也不干的命令
-          watch: global.config.watch,
-        }).on(`restart`, () => {
-          reStartServer(global.config.config)
-        })
-      }
-
       { // 配置 httpData 目录中的 gitignore
         tool.file.isFileEmpty(global.config._gitIgnore.file)
         && fs.writeFile(

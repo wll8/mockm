@@ -198,7 +198,7 @@ describe('命令行', () => {
     util.ok(await util.runMockm({
       runOk: false,
       cli: {
-        '--node-options': `--inspect-brk="${await getPort()}"`,
+        '--node-options': `--inspect-brk=${await getPort()}`,
       },
       okFn: async ({arg, str}) => {
         return str.match(`ws://`)

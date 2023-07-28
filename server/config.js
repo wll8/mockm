@@ -279,6 +279,7 @@ const fn = async () => {
     _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
     _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
     _db: {}, // jsonServer 生成 lowdb 实例后, 会将其挂载于此
+    _configFile: business.initHandle().configFileFn({ cliArg: parseArgv() }), // 注: 这里需要重新计算 cliArg, 而不是被修改后的 cliArg
     _set(prop, val) { // 暴露一个变更 config 的方法
       if([
         `_db`,

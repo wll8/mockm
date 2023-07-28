@@ -5,7 +5,7 @@ function killProcess(...arg) {
     console.log('中途退出测试')
     allTestAfter()
   }
-  // process.exit()
+  process.exit()
 }
 process.on(`SIGTERM`, killProcess)
 process.on(`SIGINT`, killProcess)
@@ -168,6 +168,7 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     build: {
       runPath: pkgPath(runPath || `./run.js`),
       arg: {
+        proxy: `http://hongqiye.com:8888/`,
         '--config': true,
         '--cwd': getTempDir(),
         port: port.port,
@@ -179,6 +180,7 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     dev: {
       runPath: pkgPath(runPath || `./run.js`),
       arg: {
+        proxy: `http://hongqiye.com:8888/`,
         '--config': true,
         '--cwd': getTempDir(),
         port: port.port,
