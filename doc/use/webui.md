@@ -4,7 +4,7 @@
 ## 请求列表
 所有被拦截的请求都会实时出现在这里.
 
-![请求列表](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_api_list_2020-09-21_100140.png)
+![请求列表](~@doc/image/mockm_api_list_2020-09-21_100140.png)
 
 表头列内容含义:
 
@@ -27,28 +27,28 @@ api | 请求地址
 ### 功能区
 
 - **replay**
-![replay](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_replay_2020-11-10-11-21-51.png)
+![replay](~@doc/image/mockm_replay_2020-11-10-11-21-51.png)
 
 重放, 使用当前请求的参数再重新请求一次接口.
 
 后台可以使用这个功能来快速重现错误, 而不必登录账号, 不必重新构造接口数据.
 
 - **capture**
-![capture](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_capture_2020-11-10-11-29-22.png)
+![capture](~@doc/image/mockm_capture_2020-11-10-11-29-22.png)
 
 获取当前页面截图, 作为简单的 `留证` .
 
 如果你只需要别人能远程访问, 可使用[远程选项](../config/option.md#config-remote).
 
 - **swagger**
-![swagger](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_swagger_2020-11-10-11-32-18.png)
+![swagger](~@doc/image/mockm_swagger_2020-11-10-11-32-18.png)
 
 配置 openApi 后, 会自动查找 api 对应的 swagger 视图供使用. 例如 `Try it out` 进行请求调试, 查看 module 定义.
 
 请求时, 会自动添加最新 token, 意味着你不需要手动登录就能调试接口.
 
 - **history**
-![history](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_history_2020-11-10-11-33-26.png)
+![history](~@doc/image/mockm_history_2020-11-10-11-33-26.png)
 
 查看当前 api 的所有请求历史列表, 点击某条历史, 跳转到对应的请求详情.
 
@@ -94,12 +94,12 @@ res | 响应体中 body 的内容长度
     - headers 响应头
   - body 响应体
 
-![请求详情](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_api_detail_2020-09-21_100052.png)
+![请求详情](~@doc/image/mockm_api_detail_2020-09-21_100052.png)
 
 ::: details 参考
-![请求](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/HTTP_ReqExample.png)
+![请求](~@doc/image/HTTP_ReqExample.png)
 
-![响应](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/HTTP_ResExample.png)
+![响应](~@doc/image/HTTP_ResExample.png)
 
 <center>来自 ntu.edu.sg </center>
 
@@ -118,7 +118,7 @@ res | 响应体中 body 的内容长度
 - 点击列表中的单个开关, 可以禁用单个接口
 
 ## 接口编辑
-![apiWebEdit](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
+![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
 
 如果还没有真实的接口, 可以通过此功能创建便于前后端参考的 `接口|文档` , 它描述了请求的地址, 方法, 参数的位置, 类型, 响应, 并且可以生成供前端调用的接口.
 
@@ -150,7 +150,7 @@ mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应
 默认情况下, 生成的整个数据是一个对象. 如果要精确控制返回值, 可以使用快捷键 `ctrl+e` 或点击 `action -> example` 打开的窗口中操作.
 
 ### 使用表格中的数据作为响应
-![apiWebEdit](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_apiWebEdit_2020-11-10-14-05-27.png)
+![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-11-10-14-05-27.png)
 
 则根据你在表中录入情况生成数据, 你可以修改返回值为 `object` 或 `array`. 为 object 时, 生成规则表示从单个对象中随机取几个字段, 为 array 时, 表示返回的数组中有多少个对象.
 
@@ -161,7 +161,7 @@ mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应
 注: 表格形式生成的数据 content-type 为 `application/json` .
 
 ### 以编程方式自定义接口响应
-![apiWebEdit](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_apiWebEdit_2020-11-10-14-07-10.png)
+![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-11-10-14-07-10.png)
 
 你可使用 js 编写该接口的逻辑, 例如响应数据根据请求的不同而不同.
 
@@ -201,7 +201,7 @@ mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应
 :::
 
 ### 使用历史记录作为响应
-![apiWebEdit](https://cdn.jsdelivr.net/gh/wll8/mockm@1.1.14/doc/image/mockm_apiWebEdit_2020-12-03-10-44-49.png)
+![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-12-03-10-44-49.png)
 
 输入请求ID, 请求当前接口时, 总是返回所输入请求ID的响应, 包括 headers 以及其中的测试链接也总是一样的.
 
