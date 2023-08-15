@@ -23,25 +23,31 @@ function getHtml(data) {
     .reduce(
       (acc, cur) => {
         return `${acc}
-        <a href="./${cur.name}">
-          <div class="name">${cur.name}</div>
+        <div class="item">
+          <a href="./${cur.name}" class="name">${cur.name}</a>
           <div class="size">${cur.size}</div>
           <div class="mtime">${cur.mtime}</div>
-        </a>
+          <div class="action">
+            <a href="./${cur.name}?download=true" class="download ${cur.isFile && 'show'}">+</a>
+          </div>
+        </div>
       `
       },
       pathList.length > 1 ? `
-        <a href="..">
+        <a href=".." class="item">
           <div class="name">..</div>
           <div class="size">--</div>
           <div class="mtime">--</div>
+          <div class="action">&nbsp;</div>
         </a>
       ` : ``
     )
   // 文件模板
   const template = `
     <head>
+      <meta charset="UTF-8">
       <base href="${data.originalUrl}" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <style>
       html,
@@ -52,17 +58,23 @@ function getHtml(data) {
       .main {
         font-family: 'Courier New', Courier, monospace;
       }
-      .main .path a:hover {
+      .main a {
+        text-decoration: none;
+      }
+      .main .path {
+        word-break: break-all;
+      }
+      .main .path .item:hover {
         background-color: #eee;
       }
       .main .list.header {
         font-weight: bold;
+        display: flex;
       }
-      .main .list a {
-        display: block;
-        text-decoration: none;
+      .main .list .item {
+        display: flex;
       }
-      .main .list a:hover {
+      .main .list .item:hover {
         background-color: #eee;
       }
       .main .list .name,
@@ -73,25 +85,49 @@ function getHtml(data) {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .main .list.header :not(.name),
+      .main .list .item :not(.name) {
+        flex-shrink: 0;
+        min-width: 40px;
+      }
       .main .list .name {
-        width: calc(100% - 330px);
+        width: 100%;
       }
       .main .list .size {
-        width: 100px;
-        text-align: right;
+        width: 120px;
+        text-align: left;
       }
       .main .list .mtime {
         width: 200px;
+      }
+      .action a {
+        display: none;
+        font-style: normal;
+      }
+      .action a.show {
+        display: inline-block;
+        padding: 0 10px;
+        box-sizing: border-box;
+      }
+      @media screen and (max-width: 480px) {
+        .main .list .size,
+        .main .list .mtime {
+          display: none;
+        }
+      }
+      @media screen and (max-width: 768px) {
+        .main .list .mtime {
+          display: none;
+        }
       }
     </style>
     <div class="main">
       <div class="path">${pathStr}</div>
       <div class="list header">
-        <div>
-          <div class="name">name</div>
-          <div class="size">size</div>
-          <div class="mtime">mtime</div>
-        </div>
+        <div class="name">name</div>
+        <div class="size">size</div>
+        <div class="mtime">mtime</div>
+        <div class="action">&nbsp;</div>
       </div>
       <div class="list fileList">${fileListStr}</div>
     </div>
@@ -146,6 +182,7 @@ const obj = {
 module.exports = (option) => {
   return async (req, res, next) => {
     const nodePath = require(`path`)
+    const { download } = req.query
     const url = decodeURI(req.url.split(`?`)[0])
     const path = nodePath.normalize(`${option.root}/${url}`)
     const pathRoot = nodePath.normalize(option.root)
@@ -171,6 +208,10 @@ module.exports = (option) => {
             }
             res.send(getHtml(data))
           } else {
+            if(download) {
+              const name = require(`path`).parse(path).base
+              res.set(`Content-Disposition`, `attachment; filename*=UTF-8''${encodeURIComponent(name)}`)
+            }
             res.sendFile(path, {
               hidden: true,
             })
