@@ -1,4 +1,5 @@
 module.exports = function override(config, env) {
+  config.output.publicPath= `./`
   const showGraph = false // 是否显示依赖分析图
   if(showGraph) {
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin

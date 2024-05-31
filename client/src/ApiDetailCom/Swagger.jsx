@@ -54,7 +54,7 @@ function Swagger(props) {
           path,
         },
       } = props.httpData.data.req.lineHeaders
-      let {paths, basePath = ``} = state.spec
+      let {paths = [], basePath = ``} = state.spec
       method = method.toLowerCase()
       // 去除非 api 前缀, 仅留下 api 本身 /api/getFile => /getFile
       const re = new RegExp(`^(${basePath})(/.*)`)
@@ -94,8 +94,8 @@ function Swagger(props) {
 
   function initSwagger({store, cb}) {
     // 添加 swagger-ui.css
-    $(`head`).append($(`<link rel="stylesheet" href="/cdn/npm/swagger-ui-dist@3.52.5/swagger-ui.css">`))
-    $(`head`).append($(`<link rel="stylesheet" href="/swagger-reset.css">`))
+    $(`head`).append($(`<link rel="stylesheet" href="./cdn/npm/swagger-ui-dist@3.52.5/swagger-ui.css">`))
+    $(`head`).append($(`<link rel="stylesheet" href="./swagger-reset.css">`))
     // 添加 swagger-ui-bundle.js 并初始化 swg
 
     // swagger-ui v3 没有 setHost 方法, 这里注入此方法
@@ -119,7 +119,7 @@ function Swagger(props) {
       }
     });
 
-    $.getScript2(`/cdn/npm/swagger-ui-dist@3.52.5/swagger-ui-bundle.min.js`, () => {
+    $.getScript2(`./cdn/npm/swagger-ui-dist@3.52.5/swagger-ui-bundle.min.js`, () => {
       const parseHashData = parseHash()
       window.swaggerUi = window.SwaggerUIBundle({
         url: `${cfg.baseURL}/api/getOpenApi/${parseHashData.api ? `?api=${parseHashData.api}` : ``}`,

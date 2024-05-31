@@ -18,7 +18,7 @@ common.IconFont = icons.createFromIconfontCN({
 common.cfg = {
   baseURL: {
     development: `http://localhost:9005`,
-    production: window.location.origin,
+    production: (window.location.origin + window.location.pathname).replace(/\/$/, ``),
   }[process.env.NODE_ENV],
 }
 
