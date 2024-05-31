@@ -184,8 +184,8 @@ module.exports = (option) => {
     const nodePath = require(`path`)
     const { download } = req.query
     const url = decodeURI(req.url.split(`?`)[0])
-    const path = nodePath.normalize(`${option.root}/${url}`)
-    const pathRoot = nodePath.normalize(option.root)
+    const path = nodePath.normalize(`${option.fileDir}/${url}`)
+    const pathRoot = nodePath.normalize(option.fileDir)
     /**
      * 避免路径遍历
      * https://cwe.mitre.org/data/definitions/23.html
@@ -212,9 +212,7 @@ module.exports = (option) => {
               const name = require(`path`).parse(path).base
               res.set(`Content-Disposition`, `attachment; filename*=UTF-8''${encodeURIComponent(name)}`)
             }
-            res.sendFile(path, {
-              hidden: true,
-            })
+            res.sendFile(path, option.option)
           }
         } else {
           res.status(404)

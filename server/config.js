@@ -158,7 +158,9 @@ const fn = async () => {
       const baseObj = {
         path: `/`,
         mode: `hash`,
-        option: {},
+        option: {
+          dotfiles: `allow`,
+        },
       }
       return config.static
         ? (

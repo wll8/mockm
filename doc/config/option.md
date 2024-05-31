@@ -639,7 +639,7 @@ api: {
   - fileDir: string 本地文件的位置. 可以是相对于运行目录的路径, 或绝对路径
   - list: boolean 是否显示目录列表, 当 mode 不为 history 时可用
   - mode: string 配置访问模式, 可选 `history` 和 `hash(默认值)`
-  - option: object [模式的更多配置](https://github.com/bripkens/connect-history-api-fallback#options)
+  - option: object 模式的更多配置，例如[history](https://github.com/bripkens/connect-history-api-fallback#options)和[hash](https://github.com/expressjs/serve-static#options)
 - array[object] 使用多个配置
 
 ::: details 示例

@@ -1076,9 +1076,7 @@ function business() { // 与业务相关性的函数
           action: [
             async (req, res, next) => { // 开启列表显示时
               if(item.list && item.mode !== `history`) {
-                fileList({
-                  root: item.fileDir,
-                })(req, res, next)
+                fileList(item)(req, res, next)
               } else {
                 next()
               }
@@ -1090,7 +1088,7 @@ function business() { // 与业务相关性的函数
                 next()
               }
             },
-            express.static(item.fileDir),
+            express.static(item.fileDir, item.option),
           ],
           occupied: {},
         })
