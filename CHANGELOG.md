@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.27-alpha.4](https://github.com/wll8/mockm/compare/1.1.27-alpha.3...1.1.27-alpha.4) (2024-05-31)
+
+
+### Features
+
+* client 支持相对路径部署 ([4c8b82b](https://github.com/wll8/mockm/commit/4c8b82b4fdff8c8b07a669fd0b926b865026d13d))
+
 ## [1.1.27-alpha.3](https://github.com/wll8/mockm/compare/1.1.27-alpha.2...1.1.27-alpha.3) (2024-05-31)
 
 
