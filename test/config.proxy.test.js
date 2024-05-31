@@ -5,7 +5,7 @@ describe('config.proxy', () => {
   it(`代理到原始服务器`, async () => {
     util.ok(await util.runMockm({
       cli: {
-        proxy: `http://hongqiye.com:8888/`,
+        proxy: `https://httpbin.org/`,
       },
       okFn: async ({arg, str}) => {
         const get = (await http.get(`http://127.0.0.1:${arg.port}/get?a=1&b=2`)).data
