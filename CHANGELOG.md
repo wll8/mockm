@@ -1,0 +1,15 @@
+# Changelog
+
+## [1.1.27-alpha.3](https://github.com/wll8/mockm/compare/1.1.27-alpha.2...1.1.27-alpha.3) (2024-05-31)
+
+
+### Bug Fixes
+
+* 插件周期 useParserCreated 应注入 app ([8444037](https://github.com/wll8/mockm/commit/8444037e590f88daf2e4c290caeaa93e0cb7dc64))
+* 应避免 db 中不完整的层级表占用 proxy ([d3ec0f0](https://github.com/wll8/mockm/commit/d3ec0f02727f77fcd767c27721c6260b537d5b6a))
+
+
+### Features
+
+* 更新 @wll8/json-server ([f100404](https://github.com/wll8/mockm/commit/f100404988c16ca812886f021d8c64eeb8cbfdc6))
+* 静态文件 dotfiles 值默认为 allow ([0d59d4d](https://github.com/wll8/mockm/commit/0d59d4dc2dc565086390c8ce68809e20211adbcd))
