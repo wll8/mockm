@@ -95,6 +95,7 @@ gulp.task(`uglify`, () => { // 代码压缩, 处理兼容性
 gulp.task(`setBuildInfo`, (cb) => { // 代码压缩, 处理兼容性
   const packagePath = `../dist/package/package.json`
   const package = require(packagePath)
+  package.version = require(`../package.json`).version
   package.buildInfo = package.buildInfo || {}
   package.buildInfo.branch = String(cp.execSync(`git branch --show-current`)).trim()
   package.buildInfo.date = require(`../server/util/tool.js`).time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date())
