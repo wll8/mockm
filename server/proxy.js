@@ -53,7 +53,7 @@ async function serverProxy({
     middlewaresObj.urlencodedParser,
     middlewaresObj.logger,
   ) // 添加中间件, 方便取值
-  await business.pluginRun(`useParserCreated`)
+  await business.pluginRun(`useParserCreated`, app)
   app.use((req, res, next) => { // 修改分页参数, 符合项目中的参数
     req.query.page && (req.query._page = req.query.page)
     req.query.pageSize && (req.query._limit = req.query.pageSize)
