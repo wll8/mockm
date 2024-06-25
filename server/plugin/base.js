@@ -6,7 +6,7 @@ module.exports = {
   key: `base`,
   /**
    * 支持的宿主版本
-   * array[string], 必填
+   * array[string], 非必填
    * 若版本不被支持时会给予警告
    */
   hostVersion: [],

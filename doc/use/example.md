@@ -3,6 +3,8 @@
 这里列出一些常用的业务场景, 方便快速查找.
 如果有需要后台接口的地方, 统一假设为 http://192.168.1.18:8080.
 
+也可以通过[测试用例](https://www.hongqiye.com/doc/mockm/case/)查看更多的功能演示.
+
 ## 如何使后端的接口允许跨域
 > 不需要配置 webpack, 不需要后端人员更改, 不需要浏览器插件
 
@@ -315,6 +317,7 @@ module.exports = util => {
   return {
     api: {
       async 'post /file/upload' (req, res, next) {
+        // 注意，这里和你自己安装 multiparty 这个依赖再 require 进来是一样的
         const multiparty = await toolObj.generate.initPackge(`multiparty`)
         const form = new multiparty.Form()
         form.parse(req, (err, fields = [], files) => {

@@ -150,6 +150,7 @@ updateToken = {
 类型: string | object
 默认: `http://www.httpbin.org/`
 
+提示：你可以在[测试用例](https://www.hongqiye.com/doc/mockm/case/)中搜索 `config.proxy` 来查看更多功能演示.
 
 代理到远程的目标域名，为对象时每个键是分别对应一个要自定义代理的路由.
 
@@ -522,6 +523,8 @@ function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
 
 自建 api.
 
+提示：你可以在[测试用例](https://www.hongqiye.com/doc/mockm/case/)中搜索 `config.api` 来查看更多功能演示.
+
 - object 对象的 key 为 api 路由.
 - function 可以获得工具库, 参考 [config.api.fn](../config/config_api_fn.md). 函数应返回一个对象.
 
@@ -549,6 +552,7 @@ api: {
     ws.on('message', (msg) => ws.send(msg))
   }
   // 使用中间件实现静态资源访问, config.static 就是基于此方式实现的
+  // 当然, use 也支持数组
   'use /news/': require('serve-static')(`${__dirname}/public`),
   // 拦截 config.db 生成的接口
   '/books/:id' (req, res, next) { // 在所有自定义 api 之前添加中间件
@@ -774,3 +778,200 @@ const config = {
   },
 }
 ```
+
+## config.plugin
+
+类型: Plugin[]
+默认: []
+
+通过插件可以对 mockm 的各个生命周期进行操作。
+
+每个插件是一个对象，结构如下：
+
+``` js
+module.exports = {
+  /**
+   * 插件的唯一标识
+   * string, 必填
+   */
+  key: `base`,
+  /**
+   * 支持的宿主版本
+   * array[string], 非必填
+   * 若版本不被支持时会给予警告
+   */
+  hostVersion: [],
+  /**
+   * 插件入口
+   * function, 需要返回一个对象
+   * 在这里获取用户转给插件的配置
+   * 约定: 当用户传入 false 时不启用插件
+   */
+  async main({hostInfo, pluginConfig, config, util} = {}){
+    return {
+      /**
+       * 宿主应用配置项完成
+       * 例如创建了程序所需目录结构
+       * 可以在这里创建插件所需目录结构
+       */
+      async hostFileCreated(){},
+      /**
+       * server listen 调用成功
+       * info
+       */
+      async serverCreated(info){},
+      /**
+       * app 初始化完成, 在这个时候
+       * - 只有 ws 和 http/https 支持
+       * - 没有 bodyParse urlencodedParser logger 也没有宿主的 proxy db api 各种功能
+       * - 当调用 next 方法之后才进入其他中间件
+       * 可以在这里注册一个优先级较高的中间件, 例如请求拦截
+       */
+      async useCreated(app){},
+      /**
+       * app 中的解析器初始化完成, 在这个时候
+       * - 只有 bodyParser urlencodedParser logger
+       * - 没有宿主的 proxy db api 各种功能
+       * - 当调用 next 方法之后才进入其他中间件
+       * 在这里的中间件可以获取 req.body 数据, 到这里的请求会被 log 记录
+       */
+      async useParserCreated(app){},
+      /**
+       * config.api 已解析完成
+       * - 它不再是一个函数, 而是一个对象
+       * - side 方法还未展示
+       * 可以在这里使用它, 例如注入新的接口
+       */
+      async apiParsed(api, apiUtil){},
+      /**
+       * config.api 对象中的每个接口已解析完成为一个 api 详情列表
+       * - side 方法已被展开
+       * - method route action 等信息已被展开
+       * 可以在这里使用它, 例如生成接口文档
+       * @param {*} serverRouterList 
+       */
+      async apiListParsed(serverRouterList = []) {},
+    }
+  },
+}
+```
+
+### 插件示例: 一
+
+解析 token 为 userId, 让接下来的所有接口都可以通过 req.userId 获取到用户信息.
+
+创建插件文件: get-user.js
+
+``` js
+module.exports = {
+  key: `get-user`,
+  main({ config }) {
+    return {
+      useCreated(app) {
+        app.use((req, res, next) => {
+          const token = req.header(`Blade-Auth`) || ``
+          const list = token.split(` `) || []
+          req.userId = list[1]
+          next()
+        })
+      },
+    }
+  },
+}
+```
+
+使用插件文件: mm.config.js
+
+``` js
+const getUser = require(`./get-user.js`)
+module.exports = (util) => {
+  return {
+    plugin: [getUser],
+    api: {
+      // 任意一个接口都可以获取已解析的 req.userId
+      async '/getId'(req, res, next) {
+        res.json({
+          id: req.userId,
+        })
+      },
+    },
+  }
+}
+```
+
+### 插件示例: 二
+
+- 让 config.db 返回的 data.results 为 data.records
+- 让 config.db 返回的 data.count 为 data.total
+- 让 config.db 的分页参数是 query.size 和 query.current
+
+``` js
+module.exports = {
+  key: `change-page`,
+  main({ config }) {
+    config.resHandleJsonApi = ({ req, res: { statusCode: code }, data }) => {
+      function wrapApiData({ data, code = 200 }) {
+        // 包裹 api 的返回值
+        code = String(code)
+        data.results && ((data.records = data.results), delete data.results)
+        data.count && ((data.total = data.count), delete data.count)
+        return {
+          code,
+          success: Boolean(code.match(/^[2]/)), // 如果状态码以2开头则为 true
+          data,
+        }
+      }
+      return wrapApiData({ data, code })
+    }
+    return {
+      useCreated(app) {
+        app.use((req, res, next) => {
+          const { size, current } = req.query
+          size && ((req.query._limit = size), delete req.query.size)
+          current && ((req.query._page = current), delete req.query.current)
+          next()
+        })
+      },
+    }
+  },
+}
+
+```
+
+### 插件示例: 三
+
+验证数据格式和生成接口文档：mm.config.js
+
+
+``` js
+module.exports = async (util) => {
+  const joi = await util.tool.generate.initPackge(`joi`)
+  return {
+    plugin: [util.plugin.validate, util.plugin.apiDoc],
+    api: {
+      'post /api/login': util.side({
+        tags: [`admin`],
+        summary: `登录接口`,
+        schema: {
+          body: joi
+            .object({
+              name: joi.string().default(`wll8`).required().description(`用户名`),
+            })
+            .description(`用户信息`),
+        },
+        async action(req, res) {
+          res.json(
+            globalThis.config.apiWebWrap({
+              data: req.body,
+            }),
+          )
+        },
+      }),
+    },
+  }
+}
+```
+
+上面的 mm.config.js 配置中添加了 [validate](https://github.com/wll8/mockm/blob/eab3a7a90494914cc4c623d9a906d63289938222/server/plugin/validate.js) 插件和 [apiDoc](https://github.com/wll8/mockm/blob/eab3a7a90494914cc4c623d9a906d63289938222/server/plugin/api-doc.js) 插件，然后创建了一个请求方法为 post 路径为 `/api/logo` 登录接口，接口分类为 `admin`，接口描述为 `登录接口`，接收参数是必填的 string 类型的 name 字段。
+
+浏览器打开 `http://127.0.0.1:9000/doc/` 即可看到生成的接口文档。
