@@ -2058,6 +2058,9 @@ function business() { // 与业务相关性的函数
           res: proxyRes,
         })
       },
+      onError: (err, req, res) => {
+        err && console.log(`proxy onError`, String(err))
+      },
       logLevel: `silent`,
       // proxyTimeout: 60 * 1000,
       // timeout: 60 * 1000,
