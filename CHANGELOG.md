@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.27-alpha.5](https://github.com/wll8/mockm/compare/1.1.27-alpha.4...1.1.27-alpha.5) (2024-08-12)
+
+
+### Features
+
+* 因为备案要求个人网站不能放群所以去除 ([73c07f2](https://github.com/wll8/mockm/commit/73c07f24ab93e5fcbdaa885eeb2ce3f10ac91643))
+* Catching proxy errors ([ce6ee89](https://github.com/wll8/mockm/commit/ce6ee89af09d3c57192aefdde237e9b1ca70c38d))
+
 ## [1.1.27-alpha.4](https://github.com/wll8/mockm/compare/1.1.27-alpha.3...1.1.27-alpha.4) (2024-05-31)
 
 
