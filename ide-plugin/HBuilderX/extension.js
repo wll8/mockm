@@ -23,7 +23,7 @@ function mockmTool(cmd) {
       opener(`https://hongqiye.com/doc/mockm/`)
     },
     "extension.mockmTool.mockjsDoc"() {
-      opener(`http://wll8.gitee.io/mockjs-examples/`)
+      opener(`https://wll8.github.io/mockjs-examples/`)
     },
   }[cmd]()
 }

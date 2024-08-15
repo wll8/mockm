@@ -18,4 +18,4 @@ mm/
 ## 参考
 - [mm 代码仓库](https://github.com/wll8/mockm/)
 - [mm 文档](https://hongqiye.com/doc/mockm/)
-- [mockjs 文档](http://wll8.gitee.io/mockjs-examples/)
+- [mockjs 文档](https://wll8.github.io/mockjs-examples/)
