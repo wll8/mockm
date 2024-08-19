@@ -172,7 +172,7 @@ http post :9000/blogs?q=苦涩
 
 
 ## 如何生成逼真的数据
-[mockjs](http://mockjs.com/examples.html) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
+[mockjs](https://wll8.github.io/mockjs-examples/) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
 
 ::: warning 注意
 `module.exports` 的值已经变成函数, 这样你可以从函数的参数中收到 [util 中提供的一系列的工具](../config/config_fn.md).

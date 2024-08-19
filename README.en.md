@@ -156,7 +156,7 @@ Please refer to [config.db](https://hongqiye.com/doc/mockm/config/option.html#co
 
 ### How to generate realistic data
 
-[mockjs](http://mockjs.com/examples.html) is a good data generation tool. Mockm integrates it by default. The following code generates a batch of user information using mockjs.
+[mockjs](https://wll8.github.io/mockjs-examples/) is a good data generation tool. Mockm integrates it by default. The following code generates a batch of user information using mockjs.
 
 ```js
 module.exports = (util) => {

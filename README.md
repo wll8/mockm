@@ -155,7 +155,7 @@ post :9000/blogs?q=苦涩
 
 ### 如何生成逼真的数据
 
-[mockjs](http://mockjs.com/examples.html) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
+[mockjs](https://wll8.github.io/mockjs-examples/) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
 
 ```js
 module.exports = (util) => {
