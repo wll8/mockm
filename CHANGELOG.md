@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.27-alpha.6](https://github.com/wll8/mockm/compare/1.1.27-alpha.5...1.1.27-alpha.6) (2024-08-22)
+
+
+### Features
+
+* 设置 bodyParser.json 的选项 strict 为 false 提高容错性 ([c3c3cf2](https://github.com/wll8/mockm/commit/c3c3cf2fbcf08a9e82e4c63cadf66569bfe25469))
+
 ## [1.1.27-alpha.5](https://github.com/wll8/mockm/compare/1.1.27-alpha.4...1.1.27-alpha.5) (2024-08-12)
 
 
