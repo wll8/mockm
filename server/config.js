@@ -111,6 +111,7 @@ const fn = async () => {
         json: {
           limit: `100mb`,
           extended: false,
+          strict: false,
         },
         urlencoded: {
           extended: false,
