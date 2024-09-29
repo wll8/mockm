@@ -24,6 +24,8 @@ gulp.task(`copyServer`, (cb) => { // 复制 server 中的文件, 例如 package.
     npx shx cp -r ../server/example ../dist/package/
     npx shx cp -r ../server/@types ../dist/package/
     npx shx cp ../README.md ../dist/package/
+    npx shx rm -f ../dist/package/*-lock.*
+    npx shx rm -f ../dist/package/yarn.lock
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
     console.log(`run: ${cmd}`)
