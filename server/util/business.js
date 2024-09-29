@@ -765,6 +765,10 @@ function business() { // 与业务相关性的函数
     }
 
     function parseDbApi() {
+      const db = tool.file.fileStore(global.config.dbJsonPath).get()
+      if(Object.keys(db).length === 0) {
+        return []
+      }
       const router = jsonServer.router(global.config.dbJsonPath, {
         _preciseNeste: true,
         _noRemoveDependents: true,
@@ -1282,13 +1286,15 @@ function business() { // 与业务相关性的函数
       { // 初始化 config.db, 或者更新它
         const fs = require(`fs`)
         const newDb = global.config.db()
-        const o2s = tool.obj.o2s
-        if(tool.file.isFileEmpty(global.config.dbJsonPath) || global.config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
-          fs.writeFileSync(global.config.dbJsonPath, o2s(newDb))
-        } else { // 否则只进行浅覆盖
-          const oldDb = JSON.parse(fs.readFileSync(global.config.dbJsonPath))
-          const resDb = {...newDb, ...oldDb}
-          fs.writeFileSync(global.config.dbJsonPath, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+        if(Object.keys(newDb).length){
+          const o2s = tool.obj.o2s
+          if(tool.file.isFileEmpty(global.config.dbJsonPath) || global.config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
+            fs.writeFileSync(global.config.dbJsonPath, o2s(newDb))
+          } else { // 否则只进行浅覆盖
+            const oldDb = JSON.parse(fs.readFileSync(global.config.dbJsonPath))
+            const resDb = {...newDb, ...oldDb}
+            fs.writeFileSync(global.config.dbJsonPath, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+          }
         }
       }
       

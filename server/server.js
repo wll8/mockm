@@ -41,7 +41,7 @@ new Promise(async () => {
     allRouteTest,
   } = await customApi()
 
-  global.HTTPHISTORY = require(global.config._httpHistory) // 请求历史
+  global.HTTPHISTORY = util.tool.file.fileStore(global.config._httpHistory).get() // 请求历史
   global.STORE = tool.file.fileStore(global.config._store) // 自动注入下次调试请求的数据
   require(`./proxy.js`)({
     allRoute,

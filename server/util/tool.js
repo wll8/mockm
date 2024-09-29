@@ -692,22 +692,34 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-    function fileStore(storePath, initValue) { // 存取需要持久化存储的数据
+    const fileStoreInitValueMap = {}
+    function fileStore(storePath, initValue = {}) { // 存取需要持久化存储的数据
+      initValue = fileStoreInitValueMap[storePath] = fileStoreInitValueMap[storePath] || initValue
       const fs = require(`fs`)
       const {
         o2s,
         deepSet,
         deepGet,
       } = obj()
-      if(isFileEmpty(storePath)) {
-        fs.writeFileSync(storePath, o2s(initValue || {}))
-      } else if(initValue) { // 避免后期添加的键由于存在文件而没有正常初始化
-        const store = JSON.parse(fs.readFileSync(storePath, `utf-8`))
-        fs.writeFileSync(storePath, o2s({...initValue, ...store}))
+      
+      let initEd = false
+      const init = () => {
+        if(initEd === false) {
+          if(isFileEmpty(storePath)) {
+            fs.writeFileSync(storePath, o2s(initValue))
+          } else { // 避免后期添加的键由于存在文件而没有正常初始化
+            const store = JSON.parse(fs.readFileSync(storePath, `utf-8`))
+            fs.writeFileSync(storePath, o2s({...initValue, ...store}))
+          }
+        }
+        initEd = true
       }
-      let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
+      let store = () => {
+        return isFileEmpty(storePath) ? JSON.parse(JSON.stringify(initValue)) : JSON.parse(fs.readFileSync(storePath, `utf-8`))
+      }
       return {
         set(key, val) {
+          init()
           const newStore = store()
           deepSet(newStore, key, val)
           fs.writeFileSync(storePath, o2s(newStore))

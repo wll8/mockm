@@ -154,15 +154,30 @@ describe('命令行', () => {
       )
     }))
   })
-  it(`--cwd`, async () => {
+  it(`db 为空时不创建 db.json 文件`, async () => {
     util.ok(await util.runMockm({
       mockm: () => ({
-        apiWeb: `./apiWeb.json`,
+        db: {},
       }),
       okFn: async ({arg, str}) => {
         return (
           util.hasFile(`${arg[`--cwd`]}/httpData`)
-          && util.hasFile(`${arg[`--cwd`]}/apiWeb.json`)
+          && util.hasFile(`${arg[`--cwd`]}/httpData/db.json`) === false
+        )
+      },
+    }))
+  })
+  it(`--cwd`, async () => {
+    util.ok(await util.runMockm({
+      mockm: () => ({
+        db: {
+          book: []
+        },
+      }),
+      okFn: async ({arg, str}) => {
+        return (
+          util.hasFile(`${arg[`--cwd`]}/httpData`)
+          && util.hasFile(`${arg[`--cwd`]}/httpData/db.json`)
         )
       },
     }))
@@ -176,8 +191,6 @@ describe('命令行', () => {
         await util.sleep()
         return (
           util.hasFile(`${arg[`--cwd`]}/mm/mm.config.js`)
-          && util.hasFile(`${arg[`--cwd`]}/mm/httpData`)
-          && util.hasFile(`${arg[`--cwd`]}/mm/apiWeb.json`)
         )
       }
     }))
