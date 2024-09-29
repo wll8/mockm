@@ -495,7 +495,7 @@ GET /books?q=张三 -- 精确全文匹配
 
 ## config.apiWeb
 类型: string
-默认: `${config.dataDir}/webApi.json`
+默认: `./webApi.json`
 
 从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权
 

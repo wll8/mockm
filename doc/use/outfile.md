@@ -7,7 +7,6 @@
 ``` sh
 ./httpData # 这个目录用来放置所有 mm 产生的文件, 一般不需要理睬他们
 │  db.json # 用来存储用户声明的数据
-│  apiWeb.json # 从 web 页面创建的接口数据
 │  httpHistory.json # 用来记录请求的关联信息
 │  store.json # 用来记录一些简要信息
 │

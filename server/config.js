@@ -222,7 +222,7 @@ const fn = async () => {
     dataDir: handlePathArg(config.dataDir),
     proxy: config.proxy,
     api: isType(config.api, `object`) ? () => config.api : config.api,
-    apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
+    apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`./apiWeb.json`),
     db: isType(config.db, `object`) ? () => config.db : config.db,
     remote: config.remote === false // 每个服务的 remote 配置
       ? false
