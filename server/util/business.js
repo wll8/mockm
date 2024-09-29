@@ -1226,7 +1226,10 @@ function business() { // 与业务相关性的函数
     function configFileFn({cliArg}) {
       const path = require(`path`)
       const fs = require(`fs`)
-      const cwdConfigPath = `${process.cwd()}/mm.config.js`
+      const packagePath = `${process.cwd()}/package.json`
+      const packageType = fs.existsSync(packagePath) && require(packagePath).type || `commonjs`
+      // 要在当前位置创建什么配置文件
+      const cwdConfigPath = packageType === `commonjs` ? `${process.cwd()}/mm.config.js` : `${process.cwd()}/mm.config.cjs`
       const hasCwdConfig = tool.file.hasFile(cwdConfigPath)
       let res = `${__dirname}/../config.js` // 默认配置文件
 
