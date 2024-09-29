@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.27-alpha.7](https://github.com/wll8/mockm/compare/1.1.27-alpha.6...1.1.27-alpha.7) (2024-09-29)
+
+
+### Features
+
+* --config 在 es 模块中使用 .cjs 后缀 ([1ed0e21](https://github.com/wll8/mockm/commit/1ed0e21b703ef352f1935a899e6af9637e2b9591))
+* 按需生成文件, 例如 db.json httpHistory.json apiWeb.json ([3b84cee](https://github.com/wll8/mockm/commit/3b84cee711b62f88cc751e785d833a198584a143))
+* 不在当前位置生成 httpData 目录 ([b96553c](https://github.com/wll8/mockm/commit/b96553c3a151ad9df5e41b31aa5d089708258a3b))
+
 ## [1.1.27-alpha.6](https://github.com/wll8/mockm/compare/1.1.27-alpha.5...1.1.27-alpha.6) (2024-08-22)
 
 
