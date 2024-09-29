@@ -168,6 +168,7 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     build: {
       runPath: pkgPath(runPath || `./run.js`),
       arg: {
+        dataDir: `./httpData/`,
         proxy: `https://httpbin.org/`,
         '--config': true,
         '--cwd': getTempDir(),
@@ -180,6 +181,7 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     dev: {
       runPath: pkgPath(runPath || `./run.js`),
       arg: {
+        dataDir: `./httpData/`,
         proxy: `https://httpbin.org/`,
         '--config': true,
         '--cwd': getTempDir(),

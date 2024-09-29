@@ -1,5 +1,7 @@
 const fn = async () => {
   const path = require(`path`)
+  const os = require(`os`)
+  const filenamify = require(`filenamify`)
   const exportsUtil = require(`./util/index.js`)
   const {
     print,
@@ -91,7 +93,13 @@ const fn = async () => {
       remoteToken: [],
       openApi: `http://httpbin.org/spec.json`,
       cors: true,
-      dataDir: `./httpData/`,
+      dataDir: (() => {
+        const configPathByName = filenamify(
+          handlePathArg(business.initHandle().configFileFn({ cliArg: parseArgv() })),
+          {maxLength: 255, replacement: `_`},
+        )
+        return `${os.homedir()}/.mockm/${configPathByName}/httpData/`
+      })(),
       dbJsonPath: undefined,
       apiWeb: undefined,
       apiWebWrap: wrapApiData,

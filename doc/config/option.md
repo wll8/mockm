@@ -380,7 +380,7 @@ proxy: {
 
 ## config.dataDir
 类型: string
-默认: `./httpData/`
+默认: `${os.homedir()}/.mockm/${configPathByName}/httpData/`
 
 http 请求数据保存目录.
 

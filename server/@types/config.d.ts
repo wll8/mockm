@@ -237,7 +237,7 @@ interface ConfigObj {
   /**
    * http 请求数据保存目录.
    * @default
-   * `./httpData/`
+   * `${os.homedir()}/.mockm/${configPathByName}/httpData/`
    */
   dataDir: string,
 

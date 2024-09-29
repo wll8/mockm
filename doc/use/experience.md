@@ -16,8 +16,6 @@ npm i mockm -D
 ```
 mm/
   - api/ -- 手动创建的 api
-  - httpData/ -- 请求记录, 一般不提交到版本库
-  - apiWeb.json -- 从 UI 界面上创建的接口信息
   - util.js -- 一些公用方法
   - mm.config.js -- mockm 的配置文件
 ```
