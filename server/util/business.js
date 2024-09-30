@@ -1985,7 +1985,10 @@ function business() { // 与业务相关性的函数
       const msg = tool.string.removeLeft(`
         Current configuration file:
         ${shareConfig.config}
-      
+        
+        Current dataDir:
+        ${shareConfig.dataDir}
+        
         Local service information:
         Interface forwarding: ${`http://${shareConfig.osIp}:${shareConfig.port}/ => ${shareConfig._proxyTargetInfo.origin}`}
         Interface list:       ${`http://${shareConfig.osIp}:${shareConfig.testPort}/#/apiStudio/`}
