@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.1.27-alpha.9](https://github.com/wll8/mockm/compare/1.1.27-alpha.7...1.1.27-alpha.9) (2024-09-30)
+
+
+### Bug Fixes
+
+* path.replace is not a function ([c06069b](https://github.com/wll8/mockm/commit/c06069bd6619b1e5346c65b3ec96d1629286dcd3)), closes [/github.com/expressjs/express/pull/5902#issuecomment-2382229046](https://github.com//github.com/expressjs/express/pull/5902/issues/issuecomment-2382229046)
+
+
+### Features
+
+* 修改 apiWeb 的默认路径为当前目录 ([10e3dfa](https://github.com/wll8/mockm/commit/10e3dfab5b60fdcaa4d97f431f7529382bf37a12))
+* 在启动信息中显示 dataDir ([0dc8d09](https://github.com/wll8/mockm/commit/0dc8d0911b8e7282b3172b043ab2912819c7c36a))
+
+## [1.1.27-alpha.8](https://github.com/wll8/mockm/compare/1.1.27-alpha.7...1.1.27-alpha.8) (2024-09-30)
+
+
+### Bug Fixes
+
+* path.replace is not a function ([c06069b](https://github.com/wll8/mockm/commit/c06069bd6619b1e5346c65b3ec96d1629286dcd3)), closes [/github.com/expressjs/express/pull/5902#issuecomment-2382229046](https://github.com//github.com/expressjs/express/pull/5902/issues/issuecomment-2382229046)
+
+
+### Features
+
+* 修改 apiWeb 的默认路径为当前目录 ([10e3dfa](https://github.com/wll8/mockm/commit/10e3dfab5b60fdcaa4d97f431f7529382bf37a12))
+* 在启动信息中显示 dataDir ([0dc8d09](https://github.com/wll8/mockm/commit/0dc8d0911b8e7282b3172b043ab2912819c7c36a))
+
 ## [1.1.27-alpha.7](https://github.com/wll8/mockm/compare/1.1.27-alpha.6...1.1.27-alpha.7) (2024-09-29)
 
 
