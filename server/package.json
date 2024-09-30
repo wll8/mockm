@@ -75,6 +75,17 @@
     "darwin",
     "linux"
   ],
+  "resolutions": {
+    "express": "4.17.1"
+  },
+  "overrides": {
+    "express": "4.17.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "express": "4.17.1"
+    }
+  },
   "homepage": "https://hongqiye.com/doc/mockm/",
   "keywords": [
     "JSON",
