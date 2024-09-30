@@ -10,7 +10,7 @@
     "push:npm": "cd release && npx gulp npm",
     "bit": "npm run build:client && npm run build:serve && npm run install:dist && npm run test:build",
     "bit:serve": "npm run build:serve && npm run install:dist && npm run test:build",
-    "install:dist": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npmmirror.com/ yarn",
+    "install:dist": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npmmirror.com/ yarn --registry https://registry.npmmirror.com/",
     "test": "npm run test:dev",
     "test:dev": "cd test && npm run test:dev",
     "test:build": "cd test && npm run test:build"
