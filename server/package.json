@@ -76,14 +76,14 @@
     "linux"
   ],
   "resolutions": {
-    "express": "4.17.1"
+    "express": "4.19.2"
   },
   "overrides": {
-    "express": "4.17.1"
+    "express": "4.19.2"
   },
   "pnpm": {
     "overrides": {
-      "express": "4.17.1"
+      "express": "4.19.2"
     }
   },
   "homepage": "https://hongqiye.com/doc/mockm/",
