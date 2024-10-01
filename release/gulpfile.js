@@ -23,6 +23,7 @@ gulp.task(`copyServer`, (cb) => { // 复制 server 中的文件, 例如 package.
     npx shx cp -r ../server/page ../server/util ../dist/package/
     npx shx cp -r ../server/example ../dist/package/
     npx shx cp -r ../server/@types ../dist/package/
+    npx shx cp -r ../server/patches ../dist/package/
     npx shx cp ../README.md ../dist/package/
     npx shx rm -f ../dist/package/*-lock.*
     npx shx rm -f ../dist/package/yarn.lock
