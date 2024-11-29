@@ -60,6 +60,9 @@ async function serverProxy({
     next()
   })
   app.use((req, res, next) => { // 保存自定义接口的请求历史
+    const apiCount = tool.file.fileStore(global.config._store).updateApiCount()
+    const apiId = tool.hex.string10to62(apiCount)
+    req.apiId = apiId
     const cloneDeep = require(`lodash.clonedeep`)
     const newReq = cloneDeep(req) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
     const oldSend = res.send

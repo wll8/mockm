@@ -1535,10 +1535,8 @@ function business() { // 与业务相关性的函数
 
       // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
 
-      const apiCount = tool.file.fileStore(global.config._store).updateApiCount()
-      const apiId = tool.hex.string10to62(apiCount)
       function getBodyPath() {
-        const arg = {req, headersObj, dataDir, apiId}
+        const arg = {req, headersObj, dataDir, apiId: req.apiId}
         return {
           headersPathReq: createBodyPath({...arg ,reqOrRes: `req`, isHeader: true}),
           headersPathRes: createBodyPath({...arg ,reqOrRes: `res`, isHeader: true}),
@@ -1585,7 +1583,7 @@ function business() { // 与业务相关性的函数
         },
       }
       setHttpHistory({
-        data: {path, fullApi, id: apiId, data: resDataObj},
+        data: {path, fullApi, id: req.apiId, data: resDataObj},
       })
     }
 
@@ -1773,9 +1771,7 @@ function business() { // 与业务相关性的函数
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
       const store = tool.file.fileStore(global.config._store)
       const note = store.get(`note`)
-      const apiCount = store.get(`apiCount`) + 1
-      const apiId = tool.hex.string10to62(apiCount)
-      const testPath = `/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+      const testPath = `/#/history,${req.apiId}/${req.method.toLowerCase()}${req.originalUrl}`
       const testApi = `${note.local.testPort}${testPath}`
       const testApiRemote = (global.config.remote && note.remote) ? `${note.remote.testPort}${testPath}` : undefined
       setHeader(res, {
