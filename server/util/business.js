@@ -1654,7 +1654,7 @@ function business() { // 与业务相关性的函数
         return delIdList
       }
 
-      global.HTTPHISTORY = require(global.config._httpHistory) // 请求历史
+      global.HTTPHISTORY = tool.file.fileStore(global.config._httpHistory).get() // 请求历史
       const HTTPHISTORY = global.HTTPHISTORY
       let list = business().historyHandle().getHistoryList({md5: true})
       const delIdList = {
