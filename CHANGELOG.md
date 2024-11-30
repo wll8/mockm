@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.27-alpha.10](https://github.com/wll8/mockm/compare/1.1.27-alpha.9...1.1.27-alpha.10) (2024-11-30)
+
+
+### Bug Fixes
+
+* 不应 require 可能不存在的文件 ([4e6b16c](https://github.com/wll8/mockm/commit/4e6b16cf85095889cd7f9f4fccefda50c462fb67))
+* 使用补丁修改 httpolyglot ([7288108](https://github.com/wll8/mockm/commit/728810800e43bd99acab1354b0ec0c2edc914985))
+* apiId 不应出现重复 ([98cb118](https://github.com/wll8/mockm/commit/98cb1185c024f0e9d4050633f96af7500fecf419))
+
 ## [1.1.27-alpha.9](https://github.com/wll8/mockm/compare/1.1.27-alpha.7...1.1.27-alpha.9) (2024-09-30)
 
 
