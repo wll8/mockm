@@ -9,6 +9,44 @@
 
 :::
 
+## 2025 年 03 月
+- 🔧更新辅助工具: 
+  - 使用 httpolyglot@2.2.2
+
+## 2024 年 11 月
+- 🐛修复缺陷: 
+  - 不应 require 可能不存在的文件
+  - apiId 不应出现重复
+
+## 2024 年 10 月
+- 🔧更新辅助工具: 
+  - 变更 ide-plugin 为 plugin
+  - 更新友链
+  - 升级 express
+
+## 2024 年 09 月
+- 🔧更新辅助工具: 
+  - NPM_CONFIG_REGISTRY has no effect on yarn
+  - 移除 npm 包中的 lock 文件
+- 🐛修复缺陷: 
+  - path.replace is not a function
+- ✨添加功能: 
+  - 在启动信息中显示 dataDir
+  - 修改 apiWeb 的默认路径为当前目录
+  - --config 在 es 模块中使用 .cjs 后缀
+  - 不在当前位置生成 httpData 目录
+  - 按需生成文件, 例如 db.json httpHistory.json apiWeb.json
+
+## 2024 年 08 月
+- ✨添加功能: 
+  - 设置 bodyParser.json 的选项 strict 为 false 提高容错性
+  - Catching proxy errors
+- 📝更新文档: 
+  - 更新 mockjs 示例地址
+
+## 2024 年 06 月
+- 📝更新文档: 在文档中添加测试用例查看地址
+
 ## 2024 年 05 月
 - ✨添加功能: 
   - client 支持相对路径部署
