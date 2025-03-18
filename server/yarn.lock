@@ -72,10 +72,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@httptoolkit/httpolyglot@^2.1.0":
-  version "2.2.1"
-  resolved "https://registry.npmmirror.com/@httptoolkit/httpolyglot/-/httpolyglot-2.2.1.tgz#311d1fed65c3ede75c718b1ad0580f1e4734c786"
-  integrity sha512-HOS/0zWc3yn7NM0RQFgBeepeTE8eAKtyOkcGL/TV6if5MAfr+3bH9rwCyAhbXbjlLVR3afeBRt8JYKEerDcygA==
+"@httptoolkit/httpolyglot@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.npmmirror.com/@httptoolkit/httpolyglot/-/httpolyglot-2.2.2.tgz#e36bad48f530546984724c45bd01d89c1acc020e"
+  integrity sha512-Mm75bidN/jrUsuhBjHAMoQbmR52zQYi8xr/+0mQYGW+dQelg+sdJR/kGRKKZGeAoPgp/1rrZWJqdohZP0xm18g==
   dependencies:
     "@types/node" "*"
 
