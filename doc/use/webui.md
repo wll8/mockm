@@ -145,7 +145,7 @@ mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应
   - array - 会把父字段名作为数组, 子字段名数组中的对象的键
   - eval - 以 js 代码自定义示例值
     - 例 `[1,2,3]` - 表示数组中有数字 1 2 3
-    - 例 `` Mock.mock(`@cname`) `` - 表示调用 mockjs 生成 @cname
+    - 例 ``Mock.mock(`@cname`)`` - 表示调用 mockjs 生成 @cname
     - 例 `Date.now()` - 生成时间戳
 
 注: 含有 mockjs 占位符标志时, 不会进行 `regexp/number/boolean` 类型转换

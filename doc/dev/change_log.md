@@ -10,27 +10,31 @@
 :::
 
 ## 2025 年 03 月
-- 🔧更新辅助工具: 
+
+- 🔧更新辅助工具:
   - 使用 httpolyglot@2.2.2
 
 ## 2024 年 11 月
-- 🐛修复缺陷: 
+
+- 🐛修复缺陷:
   - 不应 require 可能不存在的文件
   - apiId 不应出现重复
 
 ## 2024 年 10 月
-- 🔧更新辅助工具: 
+
+- 🔧更新辅助工具:
   - 变更 ide-plugin 为 plugin
   - 更新友链
   - 升级 express
 
 ## 2024 年 09 月
-- 🔧更新辅助工具: 
+
+- 🔧更新辅助工具:
   - NPM_CONFIG_REGISTRY has no effect on yarn
   - 移除 npm 包中的 lock 文件
-- 🐛修复缺陷: 
+- 🐛修复缺陷:
   - path.replace is not a function
-- ✨添加功能: 
+- ✨添加功能:
   - 在启动信息中显示 dataDir
   - 修改 apiWeb 的默认路径为当前目录
   - --config 在 es 模块中使用 .cjs 后缀
@@ -38,51 +42,60 @@
   - 按需生成文件, 例如 db.json httpHistory.json apiWeb.json
 
 ## 2024 年 08 月
-- ✨添加功能: 
+
+- ✨添加功能:
   - 设置 bodyParser.json 的选项 strict 为 false 提高容错性
   - Catching proxy errors
-- 📝更新文档: 
+- 📝更新文档:
   - 更新 mockjs 示例地址
 
 ## 2024 年 06 月
+
 - 📝更新文档: 在文档中添加测试用例查看地址
 
 ## 2024 年 05 月
-- ✨添加功能: 
+
+- ✨添加功能:
   - client 支持相对路径部署
   - 静态文件 dotfiles 值默认为 allow
   - 更新 @wll8/json-server
-- 🔧更新辅助工具: 
+- 🔧更新辅助工具:
   - 使用 release-it
-- 🐛修复缺陷: 
+- 🐛修复缺陷:
   - 插件周期 useParserCreated 应注入 app
   - 应避免 db 中不完整的层级表占用 proxy
 
 ## 2023 年 08 月
-- ✨添加功能: 
+
+- ✨添加功能:
   - 优化静态目录页面
-- 📝更新文档: 
+- 📝更新文档:
   - 添加英文版本的 readme
 
 ## 2023 年 07 月
-- 🔧更新辅助工具: 
+
+- 🔧更新辅助工具:
   - 不使用图片 cdn
 
 ## 2023 年 06 月
+
 - 🐛修复缺陷
   - 在 win11 中程序未完全关闭导致端口还在占用
 
 ## 2023 年 03 月
+
 - 📦更新构建工具
   - 更新 install 命令
 
 ## 2023 年 01 月
+
 - 🐛修复缺陷
   - 代理的 ws 接口在项目中无法使用, 连接一直 failed
 
 ## 2022 年 12 月
 
 #### v1.1.26
+
 - server
   - feat(log): 提升 log 容错性
   - fix(log): 当调用栈中的项不含括号地不应匹配不到
@@ -97,7 +110,7 @@
   - feat: 当提供的配置若不存在则从示例配置自动创建
   - feat: [支持 https 配置](../config/option.md#config-https)
     - 不兼容的更新
-      - 不再导出 util.server.httpServer, 这是因为需要根据 https 配置动态生成 httpServer, 所以不能在 config 初始化前导出. 在初始后可以通过 util.server.app._server.httpServer 访问到.
+      - 不再导出 util.server.httpServer, 这是因为需要根据 https 配置动态生成 httpServer, 所以不能在 config 初始化前导出. 在初始后可以通过 util.server.app.\_server.httpServer 访问到.
       - 要求 node v12+, 这是 httpolyglot 这个依赖规定的
   - feat: 更新自动安装依赖的逻辑
     - 不兼容的更新

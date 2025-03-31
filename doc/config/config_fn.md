@@ -1,34 +1,40 @@
 # config 作为函数
+
 当 [配置](./config_file.md#js) 为函数的时候, 会向函数传入一个 util 对象:.
 util 目前包含以下内容:
 
 ## util.server
+
 暴露出来服务.
 
 ### util.server.app
+
 express 实例.
 
-``` js
-module.exports = util => {
-  const app = util.server.app
+```js
+module.exports = (util) => {
+  const app = util.server.app;
   app.get(`/`, (req, res) => {
-    res.send(`Hello World`)
-  })
-}
+    res.send(`Hello World`);
+  });
+};
 ```
 
 ### util.libObj.mockjs 数据生成库
 
 ## util.libObj 第三方库
+
 ### util.libObj.mockjs 数据生成库
+
 - 参考: https://wll8.github.io/mockjs-examples/
 
-``` js
-const mockjs = util.libObj.mockjs
-console.log(mockjs.mock(`@cname`)) // 张三
+```js
+const mockjs = util.libObj.mockjs;
+console.log(mockjs.mock(`@cname`)); // 张三
 ```
 
 ::: details 模板格式
+
 - String
   - 'name|min-max': string
   - 'name|count': string
@@ -54,11 +60,13 @@ console.log(mockjs.mock(`@cname`)) // 张三
 - Path
   - Absolute Path
   - Relative Path
+
 :::
 
 ::: details 占位符
+
 - Basic
-  - boolean 
+  - boolean
   - natural
   - integer
   - float
@@ -118,47 +126,58 @@ console.log(mockjs.mock(`@cname`)) // 张三
   - guid
   - id
   - increment
+
 :::
 
 ### util.libObj.axios 请求库
+
 - 参考: https://github.com/axios/axios
 
-``` js
-const axios = util.libObj.axios
-axios.defaults.baseURL = 'http://httpbin.org' // 设置 baseURL
-axios.interceptors.request.use(config => config,  error => Promise.reject(error)) // 请求拦截
-axios.interceptors.response.use(response => response, error => Promise.reject(error)) // 响应拦截
+```js
+const axios = util.libObj.axios;
+axios.defaults.baseURL = "http://httpbin.org"; // 设置 baseURL
+axios.interceptors.request.use(
+  (config) => config,
+  (error) => Promise.reject(error)
+); // 请求拦截
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => Promise.reject(error)
+); // 响应拦截
 
-axios.get(`/ip`, { // get 请求与 query 参数
+axios.get(`/ip`, {
+  // get 请求与 query 参数
   id: 123,
-})
-
-axios.post(`/user/change`, { // post 请求与 body 参数
-  name: '张三',
-})
-
-axios({ // 同时存在 query 和 body 参数
-  method: 'post',
-  url: '/user/change',
-  params: { id: 123 }, // query 参数
-  data: { name: '张三' }, // body 参数
-  headers: {'X-Requested-With': 'XMLHttpRequest'}, // 请求头
 });
 
+axios.post(`/user/change`, {
+  // post 请求与 body 参数
+  name: "张三",
+});
+
+axios({
+  // 同时存在 query 和 body 参数
+  method: "post",
+  url: "/user/change",
+  params: { id: 123 }, // query 参数
+  data: { name: "张三" }, // body 参数
+  headers: { "X-Requested-With": "XMLHttpRequest" }, // 请求头
+});
 ```
 
-
 ### util.libObj.mime 文件类型识别
+
 - 参考: https://github.com/broofa/mime
 
-``` js
-const mime = util.libObj.mime
+```js
+const mime = util.libObj.mime;
 
-mime.getType('txt')                    // ⇨ 'text/plain'
-mime.getExtension('text/plain')        // ⇨ 'txt'
+mime.getType("txt"); // ⇨ 'text/plain'
+mime.getExtension("text/plain"); // ⇨ 'txt'
 ```
 
 ## util.toolObj 工具函数
+
 [参考源码 tool.js](https://github.com/wll8/mockm/blob/master/server/util/tool.js)
 
 - array
@@ -180,6 +199,7 @@ mime.getExtension('text/plain')        // ⇨ 'txt'
 - time
 
 ## util.business 与业务相关性的函数
+
 [参考源码 business.js](https://github.com/wll8/mockm/blob/master/server/util/business.js)
 
 - wrapApiData - 包裹 api 的返回值
@@ -187,6 +207,7 @@ mime.getExtension('text/plain')        // ⇨ 'txt'
 - strReMatch - 如果字符串是正则就返回正则, 否则返回 false
 
 ## util.side 函数用于扩展 api
+
 例如为 api 添加别名, 文档等功能.
 
 函数参数为对象, 属性为:
@@ -196,27 +217,27 @@ mime.getExtension('text/plain')        // ⇨ 'txt'
 
 示例:
 
-``` js
-config = ({side}) => ({
+```js
+config = ({ side }) => ({
   api: {
-    '/pets': side({
+    "/pets": side({
       alias: [`/pets2`, `put /pets3`],
       action: 123,
     }),
   },
-})
+});
 ```
 
 上面使用 side 函数, 让 `* /pets` 和 `* /pets2` 以及 `put /pets3` 这几个接口都返回 123.
 
 与以下代码等效:
 
-``` js
-config = ({side}) => ({
+```js
+config = ({ side }) => ({
   api: {
-    '/pets2': 123,
-    'put /pets3': 123,
-    '/pets': 123,
+    "/pets2": 123,
+    "put /pets3": 123,
+    "/pets": 123,
   },
-})
+});
 ```

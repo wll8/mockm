@@ -1013,7 +1013,7 @@ module.exports = async (util) => {
           res.json(
             globalThis.config.apiWebWrap({
               data: req.body,
-            })
+            }),
           );
         },
       }),
