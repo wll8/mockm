@@ -55,6 +55,7 @@ a[href*="www.cnzz.com"] {
   bundler: viteBundler(),
 
   theme: hopeTheme({
+    logo: "/icon/favicon.ico",
     favicon: "/icon/favicon.ico",
 
     navbar: [
