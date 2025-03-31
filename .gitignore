@@ -7,3 +7,8 @@ httpData*/
 db.json
 test/res
 .history
+
+# VuePress
+**/.vuepress/.cache/
+**/.vuepress/.temp/
+**/.vuepress/dist/

@@ -1,18 +1,19 @@
 {
+  "name": "docs",
+  "private": true,
   "scripts": {
-    "// prestart": "npx shx cp ../README.md ./",
-    "start": "vuepress dev .",
+    "dev": "vuepress dev .",
     "build": "vuepress build ."
   },
+  "packageManager": "pnpm@10.7.0",
   "dependencies": {
-    "@vuepress/plugin-back-to-top": "^1.5.4",
-    "@vuepress/plugin-google-analytics": "^1.5.4",
-    "@vuepress/plugin-medium-zoom": "^1.5.4",
-    "@vuepress/plugin-nprogress": "^1.5.4",
-    "vuepress-plugin-code-copy": "^1.0.6",
-    "vuepress-plugin-fulltext-search": "^2.0.6",
-    "markdown-it-task-lists": "^2.1.1",
-    "markdown-it-vuepress-code-snippet-enhanced": "^1.0.1",
-    "vuepress": "^1.7.1"
+    "@vuepress/bundler-vite": "2.0.0-rc.20",
+    "@vuepress/plugin-baidu-analytics": "2.0.0-rc.90",
+    "@vuepress/plugin-google-analytics": "2.0.0-rc.80",
+    "@vuepress/plugin-slimsearch": "2.0.0-rc.90",
+    "sass-embedded": "1.86.0",
+    "vue": "3.5.13",
+    "vuepress": "2.0.0-rc.20",
+    "vuepress-theme-hope": "2.0.0-rc.77"
   }
 }
