@@ -43,7 +43,7 @@ function serverReplay({
       }
     },
     {
-      target: `http://localhost:${config.port}/`,
+      target: `http://127.0.0.1:${config.port}/`,
       logLevel: `silent`,
     },
   ))

@@ -1809,7 +1809,7 @@ function business() { // 与业务相关性的函数
       reqHandle().injectionReq({req: { headers }, res, type: `set`})
       const pathOrUrl = path || url
       http({
-        baseURL: `http://localhost:${global.config.port}`,
+        baseURL: `http://127.0.0.1:${global.config.port}`,
         method,
         url: pathOrUrl, // 注意不要 url 和 params 上都同时存在 query
         params: query,
