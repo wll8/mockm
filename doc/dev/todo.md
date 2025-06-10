@@ -1,6 +1,7 @@
 # 待完成
 
 ## 文档
+
 - [ ] fix: 一段时间之后接口无响应
   - node v14.21.3/win10/win11
   - 请求无响应
@@ -25,7 +26,7 @@
 - [ ] feat: 支持微服务
   - 假设有一个 mockm 服务 A, 实现了微信的所有功能, 有例如 /getTicket 和 /getAccessToken 这样的 API
   - 有一个主服务, 在主服务里可以注册 /wx 路由给服务 A, 实现 /wx/getTicket 来服务服务 A 的接口
-  - 注: 
+  - 注:
     - 服务 A 并没有占用多端口, 不是通过主服务代理到服务 A 的方式
 - [-] fix: config.route 失效
   - 疑似 commit bec4571 导致, 经测试, 并未失效. 并且原 bec4571 所处理的问题也并不存在
@@ -41,7 +42,7 @@
 - [ ] refactor: 把 proxy/test/replay 中的 express 实例统一为名称 app
 - [x] feat: 支持 https 配置
   - 问: 在同一个端口上实现 http 和 https ?
-  - 答: 
+  - 答:
     - 可行, [通过分析报文特征来重定向](https://github.com/mscdex/httpolyglot/issues/3#issuecomment-173680155)
     - 可行但不规范, [http 和 https 按标签是属不同端口](https://stackoverflow.com/questions/22453782/nodejs-http-and-https-over-same-port)
       - https://github.com/elastic/kibana/issues/10181
@@ -65,12 +66,13 @@
   - 刷新浏览器让 ws 在不是调用 ws.close 的情况下异常断开
   - 再连接 ws 接口
   - ws 接口报错 `Invalid frame header`
-  ``` js
-    const result = require('default-gateway').v4.sync()
-    const res = require('address').ip(result && result.interface) // 获取默认IP
+  ```js
+  const result = require("default-gateway").v4.sync();
+  const res = require("address").ip(result && result.interface); // 获取默认IP
   ```
 - [ ] feat: 由于移除了 ws, 所以 d.ts 中的 `import WebSocket from 'ws'` 应变更为 `@wll8/express-ws` 中的 ws
 - [ ] feat: 自动检测安装 mockm 使用的包管理器
+
   - 参考 [ni](https://github.com/antfu/ni/blob/main/src/detect.ts), 使用 package.json 中的 packageManager 字段
   - 检测 lock 文件, 例如当都存在时检测更新日期
   - 检测 node_modules 特征
@@ -88,13 +90,13 @@
 - [x] feat: httpLog 显示完整的时间
 - [ ] fix: 当请求被取消时, httpLog 显示 `undefined undefined`
 - [x] fix: config.proxy 子路径冲突
-  ``` js
-    config = {
-      proxy: {
-        '/im':`ws:///192.168.160.74:10000/im`,
-        '/im/dept':`http://192.168.160.74:10000/im/dept`, // 不应该无法使用
-      }
-    }
+  ```js
+  config = {
+    proxy: {
+      "/im": `ws:///192.168.160.74:10000/im`,
+      "/im/dept": `http://192.168.160.74:10000/im/dept`, // 不应该无法使用
+    },
+  };
   ```
 - [x] refactor: 更改 `require('serve-static')` 为 `express.static`
 - [x] refactor: 尝试使用 express-ws 替代 ws
@@ -103,34 +105,34 @@
 - [ ] refactor: 使用单个中间件实现多个 use 的效果
   ```js
   // 修改前
-  app.use(fn)
-  isOk && app.use(fn2)
-  ``` 
+  app.use(fn);
+  isOk && app.use(fn2);
+  ```
   ```js
   // 修改后
   app.use(() => {
-    return isOk ? [fn, fn2] : [fn]
-  })
-  ``` 
+    return isOk ? [fn, fn2] : [fn];
+  });
+  ```
 - [x] refactor: 移动 `router.render` 的位置到 router 声明的地方
 - [x] refactor: 抽取 getProxyConfig 方法到公共业务中
 - [ ] fix: 多个 proxy ws 无法代理
   - https://github.com/chimurai/http-proxy-middleware#external-websocket-upgrade
   - https://github.com/chimurai/http-proxy-middleware/issues/463#issuecomment-1128835468
-  ``` js
+  ```js
   config = {
     proxy: {
-      '/': `http://httpbin.org`,
-      '/ws1': `ws://ws.ifelse.io`, // 不应无法工作
-      '/ws2': `http://ws.ifelse.io`, // 不应无法工作
-    }
-  }
-  config = {
-    proxy: {
-      '/': `http://127.0.0.1:9000`,
-      '/ws': `http://127.0.0.1:9000/websocket`, // 不应无法工作
+      "/": `http://httpbin.org`,
+      "/ws1": `ws://ws.ifelse.io`, // 不应无法工作
+      "/ws2": `http://ws.ifelse.io`, // 不应无法工作
     },
-  }
+  };
+  config = {
+    proxy: {
+      "/": `http://127.0.0.1:9000`,
+      "/ws": `http://127.0.0.1:9000/websocket`, // 不应无法工作
+    },
+  };
   ```
 - [ ] feat: 目前 config.route 是否支持参数映射
   - 例如 path 中的参数转为 query 中的参数
@@ -144,7 +146,7 @@
     - config.apiWeb - apiWebHandle
     - config.proxy - http-proxy-middleware
   - 先把以上配置都进行统一格式化为一个列表, 并按优先级排序此列表, 标记占用情况
-    ``` js
+    ```js
     list = [
       {
         route: String, // 用户路径
@@ -154,51 +156,57 @@
         description: String, // 接口描述
         disable: Boolean, // 是否禁用
         action: Function, // 要执行中间件函数
-        occupied: { // 被谁占用, 如果是被占用的状态, 则不会被使用
+        occupied: {
+          // 被谁占用, 如果是被占用的状态, 则不会被使用
           type: Enum,
           route: String,
         },
         info: {}, // 根据 type 可能不同结构的附加信息
       },
-    ]
+    ];
     ```
   - 转换 proxy 以及内部路由判断为普通的 use
 - [ ] doc: 如何更新 replayPort 返回的数据?
   - 如果代理服务是 9000, 使用同样的参数再请求一下 9000 端口即可, 因为重放时的数据默认会从最新的请求记录中获取
+
 ## 功能
+
 - [ ] feat: 在翻译的 api 中返回翻译服务提供商, 以便于排查问题
 - [ ] chore: 应向发布后的包注入 commit hash, 以便于精确追溯历史版本, 便于回退版本, 修复缺陷
 - [ ] fix: 避免依赖冲突
+
   ```
   warning package.json: "dependencies" has dependency "mockjs" with range "^1.0.1-beta3" that collides with a dependency in "devDependencies" of the same name with version "^1.1.0"
   ```
 
 - [ ] fix: config.route 也应支持 webApi
 - [ ] feat: config.proxy 应支持 url 匹配模式
-  ``` js
+  ```js
   config.proxy = {
     "/": `http://127.0.0.1`,
-    '/api/:id': [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
-  }
+    "/api/:id": [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
+  };
   ```
 - [ ] fix: config.proxy 子路径拦截不应该失效
-  ``` js
+  ```js
   config.proxy = {
     "/api/": `http://127.0.0.1/api/`,
-    '/api/a/b/c/:id': [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
-  }
+    "/api/a/b/c/:id": [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
+  };
   config.proxy = {
-    '/api/a/b/c/:id': [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
+    "/api/a/b/c/:id": [`data.customDict[0].enabled`, 1], // 此拦截规则不应失效
     "/api/": `http://127.0.0.1/api/`,
-  }
+  };
   ```
 - [x] feat: 支持操作 lowdb 实例
+
   - https://github.com/typicode/json-server/issues/484 - 推荐
   - https://github.com/typicode/json-server/issues/401
   - https://github.com/typicode/lowdb
   - https://github.com/typicode/json-server/issues/349
 
 - [ ] feat: 支持自动添加更新时间
+
   - https://github.com/typicode/json-server/issues/125
   - https://github.com/typicode/json-server/issues/262
   - https://github.com/typicode/json-server/issues/854
@@ -207,18 +215,19 @@
 
 - [x] feat: 支持从 config.api 拦截 config.db 的接口
 - [ ] feat: 支持根路径拦截
-  ``` js
+  ```js
   config.proxy = {
-    '/': {
+    "/": {
       target: `http://www.httpbin.org/`, // target host
-      onProxyReq (proxyReq, req, res) { // 拦截请求
-        console.log(`req`, req.url)
-        proxyReq.setHeader(`x-added`, `req`)
+      onProxyReq(proxyReq, req, res) {
+        // 拦截请求
+        console.log(`req`, req.url);
+        proxyReq.setHeader(`x-added`, `req`);
       },
     },
-  }
+  };
   ```
-  可以修改 `config.proxy.forEach`  中的逻辑 context 为 `/` 时也运行 server.use 逻辑, 目前修改之后会导致 config.db 中的接口失效
+  可以修改 `config.proxy.forEach` 中的逻辑 context 为 `/` 时也运行 server.use 逻辑, 目前修改之后会导致 config.db 中的接口失效
 - [x] refactor: 将依赖 git 仓库的 better-mock 更改为 npm 的 @wll8/better-mock
 - [x] refactor: 把 config 放置于全局, 避免传参位置过多
 - [x] refactor: 在 util 中
@@ -229,16 +238,16 @@
   - [x] 把 handlePathArg 放到 cli 中
   - [x] middleware 中内容应属业务方法
 - [x] fix: config.api 是 config.proxy 的子路径并携带参数时应能覆盖
-  例如以下配置不应导致 `/api/test?a=1` 不能使用
-  ``` js
+      例如以下配置不应导致 `/api/test?a=1` 不能使用
+  ```js
   config = {
     proxy: {
-      '/api/': `http://172.16.203.81/api/`,
+      "/api/": `http://172.16.203.81/api/`,
     },
     api: {
-      '/api/test': {msg: 123},
+      "/api/test": { msg: 123 },
     },
-  }
+  };
   ```
 - [x] fix: 连接不存在的 ws api 2-3次会报错
 - [x] fix: config.proxy 非 `/` 代理时, host 不应是 `/` 的代理
@@ -318,16 +327,17 @@
   - api 历史 1
     - req header: ab`c`cd
     - req header: abc`c`d
-    - req body:  bc`c`d
-    - res header:  bc`c`d
-    - res body:  bc`c`d
+    - req body: bc`c`d
+    - res header: bc`c`d
+    - res body: bc`c`d
 - [ ] feat: 重放时默认以忽略 query 参数方式进行匹配, 则仅匹配 path
 - [ ] feat: npm frp 一键安装支持逻辑
   - 运行 `frpc frpc.ini` 命令前, 判断 node_modules 是否存在 frpc, 是则运行
   - 否则到远程下载, 下载完成后再运行 frps
     - 解析 json 配置为 ini
-  
+
 ## 缺陷
+
 - [ ] fix: 当 webApi 与 config.api 相同时, webApi 不应该优先
   - 违背了文档: `从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权`
   - 这似乎是某个版本之后导致的问题
@@ -346,25 +356,27 @@
 - [ ] fix: 奔溃自动重启后会丢失 cli 上传入的参数
   - 未重现
 - [x] fix: config.proxy 无法代理到其他域
-  ``` js
+
+  ```js
   // 正确 http://127.0.0.1:9000/api2/quickSearch == ok
-  proxy: { 
+  proxy: {
     '/': `http://192.168.1.2:9000/`,
     '/api2': `http://192.168.1.2:9000/api/`,
   },
 
   // 错误 http://127.0.0.1:9000/api2/quickSearch == no
-  proxy: { 
+  proxy: {
     '/': `http://www.httpbin.org/`,
     '/api2': `http://192.168.1.2:9000/api/`,
   },
   ```
+
 - [x] fix: 删除 apiWeb 中的空对象, 避免手动编辑 apiWeb 时出现重复的 key
 - [x] fix: 添加 webApi 时不能自动生效
   - [x] 当没有指定配置文件时, 使用的是 node_modules 中的配置文件, 更改 node_modules 中的 config.js 并不会触发重启, 这是 nodemon 的默认规则导致
 - [x] fix: 初始化 cnpm 后导致无法启动 `Cannot find module 'core-js-pure/stable/instance/splice`
   - 这是由于初始化 cnpm 时是使用 npm 来安装的, npm 安装时会对原来 cnpm 安装的依赖冲突.
-- [X] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
+- [x] fix: config.api 为 {ip: 123} 时报错 `Error: Route.acl() requires a callback function but got a [object Number]`
 - [x] fix: 不能检测到使用 nvm 的全局安装的 cnpm
 - [x] fix: 如果检查新版本出错时, 不应提示更新 `已发布新版本 undefined...`
 - [x] fix: 从请求详情中点击编辑 webApi 时, 不应该携带 query 参数
@@ -374,7 +386,7 @@
 - [x] fix: res.send(undefined) 时报错
 - [ ] fix: 当 http body json 的内容较大, 例如 6M 时, 在页面上无法查看详情, 导致浏览器内存不足页崩溃
 - [ ] fix: 发送文件时, header 中没有 x-test-api
-- [x] fix: node v10.12.0 没有触发 req 的 close 事件, node v12.18.3 执行了. 导致某些情况没有保存请求记录到 json 文件中, 参考: 
+- [x] fix: node v10.12.0 没有触发 req 的 close 事件, node v12.18.3 执行了. 导致某些情况没有保存请求记录到 json 文件中, 参考:
   - https://github.com/nodejs/node/commit/f22c7c10ca0c8c7a10057de71bc423bf8b633b88
   - https://github.com/nodejs/node/issues/31394
   - https://github.com/nodejs/node/issues/21063
@@ -394,12 +406,14 @@
 - [ ] fix(doc): 文档中的表格应该 100% 宽度度支持自适应
 
 ## 重构
-- [x] refactor: 处理接口 `:9005/api/getOpenApi/` 的返回值, 更改为在原始 openApi.info 中添加 _openApiPrefix 作为接口前缀
+
+- [x] refactor: 处理接口 `:9005/api/getOpenApi/` 的返回值, 更改为在原始 openApi.info 中添加 \_openApiPrefix 作为接口前缀
 - [x] refactor: 修正拼写错误的 oepnApiData 为 openApiData
 - [x] refactor(test): 移除测试脚本中的 `with` 写法, 因为它会影响编辑器的自动提示功能
   - 例如在 `with (util) {}` 内输入 `require('fs').ex` 时并不会自动提示 `require('fs').existsSync`
 
 ## 破坏性更新计划
+
 - 2.x
   - [ ] feat: 使用插件模式扩展功能
     - 在以往的 config.db 和 config.static 实现中, 其实都是向 server 注入 use 或 api. 而 config.api 本就支持 use/api 的添加, 所以可以把它们作为插件来扩展 api, 这便于体积优化和功能扩展, 以及生态搭建.
@@ -410,7 +424,7 @@
     - 可以归纳到 `handlePathArg` 函数统一修改
   - [ ] refactor: 移除 libObj.midResJson 方法, 因为他并不是一个 lib
   - [ ] refactor: 把 initPackge, hasPackage, installPackage 放到 npm 中
-  - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn 
+  - [ ] feat: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn
   - [ ] refactor: node 支持版本调整为 v12+
   - [ ] refactor: 更改 config 函数中的 tool 为 toolObj , lib 为 libObj
   - [ ] fix: 期望 webApi 禁用所有API时应为 `*` 而不是 `/`, 因为它可能表示仅禁止根 api
@@ -419,7 +433,7 @@
   - [ ] feat: 依赖更新: ws@8.x 文本消息和关闭原因不再解码为字符串, 而是默认返回 Buffers. 另外, 8.2.x 支持 esm
   - [ ] feat(server): 更改 openApi 的功能 - 破坏性修改
     - 为了统一逻辑, 删除 array[string] 的 pathname 最高匹配度特性
-    - 支持的类型: string | array[string] | object | array[object] 
+    - 支持的类型: string | array[string] | object | array[object]
     - string - 指定一个 openApi 地址
     - array[string] - 根据顺序到每个 json 中匹配对应的 path 返回 json
     - object - 配置后再进行匹配，例如上个版本的 key 作为此版本的 resPrefix
@@ -427,12 +441,17 @@
     - object.resPrefix - 将前缀添加到 oepnApi 的 path 中
     - object.reqPrefix - 将前缀添加到请求的 path 中
     - array[object] - 参考 object
+
 ## 备注
+
 - [ ] filenamify@5.x 只支持 esm
 - [ ] node-fetch@3.x 只支持 esm
 - [ ] get-port@6.x 只支持 esm
 - esm 升级说明: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 - esm 工具 https://medium.com/web-on-the-edge/tomorrows-es-modules-today-c53d29ac448c
+
 ## 解决 mockjs 的问题
+
 ### 前端API问题
+
 - 不能使用 fetch https://github.com/nuysoft/Mock/issues/430

@@ -1,6 +1,7 @@
 # 配置项
 
 ## config.disable
+
 类型: boolean
 默认: false
 
@@ -9,40 +10,49 @@
 ::: details FQA
 **如何禁用单个自定义的接口**
 不需要提供配置, 方法比较多.
+
 - 改一下路径, 让接口匹配不上自定义接口即可.
 - 直接注释掉想跳过的接口.
+
 :::
 
 ## config.osIp
+
 类型: string
 默认: 本地网卡第一个 IPv4 地址
 
 想绑定到 mm 程序的 IP, 会自动添加到 [调试链接](#config-apiinheader) 中.
 
 ::: details 示例
-**绑定已经有内网穿透的IP到 x-test-api 上**
-``` js
+**绑定已经有内网穿透的 IP 到 x-test-api 上**
+
+```js
 {
-  osIp: `8.8.8.8`
+  osIp: `8.8.8.8`;
 }
 ```
+
 例如 8.8.8.8 是一个已经映射了外网的服务器, 那么请求的响应体上的 x-test-api 上的 IP 会被替换.
-``` sh
+
+```sh
 # 替换前
 x-test-api: http://127.0.0.0:9005/#/history,v/get/ip
 
 # 替换后
 x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 ```
-::: 
+
+:::
 
 ## config.port
+
 类型: number | string
 默认: 9000
 
 服务端口, 用于接口调用.
 
 ## config.testPort
+
 类型: number | string
 默认: 9005
 
@@ -56,6 +66,7 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 重放端口, 用于使用服务端口产生的缓存数据.
 
 ## config.replayProxy
+
 类型: boolean
 默认: true
 
@@ -65,14 +76,16 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 - true 转发
 
 ## config.replayProxyFind
+
 类型: function
 默认:
 
-@[code transcludeWith=snippet-replayProxyFind](@/../server/config.js)
+@[code](@/server/config.js)
 
 自定义请求重放时的逻辑.
 
 ## config.hostMode
+
 类型: boolean
 默认: false
 
@@ -82,14 +95,17 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 - false 否
 
 ::: details 注意
+
 - 启用时 port 配置将被忽略, 将自动与 proxy 端口保持一致, 因为 host 文件无法实现类似 `127.0.0.1:9000 a.com:8080` 的指定端口效果, 所以只能通过在本地启动与目标一致的端口来解决这个问题.
-  - 参考 [Using port number in Windows host file](https://stackoverflow.com/questions/8652948/using-port-number-in-windows-host-file), 
+  - 参考 [Using port number in Windows host file](https://stackoverflow.com/questions/8652948/using-port-number-in-windows-host-file),
 - 由于是使用更改 host 文件来实现的, 当程序异常退出时没有还原修改会导致无法访问原地址.
 - 仅支持 proxy 是域名的情况, 这是由 host 文件的工作性质决定的, 即 ip 就直接访问 ip, 不会经过 host 文件.
 - proxy 中的拦截功能将失效, 即不能再转发到目标服务器(因为已经在 host 声明目标服务器就是自己, 自己再指定自己就陷入循环了).
+
 :::
 
 ## config.updateToken
+
 类型: boolean | string | string[] | object
 默认: true
 
@@ -97,21 +113,21 @@ x-test-api: http://8.8.8.8:9005/#/history,v/get/ip
 
 对象的 key 指定了从上一个请求的的哪里获取值.
 
-``` js
-/** 
+````js
+/**
  * 不使用
  */
-updateToken = false
+updateToken = false;
 
 /**
  * 相当于 `{'req.headers.authorization': 'req.headers.authorization'}`
  */
-updateToken = true
+updateToken = true;
 
 /**
  * 相当于 `{'req.headers.auth': 'req.headers.auth'}`
  */
-updateToken = `auth`
+updateToken = `auth`;
 
 /**
  * 相当于
@@ -122,21 +138,23 @@ updateToken = `auth`
  * }
  * ```
  */
-updateToken = [`auth`, `auth2`] 
+updateToken = [`auth`, `auth2`];
 
 /**
  * 自定义每个 key/value 的对应关系, 目前仅支持 `req.headers.*` , value 可使用函数 `({req}) => [key, value]`
  */
 updateToken = {
-  'req.headers.authorization': 'req.headers.authorization',
-  'req.headers.a': 'req.headers.b',
-  'req.headers.a2': ({req, value}) => { // 动态设置, 参数中的 value 是上一次请求中对应路径的值
-    return ['req.headers.b2', `123456`] // 第一项是要设置的 key, 第二项是 value
+  "req.headers.authorization": "req.headers.authorization",
+  "req.headers.a": "req.headers.b",
+  "req.headers.a2": ({ req, value }) => {
+    // 动态设置, 参数中的 value 是上一次请求中对应路径的值
+    return ["req.headers.b2", `123456`]; // 第一项是要设置的 key, 第二项是 value
   },
-}
-```
+};
+````
 
 ## config.apiInHeader
+
 类型: boolean | string
 默认: true
 
@@ -147,6 +165,7 @@ updateToken = {
 - string: 时为自定义 header 字段.
 
 ## config.proxy
+
 类型: string | object
 默认: `http://www.httpbin.org/`
 
@@ -157,7 +176,7 @@ updateToken = {
 注: 是对象时, 需要存在键 `/` 表示默认域名.
 此功能可以自定义拦截过程, 类似 webpack 中的 `devServer.proxy` .
 
-- string 直接请求转发到指定地址. 
+- string 直接请求转发到指定地址.
 - object 相当于传入 proxy 的配置.
 
 参考 [proxy](https://github.com/chimurai/http-proxy-middleware#http-proxy-options).
@@ -315,6 +334,7 @@ undefined
 :::
 
 ### 请求转发
+
 可以方便的支持任意路径转发, 以下演示转发到其他域名:
 
 ```js {3}
@@ -325,6 +345,7 @@ proxy: {
 ```
 
 ## config.remote
+
 类型: boolean
 默认: false
 是否启用外网映射.
@@ -343,12 +364,14 @@ proxy: {
 由于 mockm 在 `v1.1.25-alpha.15` 之前不知道 ngrok 对于未注册用户会强制要求更新而导致外网映射功能无法正常使用.
 
 要解决此问题有两个方案:
-- 方案1: 更新 mockm 到 v1.1.25-alpha.15 以上的版本
-- 方案2: 手动进入 mockm 的安装目录(node_modules\mockm)运行命令 `npx ngrok update` 来更新 ngrok
+
+- 方案 1: 更新 mockm 到 v1.1.25-alpha.15 以上的版本
+- 方案 2: 手动进入 mockm 的安装目录(node_modules\mockm)运行命令 `npx ngrok update` 来更新 ngrok
 
 :::
 
 ## config.remoteToken
+
 类型: string | string[]
 默认: []
 
@@ -356,6 +379,7 @@ proxy: {
 目前 ngrok 已注册的免费用户仅可使用 1 通道, 如果你的 tokenA 支持 3 个通道, 可以这样重复使用: [tokenA, tokenA, tokenA]
 
 ## config.openApi
+
 类型: string | array | object
 默认: `http://httpbin.org/spec.json`
 
@@ -370,6 +394,7 @@ proxy: {
 当为 object 时, key 也作为 ui 界面上 swagger 调试地址的匹配. 例如某个服务有 openApi 地址, 在里面有一个 api 是 /user, 但是最终部署之后经过代理的请求接口实际是 /api/server/user, 这种情况下 key 的值就是 `/api/server`.
 
 ## config.cors
+
 类型: boolean
 默认: true
 
@@ -379,18 +404,21 @@ proxy: {
 - false 不对源跨域方式做任何处理
 
 ## config.dataDir
+
 类型: string
 默认: `${os.homedir()}/.mockm/${configPathByName}/httpData/`
 
 http 请求数据保存目录.
 
 ## config.dbJsonPath
+
 类型: string
 默认: `${config.dataDir}/db.json`
 
 json 数据生成的保存位置.
 
 ## config.dbCover
+
 类型: boolean
 默认: false
 
@@ -407,6 +435,7 @@ json 数据生成的保存位置.
 :::
 
 ## config.db
+
 类型: object | function
 默认: {}
 
@@ -416,68 +445,69 @@ json 数据生成的保存位置.
 - function 应返回一个对象
 
 ::: details 示例
-随机生成带有 id, 用户, 阅读量, 作者等信息的 40 至 60 本书数据, 以及相关的增删查改接口. 不到 1分钟即可实现这些功能.
+随机生成带有 id, 用户, 阅读量, 作者等信息的 40 至 60 本书数据, 以及相关的增删查改接口. 不到 1 分钟即可实现这些功能.
 
-``` js
-module.exports = util => {
+```js
+module.exports = (util) => {
   return {
     db: util.libObj.mockjs.mock({
-      'books|40-60': [
+      "books|40-60": [
         {
-          'id|+1': 1,
+          "id|+1": 1,
           user: /\d\d/,
           view: /\d\d\d\d/,
-          'type|1': [`js`, `css`, `html`],
-          'discount|1': [`0`, `1`],
+          "type|1": [`js`, `css`, `html`],
+          "discount|1": [`0`, `1`],
           author: {
-            'name|1': [`张三`, `李四`],
+            "name|1": [`张三`, `李四`],
           },
-          title: '@ctitle',
-        }
+          title: "@ctitle",
+        },
       ],
     }),
-  }
-}
+  };
+};
 ```
 
 所有的创建或修改都会像真实的后台接口把操作结果存储在数据库一样.
 
 - 基本操作
-GET    /books -- 获取所有
-POST   /books -- 增加一条
-GET    /books/1 -- 获取某条
-PUT    /books/1 -- 修改某条
-PATCH  /books/1 -- 部分修改某条
-DELETE /books/1 -- 删除某条
+  GET /books -- 获取所有
+  POST /books -- 增加一条
+  GET /books/1 -- 获取某条
+  PUT /books/1 -- 修改某条
+  PATCH /books/1 -- 部分修改某条
+  DELETE /books/1 -- 删除某条
 
 - 过滤
-GET /books?discount=1&type=js -- 不同字段查询
-GET /books?id=1&id=2 -- 相同字段不同的值
-GET /books?author.name=张三 -- 使用点查询深层数据
+  GET /books?discount=1&type=js -- 不同字段查询
+  GET /books?id=1&id=2 -- 相同字段不同的值
+  GET /books?author.name=张三 -- 使用点查询深层数据
 
 - 分页
-GET /books?_page=2 -- 分页
-GET /books?_page=2&_limit=5 -- 分页并指定每页数量
+  GET /books?\_page=2 -- 分页
+  GET /books?\_page=2&\_limit=5 -- 分页并指定每页数量
 
 - 排序
-GET /books?_sort=view&_order=asc -- 排序
-GET /books?_sort=user,view&_order=desc,asc -- 多字段排序
+  GET /books?\_sort=view&\_order=asc -- 排序
+  GET /books?\_sort=user,view&\_order=desc,asc -- 多字段排序
 
 - 截取
-GET /books?_start=2&_end=5 -- 截取 _start 到 _end 之间的内容
-GET /books?_start=20&_limit=10 -- 截取 _start 后面的 _limit 条内容
+  GET /books?\_start=2&\_end=5 -- 截取 \_start 到 \_end 之间的内容
+  GET /books?\_start=20&\_limit=10 -- 截取 \_start 后面的 \_limit 条内容
 
 - 运算
-GET /books?view_gte=3000&view_lte=7000 -- 范围  `_gte` `_lte`
-GET /books?id_ne=1 -- 排除 `_ne`
-GET /books?type_like=css|js -- 过滤器 `_like`, 支持正则
+  GET /books?view_gte=3000&view_lte=7000 -- 范围 `_gte` `_lte`
+  GET /books?id_ne=1 -- 排除 `_ne`
+  GET /books?type_like=css|js -- 过滤器 `_like`, 支持正则
 
 - 全文检索
-GET /books?q=张三 -- 精确全文匹配
+  GET /books?q=张三 -- 精确全文匹配
 
 :::
 
 ## config.route
+
 类型: object
 默认: {}
 
@@ -485,7 +515,7 @@ GET /books?q=张三 -- 精确全文匹配
 
 假设接口 `/books/1` 希望能通过 `/test/db/api/` 前缀访问, 配置如下:
 
-``` js
+```js
 {
   '/test/db/api/*': '/$1', // /test/db/api/books/1 => /books/1
 }
@@ -494,30 +524,35 @@ GET /books?q=张三 -- 精确全文匹配
 参考 [json-server](https://github.com/typicode/json-server#add-custom-routes).
 
 ## config.apiWeb
+
 类型: string
 默认: `./webApi.json`
 
 从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权
 
 ## config.apiWebWrap
+
 类型: boolean | function
 默认: wrapApiData
 
 统一包装从 web 页面创建的接口数据.
 
 这是默认统一使用的包裹结构: wrapApiData
-``` js
-function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
-  code = String(code)
+
+```js
+function wrapApiData({ data, code = 200 }) {
+  // 包裹 api 的返回值
+  code = String(code);
   return {
     code,
     success: Boolean(code.match(/^[2]/)), // 如果状态码以2开头则为 true
     data,
-  }
+  };
 }
 ```
 
 ## config.api
+
 类型: object | function
 默认: {}
 
@@ -539,7 +574,7 @@ function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
 
 非 use 时, value 可以是函数或 json, 为 json 时直接返回 json 数据.
 
-``` js
+```js
 api: {
   // 当为基本数据类型时, 直接返回数据
   'get /api/1': {msg: `ok`},
@@ -570,6 +605,7 @@ api: {
 ```
 
 ## config.resHandleReplay
+
 类型: function
 默认: `({req, res}) => wrapApiData({code: 200, data: {}})`
 
@@ -580,18 +616,21 @@ api: {
 :::
 
 ## config.resHandleJsonApi
+
 类型: function
 默认: `({req, res: { statusCode: code }, data}) => wrapApiData({code, data})`
 
 由 config.db 生成的接口的最后一个拦截器, 可以用来构建项目所需的数据结构.
 
 ## config.watch
+
 类型: string | array[string]
 默认: []
 
 指定一些目录或文件路径, 当它们被修改时自动重载服务. 支持绝对路径和相对于配置文件的路径.
 
 ## config.clearHistory
+
 类型: boolean | object | function
 默认: false
 
@@ -608,19 +647,22 @@ api: {
 - function 自定义清理函数, 获取 history 列表, 返回要删除的 id 列表
 
 默认配置使用以下几个内容来判断内容相同.
-  - 请求 URL
-  - 请求方法,
-  - 状态码,
-  - 请求体 MD5,
-  - 响应体 MD5,
+
+- 请求 URL
+- 请求方法,
+- 状态码,
+- 请求体 MD5,
+- 响应体 MD5,
 
 ## config.guard
+
 类型: boolean
 默认: false
 
 当程序异常退出时, 是否自动重启.
 
 ## config.backOpenApi
+
 类型: boolean | number
 默认: 10
 
@@ -629,9 +671,10 @@ api: {
 - boolean 是否启用
   - false 禁用
   - true 使用默认配置
--  number 启用并设置检测的分钟数
+- number 启用并设置检测的分钟数
 
 ## config.static
+
 类型: string | object | array
 默认: undefined
 
@@ -648,7 +691,7 @@ api: {
 
 ::: details 示例
 
-``` js
+```js
 {
   static: `public`, // 访问 http://127.0.0.1:9000/ 则表示访问 public 中的静态文件, 默认索引文件为 index.html
   static: { // 访问 dist 目录下 history 模式的项目
@@ -672,9 +715,11 @@ api: {
   ],
 }
 ```
-::: 
+
+:::
 
 ## config.disableRecord
+
 类型: boolean | string | string[] | DisableRecord | DisableRecord[]
 默认: false
 
@@ -685,35 +730,38 @@ api: {
   - true 不记录所有
 - string 禁用的 path
 - DisableRecord 使用对象配置
-  ``` ts
+
+  ```ts
   interface DisableRecord {
     /**
      * 请求地址, 将被转换为正则
      */
-    path: string,
+    path: string;
 
     /**
      * 请求方法, 不指定时为匹配所有
      */
-    method: Method,
+    method: Method;
 
     /**
      * 仅记录后 n 条, 0 表示不记录
      * @default
      * 0
      */
-    num: number,
+    num: number;
   }
   ```
+
 - DisableRecord[] 使用多个配置
 
 ## config.bodyParser
+
 类型: Object
 默认: 参考下文
 
 向 bodyParser 中间件传入配置.
 
-``` js
+```js
 // 默认值
 config.bodyParser = {
   json: {
@@ -723,52 +771,52 @@ config.bodyParser = {
   urlencoded: {
     extended: false,
   },
-}
+};
 ```
 
 ## config.https
+
 类型: configHttps
 默认: 参考类型定义
 
 为服务配置 https 协议, 默认情况下只需填写 key/cert, 即可实现在同一端口同时支持 http/https.
 
-
-``` ts
+```ts
 interface configHttps {
   /**
    * 私钥文件地址, 例如 *.key
    */
-  key: String,
+  key: String;
 
   /**
    * 公钥文件地址, 例如 *.crt, *.cer
    */
-  cert: String,
-  
+  cert: String;
+
   /**
    * 是否重定向到 https
    * @default true
    */
-  redirect: Boolean,
-  
+  redirect: Boolean;
+
   /**
    * 配置 https 使用的端口, 默认同 config.port
    */
-  port: number | string,
+  port: number | string;
   /**
    * 配置 https 使用的端口, 默认同 config.testPort
    */
-  testPort: number | string,
+  testPort: number | string;
   /**
    * 配置 https 使用的端口, 默认同 config.replayPort
    */
-  replayPort: number | string,
+  replayPort: number | string;
 }
 ```
 
 实现类似 nginx 80/443 端口 https 支持:
 
-``` js
+```js
 const config = {
   port: 80,
   https: {
@@ -776,7 +824,7 @@ const config = {
     cert: `./key/https.cer`,
     port: 443,
   },
-}
+};
 ```
 
 ## config.plugin
@@ -788,7 +836,7 @@ const config = {
 
 每个插件是一个对象，结构如下：
 
-``` js
+```js
 module.exports = {
   /**
    * 插件的唯一标识
@@ -807,19 +855,19 @@ module.exports = {
    * 在这里获取用户转给插件的配置
    * 约定: 当用户传入 false 时不启用插件
    */
-  async main({hostInfo, pluginConfig, config, util} = {}){
+  async main({ hostInfo, pluginConfig, config, util } = {}) {
     return {
       /**
        * 宿主应用配置项完成
        * 例如创建了程序所需目录结构
        * 可以在这里创建插件所需目录结构
        */
-      async hostFileCreated(){},
+      async hostFileCreated() {},
       /**
        * server listen 调用成功
        * info
        */
-      async serverCreated(info){},
+      async serverCreated(info) {},
       /**
        * app 初始化完成, 在这个时候
        * - 只有 ws 和 http/https 支持
@@ -827,7 +875,7 @@ module.exports = {
        * - 当调用 next 方法之后才进入其他中间件
        * 可以在这里注册一个优先级较高的中间件, 例如请求拦截
        */
-      async useCreated(app){},
+      async useCreated(app) {},
       /**
        * app 中的解析器初始化完成, 在这个时候
        * - 只有 bodyParser urlencodedParser logger
@@ -835,25 +883,25 @@ module.exports = {
        * - 当调用 next 方法之后才进入其他中间件
        * 在这里的中间件可以获取 req.body 数据, 到这里的请求会被 log 记录
        */
-      async useParserCreated(app){},
+      async useParserCreated(app) {},
       /**
        * config.api 已解析完成
        * - 它不再是一个函数, 而是一个对象
        * - side 方法还未展示
        * 可以在这里使用它, 例如注入新的接口
        */
-      async apiParsed(api, apiUtil){},
+      async apiParsed(api, apiUtil) {},
       /**
        * config.api 对象中的每个接口已解析完成为一个 api 详情列表
        * - side 方法已被展开
        * - method route action 等信息已被展开
        * 可以在这里使用它, 例如生成接口文档
-       * @param {*} serverRouterList 
+       * @param {*} serverRouterList
        */
       async apiListParsed(serverRouterList = []) {},
-    }
+    };
   },
-}
+};
 ```
 
 ### 插件示例: 一
@@ -862,41 +910,41 @@ module.exports = {
 
 创建插件文件: get-user.js
 
-``` js
+```js
 module.exports = {
   key: `get-user`,
   main({ config }) {
     return {
       useCreated(app) {
         app.use((req, res, next) => {
-          const token = req.header(`Blade-Auth`) || ``
-          const list = token.split(` `) || []
-          req.userId = list[1]
-          next()
-        })
+          const token = req.header(`Blade-Auth`) || ``;
+          const list = token.split(` `) || [];
+          req.userId = list[1];
+          next();
+        });
       },
-    }
+    };
   },
-}
+};
 ```
 
 使用插件文件: mm.config.js
 
-``` js
-const getUser = require(`./get-user.js`)
+```js
+const getUser = require(`./get-user.js`);
 module.exports = (util) => {
   return {
     plugin: [getUser],
     api: {
       // 任意一个接口都可以获取已解析的 req.userId
-      async '/getId'(req, res, next) {
+      async "/getId"(req, res, next) {
         res.json({
           id: req.userId,
-        })
+        });
       },
     },
-  }
-}
+  };
+};
 ```
 
 ### 插件示例: 二
@@ -905,57 +953,59 @@ module.exports = (util) => {
 - 让 config.db 返回的 data.count 为 data.total
 - 让 config.db 的分页参数是 query.size 和 query.current
 
-``` js
+```js
 module.exports = {
   key: `change-page`,
   main({ config }) {
     config.resHandleJsonApi = ({ req, res: { statusCode: code }, data }) => {
       function wrapApiData({ data, code = 200 }) {
         // 包裹 api 的返回值
-        code = String(code)
-        data.results && ((data.records = data.results), delete data.results)
-        data.count && ((data.total = data.count), delete data.count)
+        code = String(code);
+        data.results && ((data.records = data.results), delete data.results);
+        data.count && ((data.total = data.count), delete data.count);
         return {
           code,
           success: Boolean(code.match(/^[2]/)), // 如果状态码以2开头则为 true
           data,
-        }
+        };
       }
-      return wrapApiData({ data, code })
-    }
+      return wrapApiData({ data, code });
+    };
     return {
       useCreated(app) {
         app.use((req, res, next) => {
-          const { size, current } = req.query
-          size && ((req.query._limit = size), delete req.query.size)
-          current && ((req.query._page = current), delete req.query.current)
-          next()
-        })
+          const { size, current } = req.query;
+          size && ((req.query._limit = size), delete req.query.size);
+          current && ((req.query._page = current), delete req.query.current);
+          next();
+        });
       },
-    }
+    };
   },
-}
-
+};
 ```
 
 ### 插件示例: 三
 
 验证数据格式和生成接口文档：mm.config.js
 
-
-``` js
+```js
 module.exports = async (util) => {
-  const joi = await util.tool.generate.initPackge(`joi`)
+  const joi = await util.tool.generate.initPackge(`joi`);
   return {
     plugin: [util.plugin.validate, util.plugin.apiDoc],
     api: {
-      'post /api/login': util.side({
+      "post /api/login": util.side({
         tags: [`admin`],
         summary: `登录接口`,
         schema: {
           body: joi
             .object({
-              name: joi.string().default(`wll8`).required().description(`用户名`),
+              name: joi
+                .string()
+                .default(`wll8`)
+                .required()
+                .description(`用户名`),
             })
             .description(`用户信息`),
         },
@@ -964,12 +1014,12 @@ module.exports = async (util) => {
             globalThis.config.apiWebWrap({
               data: req.body,
             }),
-          )
+          );
         },
       }),
     },
-  }
-}
+  };
+};
 ```
 
 上面的 mm.config.js 配置中添加了 [validate](https://github.com/wll8/mockm/blob/eab3a7a90494914cc4c623d9a906d63289938222/server/plugin/validate.js) 插件和 [apiDoc](https://github.com/wll8/mockm/blob/eab3a7a90494914cc4c623d9a906d63289938222/server/plugin/api-doc.js) 插件，然后创建了一个请求方法为 post 路径为 `/api/logo` 登录接口，接口分类为 `admin`，接口描述为 `登录接口`，接收参数是必填的 string 类型的 name 字段。

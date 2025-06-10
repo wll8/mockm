@@ -1,6 +1,5 @@
 一个基于 express 的工具。它可以快速生成 api 以及创造数据，开箱即用，便于部署。
 
-
 <p align="center">
   <a href="https://github.com/wll8/mockm/blob/dev/README.md">中文</a> |
   <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a>
@@ -367,7 +366,8 @@ module.exports = {
 | 项目                                                               | 简介                                                                                                                  |
 | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
 | [taroify](https://github.com/mallfoundry/taroify)                  | Taroify 是移动端组件库 Vant 的 Taro 版本，两者基于相同的视觉规范，提供一致的 API 接口，助力开发者快速搭建小程序应用。 |
-| [wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 一个基于Vue3+TS开发的uni-app组件库，提供70+高质量组件，支持暗黑模式、国际化和自定义主题。                             |
+| [wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 一个基于 Vue3+TS 开发的 uni-app 组件库，提供 70+高质量组件，支持暗黑模式、国际化和自定义主题。                        |
+| [vuepress-theme-hope](https://theme-hope.vuejs.press)              | 功能强大的 VuePress 主题                                                                                              |
 
 ## 许可
 

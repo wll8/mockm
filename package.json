@@ -1,19 +1,24 @@
 {
   "version": "1.1.27-alpha.12",
   "scripts": {
-    "release": "release-it prerelease -V --ci",
-    "doc:dev": "cd doc && npm start",
-    "doc:build": "cd doc && npm run build",
-    "build:client": "cd client && npm run build",
-    "build:serve": "cd release && npx gulp",
-    "push:doc": "cd release && npx gulp pushDoc",
-    "push:npm": "cd release && npx gulp npm",
     "bit": "npm run build:client && npm run build:serve && npm run install:dist && npm run test:build",
     "bit:serve": "npm run build:serve && npm run install:dist && npm run test:build",
+    "build:client": "cd client && npm run build",
+    "build:serve": "cd release && npx gulp",
+    "doc:build": "cd doc && pnpm run build",
+    "doc:dev": "cd doc && pnpm run dev",
     "install:dist": "cd dist/package && cross-env NPM_CONFIG_REGISTRY=https://registry.npmmirror.com/ yarn --registry https://registry.npmmirror.com/",
+    "push:doc": "cd release && npx gulp pushDoc",
+    "push:npm": "cd release && npx gulp npm",
+    "release": "release-it prerelease -V --ci",
     "test": "npm run test:dev",
-    "test:dev": "cd test && npm run test:dev",
-    "test:build": "cd test && npm run test:build"
+    "test:build": "cd test && npm run test:build",
+    "test:dev": "cd test && npm run test:dev"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "4",
+    "cross-env": "^7.0.3",
+    "release-it": "14"
   },
   "release-it": {
     "git": {
@@ -44,10 +49,5 @@
       "before:release": "npm run bit",
       "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
     }
-  },
-  "devDependencies": {
-    "@release-it/conventional-changelog": "4",
-    "cross-env": "^7.0.3",
-    "release-it": "14"
   }
 }

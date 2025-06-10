@@ -357,17 +357,18 @@ Creating an API from the UI
 
 ## Differences
 
-| Tool        | Description                         | Remarks                           |
-| ----------- | ----------------------------------- | --------------------------------- |
-| mockjs      | Intercept XHR requests in the frontend and generate data | Request cannot be seen in the network console |
-| json-server | Generate Restful APIs using JSON     | Does not have integrated data generation capabilities |
+| Tool        | Description                                               | Remarks                                                     |
+| ----------- | --------------------------------------------------------- | ----------------------------------------------------------- |
+| mockjs      | Intercept XHR requests in the frontend and generate data  | Request cannot be seen in the network console               |
+| json-server | Generate Restful APIs using JSON                          | Does not have integrated data generation capabilities       |
 | yapi/rap2   | Manage API documentation and generate interfaces and data | Difficult to install and synchronize with frontend projects |
 
 ## Links
 
-| Project                                              | Description                                                                                                          |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| [taroify](https://github.com/mallfoundry/taroify) | Taroify is the Taro version of the mobile component library Vant. Both are based on the same visual specification and provide consistent API interfaces to help developers quickly build mini-applications. |
+| Project                                               | Description                                                                                                                                                                                                 |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [taroify](https://github.com/mallfoundry/taroify)     | Taroify is the Taro version of the mobile component library Vant. Both are based on the same visual specification and provide consistent API interfaces to help developers quickly build mini-applications. |
+| [vuepress-theme-hope](https://theme-hope.vuejs.press) | Powerful VuePress Theme                                                                                                                                                                                     |
 
 ## License
 
