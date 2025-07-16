@@ -6,7 +6,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 获取本地 package 版本号
      * @param {string} name packageName
      * @param {object} param1 选项
-     * @param {array} param1.packagePath 指定路径
+     * @param {string} param1.packagePath node_modules 路径
      */
     function getLocalVersion(name, {packagePath} = {}) { // 从本地获取版本号
       const hasFile = tool().file.hasFile
@@ -201,17 +201,17 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
 
   /**
    * 自动安装依赖
-   * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果, 
+   * // ? todo 当使用 yarn mm remote 或 npm run mm remote 的包管理器启动程序时, 看不到实时输出效果,
    *     需要使用 mm remote 这种直接调用可执行文件的方式才能实时输出, 不知道为什么
    * 注意, 假设安装 a 依赖后, a 依赖会被存储到 dependencies 中, 建议保留它, 因为可能是对等依赖
    *     例如 joi-to-swagger 依赖 joi, 这要求在父项目的 dependencies 中显式存在 joi 并已安装
-   * @param {*} param0 
-   * @returns 
+   * @param {*} param0
+   * @returns
    */
-  async function installPackage({cwd, env, packageName, version, attempt = 3}) {
+  async function installPackage({cwd, env, pkg, attempt = 3, requireName}) {
     const registryUrl = await npm().getNpmRegistry()
     const { MOCKM_REGISTRY } = process.env
-    const useUrl = registryUrl || MOCKM_REGISTRY || `https://registry.npm.taobao.org/`
+    const useUrl = registryUrl || MOCKM_REGISTRY || `https://registry.npmmirror.com/`
     process.env.NPM_CONFIG_REGISTRY = useUrl
     cwd = cwd.replace(/\\/g, `/`)
     // 注意: 修改为 npm 时某些依赖会无法安装, 需要使用 cnpm 成功率较高
@@ -223,16 +223,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
     // 不再使用 --registry 参数, 因为某些管理器要求此值与 lock 中的值一致
     // 不再使用 npx , 因为它在新版本需要交互式确认
-    version = version ? `@${version}` : ``
     const cmd = {
-      npm: `npm add ${packageName}${version}`,
-      pnpm: `pnpm add ${packageName}${version}`, // pnpm 其实不支持 --registry 参数
-      cnpm: `cnpm i ${packageName}${version}`, // cnpm 其他不支持 add 参数
-      yarn: `yarn add ${packageName}${version}`,
+      npm: `npm add ${pkg}`,
+      pnpm: `pnpm add ${pkg}`, // pnpm 其实不支持 --registry 参数
+      cnpm: `cnpm i ${pkg}`, // cnpm 其实不支持 add 参数
+      yarn: `yarn add ${pkg}`,
     }[installEr]
     const cd = require(`os`).type() === `Windows_NT` ? `cd /d` : `cd`
     const tips = tool().string.removeLeft(`
-      initializing: ${packageName}...
+      initializing: ${pkg}...
       ${tool().cli.colors.yellow(`If the automatic installation fails, you can try running the following commands manually:`)}
       ${tool().cli.getFullLine()}
       ${cd} "${cwd}"
@@ -257,40 +256,46 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         print(`number of retries: ${attempt - attemptNum}/${attempt - 1}`)
       }
       attemptNum = attemptNum - 1
-    } while (hasPackage(packageName) === false && attemptNum > 0)
-    const hasPackageRes = hasPackage(packageName)
-    print(tool().cli.colors[[`red`, `green`][Number(hasPackageRes)]](`Initialize ${packageName} ${[`failed`, `successfully`][Number(hasPackageRes)]}`))
+    } while (hasPackage(requireName) === false && attemptNum > 0)
+    const hasPackageRes = hasPackage(requireName)
+    print(tool().cli.colors[[`red`, `green`][Number(hasPackageRes)]](`Initialize ${pkg} ${[`failed`, `successfully`][Number(hasPackageRes)]}`))
     return hasPackageRes
   }
 
   function generate() { // 生成器
     /**
      * 如果某个依赖不存在, 则安装它
-     * @param {*} packageName 依赖名称
+     * @param {*} pkg 要安装的依赖, 与 npm i 后面的参数一致
      * @param {object} param1 配置
-     * @param {string} param1.version 版本, 如果不填则从 packageJson.optionalDependencies 中获取
      * @param {boolean} param1.getRequire 是否安装完成后进行 require
+     * @param {boolean} param1.requireName require 时使用的名称, 默认为自动解析, 例如当使用 url 安装时程序是无法知道真实名称的, 需要指定
      * @param {object} param1.env 安装时的环境变量
      * @param {string} param1.msg 依赖不存在时提示的消息
      */
-    async function initPackge(packageName, {version, getRequire = true, env = {}, msg} = {}) {
+    async function initPackge(pkg, {getRequire = true, requireName, env = {}, msg} = {}) {
       try {
         const path = require(`path`)
         const mainPath = path.join(__dirname, `../`) // 主程序目录
         const packageJson =  require(`${mainPath}/package.json`)
-        version = version || (packageJson.pluginDependencies || {})[packageName] || (packageJson.optionalDependencies || {})[packageName] || packageJson.dependencies[packageName]
-        const hasPackageRes = hasPackage(packageName)
-        if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
-          const cnpmVersion = npm().getLocalVersion(`cnpm`)
-          if(cnpmVersion === undefined) { // 如果 cnpm 不存在则先安装 cnpm
-            await installPackage({cwd: mainPath, env, packageName: `cnpm`, version: `6.1.1` })
+
+        let pkgVersion = ``
+        if(pkg.includes(`://`) === false) {
+          let nameEndsAt = pkg[0] === `@` ? pkg.slice(1).indexOf(`@`) + 1 : pkg.indexOf(`@`)
+          pkgVersion = nameEndsAt > 0 ? pkg.slice(nameEndsAt + 1) : ``
+          if(pkgVersion === ``) { // 若未指定版本时, 从已声明的依赖中选择版本
+            pkgVersion = pkgVersion || (packageJson.pluginDependencies || {})[pkg] || (packageJson.optionalDependencies || {})[pkg] || packageJson.dependencies[pkg] || ``
+            pkg = pkgVersion ? `${pkg}@${pkgVersion}`: pkg
           }
+        }
+        const requireNameNew = requireName || (pkgVersion ? pkg.replace(`@${pkgVersion}`, ``) : pkg);
+        const hasPackageRes = hasPackage(requireNameNew)
+        if(hasPackageRes === false) { // 如果依赖不存在, 则安装它
           msg && console.log(msg)
-          await installPackage({cwd: mainPath, env, packageName, version })
+          await installPackage({cwd: mainPath, env, pkg, requireName: requireNameNew })
         }
         if(getRequire) {
-          cache().delRequireCache(packageName)
-          return require(packageName)
+          cache().delRequireCache(requireNameNew)
+          return require(requireNameNew)
         }
       } catch (err) {
         console.log(`err`, err)
@@ -659,8 +664,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
   function file() { // 文件相关
     /**
      * 递归复制
-     * @param {*} from 
-     * @param {*} to 
+     * @param {*} from
+     * @param {*} to
      */
     function copyFolderSync(from, to) {
       const fs = require(`fs`)
@@ -675,7 +680,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         }
       })
     }
-    
+
     /**
      * 创建或删除一组文件
      * @param objOrArr {object|number} 要操作的内容
@@ -694,7 +699,15 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-
+    function fileChange(file, cb) {
+      const chokidar = require(`chokidar`)
+      tool().type.isEmpty(file) === false && chokidar.watch(file, {
+        ignored: `**/node_modules/**`,
+        usePolling: true,
+      }).on(`change`, (files) => {
+        cb(files)
+      })
+    }
 
     /**
      * 根据 dirName 和 fileName 返回一个当前目录不存在的文件名
@@ -758,22 +771,34 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       })
     }
 
-    function fileStore(storePath, initValue) { // 存取需要持久化存储的数据
+    const fileStoreInitValueMap = {}
+    function fileStore(storePath, initValue = {}) { // 存取需要持久化存储的数据
+      initValue = fileStoreInitValueMap[storePath] = fileStoreInitValueMap[storePath] || initValue
       const fs = require(`fs`)
       const {
         o2s,
         deepSet,
         deepGet,
       } = obj()
-      if(isFileEmpty(storePath)) {
-        fs.writeFileSync(storePath, o2s(initValue || {}))
-      } else if(initValue) { // 避免后期添加的键由于存在文件而没有正常初始化
-        const store = JSON.parse(fs.readFileSync(storePath, `utf-8`))
-        fs.writeFileSync(storePath, o2s({...initValue, ...store}))
+      
+      let initEd = false
+      const init = () => {
+        if(initEd === false) {
+          if(isFileEmpty(storePath)) {
+            fs.writeFileSync(storePath, o2s(initValue))
+          } else { // 避免后期添加的键由于存在文件而没有正常初始化
+            const store = JSON.parse(fs.readFileSync(storePath, `utf-8`))
+            fs.writeFileSync(storePath, o2s({...initValue, ...store}))
+          }
+        }
+        initEd = true
       }
-      let store = () => JSON.parse(fs.readFileSync(storePath, `utf-8`))
+      let store = () => {
+        return isFileEmpty(storePath) ? JSON.parse(JSON.stringify(initValue)) : JSON.parse(fs.readFileSync(storePath, `utf-8`))
+      }
       return {
         set(key, val) {
+          init()
           const newStore = store()
           deepSet(newStore, key, val)
           fs.writeFileSync(storePath, o2s(newStore))
@@ -993,13 +1018,13 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
         || fs.readFileSync(file, `utf-8`).trim() === ``
       )
     }
-    
+
     /**
      * 当文件不存在或内容为空时创建文件, 自动创建目录
      * arg[0].filePath 文件地址
      * arg[0].str 文件内容
      * arg[0].force 是否强行覆盖
-     * 
+     *
      * @return boolean 是否创建
      */
     function createFile({filePath, str = ``, force = false, msg = ``} = {}) {
@@ -1017,6 +1042,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     }
 
     return {
+      fileChange,
       createFile,
       copyFolderSync,
       filesCreateOrRemove,
@@ -1058,7 +1084,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
          当使用以下请求方式时, 获取到的 ip 为 ::1
          - js fetch(`http://localhost:9090/ip`);
          - cli http :9000/ip
-        */ 
+        */
         "1": `127.0.0.1`,
       }[ip] || ip
       return ip
@@ -1067,8 +1093,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
     /**
      * 判断请求是 http 还是 https
      * https://stackoverflow.com/questions/10348906/how-to-know-if-a-request-is-http-or-https-in-node-js
-     * @param {*} req 
-     * @returns 
+     * @param {*} req
+     * @returns
      */
     function getProtocol (req) {
       let proto = req.connection.encrypted ? 'https' : 'http';
@@ -1128,7 +1154,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      * 排序对象的 key, 仅操作第一层
      * @param {*} obj 要排序的对象
      * @param {*} opt.firstLong 是否长 key 在前, 默认 false
-     * @returns 
+     * @returns
      */
     function sortKey(obj, {
       firstLong = false,
@@ -1141,7 +1167,7 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
       keys.forEach(key => (newObj[key] = obj[key]))
       return newObj
     }
-    
+
     function flatObj(value, currentKey) { // 展开对象
       let result = {}
       Object.keys(value).forEach(key => {

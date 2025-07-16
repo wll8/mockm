@@ -765,7 +765,12 @@ function business() { // 与业务相关性的函数
     }
 
     function parseDbApi() {
+      const db = tool.file.fileStore(global.config.dbJsonPath).get()
+      if(Object.keys(db).length === 0) {
+        return []
+      }
       const router = jsonServer.router(global.config.dbJsonPath, {
+        _preciseNeste: true,
         _noRemoveDependents: true,
         _noDataNext: true,
         _noDbRoute: true,
@@ -1075,9 +1080,7 @@ function business() { // 与业务相关性的函数
           action: [
             async (req, res, next) => { // 开启列表显示时
               if(item.list && item.mode !== `history`) {
-                fileList({
-                  root: item.fileDir,
-                })(req, res, next)
+                fileList(item)(req, res, next)
               } else {
                 next()
               }
@@ -1089,7 +1092,7 @@ function business() { // 与业务相关性的函数
                 next()
               }
             },
-            express.static(item.fileDir),
+            express.static(item.fileDir, item.option),
           ],
           occupied: {},
         })
@@ -1223,7 +1226,10 @@ function business() { // 与业务相关性的函数
     function configFileFn({cliArg}) {
       const path = require(`path`)
       const fs = require(`fs`)
-      const cwdConfigPath = `${process.cwd()}/mm.config.js`
+      const packagePath = `${process.cwd()}/package.json`
+      const packageType = fs.existsSync(packagePath) && require(packagePath).type || `commonjs`
+      // 要在当前位置创建什么配置文件
+      const cwdConfigPath = packageType === `commonjs` ? `${process.cwd()}/mm.config.js` : `${process.cwd()}/mm.config.cjs`
       const hasCwdConfig = tool.file.hasFile(cwdConfigPath)
       let res = `${__dirname}/../config.js` // 默认配置文件
 
@@ -1283,26 +1289,18 @@ function business() { // 与业务相关性的函数
       { // 初始化 config.db, 或者更新它
         const fs = require(`fs`)
         const newDb = global.config.db()
-        const o2s = tool.obj.o2s
-        if(tool.file.isFileEmpty(global.config.dbJsonPath) || global.config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
-          fs.writeFileSync(global.config.dbJsonPath, o2s(newDb))
-        } else { // 否则只进行浅覆盖
-          const oldDb = JSON.parse(fs.readFileSync(global.config.dbJsonPath))
-          const resDb = {...newDb, ...oldDb}
-          fs.writeFileSync(global.config.dbJsonPath, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+        if(Object.keys(newDb).length){
+          const o2s = tool.obj.o2s
+          if(tool.file.isFileEmpty(global.config.dbJsonPath) || global.config.dbCover) { // 如果 db 文件为空或声明总是覆盖, 都重写整个文件
+            fs.writeFileSync(global.config.dbJsonPath, o2s(newDb))
+          } else { // 否则只进行浅覆盖
+            const oldDb = JSON.parse(fs.readFileSync(global.config.dbJsonPath))
+            const resDb = {...newDb, ...oldDb}
+            fs.writeFileSync(global.config.dbJsonPath, o2s(resDb)) // 更新 db 文件, 因为 jsonServer.router 需要用它来生成路由
+          }
         }
       }
       
-      { // 监听自定义目录更改后重启服务
-        const nodemon = require(`nodemon`)
-        tool.type.isEmpty(global.config.watch) === false && nodemon({
-          exec: `node -e 0`, // 由于必须存在 exec 参数, 所以放置一条啥也不干的命令
-          watch: global.config.watch,
-        }).on(`restart`, () => {
-          reStartServer(global.config.config)
-        })
-      }
-
       { // 配置 httpData 目录中的 gitignore
         tool.file.isFileEmpty(global.config._gitIgnore.file)
         && fs.writeFile(
@@ -1533,10 +1531,8 @@ function business() { // 与业务相关性的函数
 
       // 保存 body 数据文件, 由于操作系统对文件名长度有限制, 下面仅取 url 的前 100 个字符, 后面自增
 
-      const apiCount = tool.file.fileStore(global.config._store).updateApiCount()
-      const apiId = tool.hex.string10to62(apiCount)
       function getBodyPath() {
-        const arg = {req, headersObj, dataDir, apiId}
+        const arg = {req, headersObj, dataDir, apiId: req.apiId}
         return {
           headersPathReq: createBodyPath({...arg ,reqOrRes: `req`, isHeader: true}),
           headersPathRes: createBodyPath({...arg ,reqOrRes: `res`, isHeader: true}),
@@ -1583,7 +1579,7 @@ function business() { // 与业务相关性的函数
         },
       }
       setHttpHistory({
-        data: {path, fullApi, id: apiId, data: resDataObj},
+        data: {path, fullApi, id: req.apiId, data: resDataObj},
       })
     }
 
@@ -1654,7 +1650,7 @@ function business() { // 与业务相关性的函数
         return delIdList
       }
 
-      global.HTTPHISTORY = require(global.config._httpHistory) // 请求历史
+      global.HTTPHISTORY = tool.file.fileStore(global.config._httpHistory).get() // 请求历史
       const HTTPHISTORY = global.HTTPHISTORY
       let list = business().historyHandle().getHistoryList({md5: true})
       const delIdList = {
@@ -1722,7 +1718,7 @@ function business() { // 与业务相关性的函数
       /**
        * 这是浏览器需要的跨域信息
        */
-      if(res && (res.headersSent === false)) {
+      if(res && (res.headersSent !== true)) {
         const rawHeadersObj = req.rawHeaders.reduce((acc, cur, index) => {
          /**
           * req.rawHeaders: [key, val, key, val, ...]
@@ -1771,9 +1767,7 @@ function business() { // 与业务相关性的函数
     function setApiInHeader({req, res}) { // 设置 testApi 页面到 headers 中
       const store = tool.file.fileStore(global.config._store)
       const note = store.get(`note`)
-      const apiCount = store.get(`apiCount`) + 1
-      const apiId = tool.hex.string10to62(apiCount)
-      const testPath = `/#/history,${apiId}/${req.method.toLowerCase()}${req.originalUrl}`
+      const testPath = `/#/history,${req.apiId}/${req.method.toLowerCase()}${req.originalUrl}`
       const testApi = `${note.local.testPort}${testPath}`
       const testApiRemote = (global.config.remote && note.remote) ? `${note.remote.testPort}${testPath}` : undefined
       setHeader(res, {
@@ -1811,7 +1805,7 @@ function business() { // 与业务相关性的函数
       reqHandle().injectionReq({req: { headers }, res, type: `set`})
       const pathOrUrl = path || url
       http({
-        baseURL: `http://localhost:${global.config.port}`,
+        baseURL: `http://127.0.0.1:${global.config.port}`,
         method,
         url: pathOrUrl, // 注意不要 url 和 params 上都同时存在 query
         params: query,
@@ -1983,7 +1977,10 @@ function business() { // 与业务相关性的函数
       const msg = tool.string.removeLeft(`
         Current configuration file:
         ${shareConfig.config}
-      
+        
+        Current dataDir:
+        ${shareConfig.dataDir}
+        
         Local service information:
         Interface forwarding: ${`http://${shareConfig.osIp}:${shareConfig.port}/ => ${shareConfig._proxyTargetInfo.origin}`}
         Interface list:       ${`http://${shareConfig.osIp}:${shareConfig.testPort}/#/apiStudio/`}
@@ -2064,6 +2061,9 @@ function business() { // 与业务相关性的函数
           req,
           res: proxyRes,
         })
+      },
+      onError: (err, req, res) => {
+        err && console.log(`proxy onError`, String(err))
       },
       logLevel: `silent`,
       // proxyTimeout: 60 * 1000,

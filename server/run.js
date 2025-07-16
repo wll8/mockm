@@ -19,7 +19,7 @@ const packageJson = require(`${__dirname}/package.json`)
 const cli = tool.cli
 const cliArg = cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
-const nodemon = require(`nodemon`)
+const { ProcessManager } = require(`@wll8/process-manager`)
 
 { // 尽早的, 无依赖的修改 cwd, 避免其他读取到旧值
   const cwd = tool.cli.handlePathArg(
@@ -90,63 +90,42 @@ new Promise( async () => { // 检查更新
 
 new Promise(async () => { // 启动 server.js
   let log = ``
-  function restart() {
-    shareConfig.guard ? setTimeout(() => {
-      nodemon.emit(`restart`)
-      print(`Abnormal exit, service has been restarted!`)
-      log = ``
-    }, 1000) : process.exit()
-  }
   const nodeArg = typeof(cliArg[`--node-options`]) === `string` ? cliArg[`--node-options`] : ``
-  nodemon({
-    ignoreRoot: [], // 覆盖 ignore, 避免 .git node_modules 中的内容不能被监听, 例如未指定配置文件时是使用 node_modules 中的配置
-    exec: `node ${nodeArg} "${serverPath}" ${process.argv.slice(2).join(` `)} _base64=${base64config} _share=${sharePath}`,
-    watch: [configFile],
-    stdout: false,
-    cwd: process.cwd(),
+  const arr = [nodeArg, serverPath, ...process.argv.slice(2), `_base64=${base64config}`, `_share=${sharePath}`].filter(item => item.trim() !== ``)
+  const cp = new ProcessManager(arr)
+  cp.on(`stdout`, (data) => {
+    log = String(data)
   })
-  .on(`readable`, function(arg) { // the `readable` event indicates that data is ready to pick up
-    // console.log(`readable`, arg)
-    this.stdout.pipe(process.stdout) // 把子进程的输出定向到本进程输出
-    this.stderr.pipe(process.stderr) // 错误输出, 例如按需安装依赖时无权限
-    this.stdout.on(`data`, data => {
-      log = String(data)
-    })
+  cp.on(`stderr`, (data) => {
+    log = String(data)
   })
-  .on(`start`, (arg) => {
-    // console.log(`start`, arg)
+  cp.on(`message`, ({action, data} = {}) => {
+    if(action === `reboot`) {
+      cp.reboot(0)
+    }
+    if(action === `config`) {
+      cp.autoReStart = data.guard
+    }
   })
-  .on(`crash`, (arg) => { // 子进程被退出时重启, 例如 kill
-    // console.log(`crash`, arg)
-    restart()
-  })
-  // https://github.com/remy/nodemon/blob/master/doc/events.md
-  .on(`exit`, (arg) => { 
-    console.log(`exit`, arg)
-    // 子程序 process.exit() 时可触发, arg 为 null
-    // 子程序 process.exit(0) 时可触发, arg 为 null
-    // 子程序 process.exit(大于0) 时没有触发
-    // arg null 异常退出, 例如语法错误, 端口占用, 运行错误
-    // arg SIGUSR2 正常退出, 例如修改文件
-    // arg undefined 用户退出, 例如 ctrl+c, ctrl+c 不一定触发此回调
-    if(log.match(/killProcess:/)) { // 检测到错误日志时重启
-      console.log(`exit: ${arg}`)
+  cp.on(`close`, () => {
+    if(log.match(/killProcess:/)) { // 保存错误日志
       saveLog({
-        code: arg,
+        code: ``,
         logStr: log,
         logPath: shareConfig._errLog,
       })
-      restart()
     }
   })
-  .on(`restart`, (arg) => {
-    if(Boolean(shareConfig._store) === false) { // fix: 有时候重载后的 config 值为空 {}
-      return false
-    }
-    const store = tool.file.fileStore(shareConfig._store)
-    store.set(`restartId`, String(Date.now()))
-    // console.log(`restart`, arg)
-  })
+
+  function killProcess() {
+    cp.kill()
+    process.exit()
+  }
+  process.on(`SIGTERM`, killProcess)
+  process.on(`SIGINT`, killProcess)
+  process.on(`uncaughtException`, killProcess)
+  process.on(`unhandledRejection`, killProcess)
+
   const {
     showLocalInfo,
     remoteServer,

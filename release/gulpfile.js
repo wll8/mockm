@@ -23,7 +23,10 @@ gulp.task(`copyServer`, (cb) => { // 复制 server 中的文件, 例如 package.
     npx shx cp -r ../server/page ../server/util ../dist/package/
     npx shx cp -r ../server/example ../dist/package/
     npx shx cp -r ../server/@types ../dist/package/
+    npx shx cp -r ../server/patches ../dist/package/
     npx shx cp ../README.md ../dist/package/
+    npx shx rm -f ../dist/package/*-lock.*
+    npx shx rm -f ../dist/package/yarn.lock
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
     console.log(`run: ${cmd}`)
@@ -38,6 +41,7 @@ gulp.task(`pushDoc`, (cb) => { // 发布文档
   const shell = require(`shelljs`)
   const cmdList = `
     cd ../ && npm run doc:build
+    cd ../ && npx shx cp -r test/res/ ./doc/.vuepress/dist/case
     cd ../doc/.vuepress/ && scp -r dist/** root@hongqiye.com:/app/mockm/mm/www/doc/mockm/
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
@@ -95,6 +99,7 @@ gulp.task(`uglify`, () => { // 代码压缩, 处理兼容性
 gulp.task(`setBuildInfo`, (cb) => { // 代码压缩, 处理兼容性
   const packagePath = `../dist/package/package.json`
   const package = require(packagePath)
+  package.version = require(`../package.json`).version
   package.buildInfo = package.buildInfo || {}
   package.buildInfo.branch = String(cp.execSync(`git branch --show-current`)).trim()
   package.buildInfo.date = require(`../server/util/tool.js`).time.dateFormat(`YYYY-MM-DD hh:mm:ss`, new Date())

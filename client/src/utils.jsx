@@ -69,7 +69,7 @@ function getRestcLink({method, url, uri, path = {}, query = {}, header = {}, bod
     headers: JSON.stringify(headerArr),
     url: setPathVal(url || uri, path),
   }
-  const restcLink = `${window.location.origin}/restc/index.html#!${(queryParams(data, false))}`
+  const restcLink = `${cfg.baseURL}/restc/index.html#!${(queryParams(data, false))}`
   return restcLink
 }
 

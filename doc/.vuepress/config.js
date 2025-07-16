@@ -66,8 +66,9 @@ module.exports = {
     nav: [
       { text: '版本 v1.1.26', link: '/' },
       { text: '配置项', link: '/config/option.md' },
-      { text: 'mockjs', link: 'http://wll8.gitee.io/mockjs-examples/' },
-      { text: 'QQ答疑群', link: 'https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi' },
+      { text: '更多示例', link: 'https://www.hongqiye.com/doc/mockm/case/' },
+      { text: 'mockjs', link: 'https://wll8.github.io/mockjs-examples/' },
+      // { text: 'QQ答疑群', link: 'https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi' },
       { text: 'github', link: 'https://github.com/wll8/mockm' },
     ],
     sidebar: [

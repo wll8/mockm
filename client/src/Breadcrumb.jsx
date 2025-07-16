@@ -98,8 +98,8 @@ function BreadcrumbCom() {
                   key={index}
                   overlay={
                     <Menu>
-                      <Menu.Item key="记录"><a href="/#/">记录</a></Menu.Item>
-                      <Menu.Item key="接口"><a href="/#/apiStudio">接口</a></Menu.Item>
+                      <Menu.Item key="记录"><a href="./#/">记录</a></Menu.Item>
+                      <Menu.Item key="接口"><a href="./#/apiStudio">接口</a></Menu.Item>
                       <Menu.SubMenu key="工具" title="工具">
                         <Menu.Item key="请求" onClick={() => {
                           window.open(getRestcLink({
@@ -126,7 +126,7 @@ function BreadcrumbCom() {
                           }))
                         }}>请求</Menu.Item>
                         <Menu.Item key="文档"><a target="_blank" rel="noreferrer" href="https://hongqiye.com/doc/mockm/?from=mockm">文档</a></Menu.Item>
-                        <Menu.Item key="mockjs"><a target="_blank" rel="noreferrer" href="http://wll8.gitee.io/mockjs-examples/?from=mockm">mockjs</a></Menu.Item>
+                        <Menu.Item key="mockjs"><a target="_blank" rel="noreferrer" href="https://wll8.github.io/mockjs-examples/?from=mockm">mockjs</a></Menu.Item>
                       </Menu.SubMenu>
                       <Menu.Item key="github"><a target="_blank" rel="noreferrer" href="https://github.com/wll8/mockm?from=mockm">github</a></Menu.Item>
                     </Menu>
@@ -135,7 +135,7 @@ function BreadcrumbCom() {
                   mockm
                 </Breadcrumb.Item>
               : <Breadcrumb.Item key={index}>
-                  {index < arr.length - 1 ? <a href={`/#${item.path}`}>{item.name}</a> : item.name}
+                  {index < arr.length - 1 ? <a href={`./#${item.path}`}>{item.name}</a> : item.name}
                 </Breadcrumb.Item>
 
           ))

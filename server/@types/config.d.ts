@@ -251,7 +251,7 @@ interface ConfigObj {
   /**
    * http 请求数据保存目录.
    * @default
-   * `./httpData/`
+   * `${os.homedir()}/.mockm/${configPathByName}/httpData/`
    */
   dataDir: string,
 
@@ -289,7 +289,7 @@ interface ConfigObj {
   /**
    * 从 web 页面创建的接口数据, 会与 config.api 合并, config.api 具有优先权
    * @default
-   * ${config.dataDir}/webApi.json
+   * ./webApi.json
    */
   apiWeb: string,
 

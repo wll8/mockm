@@ -2,9 +2,9 @@
 本节讲解默认配置下生成的目录或文件, 以及 web 界面的用处.
 
 ## 文件结构
-当运行 mm 的时候, 默认会在当前目录生成以下内容:
+当运行 mm 的时候, 默认会 [config.dataDir](../config/option.md#config-datadir) 目录生成以下内容:
 
-``` sh {6-8}
+``` sh
 ./httpData # 这个目录用来放置所有 mm 产生的文件, 一般不需要理睬他们
 │  db.json # 用来存储用户声明的数据
 │  httpHistory.json # 用来记录请求的关联信息

@@ -1,5 +1,7 @@
 const fn = async () => {
   const path = require(`path`)
+  const os = require(`os`)
+  const filenamify = require(`filenamify`)
   const exportsUtil = require(`./util/index.js`)
   const {
     print,
@@ -91,7 +93,13 @@ const fn = async () => {
       remoteToken: [],
       openApi: `http://httpbin.org/spec.json`,
       cors: true,
-      dataDir: `./httpData/`,
+      dataDir: (() => {
+        const configPathByName = filenamify(
+          handlePathArg(business.initHandle().configFileFn({ cliArg: parseArgv() })),
+          {maxLength: 255, replacement: `_`},
+        )
+        return `${os.homedir()}/.mockm/${configPathByName}/httpData/`
+      })(),
       dbJsonPath: undefined,
       apiWeb: undefined,
       apiWebWrap: wrapApiData,
@@ -111,6 +119,7 @@ const fn = async () => {
         json: {
           limit: `100mb`,
           extended: false,
+          strict: false,
         },
         urlencoded: {
           extended: false,
@@ -158,7 +167,9 @@ const fn = async () => {
       const baseObj = {
         path: `/`,
         mode: `hash`,
-        option: {},
+        option: {
+          dotfiles: `allow`,
+        },
       }
       return config.static
         ? (
@@ -211,7 +222,7 @@ const fn = async () => {
     dataDir: handlePathArg(config.dataDir),
     proxy: config.proxy,
     api: isType(config.api, `object`) ? () => config.api : config.api,
-    apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`${config.dataDir}/apiWeb.json`),
+    apiWeb: config.apiWeb ? handlePathArg(config.apiWeb) : handlePathArg(`./apiWeb.json`),
     db: isType(config.db, `object`) ? () => config.db : config.db,
     remote: config.remote === false // 每个服务的 remote 配置
       ? false
@@ -284,6 +295,7 @@ const fn = async () => {
     _requestDir: handlePathArg(`${config.dataDir}/request`), // 请求记录表保存位置
     _errLog: handlePathArg(`${config.dataDir}/log.err.txt`), // 错误日志保存位置
     _db: {}, // jsonServer 生成 lowdb 实例后, 会将其挂载于此
+    _configFile: business.initHandle().configFileFn({ cliArg: parseArgv() }), // 注: 这里需要重新计算 cliArg, 而不是被修改后的 cliArg
     _set(prop, val) { // 暴露一个变更 config 的方法
       if([
         `_db`,

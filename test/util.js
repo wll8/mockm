@@ -5,7 +5,7 @@ function killProcess(...arg) {
     console.log('中途退出测试')
     allTestAfter()
   }
-  // process.exit()
+  process.exit()
 }
 process.on(`SIGTERM`, killProcess)
 process.on(`SIGINT`, killProcess)
@@ -17,7 +17,6 @@ const os = require('os')
 const shelljs = require('shelljs')
 const isWin = os.type() === 'Windows_NT'
 const child_process = require('child_process')
-const packgeAdmin = shelljs.which('cnpm') ? 'cnpm' : 'npm'
 
 /**
  * 获取一个 https 配置, 例如颁发机构, 证书, 以及他们的文件地址
@@ -169,6 +168,8 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     build: {
       runPath: pkgPath(runPath || `./run.js`),
       arg: {
+        dataDir: `./httpData/`,
+        proxy: `https://httpbin.org/`,
         '--config': true,
         '--cwd': getTempDir(),
         port: port.port,
@@ -180,6 +181,8 @@ async function craeteMockmCmdInfo(arg = {}, runPath) {
     dev: {
       runPath: pkgPath(runPath || `./run.js`),
       arg: {
+        dataDir: `./httpData/`,
+        proxy: `https://httpbin.org/`,
         '--config': true,
         '--cwd': getTempDir(),
         port: port.port,
@@ -529,7 +532,6 @@ module.exports = {
   http: http(),
   asyncTosync,
   os,
-  packgeAdmin,
   allTestAfter,
   allTestBefore,
   fs,

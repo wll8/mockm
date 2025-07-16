@@ -19,7 +19,7 @@
 - 使用 cnpm
   
 ``` sh
-npm i -g mockm --registry=https://registry.npm.taobao.org
+npm i -g mockm --registry=https://registry.npmmirror.com
 ```
 
 **如何自动安装**

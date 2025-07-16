@@ -9,8 +9,6 @@
 ```
 mm/
   - api/ -- 手动创建的 api
-  - httpData/ -- 请求记录, 一般不提交到版本库
-  - apiWeb.json -- 从 UI 界面上创建的接口信息
   - util.js -- 一些公用方法
   - mm.config.js -- mockm 的配置文件
 ```
@@ -18,4 +16,4 @@ mm/
 ## 参考
 - [mm 代码仓库](https://github.com/wll8/mockm/)
 - [mm 文档](https://hongqiye.com/doc/mockm/)
-- [mockjs 文档](http://wll8.gitee.io/mockjs-examples/)
+- [mockjs 文档](https://wll8.github.io/mockjs-examples/)

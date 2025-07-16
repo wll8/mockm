@@ -90,7 +90,12 @@ const ReqRes = (() => {
             bodyObjectURL,
           ] = res
           if(blob.type === `application/json`) {
-            bodyText = JSON.stringify(JSON.parse(bodyText), null, 2)
+            try {
+              bodyText = JSON.stringify(JSON.parse(bodyText), null, 2)
+            } catch (error) {
+              console.log(error)
+              bodyText = error
+            }
           }
           const newRes = {
             ...deepGet(state, `newHttpData.data.${reqOrRes}`, {}),

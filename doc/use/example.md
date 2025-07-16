@@ -3,6 +3,8 @@
 这里列出一些常用的业务场景, 方便快速查找.
 如果有需要后台接口的地方, 统一假设为 http://192.168.1.18:8080.
 
+也可以通过[测试用例](https://www.hongqiye.com/doc/mockm/case/)查看更多的功能演示.
+
 ## 如何使后端的接口允许跨域
 > 不需要配置 webpack, 不需要后端人员更改, 不需要浏览器插件
 
@@ -170,7 +172,7 @@ http post :9000/blogs?q=苦涩
 
 
 ## 如何生成逼真的数据
-[mockjs](http://mockjs.com/examples.html) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
+[mockjs](https://wll8.github.io/mockjs-examples/) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
 
 ::: warning 注意
 `module.exports` 的值已经变成函数, 这样你可以从函数的参数中收到 [util 中提供的一系列的工具](../config/config_fn.md).
@@ -202,21 +204,21 @@ module.exports = util => {
 假设后台接口 `http://192.168.1.18:8080/api/user` get 请求返回的数据是这样的:
 ``` js
 {
-    "code": 200,
-    "data": {
-        "books": [
-            {
-                "page": 52,
-                "type": "css"
-            },
-            {
-                "page": 26,
-                "type": "js"
-            }
-        ],
-        "name": "张三"
-    },
-    "success": true
+  "code": 200,
+  "data": {
+    "books": [
+      {
+        "page": 52,
+        "type": "css"
+      },
+      {
+        "page": 26,
+        "type": "js"
+      }
+    ],
+    "name": "张三"
+  },
+  "success": true
 }
 
 ```
@@ -315,6 +317,7 @@ module.exports = util => {
   return {
     api: {
       async 'post /file/upload' (req, res, next) {
+        // 注意，这里和你自己安装 multiparty 这个依赖再 require 进来是一样的
         const multiparty = await toolObj.generate.initPackge(`multiparty`)
         const form = new multiparty.Form()
         form.parse(req, (err, fields = [], files) => {
@@ -379,10 +382,10 @@ module.exports = {
 }
 ```
 
-## 如何恢复出错的接口
+## 如何恢复后端好了又坏的接口
 如果某个接口之前是好的, 但是由于某些问题现在坏了, 后端又没来得及修复, 可是前端现在有页面依赖这个接口, 怎么办?
 
-在 http://127.0.0.1:9005 页面选择对应接口的请求历史, 点击 `webApi => 使用此记录` 即可.
+在 http://127.0.0.1:9005 页面选择对应接口的好的那条请求历史, 点击 `webApi => 使用此记录` 即可.
 
 ## 如何在后端关闭时不影响页面
 页面要展示的内容来源于数据, 如果后端服务器出现问题, 所有接口无法使用, 这时候修改请求地址为 http://127.0.0.1:9001 即可让页面使用之前服务器返回的数据.

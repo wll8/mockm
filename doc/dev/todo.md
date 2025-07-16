@@ -1,6 +1,17 @@
 # 待完成
 
 ## 文档
+- [ ] fix: 一段时间之后接口无响应
+  - node v14.21.3/win10/win11
+  - 请求无响应
+  - 第一个 app.use 没有进入
+  - mm.config.js 中修改并保存之后没有重载
+- [ ] fix: 在 win11 中退出 mm 后端口还占用
+  - https://github.com/remy/nodemon/issues/1928
+  - https://github.com/remy/nodemon/issues/2095
+  - https://github.com/remy/nodemon/issues/1895
+  - https://github.com/remy/nodemon/issues/1705
+  - 经测, 在开发模式开不会出现, 但发布后会出现. 并且修改 run.js 中的 nodemon stdout 参数为 true 即可正常关闭, 但在 run.js 里获取不了 server.js 的输出.
 - [ ] feat: 从 config.api 中生成文档
   - [ ] ? 使用 joi, 参数为文件时, 如何生成文档
     - 3.0.0.md#considerations-for-file-uploads

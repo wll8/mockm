@@ -21,7 +21,7 @@ module.exports = util => {
 
 ## util.libObj 第三方库
 ### util.libObj.mockjs 数据生成库
-- 参考: http://wll8.gitee.io/mockjs-examples/
+- 参考: https://wll8.github.io/mockjs-examples/
 
 ``` js
 const mockjs = util.libObj.mockjs
