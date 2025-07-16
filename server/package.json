@@ -94,5 +94,9 @@
     "sandbox"
   ],
   "author": "xw",
-  "license": "MIT"
+  "license": "MIT",
+  "env": {
+    "node": "20.19.4",
+    "pnpm": "10.13.1"
+  }
 }

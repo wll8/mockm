@@ -10,6 +10,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "env": {
+    "node": "20.19.4",
+    "pnpm": "10.13.1"
+  },
   "devDependencies": {
     "axios": "^0.21.1",
     "cross-env": "^7.0.3",

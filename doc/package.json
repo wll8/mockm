@@ -1,18 +1,25 @@
 {
   "scripts": {
     "// prestart": "npx shx cp ../README.md ./",
-    "start": "vuepress dev .",
-    "build": "vuepress build ."
+    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress dev .",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build ."
+  },
+  "env": {
+    "node": "20.19.4",
+    "pnpm": "10.13.1"
   },
   "dependencies": {
     "@vuepress/plugin-back-to-top": "^1.5.4",
     "@vuepress/plugin-google-analytics": "^1.5.4",
     "@vuepress/plugin-medium-zoom": "^1.5.4",
     "@vuepress/plugin-nprogress": "^1.5.4",
-    "vuepress-plugin-code-copy": "^1.0.6",
-    "vuepress-plugin-fulltext-search": "^2.0.6",
     "markdown-it-task-lists": "^2.1.1",
     "markdown-it-vuepress-code-snippet-enhanced": "^1.0.1",
-    "vuepress": "^1.7.1"
+    "vuepress": "^1.7.1",
+    "vuepress-plugin-code-copy": "^1.0.6",
+    "vuepress-plugin-fulltext-search": "^2.0.6"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

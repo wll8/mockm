@@ -15,6 +15,10 @@
     "test:dev": "cd test && npm run test:dev",
     "test:build": "cd test && npm run test:build"
   },
+  "env": {
+    "node": "20.19.4",
+    "pnpm": "10.13.1"
+  },
   "release-it": {
     "git": {
       "commitMessage": "chore(release): v${version}",
