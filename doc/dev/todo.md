@@ -507,6 +507,12 @@
     - array[object] - 参考 object
 
 - 2.x - 非破坏性
+  - [ ] feat: 支持 --autoUpdate 参数，用于在端口占用时自动使用新端口
+    - 例如: mm --autoUpdate=port,testPort
+    - 表示: 当 port 或 testPort 被占用时, 自动使用新端口
+  - [ ] feat: 支持赋值选项值到环境变量并运行命令
+    - 例如: mm --env.VITE_BASE_URL=port --run="npm run dev"
+    - 表示: 把 port 的值赋值给 VITE_BASE_URL 环境变量, 然后运行 `npm run dev` 命令
   - [ ] refactor: 替换 react 为 vue 
   - [ ] refactor: 客户端支持从本地引用静态资源, 避免在不能访问外网时无法连接 cdn
   - [ ] feat: 支持插件机制
