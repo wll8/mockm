@@ -1,0 +1,30 @@
+# mockm-client Dockerfile
+# 使用 Node.js 14.15.5 和 Yarn 1.22.18
+# 预先安装 client 依赖
+
+FROM node:14.15.5-alpine
+
+# 设置工作目录为项目根目录
+WORKDIR /workspace
+
+# 检查并安装指定版本的 yarn
+RUN yarn --version && \
+    if [ "$(yarn --version)" != "1.22.18" ]; then \
+        npm install -g yarn@1.22.18 --force; \
+    fi
+
+# 复制 client 的 package.json 和 yarn.lock
+COPY client/package.json client/yarn.lock ./client/
+
+# 安装 client 依赖
+WORKDIR /workspace/client
+RUN yarn install --frozen-lockfile
+
+# 回到根目录
+WORKDIR /workspace
+
+# 暴露端口
+EXPOSE 3000
+
+# 默认命令：进入 client 目录并启动开发服务器
+CMD ["sh", "-c", "cd client && yarn start"]

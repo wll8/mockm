@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Node modules
+node_modules
+*/node_modules
+**/node_modules
+
+# pnpm
+.pnpm-store
+.pnpm-debug.log
+
+# Build outputs
+build
+dist
+*.log
+*.logs
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Coverage
+coverage
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Documentation build
+doc/.vuepress/dist
+
+# Test artifacts
+test/coverage
+
+# Release artifacts
+release/dist

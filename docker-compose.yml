@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mockm-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: mockm-client
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace:delegated
+      - /workspace/client/node_modules
+    environment:
+      - NODE_ENV=development
+
+  mockm-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mockm-dev
+    ports:
+      - "9000:9000"
+      - "9005:9005"
+    volumes:
+      - .:/workspace:delegated
+      - /workspace/node_modules
+      - /workspace/server/node_modules
+      - /workspace/doc/node_modules
+      - /workspace/test/node_modules
+      - /workspace/release/node_modules
+    environment:
+      - NODE_ENV=development
+
+  mockm-doc:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mockm-doc
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/workspace:delegated
+      - /workspace/doc/node_modules
+    environment:
+      - NODE_ENV=development
+    command: ["sh", "-c", "cd doc && pnpm run start -- --host 0.0.0.0 --port 8080"]
+
+volumes:
+  pnpm-store:
+
+

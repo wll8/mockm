@@ -1,3 +1,4 @@
+.pnpm-store
 dist/
 pre.md
 ms.config.js

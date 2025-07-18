@@ -563,12 +563,112 @@ mockm --config
 
 ### 2. Docker 部署
 
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 9005
-CMD ["npm", "start"]
+mockm 提供了完整的 Docker 化解决方案，支持开发和生产环境的容器化部署。
+
+#### 2.1 Docker 镜像
+
+项目提供了两个 Docker 镜像：
+
+- **mockm-client**: 前端 React 应用 (Node.js 14.15.5 + Yarn 1.22.18)
+- **mockm-dev**: 后端服务和工具 (Node.js 20.19.4 + pnpm 10.13.1)
+
+**设计理念**: 所有镜像都挂载项目根目录到 `/workspace`，遵循源码的原生设计，减少理解成本。
+
+#### 2.2 快速开始
+
+```bash
+# 构建镜像
+docker build -f Dockerfile.client -t mockm-client .
+docker build -f Dockerfile.dev -t mockm-dev .
+
+# 使用 Docker Compose 启动服务
+docker-compose up -d
 ```
+
+#### 2.3 构建内容
+
+**构建前端 dist 内容**:
+```bash
+# 使用 client 镜像构建前端（依赖已预装）
+docker run --rm \
+  -v $(pwd):/workspace:delegated \
+  -v /workspace/client/node_modules \
+  mockm-client sh -c "cd client && npm run build"
+
+# 构建产物将在 client/build 和 server/page 目录中
+```
+
+**构建 mockm tgz 内容**:
+```bash
+# 使用 dev 镜像构建发布包（依赖已预装）
+docker run --rm \
+  -v $(pwd):/workspace:delegated \
+  -v /workspace/node_modules \
+  -v /workspace/release/node_modules \
+  mockm-dev sh -c "
+    git config --global --add safe.directory /workspace
+    cd release && pnpm run build
+  "
+
+# 构建产物将在 dist 目录中，包含 mockm-{version}.tgz 文件
+```
+
+**构建文档内容**:
+```bash
+# 使用 dev 镜像构建 VuePress 文档（依赖已预装）
+docker run --rm \
+  -v $(pwd):/workspace:delegated \
+  -v /workspace/doc/node_modules \
+  mockm-dev sh -c "cd doc && pnpm run build"
+
+# 构建产物将在 doc/.vuepress/dist 目录中
+
+# 启动文档开发服务器（依赖已预装）
+docker run --rm -p 8080:8080 \
+  -v $(pwd):/workspace:delegated \
+  -v /workspace/doc/node_modules \
+  mockm-dev sh -c "cd doc && pnpm run start -- --host 0.0.0.0 --port 8080"
+
+# 文档开发服务器: http://localhost:8080/doc/mockm/
+```
+
+#### 2.4 开发模式
+
+在开发模式下，项目根目录被映射到容器的 `/workspace`，支持热重载。
+
+**设计说明**:
+- 所有镜像都挂载项目根目录到 `/workspace`
+- client 镜像在 `/workspace/client` 中工作
+- dev 镜像在 `/workspace/server` 中工作
+- 遵循源码的原生设计，client 构建时会自动将产物复制到 `../server/page`
+
+```bash
+# 启动开发环境
+docker-compose up -d
+
+# 启动文档服务
+docker-compose up -d mockm-doc
+
+# 启动所有服务（包括文档）
+docker-compose up -d mockm-client mockm-dev mockm-doc
+
+# 进入容器调试
+docker exec -it mockm-dev sh
+docker exec -it mockm-client sh
+docker exec -it mockm-doc sh
+```
+
+#### 2.5 端口映射
+
+- **3000**: mockm-client 开发服务器
+- **8080**: 文档开发服务器
+- **9000**: mockm 主服务端口
+- **9005**: mockm 管理界面端口
+
+#### 2.6 访问地址
+
+- 前端开发服务器: http://localhost:3000
+- 文档开发服务器: http://localhost:8080/doc/mockm/
+- mockm 服务: http://localhost:9000
+- mockm 管理界面: http://localhost:9005
+

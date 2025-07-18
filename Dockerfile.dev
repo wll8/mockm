@@ -1,0 +1,56 @@
+# mockm-dev Dockerfile
+# 使用 Node.js 20.19.4 和 pnpm 10.13.1
+# 预先安装除 client 外的所有依赖
+
+FROM node:20.19.4-alpine
+
+# 设置工作目录为项目根目录
+WORKDIR /workspace
+
+# 安装系统依赖（包括 git）
+RUN apk add --no-cache git
+
+# 安装指定版本的 pnpm
+RUN npm install -g pnpm@10.13.1
+
+# 设置 pnpm 存储目录到容器内部，避免污染主机目录
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV PNPM_STORE_DIR="/tmp/pnpm-store"
+
+# 复制根目录的 package.json 和 pnpm-lock.yaml
+COPY package.json pnpm-lock.yaml ./
+
+# 复制各个子项目的 package.json 和 lock 文件（除了 client）
+COPY server/package.json server/pnpm-lock.yaml ./server/
+COPY doc/package.json doc/pnpm-lock.yaml ./doc/
+COPY test/package.json test/pnpm-lock.yaml ./test/
+COPY release/package.json release/pnpm-lock.yaml ./release/
+
+# 配置 pnpm 存储目录
+RUN pnpm config set store-dir /tmp/pnpm-store
+
+# 安装根目录依赖
+RUN pnpm install --frozen-lockfile
+
+# 安装各个子项目的依赖
+WORKDIR /workspace/server
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /workspace/doc
+RUN pnpm install --frozen-lockfile --prod=false
+
+WORKDIR /workspace/test
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /workspace/release
+RUN pnpm install --frozen-lockfile
+
+# 回到根目录
+WORKDIR /workspace
+
+# 暴露端口
+EXPOSE 9000 9005 8080
+
+# 默认启动 server
+CMD ["sh", "-c", "cd server && node run.js"]
