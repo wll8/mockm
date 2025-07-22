@@ -26,11 +26,18 @@ jobs:
 
       - name: Build documentation using docker-compose
         run: |
+          # 检查并使用合适的 docker compose 命令
+          if command -v docker-compose &> /dev/null; then
+            DOCKER_COMPOSE="docker-compose"
+          else
+            DOCKER_COMPOSE="docker compose"
+          fi
+          
           # 使用现有的 docker-compose.yml 构建 mockm-dev 服务
-          docker-compose build mockm-dev
+          $DOCKER_COMPOSE build mockm-dev
           
           # 运行文档构建命令
-          docker-compose run --rm mockm-dev \
+          $DOCKER_COMPOSE run --rm mockm-dev \
             sh -c "cd doc && cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build . --config .vuepress/config.github.js"
 
       - name: Copy test resources
@@ -66,15 +73,22 @@ jobs:
 
       - name: Build using docker-compose
         run: |
+          # 检查并使用合适的 docker compose 命令
+          if command -v docker-compose &> /dev/null; then
+            DOCKER_COMPOSE="docker-compose"
+          else
+            DOCKER_COMPOSE="docker compose"
+          fi
+          
           # 构建所需的服务
-          docker-compose build mockm-client mockm-dev
+          $DOCKER_COMPOSE build mockm-client mockm-dev
           
           # 构建客户端
-          docker-compose run --rm mockm-client \
+          $DOCKER_COMPOSE run --rm mockm-client \
             sh -c "cd client && yarn build"
           
           # 构建服务端包
-          docker-compose run --rm mockm-dev \
+          $DOCKER_COMPOSE run --rm mockm-dev \
             sh -c "cd release && pnpm run build"
 
       - name: Get package info
@@ -111,5 +125,12 @@ jobs:
       - name: Cleanup Docker resources
         if: always()
         run: |
-          docker-compose down --volumes --remove-orphans || true
+          # 检查并使用合适的 docker compose 命令
+          if command -v docker-compose &> /dev/null; then
+            DOCKER_COMPOSE="docker-compose"
+          else
+            DOCKER_COMPOSE="docker compose"
+          fi
+          
+          $DOCKER_COMPOSE down --volumes --remove-orphans || true
           docker system prune -f || true
