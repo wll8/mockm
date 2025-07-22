@@ -38,7 +38,7 @@ jobs:
           
           # 运行文档构建命令
           $DOCKER_COMPOSE run --rm mockm-dev \
-            sh -c "cd doc && cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build . --config .vuepress/config.github.js"
+            sh -c "git config --global --add safe.directory /workspace && cd doc && pnpm run build -- --config .vuepress/config.github.js"
 
       - name: Copy test resources
         run: |
@@ -89,7 +89,7 @@ jobs:
           
           # 构建服务端包
           $DOCKER_COMPOSE run --rm mockm-dev \
-            sh -c "cd release && pnpm run build"
+            sh -c "git config --global --add safe.directory /workspace && cd release && pnpm run build"
 
       - name: Get package info
         run: |
