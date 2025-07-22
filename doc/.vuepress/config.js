@@ -1,7 +1,17 @@
 const path = require('path')
 
-module.exports = {
-  base: `/doc/mockm/`, // 部署地址
+// 检测是否为GitHub Pages环境
+const isGitHubPages = process.env.GITHUB_ACTIONS === 'true' || process.env.NODE_ENV === 'github'
+
+// 统一的链接替换函数
+function replaceHongqiyeLinks(url) {
+  if (!url || typeof url !== 'string') return url
+  return url.replace(/https?:\/\/(www\.)?hongqiye\.com\/doc\/mockm/g, '/mockm')
+}
+
+// 基础配置
+const baseConfig = {
+  base: isGitHubPages ? '/mockm/' : `/doc/mockm/`, // 根据环境选择部署地址
   head: [
     ['link', { rel: 'shortcut icon', href: '/icon/favicon.ico' }],
     // 百度统计
@@ -20,8 +30,6 @@ module.exports = {
         display: none;
       }
     `],
-    // 添加友盟统计功能
-    ['script', {src: `https://v1.cnzz.com/z_stat.php?id=1279281360&web_id=1279281360`}],
   ],
   configureWebpack: {
     resolve: {
@@ -39,6 +47,29 @@ module.exports = {
         breaks: true, // 转换段落里的 '\n' 到 <br>
         linkify: true,
       })
+
+      // 如果是GitHub Pages环境，添加链接替换规则
+      if (isGitHubPages) {
+        try {
+          md.core.ruler.push('replace_hongqiye_links', state => {
+            state.tokens.forEach(token => {
+              if (token.type === 'inline' && token.children) {
+                token.children.forEach(child => {
+                  if (child.type === 'link_open') {
+                    const href = child.attrGet('href')
+                    const newHref = replaceHongqiyeLinks(href)
+                    if (newHref !== href) {
+                      child.attrSet('href', newHref)
+                    }
+                  }
+                })
+              }
+            })
+          })
+        } catch (e) {
+          console.warn('Link replacement rule failed:', e.message)
+        }
+      }
     },
   },
   plugins: [
@@ -66,7 +97,7 @@ module.exports = {
     nav: [
       { text: '版本 v1.1.26', link: '/' },
       { text: '配置项', link: '/config/option.md' },
-      { text: '更多示例', link: 'https://www.hongqiye.com/doc/mockm/case/' },
+      { text: '更多示例', link: isGitHubPages ? '/mockm/case/' : 'https://www.hongqiye.com/doc/mockm/case/' },
       { text: 'mockjs', link: 'https://wll8.github.io/mockjs-examples/' },
       // { text: 'QQ答疑群', link: 'https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi' },
       { text: 'github', link: 'https://github.com/wll8/mockm' },
@@ -204,3 +235,24 @@ module.exports = {
     ],
   }
 }
+
+// 如果是GitHub Pages环境，对友盟统计进行过滤
+if (isGitHubPages) {
+  baseConfig.head = baseConfig.head.filter(item => {
+    // 移除友盟统计脚本
+    if (Array.isArray(item) && item[0] === 'script' && item[1] && item[1].src) {
+      return !item[1].src.includes('cnzz.com')
+    }
+    return true
+  })
+
+  // 处理导航栏链接替换
+  baseConfig.themeConfig.nav = baseConfig.themeConfig.nav.map(item => {
+    if (item.link && typeof item.link === 'string') {
+      return { ...item, link: replaceHongqiyeLinks(item.link) }
+    }
+    return item
+  })
+}
+
+module.exports = baseConfig

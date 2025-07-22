@@ -38,7 +38,7 @@ jobs:
           
           # 运行文档构建命令
           $DOCKER_COMPOSE run --rm mockm-dev \
-            sh -c "git config --global --add safe.directory /workspace && cd doc && pnpm run build -- --config .vuepress/config.github.js"
+            sh -c "git config --global --add safe.directory /workspace && cd doc && rm -rf .vuepress/dist && GITHUB_ACTIONS=true pnpm run build"
 
       - name: Copy test resources
         run: |
@@ -116,9 +116,9 @@ jobs:
             ### Download
             - [mockm-${{ env.VERSION }}.tgz](https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/mockm-${{ env.VERSION }}.tgz)
           draft: false
-          prerelease: ${{ contains(env.VERSION, 'alpha') || contains(env.VERSION, 'beta') }}
+          prerelease: false
           files: |
-            ./dist/${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tgz
+            dist/*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
