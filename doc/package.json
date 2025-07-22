@@ -1,8 +1,8 @@
 {
   "scripts": {
     "// prestart": "npx shx cp ../README.md ./",
-    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress dev .",
-    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build ."
+    "start": "npx cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress dev .",
+    "build": "npx cross-env NODE_ENV=production NODE_OPTIONS=--openssl-legacy-provider vuepress build ."
   },
   "env": {
     "node": "20.19.4",

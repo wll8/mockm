@@ -15,53 +15,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # 构建文档 - 使用现有 docker-compose.yml
-  build-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Build documentation using docker-compose
-        run: |
-          # 检查并使用合适的 docker compose 命令
-          if command -v docker-compose &> /dev/null; then
-            DOCKER_COMPOSE="docker-compose"
-          else
-            DOCKER_COMPOSE="docker compose"
-          fi
-          
-          # 使用现有的 docker-compose.yml 构建 mockm-dev 服务
-          $DOCKER_COMPOSE build mockm-dev
-          
-          # 运行文档构建命令
-          $DOCKER_COMPOSE run --rm mockm-dev \
-            sh -c "cd doc && cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build . --config .vuepress/config.github.js"
-
-      - name: Copy test resources
-        run: |
-          mkdir -p doc/.vuepress/dist/case
-          cp -r test/res/* doc/.vuepress/dist/case/ || true
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: doc/.vuepress/dist
-
-  # 部署到 GitHub Pages
-  deploy-pages:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build-docs
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
   # 构建和发布包 - 使用现有 docker-compose.yml
   build-and-release:
     runs-on: ubuntu-latest
@@ -87,9 +40,15 @@ jobs:
           $DOCKER_COMPOSE run --rm mockm-client \
             sh -c "cd client && yarn build"
           
-          # 构建服务端包
+          # 运行测试
           $DOCKER_COMPOSE run --rm mockm-dev \
-            sh -c "cd release && pnpm run build"
+            sh -c "npm run test:dev"
+
+          # 构建服务端包
+          $DOCKER_COMPOSE run --rm \
+            -e GITHUB_ACTIONS=true \
+            mockm-dev \
+            sh -c "git config --global --add safe.directory /workspace && npm run build:serve"
 
       - name: Get package info
         run: |
@@ -116,9 +75,10 @@ jobs:
             ### Download
             - [mockm-${{ env.VERSION }}.tgz](https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/mockm-${{ env.VERSION }}.tgz)
           draft: false
-          prerelease: ${{ contains(env.VERSION, 'alpha') || contains(env.VERSION, 'beta') }}
+          prerelease: false
+          make_latest: "true"
           files: |
-            ./dist/${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tgz
+            dist/*.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -134,3 +94,20 @@ jobs:
           
           $DOCKER_COMPOSE down --volumes --remove-orphans || true
           docker system prune -f || true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc/.vuepress/dist
+
+  # 部署到 GitHub Pages
+  deploy-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

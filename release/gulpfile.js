@@ -42,7 +42,7 @@ gulp.task(`pushDoc`, (cb) => { // 发布文档
   const cmdList = `
     cd ../ && npm run doc:build
     cd ../ && npx shx cp -r test/res/ ./doc/.vuepress/dist/case
-    cd ../doc/.vuepress/ && scp -r dist/** root@hongqiye.com:/app/mockm/mm/www/doc/mockm/
+    echo cd ../doc/.vuepress/ && scp -r dist/** root@hongqiye.com:/app/mockm/mm/www/doc/mockm/
   `.split(`\n`).map(item => item.trim()).filter(item => item)
   cmdList.forEach(cmd => {
     console.log(`run: ${cmd}`)
@@ -143,6 +143,7 @@ gulp.task(
   gulp.series(
     `clear`,
     gulp.parallel(`copyServer`),
+    `pushDoc`,
     gulp.series(`uglify`, `setBuildInfo`, `tar`, done => done())
   ),
 )
