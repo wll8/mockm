@@ -1,0 +1,115 @@
+name: Deploy Documentation and Release Package
+
+on:
+  push:
+    branches: [ dev ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # 构建文档 - 使用现有 docker-compose.yml
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build documentation using docker-compose
+        run: |
+          # 使用现有的 docker-compose.yml 构建 mockm-dev 服务
+          docker-compose build mockm-dev
+          
+          # 运行文档构建命令
+          docker-compose run --rm mockm-dev \
+            sh -c "cd doc && cross-env NODE_OPTIONS=--openssl-legacy-provider vuepress build . --config .vuepress/config.github.js"
+
+      - name: Copy test resources
+        run: |
+          mkdir -p doc/.vuepress/dist/case
+          cp -r test/res/* doc/.vuepress/dist/case/ || true
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc/.vuepress/dist
+
+  # 部署到 GitHub Pages
+  deploy-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-docs
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # 构建和发布包 - 使用现有 docker-compose.yml
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build using docker-compose
+        run: |
+          # 构建所需的服务
+          docker-compose build mockm-client mockm-dev
+          
+          # 构建客户端
+          docker-compose run --rm mockm-client \
+            sh -c "cd client && yarn build"
+          
+          # 构建服务端包
+          docker-compose run --rm mockm-dev \
+            sh -c "cd release && pnpm run build"
+
+      - name: Get package info
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PACKAGE_NAME=mockm" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          body: |
+            ## Changes in v${{ env.VERSION }}
+            
+            Auto-generated release from dev branch using existing Docker Compose configuration.
+            
+            ### Package Info
+            - Version: ${{ env.VERSION }}
+            - Build Date: ${{ github.event.head_commit.timestamp }}
+            - Commit: ${{ github.sha }}
+            - Built with: Docker Compose (reusing existing config)
+            
+            ### Download
+            - [mockm-${{ env.VERSION }}.tgz](https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/mockm-${{ env.VERSION }}.tgz)
+          draft: false
+          prerelease: ${{ contains(env.VERSION, 'alpha') || contains(env.VERSION, 'beta') }}
+          files: |
+            ./dist/${{ env.PACKAGE_NAME }}-${{ env.VERSION }}.tgz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          docker-compose down --volumes --remove-orphans || true
+          docker system prune -f || true
