@@ -63,8 +63,18 @@ async function serverProxy({
     const apiCount = tool.file.fileStore(global.config._store).updateApiCount()
     const apiId = tool.hex.string10to62(apiCount)
     req.apiId = apiId
-    const cloneDeep = require(`lodash.clonedeep`)
-    const newReq = cloneDeep(req) // 如果不 cloneDeep, 那么 req.body 到 send 回调中会被改变
+
+    // 只拷贝必要的字段，避免深拷贝整个req对象
+    const newReq = {
+      method: req.method,
+      url: req.url,
+      originalUrl: req.originalUrl,
+      headers: {...req.headers}, // 浅拷贝headers
+      body: req.body ? JSON.parse(JSON.stringify(req.body)) : undefined, // 只深拷贝body
+      query: {...req.query}, // 浅拷贝query
+      params: {...req.params}, // 浅拷贝params
+      apiId: apiId
+    }
     const oldSend = res.send
     res.send = (data = ``) => {
       let buffer =  undefined
