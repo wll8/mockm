@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "mockm 发布脚本",
   "scripts": {
-    "build": "gulp"
+    "build": "npx gulp"
   },
   "keywords": [],
   "author": "",

@@ -3,7 +3,8 @@
 
 <p align="center">
   <a href="https://github.com/wll8/mockm/blob/dev/README.md">中文</a> |
-  <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a>
+  <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a> |
+  <a href="https://wll8.github.io/mockm/">文档</a>
 </p>
 <p align="center">
   <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Downloads"></a>

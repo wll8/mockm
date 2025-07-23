@@ -1,12 +1,17 @@
 const path = require('path')
 
 // 检测是否为GitHub Pages环境
-const isGitHubPages = process.env.GITHUB_ACTIONS === 'true' || process.env.NODE_ENV === 'github'
+const isGitHubPages = process.env.GITHUB_ACTIONS === 'true'
+
+console.log('VuePress Build Environment:', {
+  GITHUB_ACTIONS: process.env.GITHUB_ACTIONS,
+  isGitHubPages: isGitHubPages
+})
 
 // 统一的链接替换函数
 function replaceHongqiyeLinks(url) {
   if (!url || typeof url !== 'string') return url
-  return url.replace(/https?:\/\/(www\.)?hongqiye\.com\/doc\/mockm/g, '/mockm')
+  return url.replace(/https?:\/\/(www\.)?hongqiye\.com\/doc\/mockm/g, '')
 }
 
 // 基础配置
@@ -97,7 +102,7 @@ const baseConfig = {
     nav: [
       { text: '版本 v1.1.26', link: '/' },
       { text: '配置项', link: '/config/option.md' },
-      { text: '更多示例', link: isGitHubPages ? '/mockm/case/' : 'https://www.hongqiye.com/doc/mockm/case/' },
+      { text: '更多示例', link: isGitHubPages ? '/case/' : 'https://www.hongqiye.com/doc/mockm/case/' },
       { text: 'mockjs', link: 'https://wll8.github.io/mockjs-examples/' },
       // { text: 'QQ答疑群', link: 'https://qm.qq.com/cgi-bin/qm/qr?k=4rvOknpHyqs5wd3c2kEt34Eysx83djEZ&jump_from=webapi' },
       { text: 'github', link: 'https://github.com/wll8/mockm' },
