@@ -40,11 +40,11 @@ jobs:
           $DOCKER_COMPOSE run --rm mockm-client \
             sh -c "cd client && yarn build"
           
-          # 运行测试
+          # 运行测试并生成报告
           $DOCKER_COMPOSE run --rm mockm-dev \
             sh -c "npm run test:dev"
 
-          # 构建服务端包
+          # 构建生产内容：包、文档、复制测试报告
           $DOCKER_COMPOSE run --rm \
             -e GITHUB_ACTIONS=true \
             mockm-dev \
@@ -57,9 +57,10 @@ jobs:
           echo "PACKAGE_NAME=mockm" >> $GITHUB_ENV
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: mini-bomba/create-github-release@v1.2.0
         with:
-          tag_name: v${{ env.VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
           body: |
             ## Changes in v${{ env.VERSION }}
@@ -74,13 +75,11 @@ jobs:
             
             ### Download
             - [mockm-${{ env.VERSION }}.tgz](https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/mockm-${{ env.VERSION }}.tgz)
-          draft: false
           prerelease: false
-          make_latest: "true"
+          draft: false
           files: |
             dist/*.tgz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          clear_attachments: true
 
       - name: Cleanup Docker resources
         if: always()
