@@ -26,11 +26,11 @@ For a quicker understanding, the `--config` parameter creates a simple example c
 
 - Access http://127.0.0.1:9000/api/1 in your browser to see the effect.
 - Access http://127.0.0.1:9005/#/get/api/1 in your browser to see the request details.
-- For more features, please [continue](https://hongqiye.com/doc/mockm/use/example.html)...
+- For more features, please [continue](https://wll8.github.io/mockm/use/example.html)...
 
 ## Function Examples
 
-Here are some configuration examples in different scenarios, including various proxies and interceptors, API writing, and data generation methods. Please refer to the detailed documentation for [configuration items](https://hongqiye.com/doc/mockm/config/option.html).
+Here are some configuration examples in different scenarios, including various proxies and interceptors, API writing, and data generation methods. Please refer to the detailed documentation for [configuration items](https://wll8.github.io/mockm/config/option.html).
 
 ### How to enable cross-origin requests for backend APIs
 
@@ -73,7 +73,7 @@ module.exports = {
 
 The API is ready, access http://127.0.0.1:9000/my/api to see the effect.
 
-Please refer to [config.api](https://hongqiye.com/doc/mockm/config/option.html#config-api) for details. For easier collaboration, APIs can also be created from the browser. Refer to [Interface Editing](https://hongqiye.com/doc/mockm/use/webui.html#接口编辑).
+Please refer to [config.api](https://wll8.github.io/mockm/config/option.html#config-api) for details. For easier collaboration, APIs can also be created from the browser. Refer to [Interface Editing](https://wll8.github.io/mockm/use/webui.html#接口编辑).
 
 ### How to get request information from an API
 
@@ -152,7 +152,7 @@ post :9000/blogs?q=bitterness
 
 ```
 
-Please refer to [config.db](https://hongqiye.com/doc/mockm/config/option.html#config-db) for all generated interfaces.
+Please refer to [config.db](https://wll8.github.io/mockm/config/option.html#config-db) for all generated interfaces.
 
 ### How to generate realistic data
 
@@ -228,7 +228,7 @@ module.exports = {
 };
 ```
 
-For more ways to operate, please refer to [config.proxy](https://hongqiye.com/doc/mockm/config/option.html#config-proxy).
+For more ways to operate, please refer to [config.proxy](https://wll8.github.io/mockm/config/option.html#config-proxy).
 
 ### How to delay the response time of the backend interface
 
@@ -328,7 +328,7 @@ By default, each request will generate a link in the response header as x-test-a
 
 ### How to use the interface remotely
 
-Set [config.remote](https://hongqiye.com/doc/mockm/config/option.html#config-remote) to true to have a public interface with a domain name and HTTPS certificate. This allows you to use it on WeChat official accounts or share it with others for remote use.
+Set [config.remote](https://wll8.github.io/mockm/config/option.html#config-remote) to true to have a public interface with a domain name and HTTPS certificate. This allows you to use it on WeChat official accounts or share it with others for remote use.
 
 The "Remote Service Information" will be displayed in the console, and both x-test-api and the interface will generate corresponding remote access links.
 
@@ -344,7 +344,7 @@ The content displayed on the pages comes from data. If the backend server has pr
 
 ## Operating MockM from the UI
 
-You can also create interfaces or operate request histories from the UI input. Below are some screenshots, please refer to the [UI instructions](https://hongqiye.com/doc/mockm/use/webui.html) for detailed documentation.
+You can also create interfaces or operate request histories from the UI input. Below are some screenshots, please refer to the [UI instructions](https://wll8.github.io/mockm/use/webui.html) for detailed documentation.
 
 Request record details  
 ![Request record details](./doc/image/mockm_replay_2020-11-10-11-21-51.png)

@@ -3,7 +3,7 @@ const { wrapApiData } = require(`./util.js`)
 
 /**
  * 配置说明请参考文档: 
- * https://hongqiye.com/doc/mockm/config/option.html
+ * https://wll8.github.io/mockm/config/option.html
  * @type {import('mockm/@types/config').Config}
  */
 module.exports = util => {

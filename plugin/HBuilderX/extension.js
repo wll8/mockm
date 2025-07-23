@@ -20,7 +20,7 @@ function mockmTool(cmd) {
       opener(`http://127.0.0.1:9005/restc/index.html`)
     },
     "extension.mockmTool.mockmDoc"() {
-      opener(`https://hongqiye.com/doc/mockm/`)
+      opener(`https://wll8.github.io/mockm/`)
     },
     "extension.mockmTool.mockjsDoc"() {
       opener(`https://wll8.github.io/mockjs-examples/`)

@@ -125,7 +125,7 @@ function BreadcrumbCom() {
                             url: `http://${window.serverConfig.osIp}:${window.serverConfig.testPort}/api/getApiList/`,
                           }))
                         }}>请求</Menu.Item>
-                        <Menu.Item key="文档"><a target="_blank" rel="noreferrer" href="https://hongqiye.com/doc/mockm/?from=mockm">文档</a></Menu.Item>
+                        <Menu.Item key="文档"><a target="_blank" rel="noreferrer" href="https://wll8.github.io/mockm/?from=mockm">文档</a></Menu.Item>
                         <Menu.Item key="mockjs"><a target="_blank" rel="noreferrer" href="https://wll8.github.io/mockjs-examples/?from=mockm">mockjs</a></Menu.Item>
                       </Menu.SubMenu>
                       <Menu.Item key="github"><a target="_blank" rel="noreferrer" href="https://github.com/wll8/mockm?from=mockm">github</a></Menu.Item>

@@ -1,5 +1,5 @@
 /**
- * @see: https://www.hongqiye.com/doc/mockm/config/option.html
+ * @see: https://wll8.github.io/mockm/config/option.html
  * @type {import('mockm/@types/config').Config}
  */
 module.exports = util => {

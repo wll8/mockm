@@ -81,7 +81,7 @@ new Promise( async () => { // 检查更新
       const msg = tool.string.removeLeft(`
         New version has been released: ${server}
         Your current version is:       ${local}
-        View updated features:         https://hongqiye.com/doc/mockm/dev/change_log.html?update=${local},${server}
+        View updated features:         https://wll8.github.io/mockm/dev/change_log.html?update=${local},${server}
       `)
       print(cli.colors.yellow(msg))
     }

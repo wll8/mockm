@@ -28,11 +28,11 @@
 
 - 浏览器访问 http://127.0.0.1:9000/api/1 查看效果.
 - 浏览器访问 http://127.0.0.1:9005/#/get/api/1 查看请求详情.
-- 想了解更多功能请[继续](https://hongqiye.com/doc/mockm/use/example.html)...
+- 想了解更多功能请[继续](https://wll8.github.io/mockm/use/example.html)...
 
 ## 功能示例
 
-这里演示了一些不同场景下的配置, 包括各种代理和拦截, api 的编写和数据生成方式. 详细文档请参考[配置项](https://hongqiye.com/doc/mockm/config/option.html)
+这里演示了一些不同场景下的配置, 包括各种代理和拦截, api 的编写和数据生成方式. 详细文档请参考[配置项](https://wll8.github.io/mockm/config/option.html)
 
 ### 如何使后端的接口允许跨域
 
@@ -75,7 +75,7 @@ module.exports = {
 
 接口已完成, 访问 http://127.0.0.1:9000/my/api 查看效果.
 
-详情请参考 [config.api](https://hongqiye.com/doc/mockm/config/option.html#config-api), 为了便于多人协作, 还能从浏览器里创建, 参考 [接口编辑](https://hongqiye.com/doc/mockm/use/webui.html#接口编辑).
+详情请参考 [config.api](https://wll8.github.io/mockm/config/option.html#config-api), 为了便于多人协作, 还能从浏览器里创建, 参考 [接口编辑](https://wll8.github.io/mockm/use/webui.html#接口编辑).
 
 ### 如何从接口获取请求信息
 
@@ -152,7 +152,7 @@ post :9000/blogs?q=苦涩
 
 ```
 
-所有生成的接口请参考 [config.db](https://hongqiye.com/doc/mockm/config/option.html#config-db).
+所有生成的接口请参考 [config.db](https://wll8.github.io/mockm/config/option.html#config-db).
 
 ### 如何生成逼真的数据
 
@@ -228,7 +228,7 @@ module.exports = {
 };
 ```
 
-更多操作方式请参考 [config.proxy](https://hongqiye.com/doc/mockm/config/option.html#config-proxy)
+更多操作方式请参考 [config.proxy](https://wll8.github.io/mockm/config/option.html#config-proxy)
 
 ### 如何延迟后端接口的响应时间
 
@@ -328,7 +328,7 @@ module.exports = {
 
 ### 如何远程使用接口
 
-把 [config.remote](https://hongqiye.com/doc/mockm/config/option.html#config-remote) 设置为 true 就能拥有域名的和 https 证书的公网接口, 能够在微信公众号上使用, 或者发给其他人远程使用..
+把 [config.remote](https://wll8.github.io/mockm/config/option.html#config-remote) 设置为 true 就能拥有域名的和 https 证书的公网接口, 能够在微信公众号上使用, 或者发给其他人远程使用..
 
 在控制台会显示 `远程服务信息`, x-test-api 和接口都会生成对应的远程访问链接.
 
@@ -344,7 +344,7 @@ module.exports = {
 
 ## 从界面上操作 mockm
 
-你也可以从 UI 输入创建接口或操作请求历史，以下展示部分截图，详细文档请参考[界面说明](https://hongqiye.com/doc/mockm/use/webui.html).
+你也可以从 UI 输入创建接口或操作请求历史，以下展示部分截图，详细文档请参考[界面说明](https://wll8.github.io/mockm/use/webui.html).
 
 请求记录详情  
 ![请求记录详情](./doc/image/mockm_replay_2020-11-10-11-21-51.png)

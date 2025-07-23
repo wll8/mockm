@@ -6,9 +6,9 @@
 <p>
 
 <p align="center">
-  <a href="https://www.hongqiye.com/doc/mockm/use/try.html">尝试</a>
+  <a href="https://wll8.github.io/mockm/use/try.html">尝试</a>
   <span>&nbsp;|&nbsp;</span>
-  <a href="https://www.hongqiye.com/doc/mockm/use/example.html">示例</a>
+  <a href="https://wll8.github.io/mockm/use/example.html">示例</a>
 <p>
 
 集模拟和调试功能于一身. 自动生成数据和增删查改一系列接口, 支持文件上传下载, 延迟, 自定义接口逻辑...

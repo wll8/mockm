@@ -150,7 +150,7 @@ updateToken = {
 类型: string | object
 默认: `http://www.httpbin.org/`
 
-提示：你可以在[测试用例](https://www.hongqiye.com/doc/mockm/case/)中搜索 `config.proxy` 来查看更多功能演示.
+提示：你可以在[测试用例](https://wll8.github.io/mockm/case/)中搜索 `config.proxy` 来查看更多功能演示.
 
 代理到远程的目标域名，为对象时每个键是分别对应一个要自定义代理的路由.
 
@@ -523,7 +523,7 @@ function wrapApiData({data, code = 200}) { // 包裹 api 的返回值
 
 自建 api.
 
-提示：你可以在[测试用例](https://www.hongqiye.com/doc/mockm/case/)中搜索 `config.api` 来查看更多功能演示.
+提示：你可以在[测试用例](https://wll8.github.io/mockm/case/)中搜索 `config.api` 来查看更多功能演示.
 
 - object 对象的 key 为 api 路由.
 - function 可以获得工具库, 参考 [config.api.fn](../config/config_api_fn.md). 函数应返回一个对象.

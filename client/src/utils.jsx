@@ -497,7 +497,7 @@ function deepSet(object, keys, val, removeUndefined = false) { // 深层设置�
 }
 
 function docLink(text, link) {
-  return <a rel="noopener noreferrer" target="_blank" href={`https://www.hongqiye.com/doc/mockm${link}`}>{text}</a>
+  return <a rel="noopener noreferrer" target="_blank" href={`https://wll8.github.io/mockm${link}`}>{text}</a>
 }
 
 /**
