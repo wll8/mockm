@@ -75,7 +75,7 @@ describe('基本功能', () => {
   })
 })
 
-describe.skip('性能', () => {
+describe('性能', () => {
   describe('接口服务', () => {
     it(`存在较多历史时造成的影响情况`, async () => {
       util.ok(await util.runMockm({
