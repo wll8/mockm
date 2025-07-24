@@ -1,376 +1,352 @@
-A framework based on Express. It can quickly generate APIs and create data, ready for deployment out of the box.
+# MockM - The Ultimate API Development Companion 🚀
+
+<p align="center">
+  <strong>One-stop API mocking and debugging platform for seamless frontend-backend parallel development</strong>
+</p>
 
 <p align="center">
   <a href="https://github.com/wll8/mockm/blob/dev/README.md">中文</a> |
-  <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a>
+  <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a> |
+  <a href="https://wll8.github.io/mockm/">📚 Documentation</a>
 </p>
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Downloads"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm" alt="Version"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm" alt="License"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm?style=flat-square&color=blue" alt="Downloads"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm?style=flat-square&color=green" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm?style=flat-square&color=orange" alt="License"></a>
+  <a href="https://github.com/wll8/mockm/stargazers"><img src="https://img.shields.io/github/stars/wll8/mockm?style=flat-square&color=yellow" alt="Stars"></a>
 </p>
+
 <p align="center">
-
-![Request Record List](./doc/image/mockm_api_list_2020-09-21_100140.png)
-
+  <img src="./doc/image/mockm_api_list_2020-09-21_100140.png" alt="MockM Interface Preview" width="800">
 </p>
 
-## Try
+## ✨ Core Features
 
-1. **Install**: Run `npm i -g mockm` in command line
-2. **Start**: Run `mm --config` in command line
+🎯 **Zero Configuration** - Get started with 2 commands, instant API server  
+🔄 **Smart Proxy** - Non-invasive CORS solution, goodbye to CORS headaches  
+📊 **Data Generation** - Built-in MockJS for realistic data generation  
+🎭 **Restful API** - Auto-generated CRUD endpoints, doubled development efficiency  
+🕸️ **WebSocket Support** - Complete real-time communication solution  
+📱 **Visual Management** - Intuitive Web UI with drag-and-drop API management  
+🔄 **Request Replay** - One-click replay of historical requests  
+🌐 **Remote Debugging** - Built-in tunneling for anywhere collaboration  
+⚡ **Hot Reload** - Real-time configuration updates, smooth development experience
 
-All the work has been finished, and you have created your own API that allows cross-origin requests, has request recording functionality, and replay functionality...
+## 🚀 Quick Start
 
-For a quicker understanding, the `--config` parameter creates a simple example configuration [mm.config.js](https://github.com/wll8/mockm/blob/dev/server/example/simple.mm.config.js), you can take a look and explore the possibilities!
+### Get Started in 1 Minute
 
-- Access http://127.0.0.1:9000/api/1 in your browser to see the effect.
-- Access http://127.0.0.1:9005/#/get/api/1 in your browser to see the request details.
-- For more features, please [continue](https://wll8.github.io/mockm/use/example.html)...
+```bash
+# Global installation
+npm i -g mockm
 
-## Function Examples
-
-Here are some configuration examples in different scenarios, including various proxies and interceptors, API writing, and data generation methods. Please refer to the detailed documentation for [configuration items](https://wll8.github.io/mockm/config/option.html).
-
-### How to enable cross-origin requests for backend APIs
-
-> No need to configure webpack, no need for backend personnel to make changes, no need for browser plugins
-
-This functionality is supported by mockm by default. By starting mockm in the simplest way, you can have this functionality by running the following command in the command line.
-
-```sh
-mm proxy=http://192.168.1.18:8080
+# Start with examples
+mm --config
 ```
 
-You can also use the configuration file method. Create a `mm.config.js` file and enter the following content, then run `mm` in the command line:
+🎉 **That's it!** You now have:
+- ✅ CORS-enabled proxy server (http://127.0.0.1:9000)
+- ✅ Visual management interface (http://127.0.0.1:9005)
+- ✅ Complete API ecosystem
+- ✅ Request recording and replay functionality
 
-```js
+### Experience Immediately
+- 🌐 Visit http://127.0.0.1:9000/api/1 to see API in action
+- 📊 Visit http://127.0.0.1:9005/#/get/api/1 to view request details
+- 🔧 Check the generated config file to explore more features
+
+> 💡 **Tip**: The `--config` parameter creates an example configuration with common feature demonstrations
+
+## 💡 Core Features Showcase
+
+### 🌍 CORS Proxy - Solve All CORS Issues with One Line
+
+**Problem**: Always frustrated by CORS errors in frontend development?  
+**Solution**: MockM eliminates CORS headaches forever!
+
+```bash
+# Simplest CORS proxy
+mm proxy=http://your-backend:8080
+```
+
+Or use a configuration file:
+```javascript
 module.exports = {
-  proxy: `http://192.168.1.18:8080`,
-};
+  proxy: 'http://your-backend:8080'
+}
 ```
 
-Then replace the original request address with your own. For example, if your IP is 127.0.0.1, make the following changes:
+**Result**: Your original `http://your-backend:8080/api/users` now works through `http://127.0.0.1:9000/api/users` with automatic CORS handling!
 
-- Before: http://192.168.1.18:8080/api/
-- After: http://127.0.0.1:9000/api/
+### 🎭 Instant APIs - Create Complete Endpoints with 3 Lines
 
-### How to create your own API
-
-> When it is the same as the backend API, your own API will be used
-
-Let's create an API in the simplest way:
-
-```js
+```javascript
 module.exports = {
   api: {
-    "/my/api": {
-      msg: `My API`,
-    },
-  },
-};
-```
-
-The API is ready, access http://127.0.0.1:9000/my/api to see the effect.
-
-Please refer to [config.api](https://wll8.github.io/mockm/config/option.html#config-api) for details. For easier collaboration, APIs can also be created from the browser. Refer to [Interface Editing](https://wll8.github.io/mockm/use/webui.html#接口编辑).
-
-### How to get request information from an API
-
-When we need to return different content based on the values passed in the API, it's also easy:
-
-```js
-module.exports = {
-  api: {
-    "/my/value"(req, res) {
-      // req.params is the path parameters in the URL
-      // req.query is the query parameters in the URL
-      // req.body is the parameters in the request body
-      res.json({ desc: `The value you passed in`, data: req.query });
-    },
-  },
-};
-```
-
-Next, access the API and pass some URL parameters to test. For example, http://localhost:9000/my/value?city=Shanghai will result in:
-
-```json
-{
-  "desc": "The value you passed in",
-  "query": {
-    "city": "Shanghai"
+    '/my/awesome/api': {
+      message: 'My first API',
+      data: { success: true }
+    }
   }
 }
 ```
 
-### How to quickly generate Restful APIs
+**Instantly available**: http://127.0.0.1:9000/my/awesome/api
 
-Let's say I want to write a list of blog articles and implement various functionalities such as adding articles, querying articles, pagination, fuzzy searching, deletion, modification, etc. for the APIs. All you need to do is add the following content:
+### 🔄 Restful API Generator - Complete CRUD with One Config
 
-```js
+Want a complete blog system? Just do this:
+
+```javascript
 module.exports = {
   db: {
-    blogs: [
-      {
-        id: 1,
-        content: `mockm is a user-friendly and flexible interface tool. Looks good~`,
-        title: `The first day of getting to know mockm`,
-      },
-    ],
-  },
-};
+    posts: [
+      { id: 1, title: 'My First Blog', content: 'Using MockM is incredibly simple!' }
+    ]
+  }
+}
 ```
+
+**Instantly get**:
+- `GET /posts` - Get all posts
+- `GET /posts/1` - Get specific post  
+- `POST /posts` - Create new post
+- `PUT /posts/1` - Update post
+- `DELETE /posts/1` - Delete post
+- `GET /posts?q=keyword` - Search posts
+
+### 📊 Smart Data Generation - Deep MockJS Integration
+
+```javascript
+module.exports = util => ({
+  db: {
+    users: util.libObj.mockjs.mock({
+      'data|20-50': [{
+        'id|+1': 1,
+        name: '@name',              // Random name
+        email: '@email',            // Random email
+        avatar: '@image("200x200")', // Random avatar
+        'age|18-65': 1,            // Random age 18-65
+        address: '@county(true)'    // Random address
+      }]
+    }).data
+  }
+})
+```
+
+### 🛠️ Response Interception & Modification - No Backend Cooperation Needed
+
+Need to modify backend response data? Easy:
+
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://your-backend:8080',
+    '/api/user': ['data.name', 'John Doe'], // Change username to John Doe
+    '/api/status': ['success'] // Return "success" directly
+  }
+}
+```
+
+### ⏱️ API Delay Simulation - Test Slow Network Conditions
+
+```javascript
+module.exports = {
+  proxy: {
+    '/api/slow': {
+      mid(req, res, next) {
+        setTimeout(next, 3000) // 3-second delay
+      }
+    }
+  }
+}
+```
+
+### 🔌 WebSocket Support - Real-time Communication Made Easy
+
+```javascript
+module.exports = {
+  api: {
+    'ws /chat'(ws, req) {
+      ws.send('Welcome to the chat room!')
+      ws.on('message', msg => {
+        ws.send(`Echo: ${msg}`)
+      })
+    }
+  }
+}
+```
+
+### 📱 Visual Management - Drag-and-Drop API Management
+
+Easily manage APIs through Web UI:
+- 📋 View all API endpoints
+- 🔍 Search and filter APIs  
+- ✏️ Edit API logic online
+- 📊 View request history and statistics
+- 🔄 One-click replay historical requests
+
+### 🌐 Remote Collaboration - One-click Tunneling
+
+```javascript
+module.exports = {
+  remote: true // Enable remote access
+}
+```
+
+Auto-generate public URLs supporting:
+- 🌍 Remote team collaboration
+- 📱 WeChat mini-program development  
+- 🔗 Third-party service integration
+
+## 🏆 Use Cases
+
+### 👨‍💻 Frontend Developers
+- **Quick Setup** Mock services without waiting for backend
+- **CORS Solution** One line of code solves all CORS issues
+- **Data-Driven** Develop with realistic data
+
+### 👩‍💻 Backend Developers  
+- **API Documentation** Auto-generated docs for smoother frontend integration
+- **Request Parameters** One-click sharing, no more screenshot parameters
+- **Debug Tools** Complete request history tracking
+
+### 🎯 QA Engineers
+- **API Testing** Built-in Postman-like tools
+- **Data Simulation** Easy testing of edge cases  
+- **Performance Testing** Delay and error simulation
+
+### 👥 Team Collaboration
+- **Remote Debugging** One-click public URL generation
+- **Version Control** Git-friendly configuration files
+- **Environment Isolation** Flexible multi-environment configs
+
+## 📸 Interface Preview
+
+<details>
+<summary>🖱️ Click to view more interface screenshots</summary>
+
+**Request Record Details**  
+![Request Record Details](./doc/image/mockm_replay_2020-11-10-11-21-51.png)
+
+**API Request History**  
+![API Request History](./doc/image/mockm_history_2020-11-10-11-33-26.png)
+
+**Visual API Editor**  
+![Visual API Editor](./doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
+
+</details>
+
+## 🆚 Feature Comparison
+
+### 📊 Comprehensive Feature Matrix
+
+| Feature | MockM | MockJS | JSON-Server | YApi/Rap2 | Postman Mock | Wiremock | MSW | Faker.js | Apifox |
+|---------|-------|--------|-------------|-----------|--------------|----------|-----|----------|--------|
+| 🚀 **Zero Config** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 🌐 **CORS Handling** | ✅ Auto | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| 📊 **Data Generation** | ✅ Built-in MockJS | ✅ | ❌ | ✅ | 🔶 Basic | 🔶 Basic | ✅ | ✅ | ✅ |
+| 🔄 **Restful API** | ✅ Auto-generated | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| 🕸️ **WebSocket** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 📱 **Visual Management** | ✅ | ❌ | ❌ | ✅ | ✅ | 🔶 3rd party | ❌ | ❌ | ✅ |
+| 🔄 **Request Replay** | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| 🌍 **Remote Debugging** | ✅ Built-in tunneling | ❌ | ❌ | ✅ | ✅ Cloud | ❌ | ❌ | ❌ | ✅ Cloud |
+| ⚡ **Hot Reload** | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| 🛠️ **Response Interception** | ✅ | ✅ Frontend only | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| 💻 **Runtime** | Node.js | Browser | Node.js | Java/Docker | Cloud | Java | Browser/Node | Node.js | Desktop/Cloud |
+| 💰 **Cost** | Free | Free | Free | Free/Paid | Free/Paid | Free | Free | Free | Free/Paid |
+
+### 🎯 Tool Positioning
+
+**Data Generation Tools**
+- **MockJS**: Frontend-only data mocking, no real network requests visible
+- **Faker.js**: Data generation library only, requires building your own server
+- **MockM**: Built-in MockJS + complete server, ready to use
+
+**API Server Tools** 
+- **JSON-Server**: Simple REST API generation, no data generation or CORS features
+- **WireMock**: Powerful Java ecosystem mock server, complex configuration
+- **MockM**: Express ecosystem, simple configuration, comprehensive features
+
+**Testing Tools**
+- **Postman Mock**: Cloud-based mock service, requires internet, relatively basic features
+- **MSW**: Focused on test environment request interception, steep learning curve
+- **MockM**: Development + testing dual-purpose, local-first, cloud-expandable
+
+**Platform Tools**
+- **YApi/Rap2**: Enterprise API management platform, complex deployment
+- **Apifox**: Commercial all-in-one API tool, powerful but paid features
+- **MockM**: Lightweight local tool, focused on development efficiency
+
+### 💡 Selection Guide
+
+| Use Case | Recommended Tool | Reason |
+|----------|------------------|--------|
+| 🚀 Rapid Prototyping | **MockM** | Zero config, instant start |
+| 🧪 Frontend Unit Testing | MSW + Faker.js | Professional testing toolchain |
+| 🏢 Enterprise API Management | YApi + MockM | Documentation + development debugging |
+| ☁️ Team Collaboration | Apifox / MockM Remote | Cloud collaboration |
+| 🎯 Java Backend Testing | WireMock | Java ecosystem integration |
+| 📊 Pure Data Generation | MockJS / Faker.js | Lightweight solution |
+
+### ❓ Common Misconceptions Clarified
+
+**🤔 "What's the difference between MockM and MockJS?"**
+- **MockJS**: Only intercepts XHR requests in browser, no real network requests
+- **MockM**: Runs a real server, visible in Network panel, supports CORS
+
+**🤔 "Isn't MockM the same as JSON-Server?"**
+- **JSON-Server**: Only generates simple REST APIs, no data generation capabilities
+- **MockM**: REST API + Data Generation + Proxy + Visual Management + Remote Debugging
+
+**🤔 "Why not just use Postman Mock?"**
+- **Postman Mock**: Cloud service, requires internet, relatively basic features, complex setup
+- **MockM**: Local-first, comprehensive features, zero-config start, optional cloud mode
+
+**🤔 "MSW looks powerful too?"**
+- **MSW**: Focused on testing environments, mainly for unit and integration tests
+- **MockM**: Focused on development environments, provides complete dev server solution
+
+**🤔 "We already have YApi/Apifox, do we still need MockM?"**
+- **YApi/Apifox**: Heavy on documentation and team collaboration, still need local tools for development
+- **MockM**: Perfect complement, focused on development efficiency, works great with documentation platforms
+
+## 🤝 Community & Support
+
+### 📚 Documentation & Tutorials
+- [📖 Complete Documentation](https://wll8.github.io/mockm/)
+- [🎯 Quick Start Guide](https://wll8.github.io/mockm/use/try.html)
+- [💡 Best Practices](https://wll8.github.io/mockm/use/example.html)
+- [🔧 Configuration Reference](https://wll8.github.io/mockm/config/option.html)
+
+### 🌟 Related Projects
+
+| Project | Description |
+|---------|-------------|
+| [🎨 Taroify](https://github.com/mallfoundry/taroify) | Taro version of mobile component library Vant, accelerating mini-program development |
+| [🎯 wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | Vue3+TS uni-app component library with 70+ high-quality components |
+
+### 💬 Communication & Feedback
+- [🐛 Bug Reports](https://github.com/wll8/mockm/issues)
+- [💡 Feature Requests](https://github.com/wll8/mockm/issues)
+- [❓ Usage Questions](https://github.com/wll8/mockm/discussions)
+
+## 📄 License
+
+This project is licensed under [MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2017-present, xw
 
 ---
 
-All the interfaces to be implemented on top have been implemented by now. Here, I use httpie as the request tool to briefly demonstrate several features. You can use your favorite tool to send requests.
+<p align="center">
+  <strong>⭐ If this project helps you, please give us a Star!</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/wll8/mockm">
+    <img src="https://img.shields.io/github/stars/wll8/mockm?style=social" alt="GitHub stars">
+  </a>
+</p>
 
-```sh
-# View details of a blog with id 1
-http :9000/blogs/1
-
-# Create an article about colleagues
-http post :9000/blogs title="Colleague's Day" content="Today his life is still the same bitterness"
-
-# Get all articles
-http :9000/blogs
-
-# Query articles containing 'bitterness'
-http :9000/blogs?q=bitterness
-
-# View details of a blog with id 1
-http :9000/blogs/1
-
-# Create an article about colleagues
-http post :9000/blogs title="Colleague's Day" content="Today his life is still the same bitterness"
-
-# Get all articles
-http post :9000/blogs
-
-# Query articles containing 'bitterness'
-post :9000/blogs?q=bitterness
-
-```
-
-Please refer to [config.db](https://wll8.github.io/mockm/config/option.html#config-db) for all generated interfaces.
-
-### How to generate realistic data
-
-[mockjs](https://wll8.github.io/mockjs-examples/) is a good data generation tool. Mockm integrates it by default. The following code generates a batch of user information using mockjs.
-
-```js
-module.exports = (util) => {
-  return {
-    db: {
-      users: util.libObj.mockjs.mock({
-        "data|15-23": [
-          // Generate 15 to 23 random data items
-          {
-            "id|+1": 1, // id starts from 1 and increments by 1
-            name: `@cname`, // Generate random Chinese names
-            "sex|1": [`Male`, `Female`, `Unknown`], // Randomly select one from these three genders
-          },
-        ],
-      }).data,
-    },
-  };
-};
-```
-
-Now you can access http://localhost:9000/users to see a lot of realistic user data.
-
-### How to modify the data returned by the backend
-
-> In many cases, it is inconvenient to directly modify the data on the backend because it involves a lot of logic. Writing it directly in the code on the frontend is both cumbersome and prone to problems.
-
-Assuming that the data returned by the GET request to the backend interface `http://192.168.1.18:8080/api/user` is like this:
-
-```js
-{
-  "code": 200,
-  "data": {
-    "books": [
-      {
-        "page": 52,
-        "type": "css"
-      },
-      {
-        "page": 26,
-        "type": "js"
-      }
-    ],
-    "name": "张三"
-  },
-  "success": true
-}
-
-```
-
-If you want to change the type of the book at index 1 to html, the configuration is as follows:
-
-```js
-module.exports = {
-  proxy: {
-    "/": `http://192.168.1.18:8080`,
-    "/api/user": [`data.books[1].type`, `html`], // The first parameter in the array is the path to be modified, and the second parameter is the new value
-  },
-};
-```
-
-If you want to directly replace the entire return value with `html`, you can do it like this:
-
-```js
-module.exports = {
-  proxy: {
-    "/": `http://192.168.1.18:8080`,
-    "/api/user": [`html`], // If only one parameter is provided, it will be replaced directly
-  },
-};
-```
-
-For more ways to operate, please refer to [config.proxy](https://wll8.github.io/mockm/config/option.html#config-proxy).
-
-### How to delay the response time of the backend interface
-
-To delay the response time of the interface `http://192.168.1.18:8080/api/user` by 5 seconds, you can do the following:
-
-```js
-module.exports = {
-  proxy: {
-    "/": `http://192.168.1.18:8080`,
-    "/api/user": {
-      mid(req, res, next) {
-        setTimeout(next, 5000);
-      },
-    },
-  },
-};
-```
-
-### How to create a download file interface
-
-Implement a file download interface http://127.0.0.1:9000/file, and send a specific file to the client.
-
-```js
-module.exports = {
-  api: {
-    "/file"(req, res, next) {
-      res.download(`Specify the file path here`);
-    },
-  },
-};
-```
-
-### How to create a websocket interface
-
-Implement a websocket interface ws://127.0.0.1:9000/wsecho, send "Connection successful" when the connection is established, and echo back the message sent by the client to the client.
-
-```js
-api: {
-  'ws /wsecho' (ws, req) {
-    ws.send(`Connection successful`)
-    ws.on('message', (msg) => {
-      ws.send(msg)
-    })
-  }
-},
-```
-
-Client connection code that can be directly tested in the browser console:
-
-```js
-function startWs(wsLink) {
-  window.ws = new WebSocket(wsLink);
-  ws.onopen = (evt) => {
-    ws.send(`Message sent by the client`);
-  };
-  ws.onmessage = (evt) => {
-    console.log(`Message returned by the server`, evt.data);
-  };
-  ws.onclose = (evt) => {
-    // Reconnect
-    setTimeout(() => startWs(wsLink), 1000);
-  };
-}
-startWs(`ws://127.0.0.1:9000/wsecho`);
-// ws.send(`Send a new message`)
-```
-
-### How to implement dynamic interface path parameters
-
-Implement an interface http://127.0.0.1:9000/status/code, where "code" is a dynamic parameter in the URL, and it returns the received code.
-
-```js
-module.exports = {
-  api: {
-    "/status/:code"(req, res, next) {
-      const { params, query, body } = req;
-      res.json({ statusCode: params.code });
-    },
-  },
-};
-```
-
-### How to display interface parameters to the backend
-
-> No more screenshots, no more back and forth questions, no more inability to copy parameters
-
-By default, each request will generate a link in the response header as x-test-api. Just send this link to the backend.
-
-- Method 1
-  You may see it directly on the command line when starting mockm.
-
-- Method 2
-  Look for it in the list on the page http://127.0.0.1:9005.
-
-- Method 3
-  If you use Chrome Developer Tools, you can find the requested interface in Network and find x-test-api in Response Headers.
-
-### How to use the interface remotely
-
-Set [config.remote](https://wll8.github.io/mockm/config/option.html#config-remote) to true to have a public interface with a domain name and HTTPS certificate. This allows you to use it on WeChat official accounts or share it with others for remote use.
-
-The "Remote Service Information" will be displayed in the console, and both x-test-api and the interface will generate corresponding remote access links.
-
-### How to restore a backend interface that was previously working but is now broken
-
-If a certain interface was previously working but is now broken due to some issues that the backend hasn't had time to fix, but the frontend now has pages that rely on this interface, what should you do?
-
-On the page http://127.0.0.1:9005, select the good request history corresponding to the interface, and click on "webApi => Use this record".
-
-### How to prevent the backend from affecting the pages when it is down
-
-The content displayed on the pages comes from data. If the backend server has problems and all interfaces are unavailable, you can modify the request address to http://127.0.0.1:9001 to allow the pages to use the data previously returned by the server.
-
-## Operating MockM from the UI
-
-You can also create interfaces or operate request histories from the UI input. Below are some screenshots, please refer to the [UI instructions](https://wll8.github.io/mockm/use/webui.html) for detailed documentation.
-
-Request record details  
-![Request record details](./doc/image/mockm_replay_2020-11-10-11-21-51.png)
-
-Request history of a certain API  
-![Request history of a certain API](./doc/image/mockm_history_2020-11-10-11-33-26.png)
-
-Creating an API from the UI  
-![Creating an API from the UI](./doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
-
-## Differences
-
-| Tool        | Description                         | Remarks                           |
-| ----------- | ----------------------------------- | --------------------------------- |
-| mockjs      | Intercept XHR requests in the frontend and generate data | Request cannot be seen in the network console |
-| json-server | Generate Restful APIs using JSON     | Does not have integrated data generation capabilities |
-| yapi/rap2   | Manage API documentation and generate interfaces and data | Difficult to install and synchronize with frontend projects |
-
-## Links
-
-| Project                                              | Description                                                                                                          |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| [taroify](https://github.com/mallfoundry/taroify) | Taroify is the Taro version of the mobile component library Vant. Both are based on the same visual specification and provide consistent API interfaces to help developers quickly build mini-applications. |
-
-## License
-
-[MIT](https://opensource.org/licenses/MIT)
-
-Copyright (c) 2017-present, xw

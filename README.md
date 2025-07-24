@@ -1,377 +1,353 @@
-一个基于 express 的工具。它可以快速生成 api 以及创造数据，开箱即用，便于部署。
+# MockM - 前后端并行开发神器 🚀
 
+<p align="center">
+  <strong>一站式 API 模拟与调试平台，让前后端开发零障碍并行</strong>
+</p>
 
 <p align="center">
   <a href="https://github.com/wll8/mockm/blob/dev/README.md">中文</a> |
   <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a> |
-  <a href="https://wll8.github.io/mockm/">文档</a>
+  <a href="https://wll8.github.io/mockm/">📚 文档</a>
 </p>
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Downloads"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm" alt="Version"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm" alt="License"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm?style=flat-square&color=blue" alt="Downloads"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm?style=flat-square&color=green" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm?style=flat-square&color=orange" alt="License"></a>
+  <a href="https://github.com/wll8/mockm/stargazers"><img src="https://img.shields.io/github/stars/wll8/mockm?style=flat-square&color=yellow" alt="Stars"></a>
 </p>
+
 <p align="center">
+  <img src="./doc/image/mockm_api_list_2020-09-21_100140.png" alt="MockM 界面预览" width="800">
+</p>
 
-![请求记录列表](./doc/image/mockm_api_list_2020-09-21_100140.png)
+## ✨ 核心特性
+
+🎯 **零配置启动** - 2 行命令搞定一切，秒变 API 服务器  
+🔄 **智能代理** - 无侵入式跨域解决方案，告别 CORS 烦恼  
+📊 **数据生成** - 内置 MockJS，逼真数据一键生成  
+🎭 **Restful API** - 自动生成增删改查接口，开发效率翻倍  
+🕸️ **WebSocket 支持** - 完整的实时通信解决方案  
+📱 **可视化管理** - 直观的 Web UI，拖拽式 API 管理  
+🔄 **请求重放** - 历史请求一键重现，调试无忧  
+🌐 **远程调试** - 内置内网穿透，随时随地协作  
+⚡ **热更新** - 配置修改实时生效，开发体验丝滑
 
 </p>
 
-## 尝试
+## 🚀 快速开始
 
-1. **安装**: 命令行输入 `npm i -g mockm`
-2. **启动**: 命令行输入 `mm --config`
+### 一分钟上手
 
-所有工作已经结束了, 并且你还创建了一个自己的 api, 拥有了后端接口允许跨域的功能, 接口记录功能和重放功能...
+```bash
+# 全局安装
+npm i -g mockm
 
-为了让你更快的找到感觉, `--config` 这个参数创建了一个简单的示例配置 [mm.config.js](https://github.com/wll8/mockm/blob/dev/server/example/simple.mm.config.js), 你可以查看它窥探天机！
-
-- 浏览器访问 http://127.0.0.1:9000/api/1 查看效果.
-- 浏览器访问 http://127.0.0.1:9005/#/get/api/1 查看请求详情.
-- 想了解更多功能请[继续](https://wll8.github.io/mockm/use/example.html)...
-
-## 功能示例
-
-这里演示了一些不同场景下的配置, 包括各种代理和拦截, api 的编写和数据生成方式. 详细文档请参考[配置项](https://wll8.github.io/mockm/config/option.html)
-
-### 如何使后端的接口允许跨域
-
-> 不需要配置 webpack, 不需要后端人员更改, 不需要浏览器插件
-
-这个功能 mockm 默认是支持的, 以最简方式启动 mockm 就能拥有此功能, 只要在命令行输入下面这条命令即可.
-
-```sh
-mm proxy=http://192.168.1.18:8080
+# 启动示例项目
+mm --config
 ```
 
-你也可以使用配置文件的方式, 创建 `mm.config.js` 文件并录入以下内容, 然后命令行输入 `mm` 即可:
+🎉 **就这么简单！** 你已经拥有了：
+- ✅ 跨域代理服务器 (http://127.0.0.1:9000)
+- ✅ 可视化管理界面 (http://127.0.0.1:9005)
+- ✅ 完整的 API 生态系统
+- ✅ 请求记录与重放功能
 
-```js
+### 立即体验
+- 🌐 访问 http://127.0.0.1:9000/api/1 查看 API 效果
+- 📊 访问 http://127.0.0.1:9005/#/get/api/1 查看请求详情
+- 🔧 查看生成的配置文件了解更多功能
+
+> 💡 **提示**: `--config` 参数会创建一个示例配置，包含常用功能演示
+
+## 💡 核心功能展示
+
+### 🌍 跨域代理 - 一行代码解决所有跨域问题
+
+**问题**：前端开发时总是被 CORS 错误困扰？  
+**解决**：MockM 让你彻底告别跨域烦恼！
+
+```bash
+# 最简单的跨域代理
+mm proxy=http://your-backend:8080
+```
+
+或者使用配置文件：
+```javascript
 module.exports = {
-  proxy: `http://192.168.1.18:8080`,
-};
+  proxy: 'http://your-backend:8080'
+}
 ```
 
-然后更换原来的请求地址为自己的即可, 例如自己的 IP 为 127.0.0.1 则做以下更改:
+**效果**：原本的 `http://your-backend:8080/api/users` 现在通过 `http://127.0.0.1:9000/api/users` 访问，自动处理跨域！
 
-- 更改前: http://192.168.1.18:8080/api/
-- 更改后: http://127.0.0.1:9000/api/
+### 🎭 秒建 API - 3 行代码创建完整接口
 
-### 如何创建一个自己的接口
-
-> 与后端接口相同时, 会使用自己的
-
-让我们以最简单的方式创建一个接口:
-
-```js
+```javascript
 module.exports = {
   api: {
-    "/my/api": {
-      msg: `我的 api`,
-    },
-  },
-};
-```
-
-接口已完成, 访问 http://127.0.0.1:9000/my/api 查看效果.
-
-详情请参考 [config.api](https://wll8.github.io/mockm/config/option.html#config-api), 为了便于多人协作, 还能从浏览器里创建, 参考 [接口编辑](https://wll8.github.io/mockm/use/webui.html#接口编辑).
-
-### 如何从接口获取请求信息
-
-当我们需要根据接口传入的值来返回不同的内容时, 也是很容易:
-
-```js
-module.exports = {
-  api: {
-    "/my/value"(req, res) {
-      // req.params 是 url 上的路径参数
-      // req.query 是 url 上的查询参数
-      // req.body 是请求体中的参数
-      res.json({ desc: `你传入的值`, data: req.query });
-    },
-  },
-};
-```
-
-接下访问接口传入一些 url 参数测试一下 http://localhost:9000/my/value?city=上海 结果为:
-
-```json
-{
-  "desc": "你传入的值",
-  "query": {
-    "city": "上海"
+    '/my/awesome/api': {
+      message: '我的第一个 API',
+      data: { success: true }
+    }
   }
 }
 ```
 
-### 如何快速生成 Restful API
+**立即可用**：http://127.0.0.1:9000/my/awesome/api
 
-假设我要写一个博客文章的列表, 并且要实现添加文章, 查询文章, 分页, 模糊搜索, 删除, 修改等各种功能的接口. 那么只需添加以下内容:
+### 🔄 Restful API 生成器 - 一个配置搞定 CRUD
 
-```js
+想要一个完整的博客系统？只需要：
+
+```javascript
 module.exports = {
   db: {
-    blogs: [
-      {
-        id: 1,
-        content: `mockm 是一款便于使用, 功能灵活的接口工具. 看起来不错~`,
-        title: `认识 mockm 的第一天`,
-      },
-    ],
-  },
-};
-```
-
-这时候上面要实现的所有接口已经实现了. 这里我用 httpie 作为请求工具简单表示几个功能, 你可以使用你喜欢的工具发送请求.
-
-```sh
-# 查看 id 为 1 的博文详情
-http :9000/blogs/1
-
-# 创建一篇关于同事的文章
-http post :9000/blogs title=同事的一天 content=今天他的生活还是同样的苦涩
-
-# 获取所有文章
-http :9000/blogs
-
-# 查询所有含有 `苦涩` 的文章
-http :9000/blogs?q=苦涩
-
-# 查看 id 为 1 的博文详情
-http :9000/blogs/1
-
-# 创建一篇关于同事的文章
-http post :9000/blogs title=同事的一天 content=今天他的生活还是同样的苦涩
-
-# 获取所有文章
-http post :9000/blogs
-
-# 查询所有含有 `苦涩` 的文章
-post :9000/blogs?q=苦涩
-
-```
-
-所有生成的接口请参考 [config.db](https://wll8.github.io/mockm/config/option.html#config-db).
-
-### 如何生成逼真的数据
-
-[mockjs](https://wll8.github.io/mockjs-examples/) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
-
-```js
-module.exports = (util) => {
-  return {
-    db: {
-      users: util.libObj.mockjs.mock({
-        "data|15-23": [
-          // 随机生成 15 至 23 条数据
-          {
-            "id|+1": 1, // id 从 1 开始自增
-            name: `@cname`, // 随机生成中文名字
-            "sex|1": [`男`, `女`, `保密`], // 性别从这三个选项中随机选择一个
-          },
-        ],
-      }).data,
-    },
-  };
-};
-```
-
-现在访问 http://localhost:9000/users 已经可以看到很多逼真的用户数据了.
-
-### 如何更改后端返回的数据
-
-> 很多时候后端不方便直接修改数据, 因为会涉及很多逻辑, 前端直接写在代码里既麻烦又容易引发问题.
-
-假设后台接口 `http://192.168.1.18:8080/api/user` get 请求返回的数据是这样的:
-
-```js
-{
-  "code": 200,
-  "data": {
-    "books": [
-      {
-        "page": 52,
-        "type": "css"
-      },
-      {
-        "page": 26,
-        "type": "js"
-      }
-    ],
-    "name": "张三"
-  },
-  "success": true
-}
-
-```
-
-如果要修改 books 索引为 1 的 type 为 html, 那么配置如下:
-
-```js
-module.exports = {
-  proxy: {
-    "/": `http://192.168.1.18:8080`,
-    "/api/user": [`data.books[1].type`, `html`], // 数组第一个参数是修改的路径, 第二个参数是修改后的值
-  },
-};
-```
-
-如果要直接替换整个返回值为 `html` , 可以这样:
-
-```js
-module.exports = {
-  proxy: {
-    "/": `http://192.168.1.18:8080`,
-    "/api/user": [`html`], // 如果只提供一个参数, 则直接替换
-  },
-};
-```
-
-更多操作方式请参考 [config.proxy](https://wll8.github.io/mockm/config/option.html#config-proxy)
-
-### 如何延迟后端接口的响应时间
-
-示例延迟 `http://192.168.1.18:8080/api/user` 这个接口的响应时间为 5 秒之后:
-
-```js
-module.exports = {
-  proxy: {
-    "/": `http://192.168.1.18:8080`,
-    "/api/user": {
-      mid(req, res, next) {
-        setTimeout(next, 5000);
-      },
-    },
-  },
-};
-```
-
-### 如何创建一个下载文件的接口
-
-实现一个文件下载接口 http://127.0.0.1:9000/file, 发送某文件给客户端.
-
-```js
-module.exports = {
-  api: {
-    "/file"(req, res, next) {
-      res.download(`这里写要下载的文件路径`);
-    },
-  },
-};
-```
-
-### 如何创建 websocket 接口
-
-实现一个 websocket 接口 ws://127.0.0.1:9000/wsecho, 当连接成功时发送 `连接成功`, 并把客户端发送的信息再原样返回给客户端.
-
-```js
-api: {
-  'ws /wsecho' (ws, req) {
-    ws.send(`连接成功`)
-    ws.on('message', (msg) => {
-      ws.send(msg)
-    })
+    posts: [
+      { id: 1, title: '我的第一篇博客', content: '使用 MockM 真的太简单了！' }
+    ]
   }
-},
-```
-
-客户端连接代码, 可以直接打开浏览器 console 测试:
-
-```js
-function startWs(wsLink) {
-  window.ws = new WebSocket(wsLink);
-  ws.onopen = (evt) => {
-    ws.send(`客户端发送的消息`);
-  };
-  ws.onmessage = (evt) => {
-    console.log(`服务器返回的消息`, evt.data);
-  };
-  ws.onclose = (evt) => {
-    // 断线重连
-    setTimeout(() => startWs(wsLink), 1000);
-  };
 }
-startWs(`ws://127.0.0.1:9000/wsecho`);
-// ws.send(`发送新消息`)
 ```
 
-### 如何实现动态的接口路径参数
+**瞬间获得**：
+- `GET /posts` - 获取所有文章
+- `GET /posts/1` - 获取指定文章  
+- `POST /posts` - 创建新文章
+- `PUT /posts/1` - 更新文章
+- `DELETE /posts/1` - 删除文章
+- `GET /posts?q=关键词` - 搜索文章
 
-实现一个接口 http://127.0.0.1:9000/status/code, 其中 code 的位置是一个动态参数, 并返回接收到的 code.
+### 📊 智能数据生成 - MockJS 深度集成
 
-```js
+```javascript
+module.exports = util => ({
+  db: {
+    users: util.libObj.mockjs.mock({
+      'data|20-50': [{
+        'id|+1': 1,
+        name: '@cname',           // 随机中文姓名
+        email: '@email',          // 随机邮箱
+        avatar: '@image("200x200")', // 随机头像
+        'age|18-65': 1,          // 18-65岁随机年龄
+        address: '@county(true)'  // 随机地址
+      }]
+    }).data
+  }
+})
+```
+
+### 🛠️ 响应拦截与修改 - 无需后端配合
+
+需要修改后端返回的数据？轻松搞定：
+
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://your-backend:8080',
+    '/api/user': ['data.name', '张三'], // 将用户名改为张三
+    '/api/status': ['success'] // 直接返回 "success"
+  }
+}
+```
+
+### ⏱️ 接口延时模拟 - 测试网络慢的情况
+
+```javascript
+module.exports = {
+  proxy: {
+    '/api/slow': {
+      mid(req, res, next) {
+        setTimeout(next, 3000) // 延时 3 秒
+      }
+    }
+  }
+}
+```
+
+### 🔌 WebSocket 支持 - 实时通信轻松实现
+
+```javascript
 module.exports = {
   api: {
-    "/status/:code"(req, res, next) {
-      const { params, query, body } = req;
-      res.json({ statusCode: params.code });
-    },
-  },
-};
+    'ws /chat'(ws, req) {
+      ws.send('欢迎进入聊天室！')
+      ws.on('message', msg => {
+        ws.send(`回音: ${msg}`)
+      })
+    }
+  }
+}
 ```
 
-### 如何向后端展示接口参数
+### 📱 可视化管理 - 拖拽式 API 管理
 
-> 告别截图, 告别一问一答, 告别参数太多无法复制
+通过 Web UI 轻松管理 API：
+- 📋 查看所有接口列表
+- 🔍 搜索和过滤接口  
+- ✏️ 在线编辑接口逻辑
+- 📊 查看请求历史和统计
+- 🔄 一键重放历史请求
 
-默认情况下, 每次请求会生成一条链接在响应头中的 x-test-api 上, 把这个链接发给后端即可.
+### 🌐 远程协作 - 内网穿透一键开启
 
-- 方法 1
-  直接在启动 mockm 的命令行里可能看到.
+```javascript
+module.exports = {
+  remote: true // 开启远程访问
+}
+```
 
-- 方法 2
-  在 http://127.0.0.1:9005 页面上的列表中查找.
+自动生成公网地址，支持：
+- 🌍 远程团队协作
+- 📱 微信公众号开发  
+- 🔗 第三方服务对接
 
-- 方法 3
-  如果你使用 chrome 开发工具, 可以在 Network 中找到请求的接口在 Response Headers 中找到 x-test-api.
+## 🏆 使用场景
 
-### 如何远程使用接口
+### 👨‍💻 前端开发者
+- **快速搭建** Mock 服务，无需等待后端
+- **跨域问题** 一行代码解决
+- **数据驱动** 使用真实数据进行开发
 
-把 [config.remote](https://wll8.github.io/mockm/config/option.html#config-remote) 设置为 true 就能拥有域名的和 https 证书的公网接口, 能够在微信公众号上使用, 或者发给其他人远程使用..
+### 👩‍💻 后端开发者  
+- **API 文档** 自动生成，前端对接更顺畅
+- **请求参数** 一键分享，告别截图传参
+- **调试工具** 完整的请求历史记录
 
-在控制台会显示 `远程服务信息`, x-test-api 和接口都会生成对应的远程访问链接.
+### 🎯 测试工程师
+- **接口测试** 内置 Postman 式工具
+- **数据模拟** 各种边界情况轻松测试  
+- **性能测试** 延时、错误模拟
 
-### 如何恢复后端好了又坏的接口
+### 👥 团队协作
+- **远程调试** 一键生成公网地址
+- **版本管理** 配置文件化，Git 友好
+- **环境隔离** 多环境配置，灵活切换
 
-如果某个接口之前是好的, 但是由于某些问题现在坏了, 后端又没来得及修复, 可是前端现在有页面依赖这个接口, 怎么办?
+## 📸 界面预览
 
-在 http://127.0.0.1:9005 页面选择对应接口的好的那条请求历史, 点击 `webApi => 使用此记录` 即可.
+<details>
+<summary>🖱️ 点击查看更多界面截图</summary>
 
-### 如何在后端关闭时不影响页面
-
-页面要展示的内容来源于数据, 如果后端服务器出现问题, 所有接口无法使用, 这时候修改请求地址为 http://127.0.0.1:9001 即可让页面使用之前服务器返回的数据.
-
-## 从界面上操作 mockm
-
-你也可以从 UI 输入创建接口或操作请求历史，以下展示部分截图，详细文档请参考[界面说明](https://wll8.github.io/mockm/use/webui.html).
-
-请求记录详情  
+**请求记录详情**  
 ![请求记录详情](./doc/image/mockm_replay_2020-11-10-11-21-51.png)
 
-某个 api 的请求历史  
-![某个 api 的请求历史](./doc/image/mockm_history_2020-11-10-11-33-26.png)
+**API 请求历史**  
+![API 请求历史](./doc/image/mockm_history_2020-11-10-11-33-26.png)
 
-从界面上创建 api  
-![从界面上创建 api](./doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
+**可视化 API 编辑**  
+![可视化 API 编辑](./doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
 
-## 区别
+</details>
 
-| 工具        | 简述                         | 备注                           |
-| ----------- | ---------------------------- | ------------------------------ |
-| mockjs      | 前端拦截 xhr 请求, 生成数据  | 不能在网络控制台看到请求       |
-| json-server | 用 json 生成 Restful api     | 没有集成数据生成功能           |
-| yapi/rap2   | 管理接口文档, 生成接口和数据 | 安装麻烦, 不方便与前端项目同步 |
+## 🆚 竞品对比
 
-## 友情链接
+### 📊 完整功能对比表
 
-| 项目                                                               | 简介                                                                                                                  |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| [taroify](https://github.com/mallfoundry/taroify)                  | Taroify 是移动端组件库 Vant 的 Taro 版本，两者基于相同的视觉规范，提供一致的 API 接口，助力开发者快速搭建小程序应用。 |
-| [wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 一个基于Vue3+TS开发的uni-app组件库，提供70+高质量组件，支持暗黑模式、国际化和自定义主题。                             |
+| 功能特性 | MockM | MockJS | JSON-Server | YApi/Rap2 | Postman Mock | Wiremock | MSW | Faker.js | Apifox |
+|---------|-------|--------|-------------|-----------|--------------|----------|-----|----------|--------|
+| 🚀 **零配置启动** | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 🌐 **跨域处理** | ✅ 自动 | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| 📊 **数据生成** | ✅ 内置 MockJS | ✅ | ❌ | ✅ | 🔶 基础 | 🔶 基础 | ✅ | ✅ | ✅ |
+| 🔄 **Restful API** | ✅ 自动生成 | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| 🕸️ **WebSocket** | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 📱 **可视化管理** | ✅ | ❌ | ❌ | ✅ | ✅ | 🔶 第三方 | ❌ | ❌ | ✅ |
+| 🔄 **请求重放** | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| 🌍 **远程调试** | ✅ 内置穿透 | ❌ | ❌ | ✅ | ✅ 云端 | ❌ | ❌ | ❌ | ✅ 云端 |
+| ⚡ **热更新** | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ |
+| 🛠️ **响应拦截** | ✅ | ✅ 仅前端 | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| 💻 **运行环境** | Node.js | Browser | Node.js | Java/Docker | Cloud | Java | Browser/Node | Node.js | Desktop/Cloud |
+| 💰 **费用** | 免费 | 免费 | 免费 | 免费/付费 | 免费/付费 | 免费 | 免费 | 免费 | 免费/付费 |
 
-## 许可
+### 🎯 工具定位说明
 
-[MIT](https://opensource.org/licenses/MIT)
+**数据生成类工具**
+- **MockJS**: 纯前端数据模拟，无法在 Network 中看到真实请求
+- **Faker.js**: 仅数据生成库，需要自行构建服务器
+- **MockM**: 内置 MockJS + 完整服务器，开箱即用
+
+**API 服务器类工具** 
+- **JSON-Server**: 简单 REST API 生成，无数据生成和跨域功能
+- **WireMock**: Java 生态的强大 Mock 服务器，配置复杂
+- **MockM**: Express 生态，配置简单，功能全面
+
+**测试工具类**
+- **Postman Mock**: 云端 Mock 服务，需要联网，功能相对基础
+- **MSW**: 专注于测试环境的请求拦截，学习成本较高
+- **MockM**: 开发+测试双用途，本地优先，可扩展云端
+
+**平台化工具**
+- **YApi/Rap2**: 企业级 API 管理平台，安装部署复杂
+- **Apifox**: 商业化一体化 API 工具，功能强大但收费
+- **MockM**: 轻量级本地工具，专注开发效率
+
+### 💡 选择建议
+
+| 使用场景 | 推荐工具 | 原因 |
+|---------|---------|------|
+| 🚀 快速原型开发 | **MockM** | 零配置，即开即用 |
+| 🧪 前端单元测试 | MSW + Faker.js | 专业测试工具链 |
+| 🏢 企业级 API 管理 | YApi + MockM | 文档管理 + 开发调试 |
+| ☁️ 团队协作开发 | Apifox / MockM远程模式 | 云端协作 |
+| 🎯 Java 后端测试 | WireMock | Java 生态集成 |
+| 📊 纯数据生成 | MockJS / Faker.js | 轻量级方案 |
+
+### ❓ 常见误区澄清
+
+**🤔 "MockM 和 MockJS 有什么区别？"**
+- **MockJS**: 仅在浏览器中拦截 XHR 请求，无真实网络请求
+- **MockM**: 运行真实服务器，可在 Network 面板看到请求，支持跨域
+
+**🤔 "MockM 和 JSON-Server 不是一样的吗？"**
+- **JSON-Server**: 只能生成简单的 REST API，无数据生成能力
+- **MockM**: REST API + 数据生成 + 代理 + 可视化管理 + 远程调试
+
+**🤔 "为什么不直接用 Postman Mock？"**
+- **Postman Mock**: 云端服务，需要网络，功能相对基础，配置复杂
+- **MockM**: 本地优先，功能全面，零配置启动，可选云端模式
+
+**🤔 "MSW 看起来也很强大？"**
+- **MSW**: 专注测试环境，主要用于单元测试和集成测试
+- **MockM**: 专注开发环境，提供完整的开发服务器解决方案
+
+**🤔 "企业已经有 YApi/Apifox 了，还需要 MockM 吗？"**
+- **YApi/Apifox**: 重文档管理和团队协作，开发时仍需本地工具
+- **MockM**: 完美补充，专注开发效率，可与文档平台配合使用
+
+## 🤝 社区与支持
+
+### 📚 文档与教程
+- [📖 完整文档](https://wll8.github.io/mockm/)
+- [🎯 快速入门](https://wll8.github.io/mockm/use/try.html)
+- [💡 最佳实践](https://wll8.github.io/mockm/use/example.html)
+- [🔧 配置参考](https://wll8.github.io/mockm/config/option.html)
+
+### 🌟 友情项目
+
+| 项目 | 简介 |
+|------|------|
+| [🎨 Taroify](https://github.com/mallfoundry/taroify) | 移动端组件库 Vant 的 Taro 版本，助力小程序开发 |
+| [🎯 wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 基于 Vue3+TS 的 uni-app 组件库，70+ 高质量组件 |
+
+### 💬 交流与反馈
+- [🐛 Bug 反馈](https://github.com/wll8/mockm/issues)
+- [💡 功能建议](https://github.com/wll8/mockm/issues)
+- [❓ 使用问题](https://github.com/wll8/mockm/discussions)
+
+## 📄 开源协议
+
+本项目基于 [MIT](https://opensource.org/licenses/MIT) 协议开源
 
 Copyright (c) 2017-present, xw
+
+---
+
+<p align="center">
+  <strong>⭐ 如果这个项目对你有帮助，请给我们一个 Star！</strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/wll8/mockm">
+    <img src="https://img.shields.io/github/stars/wll8/mockm?style=social" alt="GitHub stars">
+  </a>
+</p>
