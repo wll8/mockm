@@ -383,24 +383,39 @@ function testCliText({cmd = str, timeout = 30 * 1e3, fn = (str) => str, } = {}) 
   return new Promise((resolve, reject) => {
     const { spawn } = require('child_process');
     const [bin, ...arg] = cmd.split(/\s+/)
-    const cmdRef = spawn(bin, arg);
+    const cmdRef = spawn(bin, arg, {
+      env: {
+        ...process.env,
+        PM2_NAMESPACE: `MOCKM_TEST`,
+      }
+    });
+    const pm2Kill = async () => {
+      // hack: 由于 kill() 没办法停止 pm2 进程, 所以使用 pm2 进行删除
+      return new Promise(async (ok) => {
+        cmdRef.kill()
+        require(`child_process`).exec(`npx pm2 del mockm-${cmdRef.pid}`, {
+          cwd: `${__dirname}/../server/`,
+          stdio: `inherit`,
+        }, ok)
+      })
+    }
     cmdRef.stdout.on('data', async (data) => {
       const str = String(data)
       if(await fn(str)) {
+        await pm2Kill()
         resolve(str)
-        cmdRef.kill()
       }
     });
     cmdRef.stderr.on('data', async (data) => {
       const str = String(data)
       if(await fn(str)) {
+        await pm2Kill()
         resolve(str)
-        cmdRef.kill()
       }
     });
-    setTimeout(() => {
+    setTimeout(async () => {
+      await pm2Kill()
       reject(false)
-      cmdRef.kill()
     }, timeout);
   })
 }
@@ -441,7 +456,12 @@ function allTestBefore() {
   console.log('备份用户配置')
 }
 
-function allTestAfter() {
+async function allTestAfter() {
+  require(`child_process`).exec(`npx pm2 del MOCKM_TEST`, {
+    cwd: `${__dirname}/../server/`,
+    stdio: `inherit`,
+  }, () => {})
+  await sleep(5000)
   console.log('恢复用户配置')
 }
 

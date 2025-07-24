@@ -13,13 +13,27 @@ process.argv.includes(`--log-line`) && logHelper()
 
 const fs = require(`fs`)
 const path = require(`path`)
+const util = require('util')
 const { tool, business } = require(`${__dirname}/util/index.js`)
 const lib = require(`${__dirname}/util/lib.js`)
 const packageJson = require(`${__dirname}/package.json`)
 const cli = tool.cli
 const cliArg = cli.parseArgv()
 const serverPath = path.normalize(`${__dirname}/server.js`) // 转换为跨平台的路径
-const { ProcessManager } = require(`@wll8/process-manager`)
+const pm2 = require('pm2')
+
+// 使用 util.promisify 封装 PM2 的回调方法
+const pm2Async = {
+  connect: util.promisify(pm2.connect.bind(pm2)),
+  start: util.promisify(pm2.start.bind(pm2)),
+  restart: util.promisify(pm2.restart.bind(pm2)),
+  stop: util.promisify(pm2.stop.bind(pm2)),
+  delete: util.promisify(pm2.delete.bind(pm2)),
+  list: util.promisify(pm2.list.bind(pm2)),
+  sendDataToProcessId: util.promisify(pm2.sendDataToProcessId.bind(pm2)),
+  launchBus: util.promisify(pm2.launchBus.bind(pm2)),
+  disconnect: () => pm2.disconnect() // 这个方法不需要 promisify
+}
 
 { // 尽早的, 无依赖的修改 cwd, 避免其他读取到旧值
   const cwd = tool.cli.handlePathArg(
@@ -90,41 +104,108 @@ new Promise( async () => { // 检查更新
 
 new Promise(async () => { // 启动 server.js
   let log = ``
+  let isShuttingDown = false
   const nodeArg = typeof(cliArg[`--node-options`]) === `string` ? cliArg[`--node-options`] : ``
-  const arr = [nodeArg, serverPath, ...process.argv.slice(2), `_base64=${base64config}`, `_share=${sharePath}`].filter(item => item.trim() !== ``)
-  const cp = new ProcessManager(arr)
-  cp.on(`stdout`, (data) => {
-    log = String(data)
-  })
-  cp.on(`stderr`, (data) => {
-    log = String(data)
-  })
-  cp.on(`message`, ({action, data} = {}) => {
-    if(action === `reboot`) {
-      cp.reboot(0)
-    }
-    if(action === `config`) {
-      cp.autoReStart = data.guard
-    }
-  })
-  cp.on(`close`, () => {
-    if(log.match(/killProcess:/)) { // 保存错误日志
-      saveLog({
-        code: ``,
-        logStr: log,
-        logPath: shareConfig._errLog,
-      })
-    }
-  })
-
-  function killProcess() {
-    cp.kill()
-    process.exit()
+  const processName = `mockm-${process.pid}`
+  
+  // PM2 进程配置
+  const pm2Config = {
+    name: processName,
+    script: serverPath,
+    args: [...process.argv.slice(2), `_base64=${base64config}`, `_share=${sharePath}`],
+    nodeArgs: nodeArg ? nodeArg.split(' ').filter(arg => arg.trim()) : [],
+    cwd: process.cwd(),
+    autorestart: false, // 手动控制重启
+    watch: false, // 关闭 PM2 自带的文件监听，使用自定义监听
+    max_memory_restart: '500M',
+    merge_logs: true,
+    kill_timeout: 5000,
+    namespace: process.env.PM2_NAMESPACE,
+    // 不指定日志文件，让 PM2 使用默认位置，然后我们通过流来转发
+    silent: false
   }
+
+  // 监听进程消息和日志
+  async function listenToProcessMessages() {
+    const pm2_bus = await pm2Async.launchBus()
+    
+    // 监听日志输出
+    pm2_bus.on('log:out', (packet) => {
+      if (packet.process.name === processName) {
+        process.stdout.write(packet.data)
+        log = String(packet.data)
+      }
+    })
+
+    pm2_bus.on('log:err', (packet) => {
+      if (packet.process.name === processName) {
+        process.stderr.write(packet.data)
+        log = String(packet.data)
+      }
+    })
+
+    pm2_bus.on('process:msg', (packet) => {
+      if (packet.process.name === processName) {
+        const { action, data = {} } = packet.data || {}
+        if (action === 'err-exit') {
+          if(pm2Config.autorestart) {
+            console.log(`[${processName}] Auto restarting process...`)
+          } else {
+            killProcess()
+          }
+        }
+        if (action === 'reboot') {
+          pm2Async.restart(processName)
+        }
+        
+        if (action === 'config') {
+          pm2Config.autorestart = data.guard
+        }
+      }
+    })
+  }
+
+  // 优雅关闭函数
+  function killProcess() {
+    isShuttingDown = true
+    console.log(`[${processName}] Shutting down...`)
+    pm2Async.delete(processName)
+      .then(() => {
+        pm2Async.disconnect()
+        process.exit(0)
+      })
+      .catch(err => {
+        console.error('Error during shutdown:', err)
+        pm2Async.disconnect()
+        process.exit(1)
+      })
+  }
+
+  // 绑定进程信号
   process.on(`SIGTERM`, killProcess)
   process.on(`SIGINT`, killProcess)
   process.on(`uncaughtException`, killProcess)
   process.on(`unhandledRejection`, killProcess)
+
+  try {
+
+    // 启动 PM2 管理的进程
+    await pm2Async.connect()
+    
+    // 先清理可能存在的同名进程
+    await pm2Async.delete(processName).catch(() => {}) // 忽略错误，因为进程可能不存在
+    
+    // 启动新进程
+    await pm2Async.start(pm2Config)
+    
+    // 监听进程消息
+    listenToProcessMessages()
+    
+  } catch (err) {
+    console.error('Failed to start process:', err)
+    pm2Async.disconnect()
+    process.exit(1)
+  }
 
   const {
     showLocalInfo,

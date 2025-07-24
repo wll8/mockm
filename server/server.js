@@ -9,8 +9,14 @@ const util = require(`./util/index.js`)
 
 new Promise(async () => {
   global.config = await require(`./config.js`)
-  process.send({action: `config`, data: global.config})
-  util.tool.file.fileChange([global.config._configFile, ...global.config.watch], (files) => process.send({action: `reboot`, data: files}))
+  process.send({
+    type: 'process:msg',
+    data: { action: 'config', data: global.config }
+  })
+  util.tool.file.fileChange([global.config._configFile, ...global.config.watch], (files) => process.send({
+    type: 'process:msg',
+    data: { action: 'reboot', data: files }
+  }))
   const {
     tool,
     business,

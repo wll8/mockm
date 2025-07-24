@@ -24,5 +24,8 @@
     "mochawesome": "^7.1.3",
     "shelljs": "^0.8.4",
     "ws": "^7.5.3"
+  },
+  "dependencies": {
+    "pm2": "^6.0.8"
   }
 }
