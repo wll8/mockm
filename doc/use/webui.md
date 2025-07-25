@@ -2,8 +2,6 @@
 
 访问管理界面：http://localhost:9005
 
-![Web管理界面总览](~@doc/image/mockm_api_list_2020-09-21_100140.png)
-
 ## 🔍 请求监控
 
 ### 实时请求列表
@@ -99,7 +97,12 @@ A: 检查 OpenAPI 配置是否正确，确认当前接口在文档中存在。
 - 📋 **响应头** - 服务器返回的 Headers
 - 📄 **响应体** - 实际返回的数据内容
 
-![请求详情示例](~@doc/image/mockm_api_detail_2020-09-21_100052.png)
+
+::: details 查看请求详情
+
+![请求详情界面](~@doc/image/mockm_api_detail_2020-09-21_100052.png)
+
+:::
 
 ::: tip 💡 JSON 预览提示
 确保响应头 `Content-Type` 为 `application/json` 才能正常预览。建议后端使用 `res.json()` 而非 `res.send()`。

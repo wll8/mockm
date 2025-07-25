@@ -329,6 +329,8 @@ module.exports = {
 | [🎨 Taroify](https://github.com/mallfoundry/taroify) | 移动端组件库 Vant 的 Taro 版本，助力小程序开发 |
 | [🎯 wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 基于 Vue3+TS 的 uni-app 组件库，70+ 高质量组件 |
 
+如果你有项目需要在此页面上展示，请告诉我。
+
 ### 💬 交流与反馈
 - [🐛 Bug 反馈](https://github.com/wll8/mockm/issues)
 - [💡 功能建议](https://github.com/wll8/mockm/issues)

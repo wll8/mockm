@@ -98,11 +98,6 @@ module.exports = {
 }
 ```
 
-**访问方式：**
-- 🌐 API 调用：`http://localhost:8080/api/users`
-- 🔗 代理请求：`http://localhost:8080/proxy/path`
-- 📁 静态资源：`http://localhost:8080/static/file.html`
-
 **端口选择建议：**
 - `3000` - React 开发者的最爱
 - `8080` - Java 开发者的习惯
@@ -807,35 +802,6 @@ undefined  // 接口返回空响应
   }
 }
 ```
-
-:::
-
-## 🌐 智能请求转发
-
-**一行配置，秒变全能代理** - 支持任意路径转发，让你的 Mock 服务瞬间拥有整个互联网的后端能力！
-
-```javascript {4-6}
-module.exports = {
-  proxy: {
-    '/': 'https://httpbin.org/',              // 🏠 默认转发目标
-    '/api/weather': 'https://api.weather.com', // 🌤️ 天气服务
-    '/api/news': 'https://newsapi.org',        // 📰 新闻接口
-  }
-}
-```
-
-**🚀 实战场景演示：**
-
-| 路径规则 | 转发目标 | 使用场景 |
-|---------|----------|----------|
-| `/api/user/*` | `https://user-service.com` | 👤 用户管理服务 |
-| `/api/order/*` | `https://order-service.com` | 🛒 订单处理服务 |
-| `/upload/*` | `https://cdn.example.com` | 📁 文件上传服务 |
-| `/payment/*` | `https://pay.gateway.com` | 💳 支付网关服务 |
-
-::: tip ⚡ 性能优化秘籍
-转发功能基于高性能的 [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware#http-proxy-options) 实现，与 webpack 的 `devServer.proxy` 配置完全兼容！
-:::
 
 ## config.remote
 

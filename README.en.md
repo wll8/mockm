@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/wll8/mockm/blob/dev/README.md">中文</a> |
   <a href="https://github.com/wll8/mockm/blob/dev/README.en.md">English</a> |
-  <a href="https://wll8.github.io/mockm/">📚 Documentation</a>
+  <a href="https://wll8.github.io/mockm/en/">📚 Documentation</a>
 </p>
 
 <p align="center">
@@ -326,6 +326,8 @@ Auto-generate public URLs supporting:
 |---------|-------------|
 | [🎨 Taroify](https://github.com/mallfoundry/taroify) | Taro version of mobile component library Vant, accelerating mini-program development |
 | [🎯 wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | Vue3+TS uni-app component library with 70+ high-quality components |
+
+If you have a project that needs to be showcased on this page, please let me know.
 
 ### 💬 Communication & Feedback
 - [🐛 Bug Reports](https://github.com/wll8/mockm/issues)
