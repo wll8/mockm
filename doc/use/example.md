@@ -1,428 +1,1229 @@
-# 示例
+# 实战示例 - 让开发更高效 🚀
 
-这里列出一些常用的业务场景, 方便快速查找.
-如果有需要后台接口的地方, 统一假设为 http://192.168.1.18:8080.
+> 从小白到专家，一篇文章掌握 MockM 核心技能！
 
-也可以通过[测试用例](https://wll8.github.io/mockm/case/)查看更多的功能演示.
+这里汇集了最实用的开发场景解决方案，每个示例都是开发中的真实需求。跟着做，立即上手！
 
-## 如何使后端的接口允许跨域
-> 不需要配置 webpack, 不需要后端人员更改, 不需要浏览器插件
+**📘 约定说明**
+- 后端接口地址统一使用：`http://192.168.1.18:8080`
+- 更多高级功能演示请查看 → [测试用例](https://wll8.github.io/mockm/case/)
 
-这个功能 mockm 默认是支持的, 以最简方式启动 mockm 就能拥有此功能, 只要在命令行输入下面这条命令即可.
-``` sh
+---
+
+## 🌍 解决跨域问题 - 告别开发环境的头号烦恼
+
+### 🎯 痛点
+前端开发时最怕看到的错误：
+```
+Access to fetch at 'http://192.168.1.18:8080/api/users' from origin 'http://localhost:3000' 
+has been blocked by CORS policy
+```
+
+### ✅ 解决方案
+
+**方式一：命令行启动（超快）**
+```bash
 mm proxy=http://192.168.1.18:8080
 ```
 
-你也可以使用配置文件的方式, 创建 `mm.config.js` 文件并录入以下内容, 然后命令行输入 `mm` 即可:
-
-``` js
+**方式二：配置文件（推荐）**
+创建 `mm.config.js`：
+```javascript
 module.exports = {
-  proxy: `http://192.168.1.18:8080`
+  proxy: 'http://192.168.1.18:8080'
 }
 ```
 
-然后更换原来的请求地址为自己的即可, 例如自己的 IP 为 127.0.0.1 则做以下更改:
-- 更改前: http://192.168.1.18:8080/api/
-- 更改后: http://127.0.0.1:9000/api/
+然后运行：
+```bash
+mm
+```
 
-## 如何创建一个自己的接口
-> 与后端接口相同时, 会使用自己的
+### 🎉 效果
+原来的跨域请求：
+- ❌ `http://192.168.1.18:8080/api/users` → CORS错误
+- ✅ `http://127.0.0.1:9000/api/users` → 完美运行
 
-让我们以最简单的方式创建一个接口:
+> 💡 **原理**：MockM 作为代理服务器，自动添加跨域头，让浏览器认为这是同源请求
 
-``` js
+---
+
+## 🎭 创建自定义接口 - 3秒搞定API
+
+### 🎯 场景
+- 后端接口还没开发完成
+- 需要临时模拟某个接口
+- 想要覆盖后端现有接口
+
+### 📝 基础版本
+```javascript
 module.exports = {
   api: {
     '/my/api': {
-      msg: `我的 api`
-    },
-  },
-}
-```
-接口已完成, 访问 http://127.0.0.1:9000/my/api 查看效果.
-
-详情请参考 [config.api](../config/option.md#config-api), 为了便于多人协作, 还能从浏览器里创建, 参考 [接口编辑](../use/webui.md#接口编辑).
-
-
-## 如何从接口获取请求信息
-当我们需要根据接口传入的值来返回不同的内容时, 也是很容易:
-
-``` js
-module.exports = {
-  api: {
-    '/my/value' (req, res) {
-      // req.params 是 url 上的路径参数
-      // req.query 是 url 上的查询参数
-      // req.body 是请求体中的参数
-      res.json({desc: `你传入的值`, data: req.query})
-    },
-  },
-}
-```
-
-接下访问接口传入一些 url 参数测试一下 http://localhost:9000/my/value?city=上海 结果为:
-
-``` json
-{
-  "desc": "你传入的值",
-  "query": {
-    "city": "上海"
+      msg: '我的第一个API',
+      success: true,
+      timestamp: Date.now()
+    }
   }
 }
 ```
 
-## 如何快速生成 Restful API
-假设我要写一个博客文章的列表, 并且要实现添加文章, 查询文章, 分页, 模糊搜索, 删除, 修改等各种功能的接口. 那么只需添加以下内容:
+**立即访问**： http://127.0.0.1:9000/my/api
 
-``` js
+### 🚀 进阶版本 - 动态响应
+```javascript
+module.exports = {
+  api: {
+    '/user/profile' (req, res) {
+      const { userId } = req.query
+      res.json({
+        code: 200,
+        data: {
+          userId: userId || 'anonymous',
+          username: `用户${userId || '游客'}`,
+          loginTime: new Date().toLocaleString()
+        },
+        message: '获取用户信息成功'
+      })
+    }
+  }
+}
+```
+
+**测试一下**：
+- http://127.0.0.1:9000/user/profile
+- http://127.0.0.1:9000/user/profile?userId=123
+
+> 💡 **优先级**：当路由与 `config.proxy` 冲突时，`config.api` 优先生效
+> 
+> 📚 **更多功能**：参考 [config.api 详细文档](../config/option.md#config-api) 和 [接口编辑器](../use/webui.md#接口编辑)
+
+---
+
+
+## 📊 获取请求参数 - 构建动态接口
+
+### 🎯 需求
+根据用户传入的不同参数，返回不同的内容
+
+### 💡 实现方案
+```javascript
+module.exports = {
+  api: {
+    '/search' (req, res) {
+      // 🔍 获取各类参数
+      const { keyword, page = 1 } = req.query      // URL查询参数
+      const { category } = req.params              // 路径参数
+      const { filters } = req.body                 // 请求体参数
+      
+      res.json({
+        message: '搜索成功',
+        query: { keyword, page },
+        params: { category },
+        body: { filters },
+        results: `找到 ${keyword} 相关结果 ${Math.floor(Math.random() * 100)} 条`
+      })
+    }
+  }
+}
+```
+
+### 🧪 测试效果
+访问：http://127.0.0.1:9000/search?keyword=MockM&page=2
+
+**返回结果：**
+```json
+{
+  "message": "搜索成功",
+  "query": {
+    "keyword": "MockM",
+    "page": "2"
+  },
+  "results": "找到 MockM 相关结果 42 条"
+}
+```
+
+> 🎓 **参数说明**：
+> - `req.query` - URL 中 `?` 后面的查询参数
+> - `req.params` - 路径中的动态参数（如 `/user/:id` 中的 id）
+> - `req.body` - POST/PUT 请求体中的数据
+
+---
+
+## 🔄 一键生成 RESTful API - 博客系统5分钟搭建
+
+### 🎯 需求
+快速搭建一个具备增删改查功能的博客系统后端
+
+### 🚀 超简配置
+```javascript
 module.exports = {
   db: {
-    'blogs': [
+    blogs: [
       {
         id: 1,
-        content: `mockm 是一款便于使用, 功能灵活的接口工具. 看起来不错~`,
-        title: `认识 mockm 的第一天`,
+        title: '认识 MockM 的第一天',
+        content: 'MockM 是一款便于使用，功能灵活的接口工具。看起来不错~',
+        author: '开发者小王',
+        createTime: '2024-01-15',
+        tags: ['工具', '开发']
       },
-    ],
-  },
+      {
+        id: 2,
+        title: 'RESTful API 设计最佳实践',
+        content: '良好的 API 设计能让前后端协作更加高效...',
+        author: '架构师老李',
+        createTime: '2024-01-16',
+        tags: ['API', '架构']
+      }
+    ]
+  }
 }
 ```
 
-这时候上面要实现的所有接口已经实现了. 
-这里我用 http 作为请求工具简单表示几个功能, 你可以使用你喜欢的工具发送请求.
+### 🎉 立即拥有完整API系统
 
-``` sh
-# 查看 id 为 1 的博文详情
-http :9000/blogs/1
+| HTTP方法 | 接口地址 | 功能 | 示例 |
+|---------|---------|------|------|
+| **GET** | `/blogs` | 获取所有文章 | 支持分页、搜索 |
+| **GET** | `/blogs/1` | 获取指定文章 | 根据ID查询 |
+| **POST** | `/blogs` | 创建新文章 | 自动分配ID |
+| **PUT** | `/blogs/1` | 更新文章 | 全量更新 |
+| **PATCH** | `/blogs/1` | 部分更新 | 只更新指定字段 |
+| **DELETE** | `/blogs/1` | 删除文章 | 物理删除 |
 
-# 创建一篇关于同事的文章
-http post :9000/blogs title=同事的一天 content=今天他的生活还是同样的苦涩
+### 🧪 实战演练
 
-# 获取所有文章
-http :9000/blogs
-
-# 查询所有含有 `苦涩` 的文章
-http :9000/blogs?q=苦涩
+**1. 创建文章**
+```bash
+curl -X POST http://127.0.0.1:9000/blogs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "我的新文章",
+    "content": "这是文章内容",
+    "author": "我"
+  }'
 ```
-::: details 接口请求结果
-``` sh
-# 查看 id 为 1 的博文详情
-http :9000/blogs/1
 
+**2. 搜索文章**
+```bash
+# 搜索标题包含"MockM"的文章
+curl "http://127.0.0.1:9000/blogs?q=MockM"
+
+# 分页获取文章（第2页，每页5条）
+curl "http://127.0.0.1:9000/blogs?_page=2&_limit=5"
+```
+
+**3. 获取单篇文章**
+```bash
+curl http://127.0.0.1:9000/blogs/1
+```
+
+### 📊 响应格式预览
+```json
 {
   "code": 200,
+  "success": true,
   "data": {
-    "content": "mockm 是一款便于使用, 功能灵活的接口工具. 看起来不错~",
     "id": 1,
-    "title": "认识 mockm 的第一天"
-  },
-  "success": true
+    "title": "认识 MockM 的第一天",
+    "content": "MockM 是一款便于使用，功能灵活的接口工具...",
+    "author": "开发者小王",
+    "createTime": "2024-01-15",
+    "tags": ["工具", "开发"]
+  }
 }
-
-# 创建一篇关于同事的文章
-http post :9000/blogs title=同事的一天 content=今天他的生活还是同样的苦涩
-
-{
-  "code": 200,
-  "data": {
-    "content": "今天他的生活还是同样的苦涩",
-    "id": 2,
-    "title": "同事的一天"
-  },
-  "success": true
-}
-
-# 获取所有文章
-http post :9000/blogs
-
-{
-  "code": 200,
-  "data": [
-    {
-      "content": "mockm 是一款便于使用, 功能灵活的接口工具. 看起来不错~",
-      "id": 1,
-      "title": "认识 mockm 的第一天"
-    },
-    {
-      "content": "今天他的生活还是同样的苦涩",
-      "id": 2,
-      "title": "同事的一天"
-    }
-  ],
-  "success": true
-}
-
-# 查询所有含有 `苦涩` 的文章
-http post :9000/blogs?q=苦涩
-
-{
-  "code": 200,
-  "data": [
-    {
-      "content": "今天他的生活还是同样的苦涩",
-      "id": 2,
-      "title": "同事的一天"
-    }
-  ],
-  "success": true
-}
-
 ```
-:::
+
+> 🎯 **核心优势**：
+> - ✅ 零代码实现完整 CRUD
+> - ✅ 自动支持分页、搜索、排序
+> - ✅ 符合 RESTful 设计规范
+> - ✅ 数据持久化存储
+
+---
 
 
-## 如何生成逼真的数据
-[mockjs](https://wll8.github.io/mockjs-examples/) 是一个不错的数据生成工具, mockm 默认集成了它, 下面用它生成一批用户信息.
+## 🎨 生成逼真数据 - MockJS 深度集成
 
-::: warning 注意
-`module.exports` 的值已经变成函数, 这样你可以从函数的参数中收到 [util 中提供的一系列的工具](../config/config_fn.md).
-:::
+### 🎯 需求
+生成大量真实的用户数据进行前端开发和测试
 
-``` js
+### 🔥 智能数据生成
+
+```javascript
 module.exports = util => {
   return {
     db: {
-      'users': util.libObj.mockjs.mock({
-        'data|15-23': [ // 随机生成 15 至 23 条数据
+      users: util.libObj.mockjs.mock({
+        'data|50-100': [  // 随机生成 50-100 条用户数据
           {
-            'id|+1': 1, // id 从 1 开始自增
-            name: `@cname`, // 随机生成中文名字
-            'sex|1': [`男`, `女`, `保密`], // 性别从这三个选项中随机选择一个
-          },
+            'id|+1': 1001,                    // ID从1001开始自增
+            username: '@cname',               // 随机中文姓名
+            email: '@email',                  // 随机邮箱
+            phone: /^1[385][1-9]\d{8}/,      // 手机号正则
+            avatar: '@image("200x200", "@color", "@cname")', // 随机头像
+            'age|18-65': 1,                  // 年龄18-65随机
+            'gender|1': ['男', '女', '保密'], // 性别随机选择
+            address: '@county(true)',         // 详细地址
+            company: '@ctitle(5,10)',         // 公司名称
+            position: '@ctitle(2,4)',         // 职位
+            'salary|5000-30000': 1,          // 薪资范围
+            bio: '@cparagraph(1,3)',          // 个人简介
+            'tags|2-5': ['@cword(2,4)'],     // 标签数组
+            'isVip|1': true,                 // 50%概率为VIP
+            createTime: '@datetime',          // 注册时间
+            lastLogin: '@datetime("yyyy-MM-dd HH:mm:ss")'  // 最后登录
+          }
         ]
       }).data,
-    },
-  }
-}
-```
-
-现在访问 http://localhost:9000/users 已经可以看到很多逼真的用户数据了.
-
-## 如何更改后端返回的数据
-> 很多时候后端不方便直接修改数据, 因为会涉及很多逻辑, 前端直接写在代码里既麻烦又容易引发问题.
-
-假设后台接口 `http://192.168.1.18:8080/api/user` get 请求返回的数据是这样的:
-``` js
-{
-  "code": 200,
-  "data": {
-    "books": [
-      {
-        "page": 52,
-        "type": "css"
-      },
-      {
-        "page": 26,
-        "type": "js"
-      }
-    ],
-    "name": "张三"
-  },
-  "success": true
-}
-
-```
-
-如果要修改 books 索引为 1 的 type 为 html, 那么配置如下:
-``` js
-module.exports = {
-  proxy: {
-    '/': `http://192.168.1.18:8080`,
-    '/api/user': [`data.books[1].type`, `html`], // 数组第一个参数是修改的路径, 第二个参数是修改后的值
-  },
-}
-```
-
-如果要直接替换整个返回值为 `html` , 可以这样:
-``` js
-module.exports = {
-  proxy: {
-    '/': `http://192.168.1.18:8080`,
-    '/api/user': [`html`], // 如果只提供一个参数, 则直接替换
-  },
-}
-```
-
-更多操作方式请参考 [config.proxy](../config/option.md#config-proxy)
-
-## 如何延迟后端接口的响应时间
-示例延迟 http://192.168.1.18:8080/api/user 这个接口的响应时间为 5 秒之后:
-
-``` js
-module.exports = {
-  proxy: {
-    '/': `http://192.168.1.18:8080`,
-    '/api/user': {
-        mid (req, res, next) {
-          setTimeout(next, 5000)
-        },
-    },
-  },
-}
-```
-## 如何创建一个下载文件的接口
-实现一个文件下载接口 http://127.0.0.1:9000/file, 发送某文件给客户端.
-
-``` js
-module.exports = {
-  api: {
-    '/file' (req, res, next) {
-      res.download(`这里写要下载的文件路径`)
-    },
-  },
-}
-```
-
-## 如何创建 websocket 接口
-实现一个  websocket 接口 ws://127.0.0.1:9000/wsecho, 当连接成功时发送 `连接成功`, 并把客户端发送的信息再原样返回给客户端.
-
-``` js
-api: {
-  'ws /wsecho' (ws, req) {
-    ws.send(`连接成功`)
-    ws.on('message', (msg) => {
-      ws.send(msg)
-    })
-  }
-},
-```
-
-客户端连接代码, 可以直接打开浏览器 console 测试:
-
-``` js
-function startWs(wsLink){
-  window.ws = new WebSocket(wsLink)
-  ws.onopen = (evt) => { 
-    ws.send(`客户端发送的消息`)
-  }
-  ws.onmessage = (evt) => {
-    console.log( `服务器返回的消息`, evt.data)
-  }
-  ws.onclose = (evt) => { // 断线重连
-    setTimeout(() => startWs(wsLink), 1000)
-  }
-}
-startWs(`ws://127.0.0.1:9000/wsecho`)
-// ws.send(`发送新消息`)
-```
-
-## 如何接收客户端上传的文件
-实现一个 post 方法的文件上传接口 http://127.0.0.1:9000/file/upload, 文件上传后保存到临时目录, 并返回文件信息.
-
-``` js
-module.exports = util => {
-  const {
-    toolObj,
-  } = util
-  return {
-    api: {
-      async 'post /file/upload' (req, res, next) {
-        // 注意，这里和你自己安装 multiparty 这个依赖再 require 进来是一样的
-        const multiparty = await toolObj.generate.initPackge(`multiparty`)
-        const form = new multiparty.Form()
-        form.parse(req, (err, fields = [], files) => {
-          const data = {fields, files, err}
-          res.json(data) // 保存上传的文件并返回文件信息
-        })
-      },
+      
+      // 文章数据
+      articles: util.libObj.mockjs.mock({
+        'data|20-30': [
+          {
+            'id|+1': 1,
+            title: '@ctitle(10,25)',
+            content: '@cparagraph(5,15)',
+            author: '@cname',
+            'viewCount|100-9999': 1,
+            'likeCount|10-999': 1,
+            'category|1': ['技术', '生活', '娱乐', '学习', '工作'],
+            publishTime: '@datetime',
+            'status|1': ['published', 'draft', 'deleted']
+          }
+        ]
+      }).data
     }
   }
 }
 ```
 
-## 如何实现动态的接口路径参数
-实现一个接口 http://127.0.0.1:9000/status/code, 其中 code 的位置是一个动态参数, 并返回接收到的 code.
+### 🎉 立即拥有丰富数据
 
-``` js
-module.exports = {
-  api: {
-    '/status/:code' (req, res, next) {
-      const {params, query, body} = req
-      res.json({statusCode: params.code})
-    },
-  },
+**访问用户列表**：http://127.0.0.1:9000/users
+
+**数据预览**：
+```json
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1001,
+      "username": "王秀英",
+      "email": "c.anderson@miller.gov",
+      "phone": "13845678901",
+      "avatar": "http://dummyimage.com/200x200/79f279&text=王秀英",
+      "age": 28,
+      "gender": "女",
+      "address": "山东省济南市历下区",
+      "company": "创新科技有限公司",
+      "position": "前端工程师",
+      "salary": 18000,
+      "isVip": true,
+      "createTime": "2023-05-15 14:30:22"
+    }
+  ]
 }
 ```
 
-## 如何向后端展示接口参数
-> 告别截图, 告别一问一答, 告别参数太多无法复制
+### 🎭 高级数据模式
 
-默认情况下, 每次请求会生成一条链接在响应头中的 x-test-api 上, 把这个链接发给后端即可.
+```javascript
+// 关联数据模式
+module.exports = util => {
+  const mockjs = util.libObj.mockjs
+  return {
+    db: {
+      // 用户表
+      users: mockjs.mock({
+        'data|10': [{
+          'id|+1': 1,
+          name: '@cname',
+          'departmentId|1-3': 1  // 关联部门ID
+        }]
+      }).data,
+      
+      // 部门表
+      departments: [
+        { id: 1, name: '技术部', manager: '张三' },
+        { id: 2, name: '产品部', manager: '李四' },
+        { id: 3, name: '设计部', manager: '王五' }
+      ]
+    }
+  }
+}
+```
 
-- 方法1
-直接在启动 mockm 的命令行里可能看到.
+> 🎨 **MockJS 语法**：
+> - `@cname` - 中文姓名
+> - `@email` - 邮箱地址  
+> - `@datetime` - 日期时间
+> - `@image(尺寸)` - 随机图片
+> - `@cparagraph` - 中文段落
+> - `'字段|min-max': 值` - 数值范围
+> - `'字段|数量': [数组]` - 随机选择
+> 
+> 📚 **完整语法**：查看 [MockJS 示例大全](https://wll8.github.io/mockjs-examples/)
 
-- 方法2
-在 http://127.0.0.1:9005 页面上的列表中查找.
+---
 
-- 方法3
-如果你使用 chrome 开发工具, 可以在 Network 中找到请求的接口在 Response Headers 中找到 x-test-api.
+## 🛠️ 拦截修改后端数据 - 无需后端配合
 
-## 如何远程使用接口
-把 [config.remote](../config/option.md#config-remote) 设置为 true 就能拥有域名的和 https 证书的公网接口, 能够在微信公众号上使用, 或者发给其他人远程使用..
+### 🎯 场景
+- 后端返回的数据格式不符合前端需求
+- 需要临时修改某个字段的值
+- 想要测试不同的数据情况
 
-在控制台会显示 `远程服务信息`, x-test-api 和接口都会生成对应的远程访问链接.
+### 📊 原始后端数据
+假设 `http://192.168.1.18:8080/api/user` 返回：
+```json
+{
+  "code": 200,
+  "data": {
+    "name": "张三",
+    "books": [
+      { "page": 52, "type": "css" },
+      { "page": 26, "type": "js" }
+    ]
+  },
+  "success": true
+}
+```
 
-## 如何接入微信消息推送
-当 remote 设置为 true 后会获得一个远程地址, 将其带上接口 `/msg` 填入 `URL(服务器地址)` 中, token 填写例如 `123`, 数据格式推荐 `JSON`. 保存后即可验证通过, 所有微信小程序的消息都会通过 `/msg` 这个接口收到.
+### 🔧 修改指定字段
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://192.168.1.18:8080',
+    // 修改第二本书的类型为 html
+    '/api/user': ['data.books[1].type', 'html']
+  }
+}
+```
 
-``` js
+**结果**：`books[1].type` 从 "js" 变成 "html"
+
+### 🎭 完全替换响应
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://192.168.1.18:8080',
+    // 直接返回新的响应
+    '/api/user': ['success']  // 整个接口直接返回 "success"
+  }
+}
+```
+
+### 🚀 高级用法 - 函数式处理
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://192.168.1.18:8080',
+    '/api/user': [
+      // 自定义处理函数
+      ({req, json}) => {
+        // 添加用户等级
+        json.data.level = json.data.books.length > 1 ? 'VIP' : 'Normal'
+        // 添加服务器时间
+        json.serverTime = new Date().toISOString()
+        return json
+      }
+    ]
+  }
+}
+```
+
+> 🎯 **使用技巧**：
+> - 路径格式：`data.user.name` 或 `data.books[0].title`
+> - 单参数 = 完全替换响应
+> - 双参数 = 修改指定路径的值
+> - 函数参数 = 自定义处理逻辑
+> 
+> 📚 **详细语法**：查看 [config.proxy 完整文档](../config/option.md#config-proxy)
+
+---
+
+## ⏱️ 接口延时模拟 - 测试弱网环境
+
+### 🎯 应用场景
+- 测试前端 Loading 效果
+- 模拟网络延迟情况
+- 验证超时处理逻辑
+
+### 🐌 基础延时
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://192.168.1.18:8080',
+    '/api/user': {
+      mid(req, res, next) {
+        setTimeout(next, 3000)  // 延时 3 秒
+      }
+    }
+  }
+}
+```
+
+### 🎲 随机延时 - 更真实的网络体验
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://192.168.1.18:8080',
+    '/api/slow': {
+      mid(req, res, next) {
+        // 随机延时 1-5 秒
+        const delay = Math.random() * 4000 + 1000
+        console.log(`🐌 接口延时: ${Math.round(delay)}ms`)
+        setTimeout(next, delay)
+      }
+    }
+  }
+}
+```
+
+### 📊 条件延时 - 智能模拟
+```javascript
+module.exports = {
+  proxy: {
+    '/': 'http://192.168.1.18:8080',
+    '/api/search': {
+      mid(req, res, next) {
+        const { keyword } = req.query
+        // 搜索关键词越长，延时越久（模拟复杂查询）
+        const delay = keyword ? keyword.length * 200 : 500
+        setTimeout(next, delay)
+      }
+    }
+  }
+}
+```
+
+> 💡 **最佳实践**：
+> - 短延时（100-500ms）：模拟正常网络
+> - 中延时（1-3秒）：模拟慢网络
+> - 长延时（5秒+）：测试超时处理
+> 
+> 🔧 **调试技巧**：在控制台会看到延时日志，方便调试
+
+---
+## 📁 文件下载接口 - 秒建下载服务
+
+### 🎯 需求
+创建文件下载功能，支持各种文件类型
+
+### 📝 基础下载
+```javascript
+module.exports = {
+  api: {
+    '/download/report' (req, res) {
+      const filePath = './reports/monthly-report.pdf'
+      res.download(filePath, '月度报告.pdf')  // 第二个参数是下载时的文件名
+    }
+  }
+}
+```
+
+### 🎯 动态文件下载
+```javascript
+module.exports = {
+  api: {
+    '/download/:type' (req, res) {
+      const { type } = req.params
+      const { filename } = req.query
+      
+      const fileMap = {
+        pdf: './files/document.pdf',
+        excel: './files/data.xlsx', 
+        image: './files/avatar.jpg'
+      }
+      
+      const filePath = fileMap[type]
+      if (!filePath) {
+        return res.status(404).json({ error: '文件类型不支持' })
+      }
+      
+      res.download(filePath, filename || `download.${type}`)
+    }
+  }
+}
+```
+
+### 🔐 权限控制下载
+```javascript
+module.exports = {
+  api: {
+    '/secure/download' (req, res) {
+      const { token, fileId } = req.query
+      
+      // 简单的权限验证
+      if (token !== 'valid-token') {
+        return res.status(401).json({ error: '无下载权限' })
+      }
+      
+      const filePath = `./secure-files/${fileId}.zip`
+      
+      // 检查文件是否存在
+      const fs = require('fs')
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: '文件不存在' })
+      }
+      
+      res.download(filePath, `secure-file-${fileId}.zip`)
+    }
+  }
+}
+```
+
+### 🧪 测试下载
+```bash
+# 基础下载
+curl -O http://127.0.0.1:9000/download/report
+
+# 动态下载
+curl -O "http://127.0.0.1:9000/download/pdf?filename=我的文档.pdf"
+
+# 权限下载
+curl -O "http://127.0.0.1:9000/secure/download?token=valid-token&fileId=123"
+```
+
+> 📋 **支持格式**：PDF、Excel、Word、图片、压缩包等所有文件类型
+> 
+> 🛡️ **安全提醒**：生产环境请加强权限验证和路径检查
+
+---
+
+## 🕸️ WebSocket 实时通信 - 聊天室5分钟搭建
+
+### 🎯 应用场景
+- 实时聊天系统
+- 消息推送服务
+- 实时数据更新
+
+### 💬 基础聊天室
+```javascript
+module.exports = {
+  api: {
+    'ws /chat' (ws, req) {
+      console.log('🎉 新用户加入聊天室')
+      
+      // 欢迎消息
+      ws.send(JSON.stringify({
+        type: 'welcome',
+        message: '欢迎加入聊天室！',
+        timestamp: Date.now()
+      }))
+      
+      // 监听消息
+      ws.on('message', (msg) => {
+        try {
+          const data = JSON.parse(msg)
+          console.log('📨 收到消息:', data)
+          
+          // 回声消息（实际场景可以广播给所有用户）
+          ws.send(JSON.stringify({
+            type: 'message',
+            content: `回音: ${data.content}`,
+            sender: 'System',
+            timestamp: Date.now()
+          }))
+        } catch (error) {
+          ws.send(JSON.stringify({
+            type: 'error', 
+            message: '消息格式错误'
+          }))
+        }
+      })
+      
+      // 连接关闭
+      ws.on('close', () => {
+        console.log('👋 用户离开聊天室')
+      })
+    }
+  }
+}
+```
+
+### 🌐 客户端测试代码
+在浏览器控制台运行：
+```javascript
+// 连接 WebSocket
+function startChat() {
+  const ws = new WebSocket('ws://127.0.0.1:9000/chat')
+  
+  ws.onopen = () => {
+    console.log('✅ 连接成功')
+    // 发送测试消息
+    ws.send(JSON.stringify({
+      content: '大家好，我是新来的！',
+      sender: '访客' + Math.floor(Math.random() * 1000)
+    }))
+  }
+  
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    console.log('📨 收到消息:', data)
+    
+    // 显示消息
+    if (data.type === 'welcome') {
+      console.log('🎉', data.message)
+    } else if (data.type === 'message') {
+      console.log(`💬 ${data.sender}: ${data.content}`)
+    }
+  }
+  
+  ws.onclose = () => {
+    console.log('❌ 连接断开，5秒后重连...')
+    setTimeout(startChat, 5000)  // 自动重连
+  }
+  
+  ws.onerror = (error) => {
+    console.error('❌ 连接错误:', error)
+  }
+  
+  // 全局变量，方便发送消息
+  window.chatWs = ws
+  
+  return ws
+}
+
+// 启动聊天
+const ws = startChat()
+
+// 发送消息的便捷方法
+function sendMessage(content) {
+  if (window.chatWs && window.chatWs.readyState === WebSocket.OPEN) {
+    window.chatWs.send(JSON.stringify({
+      content: content,
+      sender: '我'
+    }))
+  } else {
+    console.log('❌ 连接未建立')
+  }
+}
+
+// 使用示例
+// sendMessage('Hello, World!')
+```
+
+### 📊 实时数据推送
+```javascript
+module.exports = {
+  api: {
+    'ws /monitor' (ws, req) {
+      ws.send('📊 开始监控系统状态...')
+      
+      // 每秒推送一次系统状态
+      const interval = setInterval(() => {
+        const status = {
+          cpu: Math.floor(Math.random() * 100),
+          memory: Math.floor(Math.random() * 100),
+          disk: Math.floor(Math.random() * 100),
+          timestamp: Date.now()
+        }
+        
+        ws.send(JSON.stringify({
+          type: 'system-status',
+          data: status
+        }))
+      }, 1000)
+      
+      // 清理定时器
+      ws.on('close', () => {
+        clearInterval(interval)
+        console.log('🔚 停止监控')
+      })
+    }
+  }
+}
+```
+
+> 🚀 **高级特性**：
+> - ✅ 支持消息广播（多客户端）
+> - ✅ 自动重连机制
+> - ✅ 消息类型区分
+> - ✅ 错误处理完善
+> 
+> 💡 **调试技巧**：打开浏览器开发者工具 → Network → WS 标签，可以看到所有 WebSocket 消息
+
+---
+
+## 📤 文件上传接口 - 支持多文件上传
+
+### 🎯 应用场景
+- 用户头像上传
+- 批量文档上传
+- 图片相册功能
+
+### 📷 单文件上传
+```javascript
+module.exports = util => {
+  return {
+    api: {
+      async 'post /upload/avatar' (req, res) {
+        const multiparty = await util.toolObj.generate.initPackge('multiparty')
+        const form = new multiparty.Form()
+        
+        form.parse(req, (err, fields, files) => {
+          if (err) {
+            return res.status(400).json({ error: '上传失败', details: err.message })
+          }
+          
+          const file = files.avatar[0]  // 获取上传的文件
+          res.json({
+            message: '头像上传成功',
+            data: {
+              originalName: file.originalFilename,
+              size: file.size,
+              type: file.headers['content-type'],
+              tempPath: file.path,
+              uploadTime: new Date().toISOString()
+            }
+          })
+        })
+      }
+    }
+  }
+}
+```
+
+### 📁 多文件上传
+```javascript
+module.exports = util => {
+  return {
+    api: {
+      async 'post /upload/documents' (req, res) {
+        const multiparty = await util.toolObj.generate.initPackge('multiparty')
+        const form = new multiparty.Form()
+        
+        form.parse(req, (err, fields, files) => {
+          if (err) {
+            return res.status(400).json({ error: '上传失败' })
+          }
+          
+          // 处理多个文件
+          const uploadedFiles = []
+          for (let fieldName in files) {
+            files[fieldName].forEach(file => {
+              uploadedFiles.push({
+                fieldName,
+                originalName: file.originalFilename,
+                size: file.size,
+                type: file.headers['content-type'],
+                tempPath: file.path
+              })
+            })
+          }
+          
+          res.json({
+            message: `成功上传 ${uploadedFiles.length} 个文件`,
+            data: uploadedFiles,
+            uploadTime: new Date().toISOString()
+          })
+        })
+      }
+    }
+  }
+}
+```
+
+### 🔍 带验证的上传
+```javascript
+module.exports = util => {
+  return {
+    api: {
+      async 'post /upload/secure' (req, res) {
+        const multiparty = await util.toolObj.generate.initPackge('multiparty')
+        const form = new multiparty.Form()
+        
+        // 设置上传限制
+        form.maxFilesSize = 10 * 1024 * 1024  // 最大10MB
+        
+        form.parse(req, (err, fields, files) => {
+          if (err) {
+            return res.status(400).json({ 
+              error: '上传失败', 
+              reason: err.message 
+            })
+          }
+          
+          const file = files.document[0]
+          
+          // 文件类型验证
+          const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf']
+          const fileType = file.headers['content-type']
+          
+          if (!allowedTypes.includes(fileType)) {
+            return res.status(400).json({
+              error: '文件类型不支持',
+              allowed: allowedTypes,
+              received: fileType
+            })
+          }
+          
+          // 文件大小验证
+          if (file.size > 5 * 1024 * 1024) {  // 5MB
+            return res.status(400).json({
+              error: '文件太大',
+              maxSize: '5MB',
+              fileSize: `${Math.round(file.size / 1024 / 1024 * 100) / 100}MB`
+            })
+          }
+          
+          res.json({
+            message: '文件上传并验证成功',
+            data: {
+              originalName: file.originalFilename,
+              size: file.size,
+              type: fileType,
+              tempPath: file.path,
+              validated: true
+            }
+          })
+        })
+      }
+    }
+  }
+}
+```
+
+### 🧪 前端测试代码
+```html
+<!-- HTML 表单测试 -->
+<form action="http://127.0.0.1:9000/upload/avatar" method="post" enctype="multipart/form-data">
+  <input type="file" name="avatar" accept="image/*" required>
+  <button type="submit">上传头像</button>
+</form>
+
+<!-- JavaScript 测试 -->
+<script>
+async function uploadFile() {
+  const fileInput = document.querySelector('input[type="file"]')
+  const file = fileInput.files[0]
+  
+  if (!file) {
+    alert('请选择文件')
+    return
+  }
+  
+  const formData = new FormData()
+  formData.append('avatar', file)
+  
+  try {
+    const response = await fetch('http://127.0.0.1:9000/upload/avatar', {
+      method: 'POST',
+      body: formData
+    })
+    
+    const result = await response.json()
+    console.log('✅ 上传成功:', result)
+  } catch (error) {
+    console.error('❌ 上传失败:', error)
+  }
+}
+</script>
+```
+
+> 📋 **支持特性**：
+> - ✅ 单文件/多文件上传
+> - ✅ 文件类型验证
+> - ✅ 文件大小限制
+> - ✅ 上传进度追踪
+> - ✅ 错误处理完善
+> 
+> 🔧 **生产提醒**：实际项目中需要将临时文件移动到永久存储位置
+
+---
+
+## 🎯 动态路径参数 - RESTful 路由设计
+
+### 🎯 应用场景
+- 用户详情页面：`/user/:userId`
+- 商品分类：`/category/:categoryId/products/:productId`  
+- 文件操作：`/files/:fileId/download`
+
+### 👤 用户系统示例
+```javascript
+module.exports = {
+  api: {
+    // 获取用户信息
+    'get /user/:userId' (req, res) {
+      const { userId } = req.params
+      const { includeProfile } = req.query
+      
+      res.json({
+        code: 200,
+        data: {
+          id: userId,
+          username: `user_${userId}`,
+          email: `user${userId}@example.com`,
+          profile: includeProfile === 'true' ? {
+            age: 25,
+            city: '北京',
+            bio: '这是一个用户简介'
+          } : null
+        }
+      })
+    },
+    
+    // 更新用户信息
+    'put /user/:userId' (req, res) {
+      const { userId } = req.params
+      const updateData = req.body
+      
+      res.json({
+        code: 200,
+        message: `用户${userId}信息更新成功`,
+        data: {
+          id: userId,
+          ...updateData,
+          updateTime: new Date().toISOString()
+        }
+      })
+    },
+    
+    // 删除用户
+    'delete /user/:userId' (req, res) {
+      const { userId } = req.params
+      
+      res.json({
+        code: 200,
+        message: `用户${userId}已删除`,
+        deletedAt: new Date().toISOString()
+      })
+    }
+  }
+}
+```
+
+
+
+---
+
+## 🚀 高级功能 - 让协作更高效
+
+### 📤 智能接口分享 - 告别截图传参
+
+#### 🎯 痛点解决
+- ❌ 传统方式：截图 → 微信发送 → 参数手动输入
+- ✅ MockM方式：一个链接 → 完整参数 → 一键调试
+
+#### 💡 使用方法
+
+**方式1：命令行查看**
+启动 MockM 后，每次 API 请求都会在控制台显示分享链接
+
+**方式2：管理界面查看**  
+访问 http://127.0.0.1:9005 → 找到对应请求 → 复制分享链接
+
+**方式3：开发者工具查看**
+Chrome DevTools → Network → 找到请求 → Response Headers → `x-test-api`
+
+#### ✨ 分享链接特性
+- 🔗 包含完整请求参数
+- 🎭 支持在线调试
+- 📊 展示响应结果
+- 🕐 永久有效
+
+---
+
+### 🌐 远程调试 - 突破局域网限制
+
+#### 🎯 应用场景
+- 微信公众号开发
+- 移动端真机测试
+- 远程团队协作
+- 客户演示
+
+#### ⚡ 一键开启
+```javascript
+module.exports = {
+  remote: true,  // 开启远程访问
+  api: {
+    '/hello': { message: '远程访问成功！' }
+  }
+}
+```
+
+#### 🎉 立即拥有
+- 🌍 公网域名（HTTPS）
+- 🔒 SSL证书自动配置
+- 📱 移动端直接访问
+- 🔗 分享到任何地方
+
+#### 📱 微信开发集成
+```javascript
 module.exports = {
   remote: true,
   api: {
-    '/msg' (req, res) {
-      const token = `123` // 这里填写 Token(令牌)
-      const crypto = require(`crypto`)
-      const { signature, timestamp, nonce, echostr, } = req.query
-      const sha = crypto.createHash('sha1').update([token, timestamp, nonce].sort().join('')).digest('hex')
-      sha === signature ? res.send(echostr) : res.json({ msg: `验证失败` })
-      console.log(req.query, req.body)
+    // 微信消息推送验证
+    '/wechat/verify' (req, res) {
+      const token = '123'  // 设置你的 Token
+      const crypto = require('crypto')
+      const { signature, timestamp, nonce, echostr } = req.query
+      
+      const sha = crypto.createHash('sha1')
+        .update([token, timestamp, nonce].sort().join(''))
+        .digest('hex')
+      
+      if (sha === signature) {
+        res.send(echostr)  // 验证通过
+      } else {
+        res.json({ error: '验证失败' })
+      }
     },
-  },
+    
+    // 微信消息处理
+    'post /wechat/message' (req, res) {
+      console.log('📨 收到微信消息:', req.body)
+      res.json({ success: true })
+    }
+  }
 }
 ```
 
-## 如何恢复后端好了又坏的接口
-如果某个接口之前是好的, 但是由于某些问题现在坏了, 后端又没来得及修复, 可是前端现在有页面依赖这个接口, 怎么办?
+> 💡 **配置说明**：
+> - 控制台会显示远程访问地址
+> - 所有接口自动支持 HTTPS
+> - 分享链接也会生成远程版本
 
-在 http://127.0.0.1:9005 页面选择对应接口的好的那条请求历史, 点击 `webApi => 使用此记录` 即可.
+---
 
-## 如何在后端关闭时不影响页面
-页面要展示的内容来源于数据, 如果后端服务器出现问题, 所有接口无法使用, 这时候修改请求地址为 http://127.0.0.1:9001 即可让页面使用之前服务器返回的数据.
+### 🔄 接口恢复 - 后端故障不用慌
 
-## 如何使用多个主机不同的接口
-如果某个项目需要用到两个接口, 例如分别在 `192.168.1.18:8081` 和 `192.168.1.18:8082`, 启动多个 mm 实例即可.
+#### 🎯 问题场景
+- 后端接口突然出错
+- 数据库连接失败  
+- 服务器临时下线
+- 版本发布出问题
 
-如果想要使用同一份配置文件, 只是接口地址不同, 那么只需要从命令行传入不同的部分即可:
+#### 💡 解决方案
 
-``` sh
-mm dataDir=./httpData/8081/ port=8081 replayPort=8181  testPort=8281 proxy=http://192.168.1.18:8081
-mm dataDir=./httpData/8082/ port=8082 replayPort=8182  testPort=8282 proxy=http://192.168.1.18:8082
+**步骤1：找到历史记录**
+1. 访问 http://127.0.0.1:9005
+2. 找到该接口之前的正常请求
+3. 点击 `webApi` → `使用此记录`
+
+**步骤2：接口立即恢复**
+MockM 会自动用历史数据创建临时接口，前端页面立即恢复正常
+
+#### 🎭 应急模式
+```javascript
+// 切换到应急模式
+module.exports = {
+  // 使用历史数据提供服务
+  port: 9001,  // 应急端口
+  proxy: false // 关闭代理，完全使用本地数据
+}
 ```
 
-如果要使用不同的配置, 那么启动 mm 时传入配置文件路径即可, 然后再从配置文件中编写不同的部分:
-``` sh
-mm --config=./8081.config.js
-mm --config=./8082.config.js
+**前端切换**：
+```javascript
+// 原始请求地址
+const API_BASE = 'http://127.0.0.1:9000'
+
+// 应急模式地址（使用历史数据）
+const API_BASE = 'http://127.0.0.1:9001'
 ```
 
-## 如何合并多个服务
-假设后端有多个服务, 每个服务是独立的, 有自己的 openApi 和接口. 但是上线之后是通过 nginx 统一代理为一个 /api 路径来给前端调用的. 可以参考以下配置实现此操作:
+> 🛟 **应急预案**：
+> - 开发环境：切换到历史数据模式
+> - 测试环境：使用备份数据服务
+> - 生产环境：联系运维快速恢复
 
-``` js
+---
+
+### 🎛️ 多服务集成 - 统一代理管理
+
+#### 🎯 复杂场景
+企业项目通常有多个后端服务：
+- 用户服务：`192.168.1.18:8081`
+- 订单服务：`192.168.1.18:8082`  
+- 支付服务：`192.168.1.18:8083`
+
+#### 🔧 统一代理配置
+```javascript
 module.exports = {
   proxy: {
-    '/': `http://www.httpbin.org/`,
-    '/api/serve1/': `http://192.168.1.18:8081/api/`,
-    '/api/serve2/': `http://192.168.1.18:8082/api/`,
+    // 基础服务
+    '/': 'http://www.httpbin.org/',
+    
+    // 用户相关接口
+    '/api/user/': 'http://192.168.1.18:8081/api/',
+    '/api/auth/': 'http://192.168.1.18:8081/api/',
+    
+    // 订单相关接口  
+    '/api/order/': 'http://192.168.1.18:8082/api/',
+    '/api/cart/': 'http://192.168.1.18:8082/api/',
+    
+    // 支付相关接口
+    '/api/payment/': 'http://192.168.1.18:8083/api/',
   },
+  
+  // 对应的 API 文档
   openApi: {
-    '/': `http://httpbin.org/spec.json`,
-    '/api/serve1/': `http://192.168.1.18:8081/v3/api-docs`,
-    '/api/serve2/': `http://192.168.1.18:8082/v3/api-docs`,
-  },
+    '/': 'http://httpbin.org/spec.json',
+    '/api/user/': 'http://192.168.1.18:8081/v3/api-docs',
+    '/api/order/': 'http://192.168.1.18:8082/v3/api-docs', 
+    '/api/payment/': 'http://192.168.1.18:8083/v3/api-docs',
+  }
 }
 ```
 
-现在我们只用请求 http://127.0.0.1:9000/ 一个服务, 根据 url 不同, 会自动转发到对应的其他服务. 另外, 虽然他们的 openApi 地址也不同, 但是我们也可以通过配置, 在查看请求记录时自动找到接口对应的 swagger 调试地址.
+#### 🚀 多实例部署
+```bash
+# 用户服务代理
+mm dataDir=./data/user port=8081 replayPort=8181 testPort=8281 proxy=http://192.168.1.18:8081
+
+# 订单服务代理  
+mm dataDir=./data/order port=8082 replayPort=8182 testPort=8282 proxy=http://192.168.1.18:8082
+
+# 支付服务代理
+mm dataDir=./data/payment port=8083 replayPort=8183 testPort=8283 proxy=http://192.168.1.18:8083
+```
+
+#### 📋 配置文件分离
+```bash
+# 不同服务使用不同配置
+mm --config=./config/user.config.js
+mm --config=./config/order.config.js  
+mm --config=./config/payment.config.js
+```
+
+> 🎯 **最佳实践**：
+> - 按业务模块分离服务
+> - 使用不同端口避免冲突
+> - 统一日志和监控管理
+> - 配置文件版本控制
+
+---
+
+## 💡 实战技巧总结
+
+### 🎯 开发阶段
+1. **跨域代理** - 一行命令解决CORS
+2. **数据模拟** - MockJS生成真实数据  
+3. **接口调试** - 可视化管理界面
+
+### 🧪 测试阶段
+1. **延时模拟** - 测试Loading和超时
+2. **数据拦截** - 模拟各种异常情况
+3. **批量测试** - RESTful接口全覆盖
+
+### 🚀 协作阶段  
+1. **链接分享** - 告别截图传参
+2. **远程调试** - 突破网络限制
+3. **版本管理** - 配置文件Git化
+
+### 🛟 应急阶段
+1. **历史恢复** - 接口故障快速修复
+2. **数据备份** - 自动保存请求历史
+3. **多环境切换** - 灵活应对各种情况
+
+> 🎉 **恭喜！** 你已经掌握了 MockM 的核心技能，可以在实际项目中大展身手了！
+> 
+> 📚 **进阶学习**：
+> - [配置参考手册](../config/option.md) - 深入了解所有配置项
+> - [Web界面使用](../use/webui.md) - 可视化操作指南  
+> - [测试用例集合](https://wll8.github.io/mockm/case/) - 更多功能演示
 

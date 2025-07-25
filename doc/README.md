@@ -1,38 +1,86 @@
-# mockm
-<p align="center">
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm" alt="Downloads"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm.svg" alt="Version"></a>
-  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm.svg" alt="License"></a>
-<p>
+# MockM - 前后端开发神器 🚀
 
 <p align="center">
-  <a href="https://wll8.github.io/mockm/use/try.html">尝试</a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/dt/mockm?style=flat-square&color=blue" alt="Downloads"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/v/mockm?style=flat-square&color=green" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/mockm"><img src="https://img.shields.io/npm/l/mockm?style=flat-square&color=orange" alt="License"></a>
+  <a href="https://github.com/wll8/mockm/stargazers"><img src="https://img.shields.io/github/stars/wll8/mockm?style=social" alt="Stars"></a>
+</p>
+
+<p align="center">
+  <a href="https://wll8.github.io/mockm/use/try.html">🚀 快速开始</a>
   <span>&nbsp;|&nbsp;</span>
-  <a href="https://wll8.github.io/mockm/use/example.html">示例</a>
-<p>
+  <a href="https://wll8.github.io/mockm/use/example.html">💡 使用示例</a>
+  <span>&nbsp;|&nbsp;</span>
+  <a href="https://wll8.github.io/mockm/config/option.html">📖 配置文档</a>
+</p>
 
-集模拟和调试功能于一身. 自动生成数据和增删查改一系列接口, 支持文件上传下载, 延迟, 自定义接口逻辑...
+> **一行命令，秒变 API 服务器** - 集模拟、代理、调试于一体的前后端协作利器
 
-## 特性
-- 支持 0 侵入, 无需修改项目中的任何代码即可投入使用
-- 快速生成接口和数据, 以及文档
-- 支持 Restful API
-- 以最方便的形式支持 api 拦截, 注入, 请求及响应修改
-- 修改实时生效
-- 支持自动允许跨域
-- 自动带参调试, 无需登录
-- 自动根据接口查找文档和调试地址, 标识字段描述
-- 请求记录, 重放
-- 当提供接口的后端服务出现问题, 也可最大程度还原接口响应
-- 参数预校验, 助你分析接口联调的问题所在
-- 无需数据库支持
-- 根据接口生成业务代码
-- 跨平台, 支持 linux macos windows
-- 支持远程调试, 一个属性完成内网穿透
+## ✨ 核心优势
 
-## 友情推荐
+🎯 **零配置启动** - 2 行命令即可拥有完整 API 服务器  
+🔄 **智能代理** - 一键解决跨域问题，无需修改任何代码  
+📊 **数据生成** - 内置 MockJS，生成逼真测试数据  
+🎭 **RESTful API** - 自动生成 CRUD 接口，支持搜索分页  
+🌐 **远程调试** - 内置内网穿透，随时分享调试链接  
+📱 **可视化管理** - Web UI 界面，人性化操作  
+⚡ **热更新** - 配置修改实时生效，开发体验流畅
 
-| 项目                                                               | 简介                                                                                                                  |
-| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| [taroify](https://github.com/mallfoundry/taroify)                  | Taroify 是移动端组件库 Vant 的 Taro 版本，两者基于相同的视觉规范，提供一致的 API 接口，助力开发者快速搭建小程序应用。 |
-| [wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 一个基于Vue3+TS开发的uni-app组件库，提供70+高质量组件，支持暗黑模式、国际化和自定义主题。                             |
+## 🚀 30 秒上手
+
+```bash
+# 安装
+npm i -g mockm
+
+# 启动（自动创建示例配置）
+mm --config
+```
+
+**立即体验**：
+- 🌐 API 服务：http://127.0.0.1:9000/api/1
+- 📊 管理界面：http://127.0.0.1:9005
+- 🔧 配置文件：查看生成的 `mm.config.js`
+
+## 🎯 典型应用
+
+### 前端开发者
+- **跨域代理** - 一行配置解决开发环境跨域
+- **Mock 数据** - 无需等待后端，立即开始开发
+- **接口调试** - 可视化界面，完整请求历史
+
+### 后端开发者
+- **API 文档** - 自动生成，前端易于对接
+- **参数分享** - 一键生成调试链接，告别截图
+- **接口测试** - 内置测试工具，支持各种场景
+
+### 团队协作
+- **远程调试** - 内网穿透，随时分享给同事
+- **版本管理** - 配置文件化，Git 友好
+- **环境切换** - 灵活的多环境配置
+
+## 📚 文档导航
+
+### 📖 新手指南
+- [🚀 快速开始](https://wll8.github.io/mockm/use/try.html) - 5 分钟上手指南
+- [💡 使用示例](https://wll8.github.io/mockm/use/example.html) - 常见场景解决方案
+- [🌐 Web 界面](https://wll8.github.io/mockm/use/webui.html) - 可视化操作指南
+
+### 🔧 进阶配置
+- [📋 配置选项](https://wll8.github.io/mockm/config/option.html) - 完整配置参考
+- [⚙️ 命令行参数](https://wll8.github.io/mockm/config/cli.html) - CLI 使用说明
+- [📁 文件结构](https://wll8.github.io/mockm/use/outfile.html) - 数据文件说明
+
+### 🛠️ 开发相关
+- [🧪 测试用例](https://wll8.github.io/mockm/case/) - 功能演示
+- [🏗️ 开发文档](https://wll8.github.io/mockm/dev/) - 贡献指南
+
+
+## 🌟 友情链接
+
+| 项目 | 简介 |
+|------|------|
+| [🎨 Taroify](https://github.com/mallfoundry/taroify) | 移动端组件库 Vant 的 Taro 版本，助力小程序开发 |
+| [🎯 wot-design-uni](https://github.com/Moonofweisheng/wot-design-uni) | 基于 Vue3+TS 的 uni-app 组件库，70+ 高质量组件 |
+
+如果你有项目需要在此页面上展示，请告诉我。

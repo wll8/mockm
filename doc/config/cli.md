@@ -1,69 +1,133 @@
-# 命令行参数
-## 从命令行传入配置项
-某些情况下, 通过命令行传入可能更简便, 支持 [配置选项](../config/option.md) 中的以下值类型:
-- string
-- boolean
-- number
+# 命令行参数 ⚡
 
-示例:
-``` sh
-mm proxy=https://httpbin.org/
+MockM 支持通过命令行快速配置，让你无需创建配置文件即可启动服务。
+
+## 🎯 快速配置
+
+### 基本语法
+```bash
+mm [配置项]=[值]
 ```
 
-上面的参数对应的选项是 [config.proxy](../config/option.md#config-proxy):
+支持的值类型：`string`、`boolean`、`number`
 
-与下列配置文件的效果是一样的:
+### 常用示例
+```bash
+# 启动代理服务
+mm proxy=https://api.example.com
 
-``` js
-module.exports = {
-  proxy: `https://httpbin.org/`,
-}
+# 指定端口
+mm port=8080
+
+# 启用进程守护
+mm guard=true
+
+# 组合配置
+mm proxy=https://api.example.com port=8080 guard=true
 ```
 
-当命令行参数与文件配置冲突时, 命令行参数优先.
+**优先级**：命令行参数 > 配置文件 > 默认值
 
-## 仅有命令行可用的参数
-以下参数仅可以在命令行上使用, 写在配置文件中是无效的:
-### --cwd
-设置程序的工作目录, 默认为当前运行命令的目录, 支持相对路径和绝对路径.
+## 🛠️ 专用参数
 
-### --template
-生成常用 mockm 配置, 此操作在运行目录下做了以下几件事:
-- 在 package.json 中添加命令 `"mm": "npx mockm --cwd=mm"` 和自身版本的开发依赖
-- 创建名为 mm 的目录并在其中放置 mockm 配置文件
+以下参数仅能在命令行使用：
 
-推荐将 mockm 安装到项目中, 之后应使用 `npm run mm` 来启动 mockm.
+### `--config` 配置文件
+指定配置文件路径，支持自动创建。
 
-注: 不会覆盖已存在的配置和文件.
+```bash
+# 使用指定配置文件
+mm --config=my-config.js
 
-### --config
-指定配置文件地址. 
+# 自动生成示例配置（推荐新手）
+mm --config
 
-例如传入 `--config=test/mm.config.js` 则表示使用 test 目录下的 mm.config.js 文件作为配置, 若不存在则从示例配置自动创建.
+# 生成到指定路径
+mm --config=test/mm.config.js
+```
 
-当命令行上仅传入 `--config` 或 `--config=true` 值时, 如果当前目录不存在配置文件, 则会自动生成一份较为完整的, 然后按自己的需求修改即可.
+### `--template` 项目模板
+在当前目录生成 MockM 项目模板。
 
-### --no-update
-禁用更新检查.
+```bash
+mm --template
+```
 
-### --log-line
-显示 console.log 所在的行.
+**生成内容**：
+- 📝 `package.json` 中添加 MockM 依赖和脚本
+- 📁 创建 `mm/` 目录和配置文件
+- 🚀 之后使用 `npm run mm` 启动
 
-### --version
-仅查看版本号, 然后退出程序, 不启动服务.
+### `--cwd` 工作目录
+设置程序运行的工作目录。
 
-### --node-options
-指定 node 的运行参数, 例如 `--node-options="--inspect-brk"` 可以进入调试模式.
+```bash
+# 使用相对路径
+mm --cwd=./mock
 
-## 环境变量
-### MOCKM_REGISTRY
-MOCKM_REGISTRY 可以指定按需安装依赖时的镜像地址, 默认跟随当前 npm 配置, 不存在时使用 https://registry.npmmirror.com/.
+# 使用绝对路径
+mm --cwd=/path/to/mock
+```
 
-::: details 为什么不使用默认的 NPM_CONFIG_REGISTRY? 
-- 1 假设你通过修改了 npm 的默认镜像地址, 例如 `nrm use taobao`, 
-- 2 你没有指定 NPM_CONFIG_REGISTRY 环境变量,
-- 3 package.json 中有以下 scripts `"dev": "mockm"`,
-- 4 当你运行 `yarn dev` 时, yarn 会自动把 NPM_CONFIG_REGISTRY 值设置为 `https://registry.yarnpkg.com/`, 这与第 2 步冲突了.
+### 其他实用参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `--version` | 显示版本号并退出 | `mm --version` |
+| `--no-update` | 禁用自动更新检查 | `mm --no-update` |
+| `--log-line` | 显示日志所在行号 | `mm --log-line` |
+| `--node-options` | 传递 Node.js 参数 | `mm --node-options="--inspect"` |
+
+## 🌍 环境变量
+
+### `MOCKM_REGISTRY`
+指定按需安装依赖时的镜像地址。
+
+```bash
+# 使用国内镜像
+export MOCKM_REGISTRY=https://registry.npmmirror.com/
+mm --config
+```
+
+**默认行为**：
+1. 优先使用 `MOCKM_REGISTRY` 环境变量
+2. 其次使用当前 npm 配置的镜像
+3. 最后使用 `https://registry.npmmirror.com/`
+
+::: tip 为什么不直接使用 NPM_CONFIG_REGISTRY？
+避免与包管理器冲突。例如运行 `yarn dev` 时，yarn 会自动设置 `NPM_CONFIG_REGISTRY=https://registry.yarnpkg.com/`，可能导致安装失败。
 :::
+
+## 💡 实用技巧
+
+### 快速启动常用配置
+```bash
+# 创建别名（Linux/macOS）
+alias mmp="mm proxy=https://api.example.com port=8080"
+
+# Windows PowerShell
+function mmp { mm proxy=https://api.example.com port=8080 }
+```
+
+### 调试模式
+```bash
+# Node.js 调试模式
+mm --node-options="--inspect-brk" --config
+
+# 显示详细日志
+mm --log-line --config
+```
+
+### 多环境配置
+```bash
+# 开发环境
+mm --config=dev.config.js
+
+# 测试环境  
+mm --config=test.config.js
+
+# 生产环境（代理）
+mm --config=prod.config.js
+```
 
 

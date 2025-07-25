@@ -1,223 +1,274 @@
-# web 界面
-访问 testPort 指定的地址, 例如 http://localhost:9005, 你会看到如下界面:
+# Web 管理界面 📱
 
-## 请求列表
-所有被拦截的请求都会实时出现在这里.
+访问管理界面：http://localhost:9005
 
-![请求列表](~@doc/image/mockm_api_list_2020-09-21_100140.png)
+![Web管理界面总览](~@doc/image/mockm_api_list_2020-09-21_100140.png)
 
-表头列内容含义:
+## 🔍 请求监控
 
-表头 | 含义
-- | -
-id | 请求 id
-code | 响应状态码
-type | 响应的内容类型
-method | 请求文件
-api | 请求地址
+### 实时请求列表
+所有被拦截的请求都会实时显示，支持排序和搜索。
 
-表头可进行排序功能.
+![请求列表详情](~@doc/image/mockm_api_list_2020-09-21_100140.png)
 
-- [ ] 请求内容搜索功能正在规划中
+| 列名 | 说明 | 功能 |
+|------|------|------|
+| **ID** | 请求唯一标识 | 点击查看详情 |
+| **Code** | HTTP 状态码 | 🟢 2xx 🟡 3xx 🔴 4xx/5xx |
+| **Type** | 响应内容类型 | JSON、HTML、图片等 |
+| **Method** | HTTP 请求方法 | GET、POST、PUT、DELETE |
+| **API** | 请求路径 | 支持搜索过滤 |
 
-## 请求详情
-### 简要信息区
-包含了 api 请求方法, 以及 url 地址.
+### 快速操作
+- 🔍 **搜索过滤** - 按路径、状态码、方法快速查找
+- 📊 **排序** - 点击表头按任意列排序
+- 🔄 **自动刷新** - 新请求实时显示
 
-### 功能区
+## 🔬 请求详情
 
-- **replay**
-![replay](~@doc/image/mockm_replay_2020-11-10-11-21-51.png)
+### 核心功能
 
-重放, 使用当前请求的参数再重新请求一次接口.
+#### 🔄 重放 (Replay)
+![重放功能](~@doc/image/mockm_replay_2020-11-10-11-21-51.png)
 
-后台可以使用这个功能来快速重现错误, 而不必登录账号, 不必重新构造接口数据.
+**一键重现错误**：使用完全相同的参数重新发起请求。
 
-- **capture**
-![capture](~@doc/image/mockm_capture_2020-11-10-11-29-22.png)
+**使用场景**：
+- 🐛 快速重现 Bug，无需重新登录
+- 🧪 测试接口稳定性
+- 🔄 验证修复效果
 
-获取当前页面截图, 作为简单的 `留证` .
+#### 📸 截图 (Capture)
+![截图功能](~@doc/image/mockm_capture_2020-11-10-11-29-22.png)
 
-如果你只需要别人能远程访问, 可使用[远程选项](../config/option.md#config-remote).
+**快速留证**：一键截取当前页面状态。
 
-- **swagger**
-![swagger](~@doc/image/mockm_swagger_2020-11-10-11-32-18.png)
+**适用于**：
+- 📝 Bug 报告附图
+- 📊 界面状态记录
+- 🤝 与团队分享问题
 
-配置 openApi 后, 会自动查找 api 对应的 swagger 视图供使用. 例如 `Try it out` 进行请求调试, 查看 module 定义.
+#### 📖 Swagger 集成
+![Swagger集成](~@doc/image/mockm_swagger_2020-11-10-11-32-18.png)
 
-请求时, 会自动添加最新 token, 意味着你不需要手动登录就能调试接口.
+**自动关联文档**：配置 OpenAPI 后自动显示对应的 Swagger 调试界面。
 
-- **history**
-![history](~@doc/image/mockm_history_2020-11-10-11-33-26.png)
+**核心优势**：
+- 🔑 自动携带最新 Token，无需手动登录
+- 📋 查看完整接口定义和参数说明
+- 🧪 直接在文档中测试接口
 
-查看当前 api 的所有请求历史列表, 点击某条历史, 跳转到对应的请求详情.
+#### 📜 历史记录 (History)
+![历史记录](~@doc/image/mockm_history_2020-11-10-11-33-26.png)
 
-如果多次请求有某次出错, 可以使用这个功能对比请求的参数, 方便确定是由于什么参数导致的错误.
+**参数对比神器**：查看同一接口的所有请求历史。
 
-表头 | 含义
-- | -
-code | 状态码
-req | 请求体中 query + body 的内容长度
-res | 响应体中 body 的内容长度
+| 列名 | 说明 |
+|------|------|
+| **Code** | HTTP 状态码 |
+| **Req** | 请求体大小（query + body）|
+| **Res** | 响应体大小 |
 
-可以对 req 或 res 排序.
+**使用技巧**：
+- 🔍 通过请求/响应大小快速定位异常
+- 📊 对比不同请求的参数差异
+- 🧭 支持按大小排序，快速找到问题请求
 
-::: details FQA
-**重放时当面页面不是最新的结果**
-重新发起请求的时候, 就产生新的请求记录页面, 你可以打开 history 查看新完成的请求记录.
+::: details 💡 常见问题
+**Q: 重放后页面没更新？**  
+A: 重放会生成新的请求记录，在 History 中查看最新结果。
 
-**capture 有时不能截图**
-- 页面内容过多时会导致截图失败
-- 截图内容不全, 如果响应部分在 iframe 中呈现时, 不支持 iframe 窗体内截图
-- T_T 如果没满足到你的需求, 你先使用专业的第三方截图功能吧~
+**Q: 截图功能失效？**  
+A: 页面内容过多或包含 iframe 时可能失败，建议使用专业截图工具。
 
-**swagger 按钮有时候不显示**
-- 检查 openApi 有没有正确配置
-- 检查当前 api 是否有在 openApi 中存在, 或在完整的 swagger ui 中存在
-- 如果存在, 那么可能是解析对应关系失败, 欢迎 [提 bug](https://github.com/wll8/mockm/issues).
-
+**Q: Swagger 按钮不显示？**  
+A: 检查 OpenAPI 配置是否正确，确认当前接口在文档中存在。
 :::
 
+### 📋 请求响应详情
 
-### 详情区
+**完整的 HTTP 通信展示**：
 
-- req 请求
-  - lineHeaders
-    - line 请求 url
-      - query 从 url 中解析出的 query 参数
-    - headers  请求头
-  - body 请求体
-    
-- res 响应
-  - lineHeaders
-    - line 响应码
-    - headers 响应头
-  - body 响应体
+**请求部分 (Request)**：
+- 🌐 **请求行** - 方法、URL、查询参数
+- 📄 **请求头** - 完整的 Headers 信息  
+- 📦 **请求体** - POST/PUT 数据内容
 
-![请求详情](~@doc/image/mockm_api_detail_2020-09-21_100052.png)
+**响应部分 (Response)**：
+- ✅ **状态行** - 状态码、状态消息
+- 📋 **响应头** - 服务器返回的 Headers
+- 📄 **响应体** - 实际返回的数据内容
 
-::: details 参考
-![请求](~@doc/image/HTTP_ReqExample.png)
+![请求详情示例](~@doc/image/mockm_api_detail_2020-09-21_100052.png)
 
-![响应](~@doc/image/HTTP_ResExample.png)
-
-<center>来自 ntu.edu.sg </center>
-
+::: tip 💡 JSON 预览提示
+确保响应头 `Content-Type` 为 `application/json` 才能正常预览。建议后端使用 `res.json()` 而非 `res.send()`。
 :::
 
-::: details FQA
-**有时候后台返回类似 json 的文字却`不支持预览`**
-对于文件类型的判断目前依赖响应头中的 `content-type` , 当类型为 json 时, 如果响应头的 content-type 是 `application/json` 则可以预览, 例如返回 json 时, 建议使用 `res.json` 而不是 `res.send` .
+## ⚙️ 接口管理
 
-:::
+### 🎛️ 接口控制面板
+![接口编辑界面](~@doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
 
-## 接口列表
-显示 mockm 中存在的接口, 仅允许 apiWeb 可以在界面上编辑.
-- 点击表头上的 `+` 按钮进入接口详情, 创建 webApi 接口
-- 点击表头上 `+` 按钮旁边的开关, 可以禁用所有 webApi 接口
-- 点击列表中的单个开关, 可以禁用单个接口
-
-## 接口编辑
-![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-11-10-14-03-22.png)
+**可视化管理所有接口**，支持 WebAPI 在线编辑。
 
 如果还没有真实的接口, 可以通过此功能创建便于前后端参考的 `接口|文档` , 它描述了请求的地址, 方法, 参数的位置, 类型, 响应, 并且可以生成供前端调用的接口.
 
 这里创建的接口称为 webApi 接口, 与 [config.api](../config/option.md#config-api) 中编写的接口进行合并, 重复时会被后者覆盖.
 
 mockm 会根据填写的 `字段名, 示例值, 类型` 转换为对应的响应数据, 支持 mockjs 语法.
-::: details 转换规则
 
+::: details 转换规则
 - 字段名: 即字段的名称, 可使用 mockjs 的生成规则.
 - 示例值: 字段的示例值, 支持 mockjs 语法, 如 @cname 生成随机中文名字.
-  - `/.*/` - 被视为正则表达式, 会进行 `new RegExp(example)` 转换
-- 类型: 即值的类型, 默认为 string. 由于输入框中的值都是 string 的, 所以建议设置供类型确定.
-  - string - 生成值为 string
-  - boolean - 会自动把示例值 `false`, `0`, `假`, `T`, `t` 都转换成 false , 其他值使用 `Boolean(example)` 转换
-  - number - 会把示例值进行 `Number(example)` 转换
-  - object - 会把父字段名作为对象, 子字段名作为对象的键
-  - array - 会把父字段名作为数组, 子字段名数组中的对象的键
-  - eval - 以 js 代码自定义示例值
-    - 例 `[1,2,3]` - 表示数组中有数字 1 2 3
-    - 例 ``Mock.mock(`@cname`)`` - 表示调用 mockjs 生成 @cname
-    - 例 `Date.now()` - 生成时间戳
-
-注: 含有 mockjs 占位符标志时, 不会进行 `regexp/number/boolean` 类型转换
-
 :::
 
-快捷键 `ctrl+s` 或点击 method 区域的 `action -> save` 保存.
+**快速操作**：
+- ➕ **新建接口** - 点击表头 `+` 按钮
+- 🔄 **批量开关** - 一键禁用/启用所有 WebAPI
+- ⚙️ **单独控制** - 控制单个接口的启用状态
 
-默认情况下, 生成的整个数据是一个对象. 如果要精确控制返回值, 可以使用快捷键 `ctrl+e` 或点击 `action -> example` 打开的窗口中操作.
+## ✏️ 在线接口编辑器
 
-### 使用表格中的数据作为响应
-![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-11-10-14-05-27.png)
+### 🎯 编辑模式选择
 
-则根据你在表中录入情况生成数据, 你可以修改返回值为 `object` 或 `array`. 为 object 时, 生成规则表示从单个对象中随机取几个字段, 为 array 时, 表示返回的数组中有多少个对象.
+#### 📊 表格模式 - 快速构建结构化数据
+![表格编辑模式](~@doc/image/mockm_apiWebEdit_2020-11-10-14-05-27.png)
 
-示例数据是根据表格中录入的内容配合生成规则形成的, 仅供预览. 
+**适用场景**：结构化数据、API 原型设计
 
-支持自定义响应头, 以 `key:value` 形式编写即可.
+**核心功能**：
+- 📝 **字段定义** - 字段名、示例值、类型设置
+- 🎲 **数据生成** - 支持 MockJS 语法
+- 📋 **预览实时** - 立即查看生成效果
+- 🔧 **响应头设置** - 自定义 HTTP Headers
 
-注: 表格形式生成的数据 content-type 为 `application/json` .
+**字段类型支持**：
 
-### 以编程方式自定义接口响应
-![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-11-10-14-07-10.png)
+| 类型 | 说明 | 示例 |
+|------|------|------|
+| `string` | 字符串 | `"用户名"` |
+| `number` | 数字 | `123`, `3.14` |
+| `boolean` | 布尔值 | `true`, `false` |
+| `object` | 对象 | 嵌套字段结构 |
+| `array` | 数组 | 数组对象集合 |
+| `eval` | JS 代码 | `Date.now()`, `Mock.mock('@cname')` |
 
-你可使用 js 编写该接口的逻辑, 例如响应数据根据请求的不同而不同.
+**MockJS 增强支持**：
+- 🎭 **占位符** - 如 `@cname`（中文姓名）、`@email`（邮箱）
+- 🔢 **数量控制** - 如 `name|2-5`（2-5个字符）
+- 📊 **规则生成** - 如 `list|10-20`（10-20条数据）
 
-与 [config.api](../config/option.md#config-api) 的编写方式对应, 由于需要考虑安全性, web 界面上不支持直接使用某些方法, 例如 fs 模块. 作为函数使用的时候, 为了方便提供了 `tool` 全局变量.
+**快捷操作**：
+- `Ctrl+S` - 保存接口
+- `Ctrl+E` - 切换到代码模式
 
-- tool 这是一个全局对象
-  - libObj - 函数接收到的工具, 例如 mockjs, axios
-  - wrapApiData - config.js 数据统一处理函数
-  - listToData - 可转换 table 为数据的函数
-  - cur - 当前接口信息
+#### 💻 代码模式 - 完全自定义逻辑
+![代码编辑模式](~@doc/image/mockm_apiWebEdit_2020-11-10-14-07-10.png)
 
-::: details 示例
-``` js
-(req, res) => {
-  // 获取工具函数
-  const {wrapApiData, listToData, cur, libObj: {mockjs, axios}} = tool
-  // 获取当前表格 api 的内容
-  const {table, example} = cur.responses['200']
-  const {rule, type} = example
-  const data = {
-    arg: {
-      // 获取请求携带的参数
-      body: req.body,
-      query: req.query,
-    },
-    // 转换当前表格 api 为数据
-    table: listToData(table, {rule, type}).data,
-    // 使用 mockjs 模拟数据
-    name: mockjs.mock('@cname'),
-  }
-  // 设置响应头
-  res.set({'My-Header': `header`})
-  // 使用公用结构包裹数据
-  res.json(wrapApiData({data, code: 200}))
+**适用场景**：复杂业务逻辑、条件响应
+
+**全局工具 `tool` 对象**：
+```javascript
+{
+  libObj: {
+    mockjs,    // MockJS 实例
+    axios      // HTTP 请求库
+  },
+  wrapApiData,  // 统一数据包装函数
+  listToData,   // 表格数据转换函数
+  cur          // 当前接口信息
 }
 ```
-:::
 
-### 使用历史记录作为响应
-![apiWebEdit](~@doc/image/mockm_apiWebEdit_2020-12-03-10-44-49.png)
-
-输入请求ID, 请求当前接口时, 总是返回所输入请求ID的响应, 包括 headers 以及其中的测试链接也总是一样的.
-
-### 批量添加
-#### 从文本批量添加
-编辑接口时, 双击表格中的添加按钮, 在弹窗中输入要内容即可, 支持层级, 自动翻译, mock 数据和类型自动生成.
-
-示例:
-``` txt
-昵称
-邮箱
-头像
-孩子
-- 年龄
-- 出生日期
-- 手机号
+**实用示例**：
+```javascript
+(req, res) => {
+  const { wrapApiData, listToData, cur, libObj: { mockjs } } = tool
+  
+  // 获取请求参数
+  const { body, query, params } = req
+  
+  // 根据参数返回不同数据
+  if (query.type === 'error') {
+    return res.status(500).json({ error: '模拟错误' })
+  }
+  
+  // 使用表格数据
+  const { table, example } = cur.responses['200']
+  const tableData = listToData(table, example).data
+  
+  // 组合返回数据
+  const data = {
+    user: mockjs.mock('@cname'),
+    timestamp: Date.now(),
+    request: { body, query, params },
+    tableData
+  }
+  
+  // 设置自定义响应头
+  res.set({ 'X-Custom-Header': 'MockM Generated' })
+  
+  // 返回统一格式数据
+  res.json(wrapApiData({ data, code: 200 }))
+}
 ```
 
-![批量添加](https://z3.ax1x.com/2021/05/18/gfuHTU.gif)
+#### 📜 历史模式 - 复用真实数据
+![历史数据模式](~@doc/image/mockm_apiWebEdit_2020-12-03-10-44-49.png)
+
+**使用场景**：
+- 🔄 **重现问题** - 使用特定请求的响应数据
+- 🧪 **A/B 测试** - 固定某个成功的响应
+- 📊 **数据一致性** - 确保测试环境数据稳定
+
+**操作方法**：输入历史请求的 ID，该接口将始终返回指定请求的完整响应（包括 Headers）。
+
+### 🚀 批量操作
+
+#### 📝 文本导入 - 快速创建字段结构
+双击表格添加按钮，在弹窗中输入结构化文本：
+
+```text
+用户信息
+- 姓名
+- 邮箱  
+- 头像
+- 个人资料
+  - 年龄
+  - 生日
+  - 手机号
+- 地址信息
+  - 省份
+  - 城市
+  - 详细地址
+```
+
+**智能功能**：
+- 🔄 **自动翻译** - 中文字段名自动生成英文键名
+- 🎯 **类型推断** - 根据字段名智能推断数据类型
+- 🎲 **Mock 生成** - 自动匹配合适的 MockJS 规则
+
+![批量添加演示](https://z3.ax1x.com/2021/05/18/gfuHTU.gif)
+
+**层级支持**：
+- 使用 `-` 或空格缩进表示子级
+- 支持多层嵌套结构
+- 自动生成对象和数组类型
+
+::: tip 💡 专业提示
+**表格模式 vs 代码模式选择**：
+- 📊 **表格模式** - 适合快速原型、结构清晰的 API
+- 💻 **代码模式** - 适合复杂逻辑、动态响应、条件判断
+- 📜 **历史模式** - 适合重现问题、固定测试数据
+
+**最佳实践**：
+1. 新接口用表格模式快速搭建
+2. 需要逻辑判断时切换到代码模式
+3. 调试问题时临时使用历史模式
+:::
+
+**保存方式**：
+- `Ctrl+S` - 快捷键保存
+- 点击 `Action → Save` - 菜单保存
+- 自动保存提示 - 修改后会提示保存状态
