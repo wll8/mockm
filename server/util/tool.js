@@ -1176,15 +1176,8 @@ function tool() { // 与业务没有相关性, 可以脱离业务使用的工具
      */
     function clearProcess({hostname} = {}) {
       function killProcess(...arg) {
-        if(arg[0] !== `SIGINT`) {
-          process.send({
-            type: 'process:msg',
-            data: { action: 'err-exit', data: [] }
-          })
-        } else {
-          process.exit()
-        }
-        hostname ? sysHost(`remove`, {hostname}).finally(() => {}) : () => {}
+        arg[0] !== `SIGINT` && console.log(`killProcess:`, ...arg) // ctrl+c 不需要显示 err
+        hostname ? sysHost(`remove`, {hostname}).finally(process.exit) : process.exit()
       }
       process.on(`SIGTERM`, killProcess)
       process.on(`SIGINT`, killProcess)
