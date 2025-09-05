@@ -20,7 +20,7 @@ const zhConfig = {
     selectLanguageAriaLabel: '选择语言',
     lastUpdated: '最后更新时间',
     nav: [
-      { text: '版本 v1.1.27', link: '/' },
+      { text: '版本 v1.1.28', link: '/' },
       { text: '配置项', link: '/config/option.md' },
       { text: '更多示例', link: isGitHubPages ? 'https://wll8.github.io/mockm/case/index.html' : 'https://www.hongqiye.com/doc/mockm/case/' },
       { text: 'mockjs', link: 'https://wll8.github.io/mockjs-examples/' },
@@ -121,7 +121,7 @@ const enConfig = {
     selectLanguageAriaLabel: 'Select language',
     lastUpdated: 'Last Updated',
     nav: [
-      { text: 'Version v1.1.27', link: '/en/' },
+      { text: 'Version v1.1.28', link: '/en/' },
       { text: 'Configuration', link: '/en/config/option.md' },
       { text: 'More Examples', link: isGitHubPages ? 'https://wll8.github.io/mockm/case/index.html' : 'https://www.hongqiye.com/doc/mockm/case/' },
       { text: 'MockJS', link: 'https://wll8.github.io/mockjs-examples/' },

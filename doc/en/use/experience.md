@@ -31,7 +31,7 @@ pnpm add mockm -D
 ```json
 {
   "devDependencies": {
-    "mockm": "^1.1.27"
+    "mockm": "^1.1.28"
   }
 }
 ```
