@@ -76,7 +76,7 @@ mockm is an API mocking and debugging tool based on Node.js and Express, integra
 
 ### Process Management Architecture
 
-mockm adopts a multi-process architecture, managing process lifecycle through `pm2`:
+mockm adopts a multi-process architecture, managing process lifecycle through `@wll8/process-manager`:
 
 1. **Main Process (run.js)**: Responsible for configuration parsing, process management, and file watching
 2. **Service Process (server.js)**: Responsible for starting various servers and business logic

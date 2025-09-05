@@ -1982,7 +1982,6 @@ module.exports = {
 ::: warning ⚠️ Precautions
 - Ensure exit cause is not configuration error, otherwise infinite restart may occur
 - Recommend with log monitoring to detect issues promptly
-- For production environments, consider using professional process management tools like PM2
 :::
 
 ## config.backOpenApi

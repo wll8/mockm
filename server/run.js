@@ -94,9 +94,11 @@ new Promise(async () => { // 启动 server.js
   const arr = [nodeArg, serverPath, ...process.argv.slice(2), `_base64=${base64config}`, `_share=${sharePath}`].filter(item => item.trim() !== ``)
   const cp = new ProcessManager(arr)
   cp.on(`stdout`, (data) => {
+    process.stdout.write(data)
     log = String(data)
   })
   cp.on(`stderr`, (data) => {
+    process.stderr.write(data)
     log = String(data)
   })
   cp.on(`message`, ({action, data} = {}) => {

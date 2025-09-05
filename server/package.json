@@ -17,7 +17,7 @@
     "@wll8/better-mock": "^0.3.3-alpha",
     "@wll8/express-ws": "^1.0.6",
     "@wll8/json-server": "^0.17.5-alpha.1",
-    "@wll8/process-manager": "^1.0.4",
+    "@wll8/process-manager": "^1.0.7",
     "address": "^1.2.2",
     "axios": "^0.30.0",
     "body-parser": "^1.20.3",

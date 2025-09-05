@@ -24,8 +24,8 @@ importers:
         specifier: ^0.17.5-alpha.1
         version: 0.17.5-alpha.1
       '@wll8/process-manager':
-        specifier: ^1.0.4
-        version: 1.0.4
+        specifier: ^1.0.7
+        version: 1.0.7
       address:
         specifier: ^1.2.2
         version: 1.2.2
@@ -418,8 +418,9 @@ packages:
     engines: {node: '>=12'}
     hasBin: true
 
-  '@wll8/process-manager@1.0.4':
-    resolution: {integrity: sha512-931Hjcdd24XVgiEAOoNSm+bb3w0JOlS4oWsczdGxgACrJO6wwKuFqUeClFpHhaZTz2q4kAge3DUPa2rrkVFQZA==}
+  '@wll8/process-manager@1.0.7':
+    resolution: {integrity: sha512-EMTAz8Hgb6uVZHLg9IetG6ws+AuN7lMecChmwD+kww71AM0mNkxOPLWUGSr+sUfuTY1Ej5jzhWOtzPsIqfmlpA==}
+    engines: {node: '>=16.0.0'}
 
   a-sync-waterfall@1.0.1:
     resolution: {integrity: sha512-RYTOHHdWipFUliRFMCS4X2Yn2X8M87V/OpSqWzKKOGhzqyUxzyVmhHDH9sAvG+ZuQf/TAOFsLCpMw09I1ufUnA==}
@@ -2704,7 +2705,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@wll8/process-manager@1.0.4': {}
+  '@wll8/process-manager@1.0.7': {}
 
   a-sync-waterfall@1.0.1:
     optional: true
