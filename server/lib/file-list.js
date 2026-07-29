@@ -48,6 +48,7 @@ function getHtml(data) {
       <meta charset="UTF-8">
       <base href="${data.originalUrl}" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      ${data.headHtml}
     </head>
     <style>
       html,
@@ -201,6 +202,7 @@ module.exports = (option) => {
               root: path,
             })
             const data = {
+              headHtml: option.headHtml || ``,
               baseUrl: req.baseUrl,
               originalUrl: `${req.originalUrl}/`.replace(/\/\/$/, `/`),
               path: url, // 由于数据不会存储并展示, 所以不用担心 xss
